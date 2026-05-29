@@ -16,7 +16,12 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+**Phase 1: Foundation & Manual Expense Spine** (2026-05-29)
+
+- [x] Manual expense entry — add/edit/delete an expense end-to-end (custom decimal keypad, ≤3-tap add)
+- [x] INR as the v1 currency — en-IN formatting (₹1,00,000.00), money stored as `Decimal`, dates stored UTC
+- [x] Local-only storage in v1 — SwiftData on an App Group store (single device, single user)
+- [x] Schema designed so adding CloudKit sharing later is additive, not a rewrite — CloudKit-ready `@Model` (all optional/defaulted, no `@Attribute(.unique)`), VersionedSchema + migration plan proven against a bundled v1 store
 
 ### Active
 
@@ -25,7 +30,6 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 **Expense tracker**
 
 - [ ] Ingest expenses automatically from bank email alerts (Gmail) — zero-touch for accounts/cards with email alerts enabled
-- [ ] Manual expense entry as fallback (works for SMS-only banks and cash)
 - [ ] Predefined category list (Groceries, Fuel, Dining, etc.) plus user-created custom tags
 - [ ] Per-category monthly budgets with progress visualization
 - [ ] Month view of expenses grouped by category/tag
@@ -47,9 +51,6 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 **Foundational**
 
 - [ ] Face ID required to open the app (toggle in settings)
-- [ ] INR as the v1 currency
-- [ ] Local-only storage in v1 (single device, single user)
-- [ ] Schema designed so adding CloudKit sharing in a later phase is additive, not a rewrite
 
 ### Out of Scope
 
@@ -139,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-28 after initialization*
+*Last updated: 2026-05-29 — Phase 1 (Foundation & Manual Expense Spine) complete*
