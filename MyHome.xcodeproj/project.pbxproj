@@ -31,6 +31,8 @@
 		A205 /* CategoryCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F205 /* CategoryCRUDTests.swift */; };
 		A206 /* ExpenseCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F206 /* ExpenseCategoryTests.swift */; };
 		A207 /* BudgetModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F207 /* BudgetModelTests.swift */; };
+		A119 /* BudgetCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119 /* BudgetCalculator.swift */; };
+		A208 /* BudgetCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208 /* BudgetCalculatorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +64,8 @@
 		F205 /* CategoryCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCRUDTests.swift; sourceTree = "<group>"; };
 		F206 /* ExpenseCategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseCategoryTests.swift; sourceTree = "<group>"; };
 		F207 /* BudgetModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetModelTests.swift; sourceTree = "<group>"; };
+		F119 /* BudgetCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculator.swift; sourceTree = "<group>"; };
+		F208 /* BudgetCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculatorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +163,7 @@
 			children = (
 				F115 /* Decimal+INR.swift */,
 				F116 /* Date+Display.swift */,
+				F119 /* BudgetCalculator.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -191,6 +196,7 @@
 				F205 /* CategoryCRUDTests.swift */,
 				F206 /* ExpenseCategoryTests.swift */,
 				F207 /* BudgetModelTests.swift */,
+				F208 /* BudgetCalculatorTests.swift */,
 				G210 /* Resources */,
 			);
 			path = MyHomeTests;
@@ -326,6 +332,7 @@
 				A123 /* ExpenseListView.swift in Sources */,
 				A124 /* ExpenseRow.swift in Sources */,
 				A125 /* EditExpenseView.swift in Sources */,
+				A119 /* BudgetCalculator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,6 +346,7 @@
 				A205 /* CategoryCRUDTests.swift in Sources */,
 				A206 /* ExpenseCategoryTests.swift in Sources */,
 				A207 /* BudgetModelTests.swift in Sources */,
+				A208 /* BudgetCalculatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
