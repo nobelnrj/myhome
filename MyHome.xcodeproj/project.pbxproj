@@ -11,6 +11,12 @@
 		A102 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F102 /* RootView.swift */; };
 		A103 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F103 /* Assets.xcassets */; };
 		A104 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F104 /* PrivacyInfo.xcprivacy */; };
+		A111 /* SchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = F111 /* SchemaV1.swift */; };
+		A112 /* MigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F112 /* MigrationPlan.swift */; };
+		A113 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = F113 /* Expense.swift */; };
+		A114 /* ModelContainer+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = F114 /* ModelContainer+App.swift */; };
+		A115 /* Decimal+INR.swift in Sources */ = {isa = PBXBuildFile; fileRef = F115 /* Decimal+INR.swift */; };
+		A116 /* Date+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = F116 /* Date+Display.swift */; };
 		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
 		A202 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F202 /* MigrationTests.swift */; };
 /* End PBXBuildFile section */
@@ -24,6 +30,12 @@
 		F104 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F105 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F106 /* MyHome.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MyHome.entitlements; sourceTree = "<group>"; };
+		F111 /* SchemaV1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV1.swift; sourceTree = "<group>"; };
+		F112 /* MigrationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationPlan.swift; sourceTree = "<group>"; };
+		F113 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
+		F114 /* ModelContainer+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelContainer+App.swift"; sourceTree = "<group>"; };
+		F115 /* Decimal+INR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Decimal+INR.swift"; sourceTree = "<group>"; };
+		F116 /* Date+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Display.swift"; sourceTree = "<group>"; };
 		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
 		F202 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -74,6 +86,7 @@
 				G110 /* Resources */,
 				G120 /* Features */,
 				G130 /* Persistence */,
+				G140 /* Support */,
 			);
 			path = MyHomeApp;
 			sourceTree = "<group>";
@@ -105,15 +118,27 @@
 		G130 /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
+				F114 /* ModelContainer+App.swift */,
 				G131 /* Schema */,
 				G132 /* Models */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
 		};
+		G140 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				F115 /* Decimal+INR.swift */,
+				F116 /* Date+Display.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 		G131 /* Schema */ = {
 			isa = PBXGroup;
 			children = (
+				F111 /* SchemaV1.swift */,
+				F112 /* MigrationPlan.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -121,6 +146,7 @@
 		G132 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				F113 /* Expense.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -242,6 +268,12 @@
 			files = (
 				A101 /* MyHomeApp.swift in Sources */,
 				A102 /* RootView.swift in Sources */,
+				A111 /* SchemaV1.swift in Sources */,
+				A112 /* MigrationPlan.swift in Sources */,
+				A113 /* Expense.swift in Sources */,
+				A114 /* ModelContainer+App.swift in Sources */,
+				A115 /* Decimal+INR.swift in Sources */,
+				A116 /* Date+Display.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
