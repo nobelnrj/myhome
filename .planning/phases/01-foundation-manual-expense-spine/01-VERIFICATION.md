@@ -1,8 +1,10 @@
 ---
 phase: 01-foundation-manual-expense-spine
 verified: 2026-05-29T11:10:00Z
-status: human_needed
-score: 4/5
+status: passed
+human_verified: 2026-05-29T11:08:00Z
+human_verified_note: "All 5 runtime UAT items (cold-launch persistence, en-IN lakh rendering, <=3-tap add, edit flow, both delete paths) approved by the user on 2026-05-29. See 01-HUMAN-UAT.md."
+score: 5/5
 overrides_applied: 0
 human_verification:
   - test: "Run app on iOS 17+ simulator or device; add an expense using the custom keypad and verify it persists after app termination"

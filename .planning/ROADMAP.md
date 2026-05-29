@@ -143,7 +143,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Manual Expense Spine | 4/4 | Complete   | 2026-05-29 |
+| 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 0/TBD | Not started | - |
 | 3. Notes & Checklists | 0/TBD | Not started | - |
 | 4. Overview & Charts | 0/TBD | Not started | - |
