@@ -27,6 +27,10 @@
 		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
 		A202 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F202 /* MigrationTests.swift */; };
 		A203 /* MyHomeV1Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F203 /* MyHomeV1Seed.store */; };
+		A204 /* CategorySeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F204 /* CategorySeedTests.swift */; };
+		A205 /* CategoryCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F205 /* CategoryCRUDTests.swift */; };
+		A206 /* ExpenseCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F206 /* ExpenseCategoryTests.swift */; };
+		A207 /* BudgetModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F207 /* BudgetModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +58,10 @@
 		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
 		F202 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
 		F203 /* MyHomeV1Seed.store */ = {isa = PBXFileReference; lastKnownFileType = "file"; path = MyHomeV1Seed.store; sourceTree = "<group>"; };
+		F204 /* CategorySeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeedTests.swift; sourceTree = "<group>"; };
+		F205 /* CategoryCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCRUDTests.swift; sourceTree = "<group>"; };
+		F206 /* ExpenseCategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseCategoryTests.swift; sourceTree = "<group>"; };
+		F207 /* BudgetModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +187,10 @@
 			children = (
 				F201 /* ExpenseModelTests.swift */,
 				F202 /* MigrationTests.swift */,
+				F204 /* CategorySeedTests.swift */,
+				F205 /* CategoryCRUDTests.swift */,
+				F206 /* ExpenseCategoryTests.swift */,
+				F207 /* BudgetModelTests.swift */,
 				G210 /* Resources */,
 			);
 			path = MyHomeTests;
@@ -323,6 +335,10 @@
 			files = (
 				A201 /* ExpenseModelTests.swift in Sources */,
 				A202 /* MigrationTests.swift in Sources */,
+				A204 /* CategorySeedTests.swift in Sources */,
+				A205 /* CategoryCRUDTests.swift in Sources */,
+				A206 /* ExpenseCategoryTests.swift in Sources */,
+				A207 /* BudgetModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
