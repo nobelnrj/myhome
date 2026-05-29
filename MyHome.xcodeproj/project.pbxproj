@@ -24,6 +24,7 @@
 		A125 /* EditExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F125 /* EditExpenseView.swift */; };
 		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
 		A202 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F202 /* MigrationTests.swift */; };
+		A203 /* MyHomeV1Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F203 /* MyHomeV1Seed.store */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 		F125 /* EditExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseView.swift; sourceTree = "<group>"; };
 		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
 		F202 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
+		F203 /* MyHomeV1Seed.store */ = {isa = PBXFileReference; lastKnownFileType = "file"; path = MyHomeV1Seed.store; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,8 +173,17 @@
 			children = (
 				F201 /* ExpenseModelTests.swift */,
 				F202 /* MigrationTests.swift */,
+				G210 /* Resources */,
 			);
 			path = MyHomeTests;
+			sourceTree = "<group>";
+		};
+		G210 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F203 /* MyHomeV1Seed.store */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -271,6 +282,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A203 /* MyHomeV1Seed.store in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
