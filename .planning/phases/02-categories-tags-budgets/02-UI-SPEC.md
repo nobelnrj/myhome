@@ -1,11 +1,11 @@
 ---
 phase: 2
 slug: categories-tags-budgets
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-29
-reviewed_at:
+reviewed_at: 2026-05-29
 ---
 
 # Phase 2 — UI Design Contract
@@ -210,7 +210,7 @@ Layout contract:
   - Sorted by `Category.sortOrder` (predefined 0–13 first, then custom categories by creation order).
   - Each card: `BudgetCategoryCard` (see Card spec below).
   - "Uncategorized" row at the bottom of the list: shows sum of uncategorized spend, no progress bar, no budget. Visible only when there is at least one uncategorized expense in the viewed month. Source: D2-08.
-  - Toolbar trailing: `Button("Manage") { … }` — presents `ManageCategoriesView` as a `.sheet`. Label: "Manage" (text, not icon-only — provides accessible copy). Source: D2-11.
+  - Toolbar trailing: `Button("Manage Categories") { … }` — presents `ManageCategoriesView` as a `.sheet`. Label: "Manage Categories" (text, not icon-only — verb+noun makes the destination self-evident). Source: D2-11.
 
 **BudgetCategoryCard layout:**
 - `VStack(alignment: .leading, spacing: 8)` inside a List row, `padding(md = 16pt)`.
@@ -279,7 +279,7 @@ Layout contract:
 
 ### Screen 6 (New): ManageCategoriesView — Category CRUD
 
-**Navigation:** Presented as `.sheet` from BudgetsView "Manage" toolbar button.
+**Navigation:** Presented as `.sheet` from BudgetsView "Manage Categories" toolbar button.
 **Purpose:** Add custom categories; rename and delete any category (predefined or custom). Source: D2-11, EXP-05.
 
 Layout contract:
@@ -400,7 +400,7 @@ Inherits all Phase 1 copy (expense list, add/edit sheets, delete confirmation). 
 | Month pager: previous button accessible label | "Previous month" | `.accessibilityLabel("Previous month")` |
 | Month pager: next button accessible label | "Next month" | `.accessibilityLabel("Next month")` |
 | Month pager: next button disabled state | disabled (no copy change) | Visually `.opacity(0.3)` when at current month |
-| Budget manage toolbar button | "Manage" | D2-11; text label for accessibility |
+| Budget manage toolbar button | "Manage Categories" | D2-11; verb+noun, destination self-evident |
 | Category row label (add/edit sheet) | "Category" | D2-12 |
 | Category row value: uncategorized | "None" | `.secondary` color; `nil` category state |
 | Category picker sheet title | "Category" | `.navigationTitle("Category")` |
