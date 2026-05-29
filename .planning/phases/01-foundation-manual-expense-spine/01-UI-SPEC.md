@@ -56,15 +56,18 @@ Exceptions:
 
 Uses SwiftUI `.font()` semantic styles mapped to SF Pro. Do not use explicit `size:` overrides — use semantic roles so Dynamic Type scales automatically (accessibility requirement for iOS apps).
 
+Exactly 4 font-size roles are declared:
+
 | Role | SwiftUI Style | Approx Size (default) | Weight | Line Height | Usage |
 |------|---------------|-----------------------|--------|-------------|-------|
 | Display | `.font(.largeTitle)` | 34pt | Bold (700) | 1.2 | Amount field in add/edit sheet — the single focal number |
 | Heading | `.font(.title2)` | 22pt | Semibold (600) | 1.2 | Screen titles (NavigationStack inline title), section headers |
 | Body | `.font(.body)` | 17pt | Regular (400) | 1.5 | Expense list row primary text (note/memo, date) |
-| Label | `.font(.subheadline)` | 15pt | Regular (400) | 1.4 | Secondary row text (date string in list), form field labels |
-| Caption | `.font(.caption)` | 12pt | Regular (400) | 1.3 | Timestamp detail, currency code badge |
+| Label | `.font(.subheadline)` | 15pt | Regular (400) | 1.4 | Secondary row text (date string in list), form field labels, timestamp detail, currency-code badge |
 
 Weight summary: Regular (400) + Semibold/Bold (600/700) — two functional weights only, consistent with HIG.
+
+Note: Caption (`.caption`, ~12pt) is intentionally omitted. Timestamp detail and currency-code badge use the Label role (`.subheadline`, 15pt) — sufficient contrast hierarchy at this scale and preserves Dynamic Type readability.
 
 Dynamic Type: all styles must respond to accessibility size categories. Never use fixed frame heights that clip text.
 
@@ -86,8 +89,8 @@ This is an iOS 17+ app. Colors use SwiftUI semantic system colors (adaptive ligh
 **Accent reserved for (explicit list):**
 1. "Add Expense" primary CTA button (filled, in toolbar and empty state)
 2. Amount field cursor and active ring
-3. Save / Done button in NavigationStack toolbar
-4. Keypad "confirm amount" submit action (if distinct from Save)
+3. "Save Expense" button in NavigationStack toolbar
+4. Keypad "confirm amount" submit action (if distinct from Save Expense)
 5. Tappable date in expense row (if tappable to filter — Phase 2+; reserve now)
 
 Accent is NOT used for: list row backgrounds, destructive actions, informational text, icons that are decorative.
@@ -122,7 +125,7 @@ Layout contract:
 Layout contract:
 - Sheet presented with `NavigationStack` inside for toolbar buttons.
 - `.navigationTitle("New Expense")` in `.inline` mode.
-- Toolbar: leading = "Cancel" (plain, dismisses sheet), trailing = "Save" (`.systemIndigo`, disabled until amount > 0).
+- Toolbar: leading = "Cancel" (platform-standard iOS sheet-dismiss control; see Copywriting Contract), trailing = "Save Expense" (`.systemIndigo`, disabled until amount > 0).
 - Section 1 — Amount (full-width):
   - Large centered amount display using `.font(.largeTitle)`, `.fontWeight(.bold)`.
   - Amount rendered live as user types: `₹0.00` placeholder, updates to `₹{amount}` with en-IN formatting.
@@ -132,7 +135,7 @@ Layout contract:
   - Date picker row: label "Date", value defaults to now (formatted as "Today, 9:41 AM" if today, else "28 May 2026, 9:41 AM"). Tapping expands an inline `DatePicker`. Source: CONTEXT.md D-01, D-02.
   - Note field row: label "Note", `TextField` single-line, placeholder "Merchant or memo". Source: CONTEXT.md D-05 (`note: String?`).
 - No category picker in Phase 1. Source: CONTEXT.md D-07.
-- Save is enabled when amount is non-zero (positive or negative). Zero is invalid.
+- Save Expense is enabled when amount is non-zero (positive or negative). Zero is invalid.
 
 ### Screen 3: Edit Expense Sheet
 
@@ -142,21 +145,21 @@ Layout contract:
 Layout contract:
 - Identical form layout to Add Expense Sheet.
 - `.navigationTitle("Edit Expense")`.
-- Toolbar: leading = "Cancel", trailing = "Save" (active when any field changed).
+- Toolbar: leading = "Cancel" (platform-standard iOS sheet-dismiss control; see Copywriting Contract), trailing = "Save Expense" (active when any field changed).
 - Additional: destructive "Delete Expense" button at bottom of form, outside sections — full-width, `.tint(.systemRed)`, role `.destructive`. Source: EXP-03.
-- Delete triggers confirmation action sheet (not alert) with two actions: "Delete Expense" (destructive) and "Cancel". Source: Copywriting Contract below.
+- Delete triggers confirmation action sheet (not alert) with two actions: "Delete Expense" (destructive) and "Cancel" (standard action-sheet dismiss). Source: Copywriting Contract below.
 
 ---
 
 ## Copywriting Contract
 
-| Element | Copy | Source |
-|---------|------|--------|
+| Element | Copy | Notes / Source |
+|---------|------|----------------|
 | Primary CTA (toolbar) | "Add Expense" (accessible label); `+` icon visually | CONTEXT.md EXP-01 |
 | Add sheet title | "New Expense" | Default (consistent with iOS HIG sheet titles) |
 | Edit sheet title | "Edit Expense" | Default |
-| Save button | "Save" | Apple HIG standard |
-| Cancel button | "Cancel" | Apple HIG standard |
+| Save button (both sheets, toolbar trailing) | "Save Expense" | Specific verb+noun per CTA pattern. Replaces generic "Save". |
+| Cancel button (sheet toolbar leading) | "Cancel" | Platform-standard iOS sheet-dismiss affordance — a system navigation control, NOT a primary CTA label. iOS HIG explicitly designates this as the standard leading dismiss button for modal sheets. Exception to generic-label rule is acknowledged here. |
 | Amount placeholder | "₹0.00" | CONTEXT.md D-04, FND-07 |
 | Note field placeholder | "Merchant or memo" | CONTEXT.md D-05 |
 | Date field label | "Date" | Default |
@@ -165,9 +168,9 @@ Layout contract:
 | Delete row swipe label | "Delete" | Apple HIG standard for `.onDelete` |
 | Delete confirmation title | "Delete Expense?" | Destructive action confirmation |
 | Delete confirmation body | "This expense will be permanently removed." | Plain, no alarm; single user app |
-| Delete confirmation CTA | "Delete Expense" (destructive role) | Destructive — `.role(.destructive)` |
-| Delete confirmation cancel | "Cancel" | Apple HIG standard |
-| Save validation error | Inline: amount field shakes + turns `.systemRed` momentarily when Save tapped with zero amount | No modal — inline feedback only |
+| Delete confirmation CTA | "Delete Expense" (destructive role) | Specific verb+noun. `.role(.destructive)`. |
+| Delete confirmation cancel | "Cancel" | Standard action-sheet dismiss affordance per Apple HIG. NOT a primary CTA. Exception acknowledged — iOS action sheets always include a "Cancel" dismiss option as a system navigation control. |
+| Save validation error | Inline: amount field shakes + turns `.systemRed` momentarily when Save Expense tapped with zero amount | No modal — inline feedback only |
 | Negative amount toggle | No label (icon-only: `plus.slash.minus` SF Symbol); accessible label "Toggle sign" | CONTEXT.md D-03 |
 
 ---
@@ -178,7 +181,7 @@ Layout contract:
 
 Tap 1: Tap `+` toolbar button → sheet opens, cursor in amount field, keypad visible immediately (no keyboard show animation needed — custom keypad always visible).
 Tap 2: Type amount via keypad (multiple key taps count as one "interaction step" per EXP-01 — the requirement counts screen transitions, not keystrokes).
-Tap 3: Tap "Save" → expense saved, sheet dismisses, new row appears at top of list.
+Tap 3: Tap "Save Expense" → expense saved, sheet dismisses, new row appears at top of list.
 
 Optional extras (not in the ≤4-tap critical path):
 - Tap date row → expand inline date picker → change date.
@@ -191,7 +194,7 @@ Standard SwiftUI `.onDelete` with `.listStyle(.insetGrouped)`. Swipe left to rev
 
 ### Edit Navigation
 
-Tap any expense row → Edit sheet slides up. All fields pre-filled from the tapped `Expense` model. Save button disabled until a field is changed (`isDirty` state flag). Cancel discards changes with no confirmation (standard iOS pattern).
+Tap any expense row → Edit sheet slides up. All fields pre-filled from the tapped `Expense` model. Save Expense button disabled until a field is changed (`isDirty` state flag). Cancel discards changes with no confirmation (standard iOS sheet-dismiss pattern).
 
 ---
 
