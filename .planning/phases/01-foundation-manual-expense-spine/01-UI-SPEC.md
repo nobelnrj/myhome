@@ -1,10 +1,11 @@
 ---
 phase: 1
 slug: foundation-manual-expense-spine
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-29
+reviewed_at: 2026-05-29
 ---
 
 # Phase 1 — UI Design Contract
