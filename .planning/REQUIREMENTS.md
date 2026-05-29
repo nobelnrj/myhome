@@ -28,10 +28,10 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 - [x] **EXP-01**: User can add a manual expense in ≤4 taps (open → amount keypad → category → save)
 - [x] **EXP-02**: User can edit any expense they created
 - [x] **EXP-03**: User can delete any expense they created
-- [ ] **EXP-04**: App ships with an India-tuned predefined category list (Groceries, Dining, Fuel, Utilities, Rent, Auto/Cab, Shopping, Health/Pharmacy, Entertainment, Recharge/DTH, Maid/Help, UPI to Person, ATM, Misc)
-- [ ] **EXP-05**: User can add, rename, and delete custom categories
-- [ ] **EXP-06**: User can attach one tag to an expense; schema supports multiple tags per expense for future UI
-- [ ] **EXP-07**: User can set a monthly budget per category (calendar month default)
+- [x] **EXP-04**: App ships with an India-tuned predefined category list (Groceries, Dining, Fuel, Utilities, Rent, Auto/Cab, Shopping, Health/Pharmacy, Entertainment, Recharge/DTH, Maid/Help, UPI to Person, ATM, Misc)
+- [x] **EXP-05**: User can add, rename, and delete custom categories
+- [x] **EXP-06**: User can attach one tag to an expense; schema supports multiple tags per expense for future UI
+- [x] **EXP-07**: User can set a monthly budget per category (calendar month default)
 - [ ] **EXP-08**: Per-category budget progress is shown as a ₹-remaining + % bar with color shift at 80% and 100%
 - [ ] **EXP-09**: Month view shows expenses grouped by category with tap-through to the transaction list
 - [ ] **EXP-10**: User can view a spend-by-category chart for the current month (Swift Charts)
@@ -176,10 +176,10 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | EXP-01 | Phase 1 | Complete |
 | EXP-02 | Phase 1 | Complete |
 | EXP-03 | Phase 1 | Complete |
-| EXP-04 | Phase 2 | Pending |
-| EXP-05 | Phase 2 | Pending |
-| EXP-06 | Phase 2 | Pending |
-| EXP-07 | Phase 2 | Pending |
+| EXP-04 | Phase 2 | Complete |
+| EXP-05 | Phase 2 | Complete |
+| EXP-06 | Phase 2 | Complete |
+| EXP-07 | Phase 2 | Complete |
 | EXP-08 | Phase 2 | Pending |
 | EXP-09 | Phase 2 | Pending |
 | EXP-10 | Phase 4 | Pending |
