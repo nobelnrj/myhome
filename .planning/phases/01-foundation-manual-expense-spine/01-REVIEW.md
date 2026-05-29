@@ -21,10 +21,12 @@ files_reviewed_list:
   - MyHomeTests/MigrationTests.swift
 findings:
   critical: 2
+  critical_resolved: 2
   warning: 7
   info: 5
   total: 14
 status: issues_found
+critical_status: resolved
 ---
 
 # Phase 1: Code Review Report
@@ -42,7 +44,7 @@ However, adversarial review surfaces two **blockers** that defeat stated require
 
 ## Critical Issues
 
-### CR-01: Writes are never persisted — `context.save()` is missing on insert, edit, and delete
+### CR-01: Writes are never persisted — `context.save()` is missing on insert, edit, and delete [RESOLVED 2026-05-29]
 
 **File:** `MyHomeApp/Features/Expenses/AddExpenseView.swift:188-191`, `MyHomeApp/Features/Expenses/EditExpenseView.swift:246-260`, `MyHomeApp/Features/Expenses/ExpenseListView.swift:69-73`
 **Issue:** `AddExpenseView.saveExpense()` calls `context.insert(expense)` then immediately `dismiss()` with no `try context.save()`. `EditExpenseView.saveExpense()`/`deleteExpense()` and `ExpenseListView.deleteExpenses(at:)` likewise mutate/delete with no explicit save. SwiftData's implicit autosave is tied to the `mainContext`'s `autosaveEnabled` and runs on run-loop checkpoints — it is **not** guaranteed to have flushed before the app is backgrounded or killed, and the production container in `ModelContainer+App.swift` does not set `autosaveEnabled` explicitly. The research's own Pattern 4 comment ("ModelContext auto-saves or explicit try? context.save()") flagged this as a choice that was never resolved. On the canonical EXP-01 fast-path (add → dismiss → background app), the new expense can be lost. The migration/CRUD tests pass only because they call `try context.save()` manually — production code does not, so tests do not cover the real write path.
@@ -64,7 +66,9 @@ private func saveExpense() {
 ```
 Apply the same `try context.save()` to `EditExpenseView.saveExpense()`, `EditExpenseView.deleteExpense()`, and `ExpenseListView.deleteExpenses(at:)`. If relying on autosave is intended, set `container.mainContext.autosaveEnabled = true` deliberately and document that choice — but explicit save on a financial write is the safer contract.
 
-### CR-02: CloudKit-readiness reflection test is a tautology — it can never fail
+**Resolution (commit `36c1e7b`):** Added `do { try context.save() } catch { ... }` after `context.insert` in `AddExpenseView.saveExpense()`, after the property edits in `EditExpenseView.saveExpense()`, after `context.delete` in `EditExpenseView.deleteExpense()`, and after the delete loop in `ExpenseListView.deleteExpenses(at:)`. On failure the code logs via `assertionFailure`/`print` and does NOT dismiss (re-shakes the amount on the save paths), so a failed write is never treated as success. Build green and all 5 tests pass on iPhone 17.
+
+### CR-02: CloudKit-readiness reflection test is a tautology — it can never fail [RESOLVED 2026-05-29]
 
 **File:** `MyHomeTests/ExpenseModelTests.swift:84-94`
 **Issue:** The optionality assertion computes `let hasNonNilValue = !isOptional` and then `let passesRule = isOptional || hasNonNilValue`, which expands to `isOptional || !isOptional` — always `true`. The `#expect(passesRule, ...)` therefore can never fail regardless of the model shape. This is the mechanical guard FND-03 and PITFALLS Pitfall 1 rely on to stop a future developer adding a non-optional, default-less property that breaks CloudKit mirroring. As written it provides zero protection. (The `uniquenessConstraints` half of the test is genuine and useful; only the optionality loop is broken.) A reflection-based optionality check also cannot in principle detect a "non-optional with a default" vs "non-optional without a default" at runtime, because by the time you have an instance every stored property already holds a value — so the test is doubly ineffective and gives false confidence.
@@ -77,6 +81,8 @@ for attribute in entity.attributes {
 }
 ```
 Verify the exact `Schema.Entity` attribute API in Xcode (Assumption A2 in research was never confirmed) before relying on it.
+
+**Resolution (commit `d1cc0a2`):** Replaced the `isOptional || !isOptional` tautology (and removed the now-unused `OptionalProtocol` reflection helper) with assertions against the SwiftData `Schema.Entity` metadata: for every `entity.attributes`, assert `isOptional || defaultValue != nil`; assert `entity.uniquenessConstraints.isEmpty`; and assert a default-initialized `Expense(amount:)` succeeds with `amount` of type `Decimal` and expected defaults (`currencyCode == "INR"`, `note == nil`). The `Schema.Entity` attribute API (`isOptional`, `defaultValue`) was confirmed working by a green test run, resolving research Assumption A2. The test retains its name `expensePropertiesAreCloudKitReady` and remains a Swift Testing `@Test`. It now genuinely fails if a required/default-less property, a unique constraint, or a non-Decimal money type is introduced.
 
 ## Warnings
 
