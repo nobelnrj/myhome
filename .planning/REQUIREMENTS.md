@@ -25,9 +25,9 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 ### Expense Tracker (manual)
 
-- [ ] **EXP-01**: User can add a manual expense in ≤4 taps (open → amount keypad → category → save)
-- [ ] **EXP-02**: User can edit any expense they created
-- [ ] **EXP-03**: User can delete any expense they created
+- [x] **EXP-01**: User can add a manual expense in ≤4 taps (open → amount keypad → category → save)
+- [x] **EXP-02**: User can edit any expense they created
+- [x] **EXP-03**: User can delete any expense they created
 - [ ] **EXP-04**: App ships with an India-tuned predefined category list (Groceries, Dining, Fuel, Utilities, Rent, Auto/Cab, Shopping, Health/Pharmacy, Entertainment, Recharge/DTH, Maid/Help, UPI to Person, ATM, Misc)
 - [ ] **EXP-05**: User can add, rename, and delete custom categories
 - [ ] **EXP-06**: User can attach one tag to an expense; schema supports multiple tags per expense for future UI
@@ -173,9 +173,9 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | SEC-01 | Phase 5 | Pending |
 | SEC-02 | Phase 5 | Pending |
 | SEC-03 | Phase 6 | Pending |
-| EXP-01 | Phase 1 | Pending |
-| EXP-02 | Phase 1 | Pending |
-| EXP-03 | Phase 1 | Pending |
+| EXP-01 | Phase 1 | Complete |
+| EXP-02 | Phase 1 | Complete |
+| EXP-03 | Phase 1 | Complete |
 | EXP-04 | Phase 2 | Pending |
 | EXP-05 | Phase 2 | Pending |
 | EXP-06 | Phase 2 | Pending |
