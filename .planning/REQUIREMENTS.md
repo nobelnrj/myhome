@@ -9,12 +9,12 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 ### Foundation
 
-- [ ] **FND-01**: App targets iOS 17+ and uses the Swift 6.2 / SwiftUI / SwiftData stack (no UIKit, no Core Data)
-- [ ] **FND-02**: Bundle ID, CloudKit container ID, and App Group ID are decided on day one and never changed (CloudKit-ready even though v1 runs local-only)
+- [x] **FND-01**: App targets iOS 17+ and uses the Swift 6.2 / SwiftUI / SwiftData stack (no UIKit, no Core Data)
+- [x] **FND-02**: Bundle ID, CloudKit container ID, and App Group ID are decided on day one and never changed (CloudKit-ready even though v1 runs local-only)
 - [ ] **FND-03**: Every `@Model` type follows the 8 CloudKit-readiness rules — UUID PK, all fields optional or defaulted, no `@Attribute(.unique)`, optional + inverse-declared relationships, no enums stored directly, dates in UTC, money as `Decimal`, no Codable-only blobs for queryable data
-- [ ] **FND-04**: `PrivacyInfo.xcprivacy` declares required-reason APIs (UserDefaults CA92.1, FileTimestamp C617.1) with `NSPrivacyTracking: false`
+- [x] **FND-04**: `PrivacyInfo.xcprivacy` declares required-reason APIs (UserDefaults CA92.1, FileTimestamp C617.1) with `NSPrivacyTracking: false`
 - [ ] **FND-05**: `VersionedSchema` + `SchemaMigrationPlan` scaffolded from v1.0 even with only one schema version
-- [ ] **FND-06**: Test target uses Swift Testing with in-memory `ModelContainer(isStoredInMemoryOnly: true)` for fixtures; XCTest reserved for UI tests only
+- [x] **FND-06**: Test target uses Swift Testing with in-memory `ModelContainer(isStoredInMemoryOnly: true)` for fixtures; XCTest reserved for UI tests only
 - [ ] **FND-07**: All currency displayed with `Locale(identifier: "en_IN")` formatting (`₹1,00,000.00`, not `₹100,000.00`); all dates stored UTC, displayed in user locale
 
 ### Security
@@ -159,68 +159,77 @@ Explicitly excluded. Documented to prevent scope creep. Anti-features from resea
 
 ## Traceability
 
-Empty initially. Filled by the roadmapper when ROADMAP.md is created — each requirement maps to exactly one phase.
+Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROADMAP.md was created.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FND-01 | TBD | Pending |
-| FND-02 | TBD | Pending |
-| FND-03 | TBD | Pending |
-| FND-04 | TBD | Pending |
-| FND-05 | TBD | Pending |
-| FND-06 | TBD | Pending |
-| FND-07 | TBD | Pending |
-| SEC-01 | TBD | Pending |
-| SEC-02 | TBD | Pending |
-| SEC-03 | TBD | Pending |
-| EXP-01 | TBD | Pending |
-| EXP-02 | TBD | Pending |
-| EXP-03 | TBD | Pending |
-| EXP-04 | TBD | Pending |
-| EXP-05 | TBD | Pending |
-| EXP-06 | TBD | Pending |
-| EXP-07 | TBD | Pending |
-| EXP-08 | TBD | Pending |
-| EXP-09 | TBD | Pending |
-| EXP-10 | TBD | Pending |
-| EXP-11 | TBD | Pending |
-| ING-01 | TBD | Pending |
-| ING-02 | TBD | Pending |
-| ING-03 | TBD | Pending |
-| ING-04 | TBD | Pending |
-| ING-05 | TBD | Pending |
-| ING-06 | TBD | Pending |
-| ING-07 | TBD | Pending |
-| ING-08 | TBD | Pending |
-| ING-09 | TBD | Pending |
-| ING-10 | TBD | Pending |
-| ING-11 | TBD | Pending |
-| ING-12 | TBD | Pending |
-| ING-13 | TBD | Pending |
-| ING-14 | TBD | Pending |
-| ING-15 | TBD | Pending |
-| ING-16 | TBD | Pending |
-| NOT-01 | TBD | Pending |
-| NOT-02 | TBD | Pending |
-| NOT-03 | TBD | Pending |
-| NOT-04 | TBD | Pending |
-| NOT-05 | TBD | Pending |
-| NOT-06 | TBD | Pending |
-| OVR-01 | TBD | Pending |
-| OVR-02 | TBD | Pending |
-| OVR-03 | TBD | Pending |
-| OVR-04 | TBD | Pending |
-| SET-01 | TBD | Pending |
-| SET-02 | TBD | Pending |
-| SET-03 | TBD | Pending |
-| SET-04 | TBD | Pending |
-| SET-05 | TBD | Pending |
+| FND-01 | Phase 1 | Complete |
+| FND-02 | Phase 1 | Complete |
+| FND-03 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Complete |
+| FND-05 | Phase 1 | Pending |
+| FND-06 | Phase 1 | Complete |
+| FND-07 | Phase 1 | Pending |
+| SEC-01 | Phase 5 | Pending |
+| SEC-02 | Phase 5 | Pending |
+| SEC-03 | Phase 6 | Pending |
+| EXP-01 | Phase 1 | Pending |
+| EXP-02 | Phase 1 | Pending |
+| EXP-03 | Phase 1 | Pending |
+| EXP-04 | Phase 2 | Pending |
+| EXP-05 | Phase 2 | Pending |
+| EXP-06 | Phase 2 | Pending |
+| EXP-07 | Phase 2 | Pending |
+| EXP-08 | Phase 2 | Pending |
+| EXP-09 | Phase 2 | Pending |
+| EXP-10 | Phase 4 | Pending |
+| EXP-11 | Phase 4 | Pending |
+| ING-01 | Phase 6 | Pending |
+| ING-02 | Phase 6 | Pending |
+| ING-03 | Phase 6 | Pending |
+| ING-04 | Phase 7 | Pending |
+| ING-05 | Phase 6 | Pending |
+| ING-06 | Phase 7 | Pending |
+| ING-07 | Phase 7 | Pending |
+| ING-08 | Phase 7 | Pending |
+| ING-09 | Phase 7 | Pending |
+| ING-10 | Phase 7 | Pending |
+| ING-11 | Phase 7 | Pending |
+| ING-12 | Phase 7 | Pending |
+| ING-13 | Phase 7 | Pending |
+| ING-14 | Phase 7 | Pending |
+| ING-15 | Phase 7 | Pending |
+| ING-16 | Phase 6 | Pending |
+| NOT-01 | Phase 3 | Pending |
+| NOT-02 | Phase 3 | Pending |
+| NOT-03 | Phase 3 | Pending |
+| NOT-04 | Phase 3 | Pending |
+| NOT-05 | Phase 3 | Pending |
+| NOT-06 | Phase 3 | Pending |
+| OVR-01 | Phase 4 | Pending |
+| OVR-02 | Phase 4 | Pending |
+| OVR-03 | Phase 4 | Pending |
+| OVR-04 | Phase 4 | Pending |
+| SET-01 | Phase 5 | Pending |
+| SET-02 | Phase 5 | Pending |
+| SET-03 | Phase 5 | Pending |
+| SET-04 | Phase 6 | Pending |
+| SET-05 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 52 total
-- Mapped to phases: 0
-- Unmapped: 52 ⚠️ (will be 0 after roadmap creation)
+- Mapped to phases: 52
+- Unmapped: 0 ✓
+
+**Per-phase distribution:**
+- Phase 1 (Foundation & Manual Expense Spine): 10 — FND-01..07, EXP-01, EXP-02, EXP-03
+- Phase 2 (Categories, Tags & Budgets): 6 — EXP-04..09
+- Phase 3 (Notes & Checklists): 6 — NOT-01..06
+- Phase 4 (Overview & Charts): 6 — OVR-01..04, EXP-10, EXP-11
+- Phase 5 (Face ID Gate & Settings): 5 — SEC-01, SEC-02, SET-01, SET-02, SET-03
+- Phase 6 (Gmail Sign-In & Client): 8 — ING-01, ING-02, ING-03, ING-05, ING-16, SEC-03, SET-04, SET-05
+- Phase 7 (Bank Parsers & Ingestion Pipeline): 11 — ING-04, ING-06..15
 
 ---
 *Requirements defined: 2026-05-28*
-*Last updated: 2026-05-28 after initial definition*
+*Last updated: 2026-05-29 — traceability mapped to roadmap (52/52)*
