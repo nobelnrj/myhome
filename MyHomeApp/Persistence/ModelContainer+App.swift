@@ -14,7 +14,7 @@ extension ModelContainer {
     /// The store file is at the same relative path in both cases so migration is a file copy.
     /// TODO: migrate to App Group URL when paid account active (group.com.reojacob.myhome).
     static func appContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV1.self)
+        let schema = Schema(versionedSchema: SchemaV2.self)
 
         // Resolve the App Group container URL; fall back to Application Support if unavailable.
         let storeURL: URL

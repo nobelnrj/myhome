@@ -2,10 +2,10 @@ import SwiftData
 
 /// Convenience typealias so views and tests use bare `Expense` without the version prefix.
 ///
-/// When Phase 2 introduces SchemaV2 with an updated Expense shape,
-/// this typealias flips to `SchemaV2.Expense` in one line — no view changes needed.
+/// Flipped from SchemaV1.Expense → SchemaV2.Expense in Phase 2.
+/// All views and tests that use `Expense` continue to compile unchanged.
 ///
 /// Usage:
 ///   let expense = Expense(amount: Decimal(500), note: "Lunch")
 ///   @Query var expenses: [Expense]
-typealias Expense = SchemaV1.Expense
+typealias Expense = SchemaV2.Expense

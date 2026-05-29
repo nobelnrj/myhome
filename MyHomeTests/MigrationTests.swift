@@ -34,7 +34,8 @@ struct MigrationTests {
 
         // 3. Open with the migration plan.
         //    If migration fails, ModelContainer.init throws — the test fails with a clear error.
-        let schema = Schema(versionedSchema: SchemaV1.self)
+        //    Schema target is SchemaV2 so AppMigrationPlan drives the V1→V2 migration.
+        let schema = Schema(versionedSchema: SchemaV2.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
