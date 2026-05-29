@@ -49,12 +49,15 @@ Plans:
   2. User can attach one tag to an expense (schema already supports multiple for future UI)
   3. User can set a monthly budget per category and see a ₹-remaining + % progress bar that shifts color at 80% and 100%
   4. User can view the current month's expenses grouped by category and tap through to the transaction list
-**Plans**: TBD
+**Plans**: 5 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — SchemaV2 + Category @Model + additive Expense relationship + V1->V2 migration + idempotent 14-category seed + model test suite (EXP-04/05/06/07)
+- [ ] 02-02-PLAN.md — BudgetCalculator + BudgetProgressData pure budget math (thresholds, aggregation, uncategorized bucket) — TDD (EXP-08/09)
+- [ ] 02-03-PLAN.md — Optional category picker in Add/Edit expense + reusable CategoryPickerView (EXP-06)
+- [ ] 02-04-PLAN.md — Budget viz/edit components: BudgetProgressView, BudgetCategoryCard, EditBudgetSheet, month-year helper (EXP-07/08)
+- [ ] 02-05-PLAN.md — Budgets surface: month pager + cards + uncategorized + tap-through + ManageCategories + TabView shell (EXP-05/08/09)
 
 ### Phase 3: Notes & Checklists
 **Goal**: A user can capture notes with inline checklists, pin the important ones, and find anything by search — the second core household feature, fully decoupled from expenses.
