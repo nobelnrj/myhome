@@ -249,12 +249,31 @@ struct EditExpenseView: View {
             ? nil
             : note.trimmingCharacters(in: .whitespaces)
         expense.updatedAt = Date()
+        // CR-01: persist explicitly — do not rely on implicit autosave (financial write).
+        do {
+            try context.save()
+        } catch {
+            // Surface the failure; do not dismiss as if the save succeeded.
+            assertionFailure("Failed to save edited expense: \(error)")
+            print("Failed to save edited expense: \(error)")
+            shakeAmount()
+            return
+        }
         // T-01-07: dismiss cleanly after save (Pitfall 19)
         dismiss()
     }
 
     private func deleteExpense() {
         context.delete(expense)
+        // CR-01: persist the delete explicitly — do not rely on implicit autosave.
+        do {
+            try context.save()
+        } catch {
+            // Surface the failure; do not dismiss as if the delete succeeded.
+            assertionFailure("Failed to delete expense: \(error)")
+            print("Failed to delete expense: \(error)")
+            return
+        }
         // T-01-07: dismiss cleanly after delete (Pitfall 19)
         dismiss()
     }

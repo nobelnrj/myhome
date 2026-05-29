@@ -70,5 +70,13 @@ struct ExpenseListView: View {
         for index in offsets {
             context.delete(expenses[index])
         }
+        // CR-01: persist the delete explicitly — do not rely on implicit autosave.
+        do {
+            try context.save()
+        } catch {
+            // Surface the failure rather than swallowing it silently.
+            assertionFailure("Failed to save after deleting expenses: \(error)")
+            print("Failed to save after deleting expenses: \(error)")
+        }
     }
 }

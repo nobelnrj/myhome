@@ -187,6 +187,16 @@ struct AddExpenseView: View {
             : note.trimmingCharacters(in: .whitespaces)
         let expense = Expense(amount: amount, date: date, note: trimmedNote)
         context.insert(expense)
+        // CR-01: persist explicitly — do not rely on implicit autosave (financial write).
+        do {
+            try context.save()
+        } catch {
+            // Surface the failure; do not dismiss as if the save succeeded.
+            assertionFailure("Failed to save new expense: \(error)")
+            print("Failed to save new expense: \(error)")
+            shakeAmount()
+            return
+        }
         // T-01-07: dismiss cleanly after insert (Pitfall 19 — no same-tick navigation race)
         dismiss()
     }
