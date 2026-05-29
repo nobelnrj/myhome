@@ -77,36 +77,54 @@ struct ExpenseModelTests {
 
     @Test("Expense @Model: all properties are optional or have defaults (CloudKit-readiness)")
     func expensePropertiesAreCloudKitReady() throws {
-        // Create an Expense with only the required parameter; all others must default.
-        let expense = Expense(amount: Decimal(0))
-        let mirror = Mirror(reflecting: expense)
+        // CR-02 / FND-03 / Pitfall 1: this test must actually be able to FAIL if a
+        // future developer adds a non-optional, default-less stored property, drops a
+        // CloudKit-incompatible @Attribute(.unique), or changes the money type.
+        //
+        // The previous version computed `isOptional || !isOptional` (always true) via
+        // runtime reflection — which cannot in principle distinguish "non-optional with
+        // default" from "non-optional without default" once an instance exists. We
+        // replace it with checks against the SwiftData Schema metadata, which records
+        // optionality, default-value presence, and uniqueness independently of any
+        // instance.
 
-        for child in mirror.children {
-            guard let label = child.label else { continue }
-            let value = child.value
-            let isOptional = value is any OptionalProtocol
-            let hasNonNilValue = !isOptional
-
-            // Every property must be either optional (nil is valid) or
-            // have produced a non-nil value from a default.
-            let passesRule = isOptional || hasNonNilValue
-            #expect(passesRule, "Property '\(label)' must be optional or have a default value")
-        }
-
-        // Assert no @Attribute(.unique): uniquenessConstraints must be empty.
         let container = try ModelContainer(
             for: Expense.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
-        let entityDescription = container.schema.entities.first { $0.name == "Expense" }
-        #expect(entityDescription?.uniquenessConstraints.isEmpty == true,
-                "Expense must have no @Attribute(.unique) — CloudKit does not support it")
+
+        let entity = try #require(
+            container.schema.entities.first { $0.name == "Expense" },
+            "Expense entity must be present in the schema"
+        )
+
+        // 1. Every stored attribute must be optional OR carry a default value, so
+        //    CloudKit mirroring (which makes all attributes optional) can never see a
+        //    required-but-empty column. `defaultValue` is non-nil only when the
+        //    property declares a default.
+        #expect(!entity.attributes.isEmpty, "Expense must declare stored attributes")
+        for attribute in entity.attributes {
+            let isOptional = attribute.isOptional
+            let hasDefault = attribute.defaultValue != nil
+            #expect(
+                isOptional || hasDefault,
+                "Attribute '\(attribute.name)' must be optional or have a default value for CloudKit mirroring"
+            )
+        }
+
+        // 2. No @Attribute(.unique): CloudKit does not support unique constraints.
+        #expect(
+            entity.uniquenessConstraints.isEmpty,
+            "Expense must have no @Attribute(.unique) — CloudKit does not support it"
+        )
+
+        // 3. Money must be Decimal (never Double — Pitfall 17). A default-initialized
+        //    instance must succeed using only the one required parameter, and its
+        //    defaults must be intact.
+        let expense = Expense(amount: Decimal(0))
+        #expect(type(of: expense.amount) == Decimal.self, "amount must be a Decimal, never Double")
+        #expect(expense.amount == Decimal(0))
+        #expect(expense.currencyCode == "INR", "currencyCode must default to INR")
+        #expect(expense.note == nil, "note must be optional and default to nil")
     }
 }
-
-// MARK: - Helpers
-
-/// Protocol used by the reflection test to detect Optional<T> values
-/// without needing to know T at compile time.
-private protocol OptionalProtocol {}
-extension Optional: OptionalProtocol {}
