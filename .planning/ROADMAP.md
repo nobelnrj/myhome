@@ -36,7 +36,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Xcode bootstrap, locked IDs (D-09), strict concurrency, PrivacyInfo manifest, Swift Testing target with failing stubs (FND-01/02/04/06)
-- [ ] 01-02-PLAN.md — Expense @Model + VersionedSchema v1 + MigrationPlan + ModelContainer factory + en-IN/UTC formatting (FND-03/05/06/07)
+- [x] 01-02-PLAN.md — Expense @Model + VersionedSchema v1 + MigrationPlan + ModelContainer factory + en-IN/UTC formatting (FND-03/05/06/07)
 - [ ] 01-03-PLAN.md — Expense List + Add (custom keypad) + Edit screens, manual CRUD end-to-end (EXP-01/02/03)
 - [ ] 01-04-PLAN.md — Seed store + migration-load test green; full suite verified (FND-05)
 
@@ -143,7 +143,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Manual Expense Spine | 1/4 | In Progress|  |
+| 1. Foundation & Manual Expense Spine | 2/4 | In Progress|  |
 | 2. Categories, Tags & Budgets | 0/TBD | Not started | - |
 | 3. Notes & Checklists | 0/TBD | Not started | - |
 | 4. Overview & Charts | 0/TBD | Not started | - |

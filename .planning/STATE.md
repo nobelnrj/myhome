@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-29T10:03:09.553Z"
+last_updated: "2026-05-29T10:19:42.240Z"
 last_activity: 2026-05-29
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 01 (foundation-manual-expense-spine) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-05-29
 
-Progress: [███░░░░░░░] 25%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [███░░░░░░░] 25%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01 P02 | 20 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,9 @@ Recent decisions affecting current work:
 - [Roadmap]: Manual expense entry ships before Gmail ingestion (load-bearing sequencing — validates schema/UI/budget loop before staking the project on the riskiest sub-system)
 - [Roadmap]: Foundation lock-ins (bundle/CloudKit/App-Group IDs, privacy manifest, CloudKit-ready schema) folded into Phase 1 because they are one-way doors
 - [Roadmap]: Gmail ingestion split — OAuth/client proven in isolation (Phase 6) before parsers + pipeline + background tasks (Phase 7)
+- [Phase ?]: Expense @Model nested in SchemaV1 enum; typealias Expense = SchemaV1.Expense for clean view imports
+- [Phase ?]: FormatStyle .currency(code:INR).locale(en_IN) for lakh grouping — not NumberFormatter, not hand-rolled
+- [Phase ?]: App Group store URL with Application Support fallback for free-account provisioning
 
 ### Pending Todos
 
@@ -88,6 +92,6 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 
 ## Session Continuity
 
-Last session: 2026-05-29T10:03:09.548Z
-Stopped at: Phase 1 UI-SPEC approved
+Last session: 2026-05-29T10:19:42.235Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

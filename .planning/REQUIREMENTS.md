@@ -11,11 +11,11 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 - [x] **FND-01**: App targets iOS 17+ and uses the Swift 6.2 / SwiftUI / SwiftData stack (no UIKit, no Core Data)
 - [x] **FND-02**: Bundle ID, CloudKit container ID, and App Group ID are decided on day one and never changed (CloudKit-ready even though v1 runs local-only)
-- [ ] **FND-03**: Every `@Model` type follows the 8 CloudKit-readiness rules — UUID PK, all fields optional or defaulted, no `@Attribute(.unique)`, optional + inverse-declared relationships, no enums stored directly, dates in UTC, money as `Decimal`, no Codable-only blobs for queryable data
+- [x] **FND-03**: Every `@Model` type follows the 8 CloudKit-readiness rules — UUID PK, all fields optional or defaulted, no `@Attribute(.unique)`, optional + inverse-declared relationships, no enums stored directly, dates in UTC, money as `Decimal`, no Codable-only blobs for queryable data
 - [x] **FND-04**: `PrivacyInfo.xcprivacy` declares required-reason APIs (UserDefaults CA92.1, FileTimestamp C617.1) with `NSPrivacyTracking: false`
-- [ ] **FND-05**: `VersionedSchema` + `SchemaMigrationPlan` scaffolded from v1.0 even with only one schema version
+- [x] **FND-05**: `VersionedSchema` + `SchemaMigrationPlan` scaffolded from v1.0 even with only one schema version
 - [x] **FND-06**: Test target uses Swift Testing with in-memory `ModelContainer(isStoredInMemoryOnly: true)` for fixtures; XCTest reserved for UI tests only
-- [ ] **FND-07**: All currency displayed with `Locale(identifier: "en_IN")` formatting (`₹1,00,000.00`, not `₹100,000.00`); all dates stored UTC, displayed in user locale
+- [x] **FND-07**: All currency displayed with `Locale(identifier: "en_IN")` formatting (`₹1,00,000.00`, not `₹100,000.00`); all dates stored UTC, displayed in user locale
 
 ### Security
 
@@ -165,11 +165,11 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 |-------------|-------|--------|
 | FND-01 | Phase 1 | Complete |
 | FND-02 | Phase 1 | Complete |
-| FND-03 | Phase 1 | Pending |
+| FND-03 | Phase 1 | Complete |
 | FND-04 | Phase 1 | Complete |
-| FND-05 | Phase 1 | Pending |
+| FND-05 | Phase 1 | Complete |
 | FND-06 | Phase 1 | Complete |
-| FND-07 | Phase 1 | Pending |
+| FND-07 | Phase 1 | Complete |
 | SEC-01 | Phase 5 | Pending |
 | SEC-02 | Phase 5 | Pending |
 | SEC-03 | Phase 6 | Pending |
