@@ -12,7 +12,7 @@ My Home is a single-user (v1) iOS app for a two-person Indian household, built a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Manual Expense Spine** - Lock one-way-door IDs, CloudKit-ready SwiftData schema, and manual expense CRUD end-to-end
+- [x] **Phase 1: Foundation & Manual Expense Spine** - Lock one-way-door IDs, CloudKit-ready SwiftData schema, and manual expense CRUD end-to-end (completed 2026-05-29)
 - [ ] **Phase 2: Categories, Tags & Budgets** - Close the manual-expense loop with categories, single-tag, per-category budgets, and month view
 - [ ] **Phase 3: Notes & Checklists** - Independent note keeper with inline checklists, pin, search, and auto-save
 - [ ] **Phase 4: Overview & Charts** - Motivating home surface: spend-vs-budget, top categories, pinned note, and Swift Charts
@@ -38,7 +38,7 @@ Plans:
 - [x] 01-01-PLAN.md — Xcode bootstrap, locked IDs (D-09), strict concurrency, PrivacyInfo manifest, Swift Testing target with failing stubs (FND-01/02/04/06)
 - [x] 01-02-PLAN.md — Expense @Model + VersionedSchema v1 + MigrationPlan + ModelContainer factory + en-IN/UTC formatting (FND-03/05/06/07)
 - [x] 01-03-PLAN.md — Expense List + Add (custom keypad) + Edit screens, manual CRUD end-to-end (EXP-01/02/03)
-- [ ] 01-04-PLAN.md — Seed store + migration-load test green; full suite verified (FND-05)
+- [x] 01-04-PLAN.md — Seed store + migration-load test green; full suite verified (FND-05)
 
 ### Phase 2: Categories, Tags & Budgets
 **Goal**: A user can categorize and tag expenses, set per-category monthly budgets, and watch budget progress — making the manual tracker usable end-to-end with no backend.
@@ -143,7 +143,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Manual Expense Spine | 3/4 | In Progress|  |
+| 1. Foundation & Manual Expense Spine | 4/4 | Complete   | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 0/TBD | Not started | - |
 | 3. Notes & Checklists | 0/TBD | Not started | - |
 | 4. Overview & Charts | 0/TBD | Not started | - |
