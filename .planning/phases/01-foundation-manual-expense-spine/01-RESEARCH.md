@@ -836,7 +836,7 @@ extension Date {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **App Group on free account**
    - What we know: Apple free accounts have unreliable App Group entitlement provisioning (PITFALLS.md Pitfall 5, 13).
