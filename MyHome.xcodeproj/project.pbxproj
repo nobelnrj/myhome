@@ -222,6 +222,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A103 /* Assets.xcassets in Resources */,
+				A104 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
