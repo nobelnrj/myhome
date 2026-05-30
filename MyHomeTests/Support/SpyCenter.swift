@@ -3,66 +3,12 @@ import UserNotifications
 @testable import MyHome
 
 // ---------------------------------------------------------------------------
-// NotificationCenterPort — protocol seam for testable notification scheduling.
-// Production conformer (plan 03-06): wraps UNUserNotificationCenter.current().
-// Test conformer: SpyCenter below.
-// ---------------------------------------------------------------------------
-
-/// Protocol that abstracts the four UNUserNotificationCenter operations required
-/// by NotificationScheduler. Injecting this protocol lets unit tests run without
-/// touching the OS notification center.
-public protocol NotificationCenterPort: Sendable {
-    /// Requests user authorization for the given options.
-    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
-    /// Adds a notification request to the center.
-    func add(_ request: UNNotificationRequest) async throws
-    /// Removes pending requests by identifier.
-    func removePendingNotificationRequests(withIdentifiers ids: [String])
-    /// Returns all currently pending notification requests.
-    func pendingNotificationRequests() async -> [UNNotificationRequest]
-}
-
-// ---------------------------------------------------------------------------
-// ReminderInfo — placeholder value type consumed by NotificationScheduler.
-// Plan 03-03 will move/replace this with the final Codable value types
-// (ReminderRecurrence + ReminderEndRule) once the scheduler is implemented.
-// ---------------------------------------------------------------------------
-
-/// Input type for NotificationScheduler.buildRequests(for:).
-/// Mirrors the reminder fields embedded on Note/NoteBlock (RESEARCH §Data Model Design).
-public struct ReminderInfo: Sendable {
-    public var id: UUID
-    public var title: String
-    public var date: Date
-    public var isAllDay: Bool
-    /// Lead-time advance alerts, expressed as minutes before the main reminder.
-    public var leadMinutes: [Int]
-    /// Encoded recurrence. nil = no recurrence (RecurrenceType.none).
-    public var recurrenceData: Data?
-    /// Encoded end rule. nil = never (EndRuleType.never).
-    public var endRuleData: Data?
-
-    public init(
-        id: UUID = UUID(),
-        title: String,
-        date: Date,
-        isAllDay: Bool = false,
-        leadMinutes: [Int] = [],
-        recurrenceData: Data? = nil,
-        endRuleData: Data? = nil
-    ) {
-        self.id = id
-        self.title = title
-        self.date = date
-        self.isAllDay = isAllDay
-        self.leadMinutes = leadMinutes
-        self.recurrenceData = recurrenceData
-        self.endRuleData = endRuleData
-    }
-}
-
-// ---------------------------------------------------------------------------
 // SpyCenter — in-memory NotificationCenterPort test double.
+//
+// NotificationCenterPort is defined in MyHomeApp/Support/NotificationCenterPort.swift
+// (production file, plan 03-03). This file provides the test double only.
+//
+// ReminderInfo is defined in MyHomeApp/Support/NotificationScheduler.swift (plan 03-03).
 // ---------------------------------------------------------------------------
 
 /// In-memory spy that records all `add` and `removePendingNotificationRequests`
@@ -125,11 +71,10 @@ public final class SpyCenter: NotificationCenterPort, @unchecked Sendable {
 }
 
 // ---------------------------------------------------------------------------
-// Fixture builders — convenience helpers for test stubs.
-// Plan 03-03 will expand these with full recurrence/end-rule support.
+// Fixture builders — convenience helpers for scheduler tests (plan 03-03).
 // ---------------------------------------------------------------------------
 
-/// Returns a timed ReminderInfo firing `leadMinutes` before a reference date.
+/// Returns a timed ReminderInfo firing with the given lead offsets.
 public func timedReminder(
     leadMinutes: [Int] = [],
     date: Date = Date(timeIntervalSinceNow: 3600)
@@ -138,18 +83,20 @@ public func timedReminder(
         title: "Test Reminder",
         date: date,
         isAllDay: false,
+        recurrence: ReminderRecurrence(type: .none),
+        endRule: ReminderEndRule(type: .never),
         leadMinutes: leadMinutes
     )
 }
 
-/// Returns a weekly ReminderInfo with a weekday set (1=Sun..7=Sat).
+/// Returns a weekly ReminderInfo with the specified weekdays (1=Sun..7=Sat).
 public func weeklyReminder(weekdays: [Int]) -> ReminderInfo {
-    // Recurrence data will be properly encoded in plan 03-03.
-    // For now, provide a bare info so stubs compile.
     ReminderInfo(
         title: "Weekly Reminder",
         date: Date(timeIntervalSinceNow: 3600),
         isAllDay: false,
+        recurrence: ReminderRecurrence(type: .weekly, weekdays: weekdays),
+        endRule: ReminderEndRule(type: .never),
         leadMinutes: []
     )
 }
