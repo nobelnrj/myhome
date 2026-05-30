@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-30T10:21:27.052Z"
+last_updated: "2026-05-30T10:35:54.827Z"
 last_activity: 2026-05-30
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 15
-  completed_plans: 10
+  completed_plans: 11
   percent: 29
 ---
 
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 03 (notes-checklists) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-05-30
 
-Progress: [███████░░░] 67%
+Progress: [███████░░░] 73%
 
 ## Performance Metrics
 
@@ -77,6 +77,8 @@ Recent decisions affecting current work:
 - [Phase ?]: EditExpenseView uses local @State mirror of expense fields for isDirty detection; Cancel dismisses without mutating model
 - [Phase ?]: RootView reduced to single-line pass-through to ExpenseListView; ExpenseListView owns its own NavigationStack
 - [Phase ?]: Seed store generated via macOS SwiftData script (xcrun -sdk macosx swift) — deterministic, reproducible, no simulator required
+- [Phase ?]: Required companion to container flip
+- [Phase ?]: AppMigrationPlan chains to V3 now
 
 ### Pending Todos
 
@@ -103,6 +105,6 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 
 ## Session Continuity
 
-Last session: 2026-05-30T10:21:27.047Z
+Last session: 2026-05-30T10:35:42.272Z
 Stopped at: Phase 3 context gathered
 Resume file: None

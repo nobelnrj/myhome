@@ -99,7 +99,7 @@ Plans:
 - [x] 03-01-PLAN.md — Wave 0 test infra: all Note/scheduler/recurrence/calendar test stubs + NotificationCenterPort/SpyCenter seam + bundled MyHomeV2Seed.store (NOT-01..06)
 
 **Wave 1** — data layer
-- [ ] 03-02-PLAN.md — SchemaV3 + Note/NoteBlock @Models + reminder value types + v2ToV3 migration + typealias/container flip (NOT-01/02)
+- [x] 03-02-PLAN.md — SchemaV3 + Note/NoteBlock @Models + reminder value types + v2ToV3 migration + typealias/container flip (NOT-01/02)
 
 **Wave 2** — notification core
 - [ ] 03-03-PLAN.md — NotificationScheduler (pure buildRequests) + NotificationCenterPort + recurrence/after-N/64-cap (TDD; SC-R1..R3)
@@ -202,7 +202,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
-| 3. Notes & Checklists | 1/6 | In Progress|  |
+| 3. Notes & Checklists | 2/6 | In Progress|  |
 | 4. Overview & Charts | 0/TBD | Not started | - |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
 | 6. Gmail Sign-In & Client | 0/TBD | Not started | - |
