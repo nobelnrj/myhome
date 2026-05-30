@@ -54,6 +54,32 @@ struct MigrationTests {
         #expect(seedExpense?.note == "Seed", "Seed expense note must be 'Seed'")
         #expect(seedExpense?.currencyCode == "INR", "Seed expense currencyCode must be 'INR'")
     }
+
+    // MARK: - Wave 0 stub: v2 → v3 migration
+
+    /// Validation command: -only-testing:MyHomeTests/MigrationTests/v2StoreMigratesToV3
+    /// Requirement: Migration (VALIDATION.md) — V2→V3 store opens under AppMigrationPlan; Expense rows survive.
+    /// Wave 0 stub — fails via Issue.record until plan 03-02 ships SchemaV3.
+    @Test("v2 store loads and Expense rows survive under AppMigrationPlan (V2→V3)")
+    func v2StoreMigratesToV3() throws {
+        // 1. Locate the bundled v2 seed store.
+        let testBundle = Bundle(for: MigrationTestsClass.self)
+        guard let bundledStoreURL = testBundle.url(forResource: "MyHomeV2Seed", withExtension: "store") else {
+            Issue.record("Bundled v2 seed store not found — MyHomeV2Seed.store must be in the MyHomeTests target's Copy Bundle Resources build phase")
+            return
+        }
+
+        // 2. Copy to a unique temp location so the test never modifies the bundle resource.
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("migration-v2v3-test-\(UUID()).store")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        try FileManager.default.copyItem(at: bundledStoreURL, to: tempURL)
+
+        // 3. SchemaV3 does not exist until plan 03-02 — gate the assertion body so the file
+        //    compiles today and the test FAILS (not errors).
+        Issue.record("SchemaV3 pending plan 03-02 — open with Schema(versionedSchema: SchemaV3.self) and assert Expense rows survive")
+    }
 }
 
 // ---------------------------------------------------------------------------

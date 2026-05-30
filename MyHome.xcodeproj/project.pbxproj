@@ -48,6 +48,7 @@
 		A306 /* NotificationSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F306 /* NotificationSchedulerTests.swift */; };
 		A307 /* RecurrenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F307 /* RecurrenceTests.swift */; };
 		A308 /* CalendarAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F308 /* CalendarAggregationTests.swift */; };
+		A310 /* MyHomeV2Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F310 /* MyHomeV2Seed.store */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -96,6 +97,7 @@
 		F306 /* NotificationSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSchedulerTests.swift; sourceTree = "<group>"; };
 		F307 /* RecurrenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceTests.swift; sourceTree = "<group>"; };
 		F308 /* CalendarAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAggregationTests.swift; sourceTree = "<group>"; };
+		F310 /* MyHomeV2Seed.store */ = {isa = PBXFileReference; lastKnownFileType = "file"; path = MyHomeV2Seed.store; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -267,6 +269,7 @@
 			isa = PBXGroup;
 			children = (
 				F203 /* MyHomeV1Seed.store */,
+				F310 /* MyHomeV2Seed.store */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -368,6 +371,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A203 /* MyHomeV1Seed.store in Resources */,
+				A310 /* MyHomeV2Seed.store in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
