@@ -46,6 +46,9 @@
 		A132 /* BudgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F132 /* BudgetsView.swift */; };
 		A140NCP /* NotificationCenterPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F140NCP /* NotificationCenterPort.swift */; };
 		A141NS /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F141NS /* NotificationScheduler.swift */; };
+		A142NLO /* NoteListOrganizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F142NLO /* NoteListOrganizer.swift */; };
+		A143NSF /* NoteSearchFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F143NSF /* NoteSearchFilter.swift */; };
+		A144CA /* CalendarAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F144CA /* CalendarAggregator.swift */; };
 		A301 /* SpyCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F301 /* SpyCenter.swift */; };
 		A302 /* NoteModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F302 /* NoteModelTests.swift */; };
 		A303 /* NoteListOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F303 /* NoteListOrderingTests.swift */; };
@@ -94,6 +97,9 @@
 		F119 /* BudgetCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculator.swift; sourceTree = "<group>"; };
 		F140NCP /* NotificationCenterPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterPort.swift; sourceTree = "<group>"; };
 		F141NS /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+		F142NLO /* NoteListOrganizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListOrganizer.swift; sourceTree = "<group>"; };
+		F143NSF /* NoteSearchFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSearchFilter.swift; sourceTree = "<group>"; };
+		F144CA /* CalendarAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAggregator.swift; sourceTree = "<group>"; };
 		F208 /* BudgetCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculatorTests.swift; sourceTree = "<group>"; };
 		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
 		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
@@ -225,6 +231,9 @@
 				F119 /* BudgetCalculator.swift */,
 				F140NCP /* NotificationCenterPort.swift */,
 				F141NS /* NotificationScheduler.swift */,
+				F142NLO /* NoteListOrganizer.swift */,
+				F143NSF /* NoteSearchFilter.swift */,
+				F144CA /* CalendarAggregator.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -423,6 +432,9 @@
 				A119 /* BudgetCalculator.swift in Sources */,
 				A140NCP /* NotificationCenterPort.swift in Sources */,
 				A141NS /* NotificationScheduler.swift in Sources */,
+				A142NLO /* NoteListOrganizer.swift in Sources */,
+				A143NSF /* NoteSearchFilter.swift in Sources */,
+				A144CA /* CalendarAggregator.swift in Sources */,
 				A127 /* BudgetProgressView.swift in Sources */,
 				A128 /* BudgetCategoryCard.swift in Sources */,
 				A129 /* EditBudgetSheet.swift in Sources */,
