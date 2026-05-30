@@ -26,6 +26,8 @@ struct EditExpenseView: View {
     @State private var showDeleteConfirmation: Bool = false
     @State private var amountShakeOffset: CGFloat = 0
     @State private var amountIsError: Bool = false
+    @State private var selectedCategory: Category? = nil
+    @State private var showCategoryPicker: Bool = false
 
     // MARK: - Computed
 
@@ -39,6 +41,7 @@ struct EditExpenseView: View {
         return amount != expense.amount
             || date != expense.date
             || (note.trimmingCharacters(in: .whitespaces).isEmpty ? nil : note.trimmingCharacters(in: .whitespaces)) != expense.note
+            || selectedCategory?.persistentModelID != expense.categories.first?.persistentModelID
     }
 
     private var isSaveEnabled: Bool {
@@ -178,6 +181,43 @@ struct EditExpenseView: View {
             .background(Color(.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
+            // Category row (Section 2, optional — off the ≤3-tap critical path; D2-12)
+            Button(action: { showCategoryPicker = true }) {
+                HStack {
+                    Text("Category")
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    if let cat = selectedCategory, let name = cat.name {
+                        if let symbol = cat.symbolName {
+                            Image(systemName: symbol)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        // T-02-07: plain Text — never AttributedString(markdown:)
+                        Text(name)
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                    } else {
+                        Text("None")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                    }
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .frame(minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.top, 8)
+            .sheet(isPresented: $showCategoryPicker) {
+                CategoryPickerView(selectedCategory: $selectedCategory)
+            }
+
             // Note field (T-01-06: plain TextField — never AttributedString(markdown:))
             HStack {
                 Text("Note")
@@ -231,6 +271,7 @@ struct EditExpenseView: View {
         }
         date = expense.date
         note = expense.note ?? ""
+        selectedCategory = expense.categories.first   // v1 UI: single-select (D2-02)
     }
 
     private func saveExpense() {
@@ -248,6 +289,8 @@ struct EditExpenseView: View {
         expense.note = note.trimmingCharacters(in: .whitespaces).isEmpty
             ? nil
             : note.trimmingCharacters(in: .whitespaces)
+        // Wire optional category (v1 UI: single-select; schema supports multiple — D2-02)
+        expense.categories = selectedCategory.map { [$0] } ?? []
         expense.updatedAt = Date()
         // CR-01: persist explicitly — do not rely on implicit autosave (financial write).
         do {
