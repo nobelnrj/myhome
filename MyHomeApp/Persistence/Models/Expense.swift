@@ -8,4 +8,4 @@ import SwiftData
 /// Usage:
 ///   let expense = Expense(amount: Decimal(500), note: "Lunch")
 ///   @Query var expenses: [Expense]
-typealias Expense = SchemaV2.Expense
+typealias Expense = SchemaV3.Expense

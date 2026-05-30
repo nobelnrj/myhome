@@ -7,4 +7,4 @@ import SwiftData
 /// Usage:
 ///   let category = Category(name: "Groceries", symbolName: "cart")
 ///   @Query(sort: \Category.sortOrder) var categories: [Category]
-typealias Category = SchemaV2.Category
+typealias Category = SchemaV3.Category

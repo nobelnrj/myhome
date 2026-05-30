@@ -34,8 +34,9 @@ struct MigrationTests {
 
         // 3. Open with the migration plan.
         //    If migration fails, ModelContainer.init throws — the test fails with a clear error.
-        //    Schema target is SchemaV2 so AppMigrationPlan drives the V1→V2 migration.
-        let schema = Schema(versionedSchema: SchemaV2.self)
+        //    Schema target is SchemaV3 (the top schema after plan 03-02); AppMigrationPlan
+        //    drives V1→V2→V3 in sequence.
+        let schema = Schema(versionedSchema: SchemaV3.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
@@ -55,11 +56,11 @@ struct MigrationTests {
         #expect(seedExpense?.currencyCode == "INR", "Seed expense currencyCode must be 'INR'")
     }
 
-    // MARK: - Wave 0 stub: v2 → v3 migration
+    // MARK: - V2 → V3 migration
 
     /// Validation command: -only-testing:MyHomeTests/MigrationTests/v2StoreMigratesToV3
-    /// Requirement: Migration (VALIDATION.md) — V2→V3 store opens under AppMigrationPlan; Expense rows survive.
-    /// Wave 0 stub — fails via Issue.record until plan 03-02 ships SchemaV3.
+    /// Requirement: Migration — V2→V3 store opens under AppMigrationPlan; Expense rows survive.
+    /// Implemented in plan 03-02 — this test turns GREEN when SchemaV3 + v2ToV3 stage ship.
     @Test("v2 store loads and Expense rows survive under AppMigrationPlan (V2→V3)")
     func v2StoreMigratesToV3() throws {
         // 1. Locate the bundled v2 seed store.
@@ -76,9 +77,26 @@ struct MigrationTests {
 
         try FileManager.default.copyItem(at: bundledStoreURL, to: tempURL)
 
-        // 3. SchemaV3 does not exist until plan 03-02 — gate the assertion body so the file
-        //    compiles today and the test FAILS (not errors).
-        Issue.record("SchemaV3 pending plan 03-02 — open with Schema(versionedSchema: SchemaV3.self) and assert Expense rows survive")
+        // 3. Open with the migration plan targeting SchemaV3.
+        //    AppMigrationPlan now lists V1 → V2 → V3; if migration fails, ModelContainer.init throws.
+        let schema = Schema(versionedSchema: SchemaV3.self)
+        let config = ModelConfiguration(schema: schema, url: tempURL)
+        let container = try ModelContainer(
+            for: schema,
+            migrationPlan: AppMigrationPlan.self,
+            configurations: [config]
+        )
+
+        // 4. Verify the seeded expense is readable (store was pre-seeded with one Expense row).
+        let context = container.mainContext
+        let expenses = try context.fetch(FetchDescriptor<Expense>())
+        #expect(!expenses.isEmpty, "At least one Expense must survive the V2→V3 migration (T-03-02)")
+
+        // 5. Verify the seeded data is intact (generator seeded amount=100, note="Seed").
+        let seedExpense = expenses.first
+        #expect(seedExpense?.amount == Decimal(100), "Seed expense amount must be 100 after migration")
+        #expect(seedExpense?.note == "Seed", "Seed expense note must be 'Seed' after migration")
+        #expect(seedExpense?.currencyCode == "INR", "Seed expense currencyCode must be 'INR' after migration")
     }
 }
 
