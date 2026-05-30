@@ -17,6 +17,7 @@ struct NotesListView: View {
 
     @State private var showingAddSheet: Bool = false
     @State private var editingNote: Note? = nil
+    @State private var noteToEditAfterAdd: Note? = nil
     @State private var searchText: String = ""
 
     // MARK: - Computed
@@ -51,8 +52,16 @@ struct NotesListView: View {
             }
         }
         .searchable(text: $searchText, prompt: "Search notes")
-        .sheet(isPresented: $showingAddSheet) {
-            AddNoteView()
+        // Parent-coordinated sequential sheets: AddNoteView dismisses first, then
+        // onDismiss hands the created note to EditNoteView. Only one sheet is ever
+        // presented at a time — no nested-sheet anti-pattern (bug fix 03-05).
+        .sheet(isPresented: $showingAddSheet, onDismiss: {
+            if let n = noteToEditAfterAdd {
+                noteToEditAfterAdd = nil
+                editingNote = n
+            }
+        }) {
+            AddNoteView(onCreated: { noteToEditAfterAdd = $0 })
         }
         .sheet(item: $editingNote) { note in
             EditNoteView(note: note)

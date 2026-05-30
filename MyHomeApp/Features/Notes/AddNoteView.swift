@@ -3,18 +3,23 @@ import SwiftData
 
 /// Sheet for creating a new note.
 ///
-/// Creates a Note with the required title; immediately presents the block editor (EditNoteView).
-/// Untitled notes are discarded on dismiss (D3-03, T-03-10).
+/// Creates a Note with the required title, then calls `onCreated` with the new note and dismisses.
+/// The caller (NotesListView) receives the note via `onCreated` and presents EditNoteView AFTER
+/// this sheet fully dismisses — parent-coordinated sequential sheets (no nested sheets).
 ///
-/// Implementation: Task 2 (TDD, plan 03-05).
+/// Untitled notes are discarded on dismiss (D3-03, T-03-10) — guarded by the disabled Add Note button.
+///
+/// Implementation: Task 2 (TDD, plan 03-05). Bug fix: 03-05 nested-sheet anti-pattern.
 struct AddNoteView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
 
     @State private var title: String = ""
-    @State private var createdNote: Note? = nil
-    @State private var showEditor: Bool = false
+
+    /// Called with the newly-created Note just before this sheet dismisses.
+    /// NotesListView holds the note and presents EditNoteView via onDismiss handoff.
+    var onCreated: (Note) -> Void
 
     var body: some View {
         NavigationStack {
@@ -42,11 +47,6 @@ struct AddNoteView: View {
                     .tint(.accentColor)
                 }
             }
-            .sheet(isPresented: $showEditor, onDismiss: { dismiss() }) {
-                if let note = createdNote {
-                    EditNoteView(note: note)
-                }
-            }
         }
     }
 
@@ -62,7 +62,9 @@ struct AddNoteView: View {
         } catch {
             assertionFailure("Failed to save new note: \(error)")
         }
-        createdNote = note
-        showEditor = true
+        // Hand off the note to the parent, then dismiss.
+        // NotesListView will present EditNoteView after this sheet fully dismisses.
+        onCreated(note)
+        dismiss()
     }
 }
