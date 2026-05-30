@@ -105,7 +105,7 @@ Plans:
 - [x] 03-03-PLAN.md — NotificationScheduler (pure buildRequests) + NotificationCenterPort + recurrence/after-N/64-cap (TDD; SC-R1..R3)
 
 **Wave 3** — pure UI helpers
-- [ ] 03-04-PLAN.md — NoteListOrganizer (Daily Routine→Pinned→Other) + NoteSearchFilter + CalendarAggregator (TDD; NOT-03/04/06, SC-R4/R5)
+- [x] 03-04-PLAN.md — NoteListOrganizer (Daily Routine→Pinned→Other) + NoteSearchFilter + CalendarAggregator (TDD; NOT-03/04/06, SC-R4/R5)
 
 **Wave 4** — note-keeper UI
 - [ ] 03-05-PLAN.md — Notes tab + sectioned searchable list + block editor + debounced auto-save + discard-on-empty-title (NOT-01..06; UAT checkpoint)
@@ -202,7 +202,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
-| 3. Notes & Checklists | 3/6 | In Progress|  |
+| 3. Notes & Checklists | 4/6 | In Progress|  |
 | 4. Overview & Charts | 0/TBD | Not started | - |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
 | 6. Gmail Sign-In & Client | 0/TBD | Not started | - |
