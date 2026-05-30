@@ -14,7 +14,7 @@ My Home is a single-user (v1) iOS app for a two-person Indian household, built a
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Manual Expense Spine** - Lock one-way-door IDs, CloudKit-ready SwiftData schema, and manual expense CRUD end-to-end (completed 2026-05-29)
-- [ ] **Phase 2: Categories, Tags & Budgets** - Close the manual-expense loop with categories, single-tag, per-category budgets, and month view
+- [x] **Phase 2: Categories, Tags & Budgets** - Close the manual-expense loop with categories, single-tag, per-category budgets, and month view (completed 2026-05-30)
 - [ ] **Phase 3: Notes & Checklists** - Independent note keeper with inline checklists, pin, search, and auto-save
 - [ ] **Phase 4: Overview & Charts** - Motivating home surface: spend-vs-budget, top categories, pinned note, and Swift Charts
 - [ ] **Phase 5: Face ID Gate & Settings** - Biometric app lock with passcode fallback and a Settings shell for managing the household
@@ -75,7 +75,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 02-05-PLAN.md — Budgets surface: month pager + cards + uncategorized + tap-through + ManageCategories + TabView shell (EXP-05/08/09)
+- [x] 02-05-PLAN.md — Budgets surface: month pager + cards + uncategorized + tap-through + ManageCategories + TabView shell (EXP-05/08/09)
 
 ### Phase 3: Notes & Checklists
 
@@ -185,7 +185,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
-| 2. Categories, Tags & Budgets | 4/5 | In Progress|  |
+| 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
 | 3. Notes & Checklists | 0/TBD | Not started | - |
 | 4. Overview & Charts | 0/TBD | Not started | - |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
