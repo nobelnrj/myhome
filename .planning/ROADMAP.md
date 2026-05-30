@@ -67,7 +67,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 02-02-PLAN.md — BudgetCalculator + BudgetProgressData pure budget math (thresholds, aggregation, uncategorized bucket) — TDD (EXP-08/09)
-- [ ] 02-03-PLAN.md — Optional category picker in Add/Edit expense + reusable CategoryPickerView (EXP-06)
+- [x] 02-03-PLAN.md — Optional category picker in Add/Edit expense + reusable CategoryPickerView (EXP-06)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -185,7 +185,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
-| 2. Categories, Tags & Budgets | 2/5 | In Progress|  |
+| 2. Categories, Tags & Budgets | 3/5 | In Progress|  |
 | 3. Notes & Checklists | 0/TBD | Not started | - |
 | 4. Overview & Charts | 0/TBD | Not started | - |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
