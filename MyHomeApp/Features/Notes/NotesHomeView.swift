@@ -38,13 +38,9 @@ struct NotesHomeView: View {
                 case .list:
                     NotesListView()
                 case .calendar:
-                    // 03-06 HOOK: CalendarView goes here; stub until plan 03-06
-                    ContentUnavailableView(
-                        "No Reminders",
-                        systemImage: "calendar",
-                        description: Text("Scheduled reminders will appear here.")
-                    )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // 03-06: CalendarView — LazyVGrid month grid with per-day counts + agenda
+                    CalendarView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .navigationTitle("Notes")
