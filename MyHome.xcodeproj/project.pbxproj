@@ -49,6 +49,11 @@
 		A142NLO /* NoteListOrganizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F142NLO /* NoteListOrganizer.swift */; };
 		A143NSF /* NoteSearchFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F143NSF /* NoteSearchFilter.swift */; };
 		A144CA /* CalendarAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F144CA /* CalendarAggregator.swift */; };
+		A151NHV /* NotesHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F151NHV /* NotesHomeView.swift */; };
+		A152NLV /* NotesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F152NLV /* NotesListView.swift */; };
+		A153NRW /* NoteRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F153NRW /* NoteRow.swift */; };
+		A154ANV /* AddNoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F154ANV /* AddNoteView.swift */; };
+		A155ENV /* EditNoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F155ENV /* EditNoteView.swift */; };
 		A301 /* SpyCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F301 /* SpyCenter.swift */; };
 		A302 /* NoteModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F302 /* NoteModelTests.swift */; };
 		A303 /* NoteListOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F303 /* NoteListOrderingTests.swift */; };
@@ -100,6 +105,11 @@
 		F142NLO /* NoteListOrganizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListOrganizer.swift; sourceTree = "<group>"; };
 		F143NSF /* NoteSearchFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSearchFilter.swift; sourceTree = "<group>"; };
 		F144CA /* CalendarAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAggregator.swift; sourceTree = "<group>"; };
+		F151NHV /* NotesHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesHomeView.swift; sourceTree = "<group>"; };
+		F152NLV /* NotesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesListView.swift; sourceTree = "<group>"; };
+		F153NRW /* NoteRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRow.swift; sourceTree = "<group>"; };
+		F154ANV /* AddNoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNoteView.swift; sourceTree = "<group>"; };
+		F155ENV /* EditNoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNoteView.swift; sourceTree = "<group>"; };
 		F208 /* BudgetCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculatorTests.swift; sourceTree = "<group>"; };
 		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
 		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
@@ -183,8 +193,21 @@
 			children = (
 				G121 /* Expenses */,
 				G122 /* Budgets */,
+				G123 /* Notes */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		G123 /* Notes */ = {
+			isa = PBXGroup;
+			children = (
+				F151NHV /* NotesHomeView.swift */,
+				F152NLV /* NotesListView.swift */,
+				F153NRW /* NoteRow.swift */,
+				F154ANV /* AddNoteView.swift */,
+				F155ENV /* EditNoteView.swift */,
+			);
+			path = Notes;
 			sourceTree = "<group>";
 		};
 		G122 /* Budgets */ = {
@@ -435,6 +458,11 @@
 				A142NLO /* NoteListOrganizer.swift in Sources */,
 				A143NSF /* NoteSearchFilter.swift in Sources */,
 				A144CA /* CalendarAggregator.swift in Sources */,
+				A151NHV /* NotesHomeView.swift in Sources */,
+				A152NLV /* NotesListView.swift in Sources */,
+				A153NRW /* NoteRow.swift in Sources */,
+				A154ANV /* AddNoteView.swift in Sources */,
+				A155ENV /* EditNoteView.swift in Sources */,
 				A127 /* BudgetProgressView.swift in Sources */,
 				A128 /* BudgetCategoryCard.swift in Sources */,
 				A129 /* EditBudgetSheet.swift in Sources */,
