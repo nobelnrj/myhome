@@ -41,6 +41,13 @@
 		A131 /* FilteredExpenseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F131 /* FilteredExpenseListView.swift */; };
 		A132 /* BudgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F132 /* BudgetsView.swift */; };
 		A301 /* SpyCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F301 /* SpyCenter.swift */; };
+		A302 /* NoteModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F302 /* NoteModelTests.swift */; };
+		A303 /* NoteListOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F303 /* NoteListOrderingTests.swift */; };
+		A304 /* NoteSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F304 /* NoteSearchTests.swift */; };
+		A305 /* AutoSaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F305 /* AutoSaveTests.swift */; };
+		A306 /* NotificationSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F306 /* NotificationSchedulerTests.swift */; };
+		A307 /* RecurrenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F307 /* RecurrenceTests.swift */; };
+		A308 /* CalendarAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F308 /* CalendarAggregationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -82,6 +89,13 @@
 		F131 /* FilteredExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredExpenseListView.swift; sourceTree = "<group>"; };
 		F132 /* BudgetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsView.swift; sourceTree = "<group>"; };
 		F301 /* SpyCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyCenter.swift; sourceTree = "<group>"; };
+		F302 /* NoteModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModelTests.swift; sourceTree = "<group>"; };
+		F303 /* NoteListOrderingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListOrderingTests.swift; sourceTree = "<group>"; };
+		F304 /* NoteSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSearchTests.swift; sourceTree = "<group>"; };
+		F305 /* AutoSaveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoSaveTests.swift; sourceTree = "<group>"; };
+		F306 /* NotificationSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSchedulerTests.swift; sourceTree = "<group>"; };
+		F307 /* RecurrenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceTests.swift; sourceTree = "<group>"; };
+		F308 /* CalendarAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAggregationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,6 +242,13 @@
 				F206 /* ExpenseCategoryTests.swift */,
 				F207 /* BudgetModelTests.swift */,
 				F208 /* BudgetCalculatorTests.swift */,
+				F302 /* NoteModelTests.swift */,
+				F303 /* NoteListOrderingTests.swift */,
+				F304 /* NoteSearchTests.swift */,
+				F305 /* AutoSaveTests.swift */,
+				F306 /* NotificationSchedulerTests.swift */,
+				F307 /* RecurrenceTests.swift */,
+				F308 /* CalendarAggregationTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -395,6 +416,13 @@
 				A207 /* BudgetModelTests.swift in Sources */,
 				A208 /* BudgetCalculatorTests.swift in Sources */,
 				A301 /* SpyCenter.swift in Sources */,
+				A302 /* NoteModelTests.swift in Sources */,
+				A303 /* NoteListOrderingTests.swift in Sources */,
+				A304 /* NoteSearchTests.swift in Sources */,
+				A305 /* AutoSaveTests.swift in Sources */,
+				A306 /* NotificationSchedulerTests.swift in Sources */,
+				A307 /* RecurrenceTests.swift in Sources */,
+				A308 /* CalendarAggregationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
