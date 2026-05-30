@@ -35,6 +35,8 @@
 		A119 /* BudgetCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119 /* BudgetCalculator.swift */; };
 		A208 /* BudgetCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208 /* BudgetCalculatorTests.swift */; };
 		A127 /* BudgetProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F127 /* BudgetProgressView.swift */; };
+		A128 /* BudgetCategoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F128 /* BudgetCategoryCard.swift */; };
+		A129 /* EditBudgetSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F129 /* EditBudgetSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +72,8 @@
 		F119 /* BudgetCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculator.swift; sourceTree = "<group>"; };
 		F208 /* BudgetCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculatorTests.swift; sourceTree = "<group>"; };
 		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
+		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
+		F129 /* EditBudgetSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBudgetSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +149,8 @@
 			isa = PBXGroup;
 			children = (
 				F127 /* BudgetProgressView.swift */,
+				F128 /* BudgetCategoryCard.swift */,
+				F129 /* EditBudgetSheet.swift */,
 			);
 			path = Budgets;
 			sourceTree = "<group>";
@@ -349,6 +355,8 @@
 				A126 /* CategoryPickerView.swift in Sources */,
 				A119 /* BudgetCalculator.swift in Sources */,
 				A127 /* BudgetProgressView.swift in Sources */,
+				A128 /* BudgetCategoryCard.swift in Sources */,
+				A129 /* EditBudgetSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
