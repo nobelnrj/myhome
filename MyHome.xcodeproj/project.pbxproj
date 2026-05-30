@@ -24,6 +24,7 @@
 		A123 /* ExpenseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123 /* ExpenseListView.swift */; };
 		A124 /* ExpenseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F124 /* ExpenseRow.swift */; };
 		A125 /* EditExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F125 /* EditExpenseView.swift */; };
+		A126 /* CategoryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F126 /* CategoryPickerView.swift */; };
 		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
 		A202 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F202 /* MigrationTests.swift */; };
 		A203 /* MyHomeV1Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F203 /* MyHomeV1Seed.store */; };
@@ -57,6 +58,7 @@
 		F123 /* ExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseListView.swift; sourceTree = "<group>"; };
 		F124 /* ExpenseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseRow.swift; sourceTree = "<group>"; };
 		F125 /* EditExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseView.swift; sourceTree = "<group>"; };
+		F126 /* CategoryPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPickerView.swift; sourceTree = "<group>"; };
 		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
 		F202 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
 		F203 /* MyHomeV1Seed.store */ = {isa = PBXFileReference; lastKnownFileType = "file"; path = MyHomeV1Seed.store; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				F123 /* ExpenseListView.swift */,
 				F124 /* ExpenseRow.swift */,
 				F125 /* EditExpenseView.swift */,
+				F126 /* CategoryPickerView.swift */,
 			);
 			path = Expenses;
 			sourceTree = "<group>";
@@ -332,6 +335,7 @@
 				A123 /* ExpenseListView.swift in Sources */,
 				A124 /* ExpenseRow.swift in Sources */,
 				A125 /* EditExpenseView.swift in Sources */,
+				A126 /* CategoryPickerView.swift in Sources */,
 				A119 /* BudgetCalculator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
