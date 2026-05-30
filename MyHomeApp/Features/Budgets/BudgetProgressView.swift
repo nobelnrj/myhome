@@ -59,11 +59,11 @@ struct BudgetProgressView: View {
                     HStack {
                         // ₹-remaining or ₹-over-budget label
                         if remaining >= 0 {
-                            Text("₹\(remaining.formattedINR()) remaining")
+                            Text("\(remaining.formattedINR()) remaining")
                                 .font(.subheadline)
                                 .foregroundStyle(remainingTextColor)
                         } else {
-                            Text("₹\((-remaining).formattedINR()) over budget")
+                            Text("\((-remaining).formattedINR()) over budget")
                                 .font(.subheadline)
                                 .foregroundStyle(Color(.systemRed))
                         }

@@ -41,9 +41,10 @@ extension Date {
     /// Example: "May 2026"
     func formattedAsMonthYear() -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
         formatter.locale = .current
         formatter.timeZone = .current
+        // Locale-adaptive ordering (e.g. year-before-month in ja/ko/zh).
+        formatter.setLocalizedDateFormatFromTemplate("MMMMyyyy")
         return formatter.string(from: self)
     }
 }

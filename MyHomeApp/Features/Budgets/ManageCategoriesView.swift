@@ -188,7 +188,9 @@ struct ManageCategoriesView: View {
                 nameError = "A category with that name already exists."
                 return
             }
-            let category = Category(name: trimmed, symbolName: "tag", sortOrder: 1000 + categories.count)
+            // Append after the highest existing sortOrder so deletions don't cause collisions.
+            let nextSortOrder = (all.map(\.sortOrder).max() ?? 999) + 1
+            let category = Category(name: trimmed, symbolName: "tag", sortOrder: nextSortOrder)
             context.insert(category)
             try context.save()  // CR-01: explicit save
             nameError = nil

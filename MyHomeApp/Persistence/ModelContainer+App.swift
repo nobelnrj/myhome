@@ -24,9 +24,11 @@ extension ModelContainer {
             storeURL = groupURL.appendingPathComponent("MyHome.store")
         } else {
             // TODO: migrate to App Group URL when paid account active
-            let supportURL = FileManager.default
+            guard let supportURL = FileManager.default
                 .urls(for: .applicationSupportDirectory, in: .userDomainMask)
-                .first!
+                .first else {
+                throw CocoaError(.fileNoSuchFile)
+            }
             storeURL = supportURL.appendingPathComponent("MyHome.store")
         }
 

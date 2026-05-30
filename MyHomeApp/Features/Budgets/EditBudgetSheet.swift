@@ -96,11 +96,11 @@ struct EditBudgetSheet: View {
                     // CR-01: persist explicitly — configuration write (T-02-10)
                     do {
                         try context.save()
+                        dismiss()
                     } catch {
                         assertionFailure("Failed to remove budget: \(error)")
                         print("Failed to remove budget: \(error)")
                     }
-                    dismiss()
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
