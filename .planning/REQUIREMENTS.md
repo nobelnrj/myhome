@@ -32,7 +32,7 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 - [x] **EXP-05**: User can add, rename, and delete custom categories
 - [x] **EXP-06**: User can attach one tag to an expense; schema supports multiple tags per expense for future UI
 - [x] **EXP-07**: User can set a monthly budget per category (calendar month default)
-- [ ] **EXP-08**: Per-category budget progress is shown as a ₹-remaining + % bar with color shift at 80% and 100%
+- [x] **EXP-08**: Per-category budget progress is shown as a ₹-remaining + % bar with color shift at 80% and 100%
 - [ ] **EXP-09**: Month view shows expenses grouped by category with tap-through to the transaction list
 - [ ] **EXP-10**: User can view a spend-by-category chart for the current month (Swift Charts)
 - [ ] **EXP-11**: User can view a spend-over-time chart across configurable date ranges (Swift Charts)
@@ -180,7 +180,7 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | EXP-05 | Phase 2 | Complete |
 | EXP-06 | Phase 2 | Complete |
 | EXP-07 | Phase 2 | Complete |
-| EXP-08 | Phase 2 | Pending |
+| EXP-08 | Phase 2 | Complete |
 | EXP-09 | Phase 2 | Pending |
 | EXP-10 | Phase 4 | Pending |
 | EXP-11 | Phase 4 | Pending |

@@ -71,7 +71,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 02-04-PLAN.md — Budget viz/edit components: BudgetProgressView, BudgetCategoryCard, EditBudgetSheet, month-year helper (EXP-07/08)
+- [x] 02-04-PLAN.md — Budget viz/edit components: BudgetProgressView, BudgetCategoryCard, EditBudgetSheet, month-year helper (EXP-07/08)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -185,7 +185,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
-| 2. Categories, Tags & Budgets | 3/5 | In Progress|  |
+| 2. Categories, Tags & Budgets | 4/5 | In Progress|  |
 | 3. Notes & Checklists | 0/TBD | Not started | - |
 | 4. Overview & Charts | 0/TBD | Not started | - |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
