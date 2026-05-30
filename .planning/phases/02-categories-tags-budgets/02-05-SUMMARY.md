@@ -76,7 +76,7 @@ metrics:
 
 - Task 1: `xcodebuild test ... -only-testing MyHomeTests/CategoryCRUDTests` → **TEST SUCCEEDED** (all 4 tests pass).
 - Task 2: `xcodebuild test -scheme MyHome -destination 'platform=iOS Simulator,name=iPhone 17'` → **TEST SUCCEEDED** (all 20+ tests pass).
-- Task 3 (human checkpoint): awaiting visual verification on iPhone 17 simulator.
+- Task 3 (human checkpoint): **APPROVED** (2026-05-30) — visual verification on iPhone 17 simulator confirmed tab bar, month pager, Manage Categories CRUD + name uniqueness + delete dialog, color thresholds shifting at 80%/100% (always paired with text), category tap-through, and the Uncategorized row.
 
 ## Deviations from Plan
 
