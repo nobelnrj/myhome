@@ -221,49 +221,96 @@ private struct SelectedDay: Identifiable {
     let date: Date
 }
 
+// MARK: - AgendaReminderItem (live-model wrapper for DayAgendaView)
+
+/// Display model for a single agenda row.
+///
+/// All display properties are computed from the live `ReminderTarget` reference types
+/// (ReminderTarget is defined in ReminderEditView.swift and is module-internal).
+/// Mutations to the Note/NoteBlock propagate back to CalendarView's @Query and cause
+/// DayProgress to recompute live — no detached snapshot involved.
+private struct AgendaReminderItem: Identifiable {
+    let id: UUID
+    let target: ReminderTarget
+    let date: Date
+
+    init(target: ReminderTarget, date: Date) {
+        switch target {
+        case .note(let note): self.id = note.id
+        case .block(let block): self.id = block.id
+        }
+        self.target = target
+        self.date = date
+    }
+
+    var title: String {
+        switch target {
+        case .note(let note):   return note.title.isEmpty ? "Untitled Note" : note.title
+        case .block(let block): return block.text.isEmpty ? "(Checklist item)" : block.text
+        }
+    }
+
+    var isAllDay: Bool {
+        switch target {
+        case .note(let note):   return note.reminderIsAllDay
+        case .block(let block): return block.reminderIsAllDay
+        }
+    }
+
+    var isChecked: Bool {
+        switch target {
+        case .note(let note):
+            let blocks = note.blocks ?? []
+            guard !blocks.isEmpty else { return false }
+            return blocks.allSatisfy { $0.isChecked }
+        case .block(let block):
+            return block.isChecked
+        }
+    }
+}
+
 // MARK: - DayAgendaView
 
 /// Agenda sheet showing all reminders due on a specific day with completion progress.
 ///
 /// Opened when the user taps a day cell in CalendarView.
 /// Progress from CalendarAggregator.progress(for:notes:) — derived live (D3-16).
+///
+/// Completion: each row's checkbox is a Button bound to the live Note/NoteBlock via
+/// ReminderTarget. Tapping toggles the model and saves context (CLAUDE.md: explicit save).
+/// Completing cancels pending notifications (mirrors NotificationActionDelegate.handleComplete).
 struct DayAgendaView: View {
 
     let day: Date
     let notes: [Note]
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
 
     private var progress: DayProgress {
         CalendarAggregator.progress(for: day, notes: notes)
     }
 
-    /// All reminders (note + block level) due on this day.
-    private var remindersOnDay: [ReminderItem] {
-        var items: [ReminderItem] = []
+    /// All reminders (note + block level) due on this day, bound to live model targets.
+    private var remindersOnDay: [AgendaReminderItem] {
+        var items: [AgendaReminderItem] = []
         let cal = Calendar.current
         for note in notes {
             if note.reminderEnabled,
                let date = note.reminderDate,
                cal.isDate(date, inSameDayAs: day) {
-                items.append(ReminderItem(
-                    id: note.id,
-                    title: note.title.isEmpty ? "Untitled Note" : note.title,
-                    date: date,
-                    isAllDay: note.reminderIsAllDay,
-                    isChecked: (note.blocks ?? []).allSatisfy { $0.isChecked } && !(note.blocks ?? []).isEmpty
+                items.append(AgendaReminderItem(
+                    target: ReminderTarget.note(note),
+                    date: date
                 ))
             }
             for block in note.blocks ?? [] {
                 if block.reminderEnabled,
                    let date = block.reminderDate,
                    cal.isDate(date, inSameDayAs: day) {
-                    items.append(ReminderItem(
-                        id: block.id,
-                        title: block.text.isEmpty ? "(Checklist item)" : block.text,
-                        date: date,
-                        isAllDay: block.reminderIsAllDay,
-                        isChecked: block.isChecked
+                    items.append(AgendaReminderItem(
+                        target: ReminderTarget.block(block),
+                        date: date
                     ))
                 }
             }
@@ -282,7 +329,7 @@ struct DayAgendaView: View {
                     )
                 } else {
                     List {
-                        // Progress header
+                        // Progress header — recomputed live from model via `progress`
                         if progress.total > 0 {
                             Section {
                                 HStack {
@@ -299,13 +346,21 @@ struct DayAgendaView: View {
                             }
                         }
 
-                        // Reminder items
+                        // Reminder items with actionable checkboxes
                         Section {
                             ForEach(remindersOnDay) { item in
                                 HStack(spacing: 12) {
-                                    Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(item.isChecked ? .secondary : Color.accentColor)
-                                        .font(.body)
+                                    // Actionable checkbox (>=44pt target) bound to live model
+                                    Button {
+                                        toggleCompletion(item)
+                                    } label: {
+                                        Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle(item.isChecked ? .secondary : Color.accentColor)
+                                            .font(.body)
+                                            .frame(minWidth: 44, minHeight: 44)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel(item.isChecked ? "Mark incomplete" : "Mark complete")
 
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(item.title)
@@ -335,14 +390,80 @@ struct DayAgendaView: View {
             }
         }
     }
-}
 
-// MARK: - ReminderItem (view model for DayAgendaView)
+    // MARK: - Completion toggle (bound to live model)
 
-private struct ReminderItem: Identifiable {
-    let id: UUID
-    let title: String
-    let date: Date
-    let isAllDay: Bool
-    let isChecked: Bool
+    /// Toggles completion on the live Note/NoteBlock and persists.
+    ///
+    /// Mirrors NotificationActionDelegate.handleComplete semantics:
+    /// - BLOCK target: toggle isChecked; when completing, cancel pending alerts + set reminderEnabled = false.
+    ///   When unchecking, only clear isChecked (no auto-reschedule — that is the editor's job).
+    /// - NOTE target WITH blocks: set all blocks to the new checked state; when completing,
+    ///   cancel note-level alerts + set reminderEnabled = false.
+    /// - NOTE target WITHOUT blocks: completing sets reminderEnabled = false + cancels alerts
+    ///   (item drops from pending list). Unchecking only clears reminderEnabled state.
+    ///
+    /// Security: T-03-16 — no note/block body text in logs.
+    private func toggleCompletion(_ item: AgendaReminderItem) {
+        switch item.target {
+
+        case .block(let block):
+            let newChecked = !block.isChecked
+            block.isChecked = newChecked
+            if newChecked {
+                // Cancel pending alerts and disable the reminder (mirrors D3-04)
+                cancelBlockReminder(block)
+            }
+
+        case .note(let note):
+            let blocks = note.blocks ?? []
+            if !blocks.isEmpty {
+                // Determine new state: if all are already checked, uncheck all; else check all
+                let allChecked = blocks.allSatisfy { $0.isChecked }
+                let newChecked = !allChecked
+                for block in blocks {
+                    block.isChecked = newChecked
+                }
+                if newChecked {
+                    cancelNoteReminder(note)
+                }
+            } else {
+                // No blocks: completing just disables the reminder so it leaves the agenda
+                if note.reminderEnabled {
+                    cancelNoteReminder(note)
+                } else {
+                    note.reminderEnabled = true
+                }
+            }
+        }
+
+        // Explicit save (CLAUDE.md: no implicit autosave reliance)
+        try? context.save()
+    }
+
+    /// Cancels pending notifications for a block-level reminder and clears reminderEnabled.
+    private func cancelBlockReminder(_ block: NoteBlock) {
+        let leadCount = block.reminderLeadMinutes > 0 ? 1 : 0
+        var weekdays: [Int] = []
+        if let data = block.reminderRecurrenceData,
+           let rec = try? JSONDecoder().decode(ReminderRecurrence.self, from: data) {
+            weekdays = rec.weekdays ?? []
+        }
+        NotificationScheduler(center: SystemNotificationCenter())
+            .cancel(reminderID: block.id, leadCount: leadCount, weekdays: weekdays)
+        block.reminderEnabled = false
+    }
+
+    /// Cancels pending notifications for a note-level reminder and clears reminderEnabled.
+    private func cancelNoteReminder(_ note: Note) {
+        let leadCount = note.reminderLeadMinutes > 0 ? 1 : 0
+        var weekdays: [Int] = []
+        if let data = note.reminderRecurrenceData,
+           let rec = try? JSONDecoder().decode(ReminderRecurrence.self, from: data) {
+            weekdays = rec.weekdays ?? []
+        }
+        NotificationScheduler(center: SystemNotificationCenter())
+            .cancel(reminderID: note.id, leadCount: leadCount, weekdays: weekdays)
+        note.reminderEnabled = false
+    }
 }
