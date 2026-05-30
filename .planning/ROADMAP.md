@@ -79,15 +79,16 @@ Plans:
 
 ### Phase 3: Notes & Checklists
 
-**Goal**: A user can capture notes with inline checklists, pin the important ones, and find anything by search — the second core household feature, fully decoupled from expenses.
+**Goal**: A user can capture block-style notes (interleaved text paragraphs + inline checklist rows), pin the important ones, and find anything by search — AND turn any note or checklist row into a scheduled reminder (all-day or timed, optionally recurring) with local notifications and a calendar view. Phase 3 is the household's note + reminder hub, fully decoupled from expenses.
 **Depends on**: Phase 1
 **Requirements**: NOT-01, NOT-02, NOT-03, NOT-04, NOT-05, NOT-06
 **Success Criteria** (what must be TRUE):
 
-  1. User can create a note with a title and free-form body, with inline checkbox rows embedded anywhere in the body
-  2. Edits auto-save (debounced ~500ms) with no explicit save button
-  3. The notes list shows pinned notes first, then most-recent-first, and the user can pin/unpin
-  4. User can search across note title and body and see matching results
+  1. User can create a note with a required title and a block body of interleaved text paragraphs and inline checkbox rows; edits auto-save (debounced ~500ms) with no save button
+  2. The notes list shows a Daily Routine section (daily-recurring notes) first, then manually-pinned notes, then the rest most-recent-first; user can pin/unpin and search title + body
+  3. User can attach a reminder to a whole note or any checkbox row — all-day or timed, with optional advance lead-time — and set recurrence (none / daily / weekly-with-weekdays / monthly / yearly) with an end rule (never / on date / after N)
+  4. Reminders fire local notifications (permission requested on first reminder) that deep-link into the note and offer Complete/Snooze actions
+  5. A Calendar view inside the Notes tab shows per-day reminder counts; tapping a day opens that day's reminders with a completion progress
 
 **Plans**: TBD
 **UI hint**: yes
