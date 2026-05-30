@@ -58,16 +58,16 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 ### Notes
 
-- [ ] **NOT-01**: User can create a note with a required title and a block body of interleaved text paragraphs and inline checkbox rows
-- [ ] **NOT-02**: User can embed inline checklist items (checkbox rows) anywhere in a note's body; checked rows sink within their contiguous checklist run
-- [ ] **NOT-03**: Notes list shows a Daily Routine section (daily-recurring notes) first, then manually-pinned notes, then the rest most-recent-first
-- [ ] **NOT-04**: User can pin and unpin notes
-- [ ] **NOT-05**: Notes auto-save while editing (debounced ~500ms); no explicit save button
-- [ ] **NOT-06**: User can search across note title and body via `.searchable`
-- [ ] **NOT-07**: User can attach a reminder to a whole note or any checkbox row — all-day or timed, with optional advance lead-time
-- [ ] **NOT-08**: A reminder can recur (none / daily / weekly-with-weekdays / monthly / yearly) with an end rule (never / on date / after N occurrences)
-- [ ] **NOT-09**: Reminders fire local notifications (permission requested on first reminder) that deep-link into the note and offer Complete / Snooze actions
-- [ ] **NOT-10**: A Calendar view inside the Notes tab shows per-day reminder counts; tapping a day opens that day's reminders with a completion progress
+- [x] **NOT-01**: User can create a note with a required title and a block body of interleaved text paragraphs and inline checkbox rows
+- [x] **NOT-02**: User can embed inline checklist items (checkbox rows) anywhere in a note's body; checked rows sink within their contiguous checklist run
+- [x] **NOT-03**: Notes list shows a Daily Routine section (daily-recurring notes) first, then manually-pinned notes, then the rest most-recent-first
+- [x] **NOT-04**: User can pin and unpin notes
+- [x] **NOT-05**: Notes auto-save while editing (debounced ~500ms); no explicit save button
+- [x] **NOT-06**: User can search across note title and body via `.searchable`
+- [x] **NOT-07**: User can attach a reminder to a whole note or any checkbox row — all-day or timed, with optional advance lead-time
+- [x] **NOT-08**: A reminder can recur (none / daily / weekly-with-weekdays / monthly / yearly) with an end rule (never / on date / after N occurrences)
+- [x] **NOT-09**: Reminders fire local notifications (permission requested on first reminder) that deep-link into the note and offer Complete / Snooze actions
+- [x] **NOT-10**: A Calendar view inside the Notes tab shows per-day reminder counts; tapping a day opens that day's reminders with a completion progress
 
 ### Overview
 
@@ -204,16 +204,16 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | ING-14 | Phase 7 | Pending |
 | ING-15 | Phase 7 | Pending |
 | ING-16 | Phase 6 | Pending |
-| NOT-01 | Phase 3 | Pending |
-| NOT-02 | Phase 3 | Pending |
-| NOT-03 | Phase 3 | Pending |
-| NOT-04 | Phase 3 | Pending |
-| NOT-05 | Phase 3 | Pending |
-| NOT-06 | Phase 3 | Pending |
-| NOT-07 | Phase 3 | Pending |
-| NOT-08 | Phase 3 | Pending |
-| NOT-09 | Phase 3 | Pending |
-| NOT-10 | Phase 3 | Pending |
+| NOT-01 | Phase 3 | Complete |
+| NOT-02 | Phase 3 | Complete |
+| NOT-03 | Phase 3 | Complete |
+| NOT-04 | Phase 3 | Complete |
+| NOT-05 | Phase 3 | Complete |
+| NOT-06 | Phase 3 | Complete |
+| NOT-07 | Phase 3 | Complete |
+| NOT-08 | Phase 3 | Complete |
+| NOT-09 | Phase 3 | Complete |
+| NOT-10 | Phase 3 | Complete |
 | OVR-01 | Phase 4 | Pending |
 | OVR-02 | Phase 4 | Pending |
 | OVR-03 | Phase 4 | Pending |
