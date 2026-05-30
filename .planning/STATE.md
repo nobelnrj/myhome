@@ -107,6 +107,6 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 
 ## Session Continuity
 
-Last session: 2026-05-30T20:00:00Z
-Stopped at: Phase 03 Plan 05 — COMPLETE (f30b75a, e6f098a, 392fd19, a83bcf5); human UAT approved; next: 03-06-PLAN.md (reminders hub + calendar + notifications)
+Last session: 2026-05-31T00:00:00Z
+Stopped at: Phase 03 Plan 06 — Tasks 1+2 COMMITTED (8a3494a, 06ae800); awaiting manual UAT at Task 3 checkpoint (permission, delivery, Complete/Snooze, deep-link, calendar, reschedule-on-edit on iPhone 17)
 Resume file: None
