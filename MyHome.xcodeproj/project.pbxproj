@@ -14,6 +14,10 @@
 		A111 /* SchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = F111 /* SchemaV1.swift */; };
 		A112 /* MigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F112 /* MigrationPlan.swift */; };
 		A117 /* SchemaV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F117 /* SchemaV2.swift */; };
+		A119V3 /* SchemaV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119V3 /* SchemaV3.swift */; };
+		A120RV /* ReminderValueTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F120RV /* ReminderValueTypes.swift */; };
+		A133N /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = F133N /* Note.swift */; };
+		A134NB /* NoteBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = F134NB /* NoteBlock.swift */; };
 		A113 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = F113 /* Expense.swift */; };
 		A118 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F118 /* Category.swift */; };
 		A114 /* ModelContainer+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = F114 /* ModelContainer+App.swift */; };
@@ -63,6 +67,10 @@
 		F111 /* SchemaV1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV1.swift; sourceTree = "<group>"; };
 		F112 /* MigrationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationPlan.swift; sourceTree = "<group>"; };
 		F117 /* SchemaV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV2.swift; sourceTree = "<group>"; };
+		F119V3 /* SchemaV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV3.swift; sourceTree = "<group>"; };
+		F120RV /* ReminderValueTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderValueTypes.swift; sourceTree = "<group>"; };
+		F133N /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
+		F134NB /* NoteBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBlock.swift; sourceTree = "<group>"; };
 		F113 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
 		F118 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		F114 /* ModelContainer+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelContainer+App.swift"; sourceTree = "<group>"; };
@@ -221,6 +229,7 @@
 				F111 /* SchemaV1.swift */,
 				F112 /* MigrationPlan.swift */,
 				F117 /* SchemaV2.swift */,
+				F119V3 /* SchemaV3.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -230,6 +239,9 @@
 			children = (
 				F113 /* Expense.swift */,
 				F118 /* Category.swift */,
+				F120RV /* ReminderValueTypes.swift */,
+				F133N /* Note.swift */,
+				F134NB /* NoteBlock.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -387,6 +399,10 @@
 				A111 /* SchemaV1.swift in Sources */,
 				A112 /* MigrationPlan.swift in Sources */,
 				A117 /* SchemaV2.swift in Sources */,
+				A119V3 /* SchemaV3.swift in Sources */,
+				A120RV /* ReminderValueTypes.swift in Sources */,
+				A133N /* Note.swift in Sources */,
+				A134NB /* NoteBlock.swift in Sources */,
 				A113 /* Expense.swift in Sources */,
 				A118 /* Category.swift in Sources */,
 				A114 /* ModelContainer+App.swift in Sources */,
