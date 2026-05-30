@@ -8,9 +8,27 @@ import SwiftData
 /// NoteBlock.text; per Open Question 3 in RESEARCH, block-text search via #Predicate is not
 /// feasible in SwiftData 1.x without relationship joins — in-memory filter is correct).
 ///
+/// `deepLinkNoteID`: injected by NotesHomeView when a notification deep-link arrives.
+/// When non-nil the view looks up the matching Note and sets `editingNote` to open it
+/// via the existing `.sheet(item: $editingNote)`. Resets `deepLinkNoteID` to nil after
+/// consuming it. Single-sheet discipline preserved — no nested sheets added (03-05).
+///
 /// Reads via @Query (sort: modifiedAt, order: .reverse); writes via modelContext (no repository).
-/// Security: T-03-08 (in-memory filter), T-03-11/12 (explicit save + no content in logs).
+/// Security: T-03-08 (in-memory filter), T-03-11/12 (explicit save + no content in logs),
+///           T-03-14 (deep-link maps deterministic UUID → correct note only).
 struct NotesListView: View {
+
+    // MARK: - Deep-link
+
+    @Binding var deepLinkNoteID: UUID?
+
+    // MARK: - Init
+
+    /// Default constant binding keeps previews and existing callers that omit
+    /// the deep-link param compiling unchanged.
+    init(deepLinkNoteID: Binding<UUID?> = .constant(nil)) {
+        self._deepLinkNoteID = deepLinkNoteID
+    }
 
     @Query(sort: \Note.modifiedAt, order: .reverse) private var notes: [Note]
     @Environment(\.modelContext) private var context
@@ -65,6 +83,15 @@ struct NotesListView: View {
         }
         .sheet(item: $editingNote) { note in
             EditNoteView(note: note)
+        }
+        // Deep-link: when a noteID arrives, locate the matching Note and open its editor.
+        // Reuses the existing editingNote sheet — no nested sheet (03-05 single-sheet rule).
+        .onChange(of: deepLinkNoteID) { _, newID in
+            guard let id = newID else { return }
+            if let match = notes.first(where: { $0.id == id }) {
+                editingNote = match
+            }
+            deepLinkNoteID = nil
         }
     }
 
