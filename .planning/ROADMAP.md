@@ -90,13 +90,28 @@ Plans:
   4. Reminders fire local notifications (permission requested on first reminder) that deep-link into the note and offer Complete/Snooze actions
   5. A Calendar view inside the Notes tab shows per-day reminder counts; tapping a day opens that day's reminders with a completion progress
 
-**Plans**: TBD
+**Plans**: 6 plans
 **UI hint**: yes
 
 Plans:
 
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+**Wave 0** — failing-test scaffold (Nyquist gate)
+- [ ] 03-01-PLAN.md — Wave 0 test infra: all Note/scheduler/recurrence/calendar test stubs + NotificationCenterPort/SpyCenter seam + bundled MyHomeV2Seed.store (NOT-01..06)
+
+**Wave 1** — data layer
+- [ ] 03-02-PLAN.md — SchemaV3 + Note/NoteBlock @Models + reminder value types + v2ToV3 migration + typealias/container flip (NOT-01/02)
+
+**Wave 2** — notification core
+- [ ] 03-03-PLAN.md — NotificationScheduler (pure buildRequests) + NotificationCenterPort + recurrence/after-N/64-cap (TDD; SC-R1..R3)
+
+**Wave 3** — pure UI helpers
+- [ ] 03-04-PLAN.md — NoteListOrganizer (Daily Routine→Pinned→Other) + NoteSearchFilter + CalendarAggregator (TDD; NOT-03/04/06, SC-R4/R5)
+
+**Wave 4** — note-keeper UI
+- [ ] 03-05-PLAN.md — Notes tab + sectioned searchable list + block editor + debounced auto-save + discard-on-empty-title (NOT-01..06; UAT checkpoint)
+
+**Wave 5** — reminders hub + integration
+- [ ] 03-06-PLAN.md — ReminderEditView + LazyVGrid Calendar + live notifications (permission/Complete/Snooze/deep-link/reschedule) (SC-R1..R5; UAT checkpoint)
 
 ### Phase 4: Overview & Charts
 
@@ -187,7 +202,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
-| 3. Notes & Checklists | 0/TBD | Not started | - |
+| 3. Notes & Checklists | 0/6 | Not started | - |
 | 4. Overview & Charts | 0/TBD | Not started | - |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
 | 6. Gmail Sign-In & Client | 0/TBD | Not started | - |
