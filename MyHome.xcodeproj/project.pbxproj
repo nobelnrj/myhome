@@ -34,6 +34,7 @@
 		A207 /* BudgetModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F207 /* BudgetModelTests.swift */; };
 		A119 /* BudgetCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119 /* BudgetCalculator.swift */; };
 		A208 /* BudgetCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208 /* BudgetCalculatorTests.swift */; };
+		A127 /* BudgetProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F127 /* BudgetProgressView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,7 @@
 		F207 /* BudgetModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetModelTests.swift; sourceTree = "<group>"; };
 		F119 /* BudgetCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculator.swift; sourceTree = "<group>"; };
 		F208 /* BudgetCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculatorTests.swift; sourceTree = "<group>"; };
+		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,8 +136,17 @@
 			isa = PBXGroup;
 			children = (
 				G121 /* Expenses */,
+				G122 /* Budgets */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		G122 /* Budgets */ = {
+			isa = PBXGroup;
+			children = (
+				F127 /* BudgetProgressView.swift */,
+			);
+			path = Budgets;
 			sourceTree = "<group>";
 		};
 		G121 /* Expenses */ = {
@@ -337,6 +348,7 @@
 				A125 /* EditExpenseView.swift in Sources */,
 				A126 /* CategoryPickerView.swift in Sources */,
 				A119 /* BudgetCalculator.swift in Sources */,
+				A127 /* BudgetProgressView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

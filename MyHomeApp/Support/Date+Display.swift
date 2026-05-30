@@ -34,4 +34,16 @@ extension Date {
             return formatter.string(from: self)
         }
     }
+
+    /// Formats this date as "May 2026" for the Budgets tab month pager.
+    ///
+    /// Uses the user's current locale and timezone (D-02: store UTC, display local).
+    /// Example: "May 2026"
+    func formattedAsMonthYear() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        formatter.locale = .current
+        formatter.timeZone = .current
+        return formatter.string(from: self)
+    }
 }
