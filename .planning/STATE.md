@@ -107,6 +107,6 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 
 ## Session Continuity
 
-Last session: 2026-05-31T00:00:00Z
-Stopped at: Phase 03 Plan 06 — Tasks 1+2 COMMITTED (8a3494a, 06ae800); awaiting manual UAT at Task 3 checkpoint (permission, delivery, Complete/Snooze, deep-link, calendar, reschedule-on-edit on iPhone 17)
+Last session: 2026-05-31T00:35:00Z
+Stopped at: Phase 03 Plan 06 — UAT Bug Fixes COMMITTED (fa24d87, 1c32d91): (A) notifications now carry categoryIdentifier + userInfo so Complete/Snooze buttons appear; (B) kOpenNoteNotification observed in RootView; tab switches to Notes and EditNoteView opens for the deep-linked note. Still awaiting manual UAT at Task 3 checkpoint (permission, delivery, Complete/Snooze, deep-link, calendar, reschedule-on-edit on iPhone 17).
 Resume file: None
