@@ -61,6 +61,10 @@ struct EditNoteView: View {
     // Debouncer for auto-save (isolated so AutoSaveTests can verify directly — NOT-05)
     @State private var debouncer = Debouncer(delay: 0.5)
 
+    // 03-06: Reminder sheet state
+    @State private var showNoteReminder: Bool = false
+    @State private var reminderBlock: NoteBlock? = nil   // nil = note-level, non-nil = block-level
+
     // MARK: - Body
 
     var body: some View {
@@ -98,8 +102,16 @@ struct EditNoteView: View {
                     }
                     .accessibilityLabel("Delete note")
                 }
-                // 03-06 HOOK: "Set Reminder" toolbar button goes here
-                // ToolbarItem(placement: .primaryAction) { ... }
+                // 03-06: Note-level "Set Reminder" toolbar button
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        reminderBlock = nil
+                        showNoteReminder = true
+                    } label: {
+                        Image(systemName: note.reminderEnabled ? "bell.fill" : "bell")
+                    }
+                    .accessibilityLabel(note.reminderEnabled ? "Edit reminder" : "Set reminder")
+                }
             }
             .confirmationDialog(
                 "Delete Note?",
@@ -115,6 +127,14 @@ struct EditNoteView: View {
             }
             .alert("Couldn't save note. Please try again.", isPresented: $saveError) {
                 Button("OK", role: .cancel) {}
+            }
+            // 03-06: Reminder edit sheet — single sheet per parent-coordinated handoff discipline
+            .sheet(isPresented: $showNoteReminder) {
+                if let block = reminderBlock {
+                    ReminderEditView(target: .block(block))
+                } else {
+                    ReminderEditView(target: .note(note))
+                }
             }
         }
         .onDisappear {
@@ -186,8 +206,25 @@ struct EditNoteView: View {
             .strikethrough(block.isChecked)
             .opacity(block.isChecked ? 0.6 : 1.0)
             .lineLimit(1...10)
-            // 03-06 HOOK: per-block "Set Reminder" context menu goes here
-            // .contextMenu { ... }
+            // 03-06: per-block "Set Reminder" context menu
+            .contextMenu {
+                Button {
+                    reminderBlock = block
+                    showNoteReminder = true
+                } label: {
+                    Label(
+                        block.reminderEnabled ? "Edit Reminder" : "Set Reminder",
+                        systemImage: block.reminderEnabled ? "bell.fill" : "bell"
+                    )
+                }
+                if block.reminderEnabled {
+                    Button(role: .destructive) {
+                        cancelBlockReminder(block)
+                    } label: {
+                        Label("Remove Reminder", systemImage: "bell.slash")
+                    }
+                }
+            }
         }
         .padding(.vertical, 4)
     }
@@ -297,8 +334,30 @@ struct EditNoteView: View {
 
     private func toggleCheck(_ block: NoteBlock) {
         block.isChecked.toggle()
-        // 03-06 HOOK: when isChecked becomes true, cancel future reminder for this block
-        // NotificationScheduler.cancel(for: block, center: notificationCenter)
+        // 03-06: when a row is checked, cancel its future reminder/advance alerts (D3-04)
+        if block.isChecked && block.reminderEnabled {
+            cancelBlockReminder(block)
+        }
+        markDirty()
+    }
+
+    /// Cancels all pending notifications for a block-level reminder and clears the model fields.
+    private func cancelBlockReminder(_ block: NoteBlock) {
+        let leadCount = block.reminderLeadMinutes > 0 ? 1 : 0
+        var weekdays: [Int] = []
+        if let data = block.reminderRecurrenceData,
+           let rec = try? JSONDecoder().decode(ReminderRecurrence.self, from: data) {
+            weekdays = rec.weekdays ?? []
+        }
+        let scheduler = NotificationScheduler(center: SystemNotificationCenter())
+        scheduler.cancel(reminderID: block.id, leadCount: leadCount, weekdays: weekdays)
+
+        block.reminderEnabled = false
+        block.reminderDate = nil
+        block.reminderIsAllDay = false
+        block.reminderRecurrenceData = nil
+        block.reminderEndRuleData = nil
+        block.reminderLeadMinutes = 0
         markDirty()
     }
 

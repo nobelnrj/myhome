@@ -54,6 +54,9 @@
 		A153NRW /* NoteRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F153NRW /* NoteRow.swift */; };
 		A154ANV /* AddNoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F154ANV /* AddNoteView.swift */; };
 		A155ENV /* EditNoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F155ENV /* EditNoteView.swift */; };
+		A156REV /* ReminderEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F156REV /* ReminderEditView.swift */; };
+		A157CV /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F157CV /* CalendarView.swift */; };
+		A145NA /* NotificationActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F145NA /* NotificationActions.swift */; };
 		A301 /* SpyCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F301 /* SpyCenter.swift */; };
 		A302 /* NoteModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F302 /* NoteModelTests.swift */; };
 		A303 /* NoteListOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F303 /* NoteListOrderingTests.swift */; };
@@ -110,6 +113,9 @@
 		F153NRW /* NoteRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRow.swift; sourceTree = "<group>"; };
 		F154ANV /* AddNoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNoteView.swift; sourceTree = "<group>"; };
 		F155ENV /* EditNoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNoteView.swift; sourceTree = "<group>"; };
+		F156REV /* ReminderEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEditView.swift; sourceTree = "<group>"; };
+		F157CV /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		F145NA /* NotificationActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationActions.swift; sourceTree = "<group>"; };
 		F208 /* BudgetCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculatorTests.swift; sourceTree = "<group>"; };
 		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
 		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
@@ -206,6 +212,8 @@
 				F153NRW /* NoteRow.swift */,
 				F154ANV /* AddNoteView.swift */,
 				F155ENV /* EditNoteView.swift */,
+				F156REV /* ReminderEditView.swift */,
+				F157CV /* CalendarView.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -257,6 +265,7 @@
 				F142NLO /* NoteListOrganizer.swift */,
 				F143NSF /* NoteSearchFilter.swift */,
 				F144CA /* CalendarAggregator.swift */,
+				F145NA /* NotificationActions.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -463,6 +472,9 @@
 				A153NRW /* NoteRow.swift in Sources */,
 				A154ANV /* AddNoteView.swift in Sources */,
 				A155ENV /* EditNoteView.swift in Sources */,
+				A156REV /* ReminderEditView.swift in Sources */,
+				A157CV /* CalendarView.swift in Sources */,
+				A145NA /* NotificationActions.swift in Sources */,
 				A127 /* BudgetProgressView.swift in Sources */,
 				A128 /* BudgetCategoryCard.swift in Sources */,
 				A129 /* EditBudgetSheet.swift in Sources */,
