@@ -37,6 +37,9 @@
 		A127 /* BudgetProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F127 /* BudgetProgressView.swift */; };
 		A128 /* BudgetCategoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F128 /* BudgetCategoryCard.swift */; };
 		A129 /* EditBudgetSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F129 /* EditBudgetSheet.swift */; };
+		A130 /* ManageCategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F130 /* ManageCategoriesView.swift */; };
+		A131 /* FilteredExpenseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F131 /* FilteredExpenseListView.swift */; };
+		A132 /* BudgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F132 /* BudgetsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,6 +77,9 @@
 		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
 		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
 		F129 /* EditBudgetSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBudgetSheet.swift; sourceTree = "<group>"; };
+		F130 /* ManageCategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageCategoriesView.swift; sourceTree = "<group>"; };
+		F131 /* FilteredExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredExpenseListView.swift; sourceTree = "<group>"; };
+		F132 /* BudgetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +157,9 @@
 				F127 /* BudgetProgressView.swift */,
 				F128 /* BudgetCategoryCard.swift */,
 				F129 /* EditBudgetSheet.swift */,
+				F130 /* ManageCategoriesView.swift */,
+				F131 /* FilteredExpenseListView.swift */,
+				F132 /* BudgetsView.swift */,
 			);
 			path = Budgets;
 			sourceTree = "<group>";
@@ -357,6 +366,9 @@
 				A127 /* BudgetProgressView.swift in Sources */,
 				A128 /* BudgetCategoryCard.swift in Sources */,
 				A129 /* EditBudgetSheet.swift in Sources */,
+				A130 /* ManageCategoriesView.swift in Sources */,
+				A131 /* FilteredExpenseListView.swift in Sources */,
+				A132 /* BudgetsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
