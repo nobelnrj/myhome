@@ -40,6 +40,7 @@
 		A130 /* ManageCategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F130 /* ManageCategoriesView.swift */; };
 		A131 /* FilteredExpenseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F131 /* FilteredExpenseListView.swift */; };
 		A132 /* BudgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F132 /* BudgetsView.swift */; };
+		A301 /* SpyCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F301 /* SpyCenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,6 +81,7 @@
 		F130 /* ManageCategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageCategoriesView.swift; sourceTree = "<group>"; };
 		F131 /* FilteredExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredExpenseListView.swift; sourceTree = "<group>"; };
 		F132 /* BudgetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsView.swift; sourceTree = "<group>"; };
+		F301 /* SpyCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyCenter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -227,8 +229,17 @@
 				F207 /* BudgetModelTests.swift */,
 				F208 /* BudgetCalculatorTests.swift */,
 				G210 /* Resources */,
+				G220 /* Support */,
 			);
 			path = MyHomeTests;
+			sourceTree = "<group>";
+		};
+		G220 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				F301 /* SpyCenter.swift */,
+			);
+			path = Support;
 			sourceTree = "<group>";
 		};
 		G210 /* Resources */ = {
@@ -383,6 +394,7 @@
 				A206 /* ExpenseCategoryTests.swift in Sources */,
 				A207 /* BudgetModelTests.swift in Sources */,
 				A208 /* BudgetCalculatorTests.swift in Sources */,
+				A301 /* SpyCenter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
