@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Manual Expense Spine** - Lock one-way-door IDs, CloudKit-ready SwiftData schema, and manual expense CRUD end-to-end (completed 2026-05-29)
 - [x] **Phase 2: Categories, Tags & Budgets** - Close the manual-expense loop with categories, single-tag, per-category budgets, and month view (completed 2026-05-30)
-- [ ] **Phase 3: Notes & Checklists** - Independent note keeper with inline checklists, pin, search, and auto-save
+- [x] **Phase 3: Notes & Checklists** - Independent note keeper with inline checklists, pin, search, and auto-save (completed 2026-05-30)
 - [ ] **Phase 4: Overview & Charts** - Motivating home surface: spend-vs-budget, top categories, pinned note, and Swift Charts
 - [ ] **Phase 5: Face ID Gate & Settings** - Biometric app lock with passcode fallback and a Settings shell for managing the household
 - [ ] **Phase 6: Gmail Sign-In & Client** - Prove Gmail OAuth + readonly fetch in isolation with secure Keychain token storage
@@ -111,7 +111,7 @@ Plans:
 - [x] 03-05-PLAN.md — Notes tab + sectioned searchable list + block editor + debounced auto-save + discard-on-empty-title (NOT-01..06; UAT checkpoint)
 
 **Wave 5** — reminders hub + integration
-- [ ] 03-06-PLAN.md — ReminderEditView + LazyVGrid Calendar + live notifications (permission/Complete/Snooze/deep-link/reschedule) (SC-R1..R5; UAT checkpoint)
+- [x] 03-06-PLAN.md — ReminderEditView + LazyVGrid Calendar + live notifications (permission/Complete/Snooze/deep-link/reschedule) (SC-R1..R5; UAT checkpoint)
 
 ### Phase 4: Overview & Charts
 
@@ -202,7 +202,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
-| 3. Notes & Checklists | 5/6 | In Progress|  |
+| 3. Notes & Checklists | 6/6 | Complete   | 2026-05-30 |
 | 4. Overview & Charts | 0/TBD | Not started | - |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
 | 6. Gmail Sign-In & Client | 0/TBD | Not started | - |

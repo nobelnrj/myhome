@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-05-30T20:00:00Z"
+status: verifying
+last_updated: "2026-05-30T19:26:10.465Z"
 last_activity: 2026-05-30
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 15
-  completed_plans: 14
-  percent: 31
+  completed_plans: 15
+  percent: 43
 ---
 
 # Project State
@@ -26,10 +26,10 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 
 Phase: 03 (notes-checklists) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-30
 
-Progress: [█████████░] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [█████████░] 93%
 | Phase 03-notes-checklists P01 | 45 | 3 tasks | 14 files |
 | Phase 03-notes-checklists P04 | 20 | 2 tasks | 7 files |
 | Phase 03-notes-checklists P05 | 90 | 3 tasks + 1 fix | 8 files |
+| Phase 03-notes-checklists P06 | multi-session | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Seed store generated via macOS SwiftData script (xcrun -sdk macosx swift) — deterministic, reproducible, no simulator required
 - [Phase ?]: Required companion to container flip
 - [Phase ?]: AppMigrationPlan chains to V3 now
+- [Phase ?]: 03-06: categoryIdentifier must be stamped in NotificationScheduler.makeRequest — iOS drops actions if absent
+- [Phase ?]: 03-06: Deep-link via kOpenNoteNotification + RootView @State tab-selection Binding — no environment key needed
+- [Phase ?]: 03-06: Calendar day-agenda binds live to Note/NoteBlock @Model via AgendaReminderItem — never snapshot for completion-state UI
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 
 ## Session Continuity
 
-Last session: 2026-05-31T00:50:00Z
+Last session: 2026-05-30T19:25:22.923Z
 Stopped at: Phase 03 Plan 06 — UAT Bug Fix COMMITTED (8583ecf): calendar day-agenda checkboxes are now actionable Buttons bound to live Note/NoteBlock via AgendaReminderItem/ReminderTarget; completing cancels pending notifications (mirrors handleComplete); DayProgress recomputes live. Still awaiting manual UAT at Task 3 checkpoint (permission, delivery, Complete/Snooze, deep-link, calendar, reschedule-on-edit on iPhone 17).
 Resume file: None
