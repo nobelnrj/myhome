@@ -41,22 +41,22 @@ created: 2026-05-30
 
 | Req / SC | Plan | Wave | Observable signal (proof) | Test Type | Automated Command / Manual step | File Exists | Status |
 |----------|------|------|---------------------------|-----------|----------------------------------|-------------|--------|
-| NOT-01 | TBD | — | Note with title + blocks persists & refetches with title intact | unit (L1) | `-only-testing:MyHomeTests/NoteModelTests/noteWithTitlePersists` | ❌ W0 | ⬜ pending |
-| NOT-02 | TBD | — | Interleaved text + checkbox blocks persist preserving `order` | unit (L1) | `NoteModelTests/blockListPreservesOrder` | ❌ W0 | ⬜ pending |
-| NOT-03 | TBD | — | Ordering = Daily Routine → Pinned → Other(recent-first) | unit+manual (L1+L3) | `NoteListOrderingTests/sectionOrdering`; UAT confirm section order | ❌ W0 | ⬜ pending |
-| NOT-04 | TBD | — | Toggling `isPinned` moves note to Pinned section | unit+manual (L1+L3) | `NoteListOrderingTests/pinMovesToPinnedSection`; UAT tap pin | ❌ W0 | ⬜ pending |
-| NOT-05 | TBD | — | Debounced auto-save ~500ms; no save button; reopen shows edits | unit+manual (L1+L3) | `AutoSaveTests/debounceCommitsAfterQuiet`; UAT edit→kill→reopen | ❌ W0 | ⬜ pending |
-| NOT-06 | TBD | — | Search predicate matches title + block text; non-matches excluded | unit+manual (L1+L3) | `NoteSearchTests/matchesTitleAndBlockText`; UAT type query | ❌ W0 | ⬜ pending |
-| SC-R1 (reminders) | TBD | — | Reminder fields persist on Note AND NoteBlock; all-day vs timed honored; lead-time adds requests | unit (L1) | `NotificationSchedulerTests/buildRequestsLeadAlerts`, `ReminderModelTests/reminderOnNoteAndBlock` | ❌ W0 | ⬜ pending |
-| SC-R2 (recurrence) | TBD | — | Daily/Weekly(weekdays)/Monthly/Yearly triggers correct; "after N" stops; end-on-date stops | unit (L1) | `NotificationSchedulerTests/weeklyMultiWeekday`, `RecurrenceTests/afterNStops`, `RecurrenceTests/endOnDateStops` | ❌ W0 | ⬜ pending |
-| SC-R3 (notifications) | TBD | — | Scheduler emits correct requests/identifiers (L1); permission prompt on first reminder, banner fires, Complete/Snooze, deep-link (L3) | unit+manual (L1+L3) | `NotificationSchedulerTests/*`; **UAT mandatory** (see checklist) | ❌ W0 | ⬜ pending |
-| SC-R4 (calendar) | TBD | — | Per-day count aggregation + tapped-day agenda + completion math correct | unit+manual (L1+L3) | `CalendarAggregationTests/perDayCountsAndProgress`; UAT calendar grid+tap | ❌ W0 | ⬜ pending |
-| SC-R5 (Daily Routine + auto-pin) | TBD | — | Daily-recurring notes in Daily Routine; yearly reminder shows pre-checked pin toggle | unit+manual (L1+L3) | `NoteListOrderingTests/dailyRoutineFilter`; UAT toggle | ❌ W0 | ⬜ pending |
-| Migration | TBD | — | V2→V3 store opens under `AppMigrationPlan`; Expense rows survive | migration (L2) | `MigrationTests/v2StoreMigratesToV3` | ❌ W0 | ⬜ pending |
-| 64-cap (D3-15) | TBD | — | `pendingCount()` ≤ 64 under multi-weekday-weekly + after-N load | unit (L1) | `NotificationSchedulerTests/pendingCountUnderCap` | ❌ W0 | ⬜ pending |
+| NOT-01 | 03-02 (impl), 03-05 (UI) | 1, 4 | Note with title + blocks persists & refetches with title intact | unit (L1) | `-only-testing:MyHomeTests/NoteModelTests/noteWithTitlePersists` | ❌ W0 | ⬜ pending |
+| NOT-02 | 03-02 (impl), 03-05 (UI) | 1, 4 | Interleaved text + checkbox blocks persist preserving `order` | unit (L1) | `NoteModelTests/blockListPreservesOrder` | ❌ W0 | ⬜ pending |
+| NOT-03 | 03-04 (logic), 03-05 (UI) | 3, 4 | Ordering = Daily Routine → Pinned → Other(recent-first) | unit+manual (L1+L3) | `NoteListOrderingTests/sectionOrdering`; UAT confirm section order | ❌ W0 | ⬜ pending |
+| NOT-04 | 03-04 (logic), 03-05 (UI) | 3, 4 | Toggling `isPinned` moves note to Pinned section | unit+manual (L1+L3) | `NoteListOrderingTests/pinMovesToPinnedSection`; UAT tap pin | ❌ W0 | ⬜ pending |
+| NOT-05 | 03-05 | 4 | Debounced auto-save ~500ms; no save button; reopen shows edits | unit+manual (L1+L3) | `AutoSaveTests/debounceCommitsAfterQuiet`; UAT edit→kill→reopen | ❌ W0 | ⬜ pending |
+| NOT-06 | 03-04 (filter), 03-05 (UI) | 3, 4 | Search predicate matches title + block text; non-matches excluded | unit+manual (L1+L3) | `NoteSearchTests/matchesTitleAndBlockText`; UAT type query | ❌ W0 | ⬜ pending |
+| NOT-07 (reminders) | 03-02 (fields), 03-03 (scheduler), 03-06 (UI) | 1, 2, 5 | Reminder fields persist on Note AND NoteBlock; all-day vs timed honored; lead-time adds requests | unit (L1) | `NotificationSchedulerTests/buildRequestsLeadAlerts`, `ReminderModelTests/reminderOnNoteAndBlock` | ❌ W0 | ⬜ pending |
+| NOT-08 (recurrence) | 03-02 (value types), 03-03 (scheduler) | 1, 2 | Daily/Weekly(weekdays)/Monthly/Yearly triggers correct; "after N" stops; end-on-date stops | unit (L1) | `NotificationSchedulerTests/weeklyMultiWeekday`, `RecurrenceTests/afterNStops`, `RecurrenceTests/endOnDateStops` | ❌ W0 | ⬜ pending |
+| NOT-09 (notifications) | 03-03 (scheduler L1), 03-06 (live L3) | 2, 5 | Scheduler emits correct requests/identifiers (L1); permission prompt on first reminder, banner fires, Complete/Snooze, deep-link (L3) | unit+manual (L1+L3) | `NotificationSchedulerTests/*`; **UAT mandatory** (see checklist) | ❌ W0 | ⬜ pending |
+| NOT-10 (calendar) | 03-04 (math), 03-06 (grid) | 3, 5 | Per-day count aggregation + tapped-day agenda + completion math correct | unit+manual (L1+L3) | `CalendarAggregationTests/perDayCountsAndProgress`; UAT calendar grid+tap | ❌ W0 | ⬜ pending |
+| NOT-03 (Daily Routine + auto-pin) | 03-04 (filter), 03-06 (toggle) | 3, 5 | Daily-recurring notes in Daily Routine; yearly reminder shows pre-checked pin toggle | unit+manual (L1+L3) | `NoteListOrderingTests/dailyRoutineFilter`; UAT toggle | ❌ W0 | ⬜ pending |
+| Migration | 03-02 | 1 | V2→V3 store opens under `AppMigrationPlan`; Expense rows survive | migration (L2) | `MigrationTests/v2StoreMigratesToV3` | ❌ W0 | ⬜ pending |
+| 64-cap (D3-15) | 03-03 | 2 | `pendingCount()` ≤ 64 under multi-weekday-weekly + after-N load | unit (L1) | `NotificationSchedulerTests/pendingCountUnderCap` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky · ❌ W0 = test file created in Wave 0*
-*Plan/Wave columns are filled in by the planner once PLAN.md files exist.*
+*Owner-expanded reminder scope is tracked under NOT-07..10; SC-R5 (Daily Routine + auto-pin) folds into NOT-03.*
 
 ---
 

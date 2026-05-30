@@ -81,7 +81,7 @@ Plans:
 
 **Goal**: A user can capture block-style notes (interleaved text paragraphs + inline checklist rows), pin the important ones, and find anything by search — AND turn any note or checklist row into a scheduled reminder (all-day or timed, optionally recurring) with local notifications and a calendar view. Phase 3 is the household's note + reminder hub, fully decoupled from expenses.
 **Depends on**: Phase 1
-**Requirements**: NOT-01, NOT-02, NOT-03, NOT-04, NOT-05, NOT-06
+**Requirements**: NOT-01, NOT-02, NOT-03, NOT-04, NOT-05, NOT-06, NOT-07, NOT-08, NOT-09, NOT-10
 **Success Criteria** (what must be TRUE):
 
   1. User can create a note with a required title and a block body of interleaved text paragraphs and inline checkbox rows; edits auto-save (debounced ~500ms) with no save button

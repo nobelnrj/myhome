@@ -58,12 +58,16 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 ### Notes
 
-- [ ] **NOT-01**: User can create a note with title and free-form body
-- [ ] **NOT-02**: User can embed inline checklist items (checkbox rows) anywhere in a note's body
-- [ ] **NOT-03**: Notes list shows pinned notes first, then most-recent-first
+- [ ] **NOT-01**: User can create a note with a required title and a block body of interleaved text paragraphs and inline checkbox rows
+- [ ] **NOT-02**: User can embed inline checklist items (checkbox rows) anywhere in a note's body; checked rows sink within their contiguous checklist run
+- [ ] **NOT-03**: Notes list shows a Daily Routine section (daily-recurring notes) first, then manually-pinned notes, then the rest most-recent-first
 - [ ] **NOT-04**: User can pin and unpin notes
 - [ ] **NOT-05**: Notes auto-save while editing (debounced ~500ms); no explicit save button
 - [ ] **NOT-06**: User can search across note title and body via `.searchable`
+- [ ] **NOT-07**: User can attach a reminder to a whole note or any checkbox row — all-day or timed, with optional advance lead-time
+- [ ] **NOT-08**: A reminder can recur (none / daily / weekly-with-weekdays / monthly / yearly) with an end rule (never / on date / after N occurrences)
+- [ ] **NOT-09**: Reminders fire local notifications (permission requested on first reminder) that deep-link into the note and offer Complete / Snooze actions
+- [ ] **NOT-10**: A Calendar view inside the Notes tab shows per-day reminder counts; tapping a day opens that day's reminders with a completion progress
 
 ### Overview
 
@@ -155,7 +159,7 @@ Explicitly excluded. Documented to prevent scope creep. Anti-features from resea
 | Notes: real-time collaboration | Eventual-consistency CloudKit is sufficient; real-time is not the use case |
 | Notes: drawing canvas | Use Apple Notes if you need that |
 | Notes: per-note encryption | App-level Face ID gate covers the trust need |
-| Notes: attached reminders | Use Apple Reminders if you need that |
+| Notes: EventKit / system Reminders & Calendar sync | In-app local-notification reminders (NOT-07..10) cover the household need; two-way sync with Apple Reminders/Calendar is out of charter |
 
 ## Traceability
 
@@ -206,6 +210,10 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | NOT-04 | Phase 3 | Pending |
 | NOT-05 | Phase 3 | Pending |
 | NOT-06 | Phase 3 | Pending |
+| NOT-07 | Phase 3 | Pending |
+| NOT-08 | Phase 3 | Pending |
+| NOT-09 | Phase 3 | Pending |
+| NOT-10 | Phase 3 | Pending |
 | OVR-01 | Phase 4 | Pending |
 | OVR-02 | Phase 4 | Pending |
 | OVR-03 | Phase 4 | Pending |
@@ -217,14 +225,14 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | SET-05 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 52 total
-- Mapped to phases: 52
+- v1 requirements: 56 total
+- Mapped to phases: 56
 - Unmapped: 0 ✓
 
 **Per-phase distribution:**
 - Phase 1 (Foundation & Manual Expense Spine): 10 — FND-01..07, EXP-01, EXP-02, EXP-03
 - Phase 2 (Categories, Tags & Budgets): 6 — EXP-04..09
-- Phase 3 (Notes & Checklists): 6 — NOT-01..06
+- Phase 3 (Notes & Checklists): 10 — NOT-01..10
 - Phase 4 (Overview & Charts): 6 — OVR-01..04, EXP-10, EXP-11
 - Phase 5 (Face ID Gate & Settings): 5 — SEC-01, SEC-02, SET-01, SET-02, SET-03
 - Phase 6 (Gmail Sign-In & Client): 8 — ING-01, ING-02, ING-03, ING-05, ING-16, SEC-03, SET-04, SET-05
@@ -232,4 +240,4 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 
 ---
 *Requirements defined: 2026-05-28*
-*Last updated: 2026-05-29 — traceability mapped to roadmap (52/52)*
+*Last updated: 2026-05-30 — Phase 3 expanded to Notes + Reminders hub; added NOT-07..10 (56/56)*
