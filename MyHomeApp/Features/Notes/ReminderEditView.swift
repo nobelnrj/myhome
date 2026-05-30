@@ -538,6 +538,18 @@ struct ReminderEditView: View {
             note.isPinned = pinToTop
         }
 
+        // Derive noteID + blockID for deep-link payload (Fix A — T-03-14)
+        let noteIDForPayload: UUID?
+        let blockIDForPayload: UUID?
+        switch target {
+        case .note(let n):
+            noteIDForPayload = n.id
+            blockIDForPayload = nil
+        case .block(let b):
+            noteIDForPayload = b.note?.id
+            blockIDForPayload = b.id
+        }
+
         // Schedule new notifications (Pitfall 3 — save context AFTER schedule)
         let info = ReminderInfo(
             id: target.reminderID,
@@ -546,7 +558,9 @@ struct ReminderEditView: View {
             isAllDay: isAllDay,
             recurrence: recurrence,
             endRule: endRule,
-            leadMinutes: leadMinutes > 0 ? [leadMinutes] : []  // T-03-13
+            leadMinutes: leadMinutes > 0 ? [leadMinutes] : [],  // T-03-13
+            noteID: noteIDForPayload,
+            blockID: blockIDForPayload
         )
         do {
             try await scheduler.schedule(info)

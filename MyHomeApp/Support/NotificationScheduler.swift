@@ -30,6 +30,12 @@ public struct ReminderInfo: Sendable {
     /// e.g. [60, 1440] → alerts 1 hour and 1 day early.
     public var leadMinutes: [Int]
 
+    /// UUID of the owning Note for deep-link routing. Set by ReminderEditView; nil
+    /// is safe — the notification will fire but won't carry a deep-link payload.
+    public var noteID: UUID? = nil
+    /// UUID of the NoteBlock if this is a block-level reminder; nil for note-level.
+    public var blockID: UUID? = nil
+
     public init(
         id: UUID = UUID(),
         title: String,
@@ -37,7 +43,9 @@ public struct ReminderInfo: Sendable {
         isAllDay: Bool = false,
         recurrence: ReminderRecurrence = ReminderRecurrence(),
         endRule: ReminderEndRule = ReminderEndRule(),
-        leadMinutes: [Int] = []
+        leadMinutes: [Int] = [],
+        noteID: UUID? = nil,
+        blockID: UUID? = nil
     ) {
         self.id = id
         self.title = title
@@ -46,6 +54,8 @@ public struct ReminderInfo: Sendable {
         self.recurrence = recurrence
         self.endRule = endRule
         self.leadMinutes = leadMinutes
+        self.noteID = noteID
+        self.blockID = blockID
     }
 }
 
@@ -124,7 +134,7 @@ public struct NotificationScheduler {
             let mainTrigger = UNCalendarNotificationTrigger(dateMatching: mainComponents, repeats: false)
             let mainRequest = makeRequest(
                 identifier: "\(info.id)-main",
-                title: info.title,
+                info: info,
                 trigger: mainTrigger
             )
             requests.append(mainRequest)
@@ -137,7 +147,7 @@ public struct NotificationScheduler {
                 let leadTrigger = UNCalendarNotificationTrigger(dateMatching: leadComponents, repeats: false)
                 let leadRequest = makeRequest(
                     identifier: "\(info.id)-lead-\(index)",
-                    title: info.title,
+                    info: info,
                     trigger: leadTrigger
                 )
                 requests.append(leadRequest)
@@ -149,7 +159,7 @@ public struct NotificationScheduler {
             let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
             let request = makeRequest(
                 identifier: "\(info.id)-main",
-                title: info.title,
+                info: info,
                 trigger: trigger
             )
             requests.append(request)
@@ -162,7 +172,7 @@ public struct NotificationScheduler {
                 let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
                 let request = makeRequest(
                     identifier: "\(info.id)-weekday-\(weekday)",
-                    title: info.title,
+                    info: info,
                     trigger: trigger
                 )
                 requests.append(request)
@@ -176,7 +186,7 @@ public struct NotificationScheduler {
             let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
             let request = makeRequest(
                 identifier: "\(info.id)-main",
-                title: info.title,
+                info: info,
                 trigger: trigger
             )
             requests.append(request)
@@ -190,7 +200,7 @@ public struct NotificationScheduler {
             let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
             let request = makeRequest(
                 identifier: "\(info.id)-main",
-                title: info.title,
+                info: info,
                 trigger: trigger
             )
             requests.append(request)
@@ -284,19 +294,30 @@ public struct NotificationScheduler {
         return [weekday]
     }
 
-    /// Creates a UNNotificationRequest with a minimal content (title only).
+    /// Creates a UNNotificationRequest with category + deep-link payload stamped.
     ///
-    /// T-03-07: Logs identifiers/counts only — never include note body text in notification
-    /// content here. Caller is responsible for setting body via a richer content builder
-    /// in the UI layer if desired.
+    /// Sets `categoryIdentifier` to `kReminderCategoryID` so iOS attaches the
+    /// Complete/Snooze action buttons (Fix A — T-03-14).
+    /// Sets `userInfo` with noteID/blockID/originalTitle for deep-link routing
+    /// (Fix A — T-03-14; userInfo consumed by NotificationActionDelegate).
+    ///
+    /// T-03-16: only UUIDs and title in userInfo — no note body text in logs.
     private func makeRequest(
         identifier: String,
-        title: String,
+        info: ReminderInfo,
         trigger: UNNotificationTrigger
     ) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
-        content.title = title
+        content.title = info.title
         content.sound = .default
+        // Stamp actionable category so Complete/Snooze buttons appear on delivery
+        content.categoryIdentifier = kReminderCategoryID
+        // Stamp deep-link payload so banner tap routes to the correct note/row
+        var userInfo: [String: String] = [:]
+        if let n = info.noteID { userInfo["noteID"] = n.uuidString }
+        if let b = info.blockID { userInfo["blockID"] = b.uuidString }
+        userInfo["originalTitle"] = info.title
+        content.userInfo = userInfo
         return UNNotificationRequest(
             identifier: identifier,
             content: content,
