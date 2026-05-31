@@ -166,12 +166,18 @@ struct ReminderEditView: View {
     @State private var afterCount: Int = 1
     @State private var pinToTop: Bool = true   // pre-checked for yearly (D3-09)
 
+    /// WR-08: recurrence type at load time, so yearly auto-pin only applies on the *transition*
+    /// into yearly — editing an existing yearly reminder (or changing away) never re-pins.
+    @State private var loadedRecurrenceType: RecurrenceType = .none
+
     // UI state
     @State private var showDatePicker: Bool = false
     @State private var showEndDatePicker: Bool = false
     @State private var showRemoveConfirmation: Bool = false
     @State private var permissionDenied: Bool = false
     @State private var isSaving: Bool = false
+    /// WR-05: set when a non-recurring reminder's date is in the past.
+    @State private var invalidPastDate: Bool = false
 
     // MARK: - Body
 
@@ -233,6 +239,15 @@ struct ReminderEditView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Notification permission denied. Enable in Settings to receive reminders.")
+            }
+            // WR-05: past-date guard for one-shot reminders
+            .alert(
+                "Reminder Time Has Passed",
+                isPresented: $invalidPastDate
+            ) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Pick a date and time in the future so the reminder can fire.")
             }
             // Remove reminder confirmation (UI-SPEC §4)
             .confirmationDialog(
@@ -450,6 +465,7 @@ struct ReminderEditView: View {
                 selectedWeekdays = Set(days)
             }
         }
+        loadedRecurrenceType = recurrenceType   // WR-08: remember entry-state for pin transition
 
         if let data = target.reminderEndRuleData,
            let rule = try? JSONDecoder().decode(ReminderEndRule.self, from: data) {
@@ -469,6 +485,13 @@ struct ReminderEditView: View {
     private func saveReminder() async {
         isSaving = true
         defer { isSaving = false }
+
+        // WR-05: a one-shot reminder in the past builds a trigger that never fires. Reject it
+        // before requesting permission or mutating the model so the user can pick a valid time.
+        if recurrenceType == .none && reminderDate <= Date() {
+            await MainActor.run { invalidPastDate = true }
+            return
+        }
 
         let center = SystemNotificationCenter()
 
@@ -533,8 +556,9 @@ struct ReminderEditView: View {
         target.reminderEndRuleData = endRuleData
         target.reminderLeadMinutes = max(0, leadMinutes)  // T-03-13
 
-        // Yearly auto-pin (D3-09)
-        if recurrenceType == .yearly, let note = target.owningNote {
+        // Yearly auto-pin (D3-09). WR-08: apply only on the transition *into* yearly, so editing
+        // an existing yearly reminder (or switching away) leaves manual pin control authoritative.
+        if recurrenceType == .yearly, loadedRecurrenceType != .yearly, let note = target.owningNote {
             note.isPinned = pinToTop
         }
 
