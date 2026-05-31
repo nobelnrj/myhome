@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-last_updated: "2026-05-30T19:26:10.465Z"
-last_activity: 2026-05-30
+status: phase_complete
+last_updated: "2026-05-31T16:30:00.000Z"
+last_activity: 2026-05-31
 progress:
   total_phases: 7
   completed_phases: 3
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-28)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 03 — notes-checklists
+**Current focus:** Phase 04 — overview-charts
 
 ## Current Position
 
-Phase: 03 (notes-checklists) — EXECUTING
-Plan: 6 of 6
-Status: Phase complete — ready for verification
-Last activity: 2026-05-30
+Phase: 04 (overview-charts) — STARTING (discuss)
+Plan: —
+Status: Phase 03 COMPLETE (all CR-01..04 + WR-01..09 fixed, full test suite green on iPhone 17 Pro). Only manual on-device UAT remains as a human step. Beginning Phase 04.
+Last activity: 2026-05-31
 
 Progress: [██████████] 100%
 
