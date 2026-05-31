@@ -24,6 +24,26 @@ let kSnoozeActionID     = "com.myhome.reminder.snooze"
 ///   "<uuid>-weekday-<N>"    — weekly-weekday fire
 ///
 /// This helper extracts the UUID prefix so the delegate can look up the owning model.
+///
+/// WR-07: Prefer reading the UUID from userInfo (noteID/blockID) which is already stamped;
+/// use identifier parsing only as fallback.
+func reminderIDFromUserInfo(_ userInfo: [AnyHashable: Any]) -> UUID? {
+    // Prefer blockID if present (block-level reminder), else noteID (note-level)
+    if let blockIDString = userInfo["blockID"] as? String,
+       let blockID = UUID(uuidString: blockIDString) {
+        return blockID
+    }
+    if let noteIDString = userInfo["noteID"] as? String,
+       let noteID = UUID(uuidString: noteIDString) {
+        return noteID
+    }
+    return nil
+}
+
+/// Parses the reminder UUID from a notification identifier string.
+///
+/// WR-07: This is a fallback only — prefer `reminderIDFromUserInfo` when userInfo is available.
+/// Reconstructs the UUID from the first 5 hyphen-split components (UUID is 8-4-4-4-12 = 5 groups).
 func reminderIDFromNotificationIdentifier(_ identifier: String) -> UUID? {
     // Split on "-" and try to reconstruct UUID from first 5 components (UUID has 5 parts)
     let parts = identifier.split(separator: "-")
@@ -87,6 +107,15 @@ func makeReminderContent(title: String, noteID: UUID, blockID: UUID? = nil) -> U
     return content
 }
 
+// MARK: - MainActor-isolated container holder (CR-04)
+
+/// Holds the ModelContainer on the MainActor so the delegate can access it
+/// without @unchecked Sendable data-race hazards.
+@MainActor
+final class MainActorContainerHolder {
+    var container: ModelContainer?
+}
+
 // MARK: - NotificationActionDelegate
 
 /// `UNUserNotificationCenterDelegate` — handles foreground display, action responses,
@@ -100,11 +129,20 @@ func makeReminderContent(title: String, noteID: UUID, blockID: UUID? = nil) -> U
 /// - Tap (default): deep-link to the note (post a Notification to navigate).
 ///
 /// Security: T-03-14 (identifier → note UUID mapping), T-03-16 (no body in logs).
+///
+/// CR-04: SwiftData mutations run on MainActor via mainContext — no @unchecked Sendable hazard.
 final class NotificationActionDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
 
-    /// Shared model container for background context (injected at app launch).
-    /// Access is safe: written once on main actor at launch, read from callbacks on delegate queue.
-    var modelContainer: ModelContainer?
+    /// CR-04: Container stored in a @MainActor-isolated holder to eliminate the
+    /// @unchecked Sendable data-race. All SwiftData work happens on mainContext.
+    let containerHolder = MainActorContainerHolder()
+
+    /// Convenience accessor for callers setting the container at launch (MyHomeApp.swift).
+    @MainActor
+    var modelContainer: ModelContainer? {
+        get { containerHolder.container }
+        set { containerHolder.container = newValue }
+    }
 
     // MARK: - UNUserNotificationCenterDelegate
 
@@ -145,21 +183,29 @@ final class NotificationActionDelegate: NSObject, UNUserNotificationCenterDelega
     // MARK: - Complete action (D3-04)
 
     private func handleComplete(identifier: String, userInfo: [AnyHashable: Any]) {
-        guard let container = modelContainer else { return }
+        // Resolve target UUIDs to Sendable locals BEFORE crossing into the @MainActor Task.
+        // `userInfo` is [AnyHashable: Any] (non-Sendable) so it must not be captured by the
+        // actor-isolated closure (Swift 6 data-race diagnostic).
+        // WR-07: prefer userInfo (noteID/blockID); fall back to identifier parsing.
+        // WR-06: blockID presence tells us the target kind so we don't guess.
+        let blockID = (userInfo["blockID"] as? String).flatMap(UUID.init(uuidString:))
+        let noteID = (userInfo["noteID"] as? String).flatMap(UUID.init(uuidString:))
+        let fallbackID = reminderIDFromNotificationIdentifier(identifier)
 
-        // Parse the target reminder ID from the notification identifier
-        guard let reminderID = reminderIDFromNotificationIdentifier(identifier) else { return }
+        // CR-04: All SwiftData work on MainActor using mainContext.
+        Task { @MainActor in
+            guard let container = containerHolder.container else { return }
+            let context = container.mainContext
 
-        // Run on a background context to avoid blocking the main actor
-        Task {
-            let context = ModelContext(container)
-            // Look for a matching NoteBlock first (block-level reminder)
-            let blockDescriptor = FetchDescriptor<NoteBlock>()
-            if let blocks = try? context.fetch(blockDescriptor) {
-                if let block = blocks.first(where: { $0.id == reminderID }) {
-                    // Check the block
+            if blockID != nil, let reminderID = blockID ?? fallbackID {
+                // Block-level reminder — predicate fetch (WR-06)
+                var blockDescriptor = FetchDescriptor<NoteBlock>(
+                    predicate: #Predicate { $0.id == reminderID }
+                )
+                blockDescriptor.fetchLimit = 1
+                if let blocks = try? context.fetch(blockDescriptor),
+                   let block = blocks.first {
                     block.isChecked = true
-                    // Cancel future advance alerts (D3-04)
                     let leadCount = block.reminderLeadMinutes > 0 ? 1 : 0
                     var weekdays: [Int] = []
                     if let data = block.reminderRecurrenceData,
@@ -169,15 +215,23 @@ final class NotificationActionDelegate: NSObject, UNUserNotificationCenterDelega
                     NotificationScheduler(center: SystemNotificationCenter())
                         .cancel(reminderID: block.id, leadCount: leadCount, weekdays: weekdays)
                     block.reminderEnabled = false
-                    try? context.save()
+                    do {
+                        try context.save()
+                    } catch {
+                        assertionFailure("NotificationActionDelegate: failed to save after completing block: \(error)")
+                    }
                     return
                 }
             }
-            // Fall back to note-level reminder
-            let noteDescriptor = FetchDescriptor<Note>()
-            if let notes = try? context.fetch(noteDescriptor) {
-                if let note = notes.first(where: { $0.id == reminderID }) {
-                    // Cancel the note-level reminder
+
+            // Note-level reminder — predicate fetch by noteID (WR-06)
+            if let reminderID = noteID ?? fallbackID {
+                var noteDescriptor = FetchDescriptor<Note>(
+                    predicate: #Predicate { $0.id == reminderID }
+                )
+                noteDescriptor.fetchLimit = 1
+                if let notes = try? context.fetch(noteDescriptor),
+                   let note = notes.first {
                     let leadCount = note.reminderLeadMinutes > 0 ? 1 : 0
                     var weekdays: [Int] = []
                     if let data = note.reminderRecurrenceData,
@@ -187,7 +241,11 @@ final class NotificationActionDelegate: NSObject, UNUserNotificationCenterDelega
                     NotificationScheduler(center: SystemNotificationCenter())
                         .cancel(reminderID: note.id, leadCount: leadCount, weekdays: weekdays)
                     note.reminderEnabled = false
-                    try? context.save()
+                    do {
+                        try context.save()
+                    } catch {
+                        assertionFailure("NotificationActionDelegate: failed to save after completing note: \(error)")
+                    }
                 }
             }
         }
@@ -201,11 +259,32 @@ final class NotificationActionDelegate: NSObject, UNUserNotificationCenterDelega
         content.title = (userInfo["originalTitle"] as? String) ?? "Reminder"
         content.sound = .default
         content.categoryIdentifier = kReminderCategoryID
-        content.userInfo = userInfo as? [String: String] ?? [:]
+
+        // CR-02: Rebuild payload by iterating userInfo and copying String→String pairs.
+        // Direct `as? [String:String]` cast on [AnyHashable:Any] always fails at runtime —
+        // the keys are AnyHashable, not String, even when the underlying values are strings.
+        var preserved: [String: String] = [:]
+        for (k, v) in userInfo {
+            if let ks = k as? String, let vs = v as? String {
+                preserved[ks] = vs
+            }
+        }
+        content.userInfo = preserved
+
+        // CR-02: Reuse the deterministic "<reminderID>-main" identifier for the snoozed copy
+        // so the existing cancel path (NotificationScheduler.cancel) can clear it when the
+        // reminder is later cancelled. Derive the main identifier from the original identifier.
+        let snoozeIdentifier: String
+        if let reminderID = reminderIDFromNotificationIdentifier(identifier) {
+            // Reuse deterministic main identifier so cancel() removes the snoozed copy
+            snoozeIdentifier = "\(reminderID)-main"
+        } else {
+            // Fallback: unique identifier (not cancellable by scheduler, but avoids collision)
+            snoozeIdentifier = "\(identifier)-snooze-\(Int(Date().timeIntervalSince1970))"
+        }
 
         // Re-fire ~1 hour from now
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3600, repeats: false)
-        let snoozeIdentifier = "\(identifier)-snooze-\(Int(Date().timeIntervalSince1970))"
         let request = UNNotificationRequest(
             identifier: snoozeIdentifier,
             content: content,
@@ -221,15 +300,17 @@ final class NotificationActionDelegate: NSObject, UNUserNotificationCenterDelega
         // to the relevant note. The UI layer subscribes to kOpenNoteNotification.
         if let noteIDString = userInfo["noteID"] as? String,
            let noteID = UUID(uuidString: noteIDString) {
-            let blockIDString = userInfo["blockID"] as? String
-            let blockID = blockIDString.flatMap { UUID(uuidString: $0) }
+            var payload: [String: Any] = ["noteID": noteID]
+            // CR-03: Only include blockID when non-nil — avoid boxing Optional(nil) as Any.
+            // RootView and NotesListView now thread blockID through to EditNoteView for row focus.
+            if let blockIDString = userInfo["blockID"] as? String,
+               let blockID = UUID(uuidString: blockIDString) {
+                payload["blockID"] = blockID
+            }
             NotificationCenter.default.post(
                 name: kOpenNoteNotification,
                 object: nil,
-                userInfo: [
-                    "noteID": noteID,
-                    "blockID": blockID as Any
-                ]
+                userInfo: payload
             )
         }
     }
