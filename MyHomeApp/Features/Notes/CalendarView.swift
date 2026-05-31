@@ -428,11 +428,12 @@ struct DayAgendaView: View {
                     cancelNoteReminder(note)
                 }
             } else {
-                // No blocks: completing just disables the reminder so it leaves the agenda
+                // No blocks: completion is one-directional (WR-04). Completing cancels + disables
+                // the reminder so it leaves the agenda. There is no re-enable path here — a
+                // transiently-visible disabled item must not resurrect a reminder with no pending
+                // notifications (mirrors NotificationActionDelegate.handleComplete).
                 if note.reminderEnabled {
                     cancelNoteReminder(note)
-                } else {
-                    note.reminderEnabled = true
                 }
             }
         }
