@@ -21,13 +21,16 @@ struct NotesListView: View {
     // MARK: - Deep-link
 
     @Binding var deepLinkNoteID: UUID?
+    /// CR-03: Target block row for block-level reminder deep-links.
+    @Binding var deepLinkBlockID: UUID?
 
     // MARK: - Init
 
     /// Default constant binding keeps previews and existing callers that omit
     /// the deep-link param compiling unchanged.
-    init(deepLinkNoteID: Binding<UUID?> = .constant(nil)) {
+    init(deepLinkNoteID: Binding<UUID?> = .constant(nil), deepLinkBlockID: Binding<UUID?> = .constant(nil)) {
         self._deepLinkNoteID = deepLinkNoteID
+        self._deepLinkBlockID = deepLinkBlockID
     }
 
     @Query(sort: \Note.modifiedAt, order: .reverse) private var notes: [Note]
@@ -37,6 +40,8 @@ struct NotesListView: View {
     @State private var editingNote: Note? = nil
     @State private var noteToEditAfterAdd: Note? = nil
     @State private var searchText: String = ""
+    /// CR-03: Block row to focus when opening a note via block-level deep-link.
+    @State private var deepLinkTargetBlockID: UUID? = nil
 
     // MARK: - Computed
 
@@ -82,7 +87,9 @@ struct NotesListView: View {
             AddNoteView(onCreated: { noteToEditAfterAdd = $0 })
         }
         .sheet(item: $editingNote) { note in
-            EditNoteView(note: note)
+            // CR-03: Pass target block ID for row focus when arriving via block-level deep-link.
+            EditNoteView(note: note, targetBlockID: deepLinkTargetBlockID)
+                .onDisappear { deepLinkTargetBlockID = nil }
         }
         // Deep-link: when a noteID arrives, locate the matching Note and open its editor.
         // Reuses the existing editingNote sheet — no nested sheet (03-05 single-sheet rule).
@@ -92,6 +99,25 @@ struct NotesListView: View {
                 editingNote = match
             }
             deepLinkNoteID = nil
+        }
+        // CR-03: Block-level deep-link — capture target block and open the owning note.
+        .onChange(of: deepLinkBlockID) { _, newBlockID in
+            guard let blockID = newBlockID else { return }
+            // Find the note that owns this block (broken into explicit steps so the
+            // type-checker does not time out on the nested optional-collection closures).
+            var owningNote: Note?
+            for note in notes {
+                let blocks: [NoteBlock] = note.blocks ?? []
+                if blocks.contains(where: { $0.id == blockID }) {
+                    owningNote = note
+                    break
+                }
+            }
+            if let note = owningNote {
+                deepLinkTargetBlockID = blockID
+                editingNote = note
+            }
+            deepLinkBlockID = nil
         }
     }
 

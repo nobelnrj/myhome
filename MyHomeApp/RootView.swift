@@ -16,6 +16,9 @@ struct RootView: View {
 
     @State private var selectedTab: Int = 0
     @State private var deepLinkNoteID: UUID? = nil
+    /// CR-03: Thread blockID deep-link through the view hierarchy so EditNoteView can
+    /// scroll to and highlight the target block row when a block-level reminder is tapped.
+    @State private var deepLinkBlockID: UUID? = nil
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -31,7 +34,7 @@ struct RootView: View {
                 }
                 .tag(1)
 
-            NotesHomeView(deepLinkNoteID: $deepLinkNoteID)
+            NotesHomeView(deepLinkNoteID: $deepLinkNoteID, deepLinkBlockID: $deepLinkBlockID)
                 .tabItem {
                     Label("Notes", systemImage: "note.text")
                 }
@@ -41,6 +44,8 @@ struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in
             if let noteID = notification.userInfo?["noteID"] as? UUID {
                 deepLinkNoteID = noteID
+                // CR-03: forward block target when present
+                deepLinkBlockID = notification.userInfo?["blockID"] as? UUID
                 selectedTab = 2
             }
         }

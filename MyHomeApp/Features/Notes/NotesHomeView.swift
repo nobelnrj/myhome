@@ -16,13 +16,16 @@ struct NotesHomeView: View {
     // MARK: - Deep-link
 
     @Binding var deepLinkNoteID: UUID?
+    /// CR-03: Target block row for block-level reminder deep-links.
+    @Binding var deepLinkBlockID: UUID?
 
     // MARK: - Init
 
     /// Default constant binding keeps existing previews and callers that don't
     /// inject a deep-link binding (e.g. previews) compiling unchanged.
-    init(deepLinkNoteID: Binding<UUID?> = .constant(nil)) {
+    init(deepLinkNoteID: Binding<UUID?> = .constant(nil), deepLinkBlockID: Binding<UUID?> = .constant(nil)) {
         self._deepLinkNoteID = deepLinkNoteID
+        self._deepLinkBlockID = deepLinkBlockID
     }
 
     // MARK: - Segment state
@@ -52,7 +55,7 @@ struct NotesHomeView: View {
                 // Content area — switch on segment
                 switch selectedSegment {
                 case .list:
-                    NotesListView(deepLinkNoteID: $deepLinkNoteID)
+                    NotesListView(deepLinkNoteID: $deepLinkNoteID, deepLinkBlockID: $deepLinkBlockID)
                 case .calendar:
                     // 03-06: CalendarView — LazyVGrid month grid with per-day counts + agenda
                     CalendarView()
@@ -64,6 +67,12 @@ struct NotesHomeView: View {
         }
         // When a deep-link arrives, switch to the list segment so NotesListView is active
         .onChange(of: deepLinkNoteID) { _, newID in
+            if newID != nil {
+                selectedSegment = .list
+            }
+        }
+        // CR-03: blockID change also switches to list so NotesListView is visible
+        .onChange(of: deepLinkBlockID) { _, newID in
             if newID != nil {
                 selectedSegment = .list
             }

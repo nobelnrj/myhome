@@ -51,12 +51,20 @@ final class Debouncer {
 struct EditNoteView: View {
 
     @Bindable var note: Note
+    /// CR-03: when arriving via a block-level reminder deep-link, the row to scroll to + highlight.
+    var targetBlockID: UUID? = nil
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+
+    /// CR-03: transient highlight for the deep-linked block row (cleared after a beat).
+    @State private var focusedBlockID: UUID? = nil
 
     @State private var isDirty: Bool = false
     @State private var showDeleteConfirmation: Bool = false
     @State private var saveError: Bool = false
+    /// WR-09: set once the note is deleted/discarded so an in-flight debounced save that
+    /// resolves afterward becomes a no-op instead of saving a deleted/half-applied context.
+    @State private var noteRemoved: Bool = false
 
     // Debouncer for auto-save (isolated so AutoSaveTests can verify directly — NOT-05)
     @State private var debouncer = Debouncer(delay: 0.5)
@@ -69,20 +77,24 @@ struct EditNoteView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    // Title field (required — D3-03)
-                    titleField
-                        .padding(.top, 16)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Title field (required — D3-03)
+                        titleField
+                            .padding(.top, 16)
 
-                    // Block list (interleaved text + checkbox blocks)
-                    blockList
+                        // Block list (interleaved text + checkbox blocks)
+                        blockList
 
-                    // Add block buttons
-                    addBlockButtons
-                        .padding(.bottom, 16)
+                        // Add block buttons
+                        addBlockButtons
+                            .padding(.bottom, 16)
+                    }
+                    .padding(.horizontal, 16)
                 }
-                .padding(.horizontal, 16)
+                // CR-03: scroll to + briefly highlight the deep-linked block row.
+                .onAppear { focusDeepLinkedBlock(using: proxy) }
             }
             .navigationTitle(note.title.isEmpty ? "New Note" : note.title)
             .navigationBarTitleDisplayMode(.inline)
@@ -227,6 +239,30 @@ struct EditNoteView: View {
             }
         }
         .padding(.vertical, 4)
+        // CR-03: stable id for ScrollViewReader + transient highlight on deep-link arrival.
+        .id(block.id)
+        .listRowBackground(Color.clear)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(focusedBlockID == block.id ? Color.accentColor.opacity(0.15) : Color.clear)
+        )
+    }
+
+    // MARK: - Deep-link focus
+
+    /// CR-03: scrolls to the deep-linked block and pulses a highlight so the user sees which row
+    /// the reminder belonged to. No-op when not arriving from a block-level deep-link.
+    private func focusDeepLinkedBlock(using proxy: ScrollViewProxy) {
+        guard let targetBlockID else { return }
+        // Defer one runloop so the rows exist before scrolling.
+        DispatchQueue.main.async {
+            withAnimation { proxy.scrollTo(targetBlockID, anchor: .center) }
+            focusedBlockID = targetBlockID
+        }
+        // Fade the highlight out after a short beat.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            withAnimation { focusedBlockID = nil }
+        }
     }
 
     // MARK: - Add Block Buttons
@@ -291,6 +327,9 @@ struct EditNoteView: View {
     }
 
     private func performSave() {
+        // WR-09: never save once the note has been deleted/discarded (a debounced save may
+        // resolve after delete on the same run loop).
+        guard !noteRemoved, note.modelContext != nil else { return }
         // T-03-12: no note body content in error strings
         do {
             try context.save()
@@ -308,6 +347,7 @@ struct EditNoteView: View {
         let trimmed = note.title.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty {
             // T-03-10: discard-on-empty-title (D3-03)
+            noteRemoved = true   // WR-09: block any in-flight debounced save
             context.delete(note)
             do {
                 try context.save()
@@ -363,6 +403,7 @@ struct EditNoteView: View {
 
     private func deleteNote() {
         debouncer.cancel()
+        noteRemoved = true   // WR-09: block any in-flight debounced save
         context.delete(note)
         do {
             try context.save()
