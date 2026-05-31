@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import UserNotifications
 @testable import MyHome
 
 // Requirements: SC-R2 ("after N" stops, end-on-date stops, weekly weekdays)
@@ -99,5 +100,110 @@ struct RecurrenceTests {
 
         let requestsActive = try scheduler.buildRequests(for: infoActive)
         #expect(!requestsActive.isEmpty, "Should produce requests when fire date is before end date")
+    }
+
+    // MARK: - WR-02: After-N expands into discrete non-repeating triggers (production path)
+
+    @Test("afterNExpandsToDiscreteTriggers: daily after-3 builds 3 non-repeating -occ triggers — WR-02/SC-R2")
+    func afterNExpandsToDiscreteTriggers() throws {
+        let scheduler = NotificationScheduler(center: SpyCenter())
+        let reminderID = UUID()
+        let info = ReminderInfo(
+            id: reminderID,
+            title: "Daily After-3",
+            date: Date(timeIntervalSinceNow: 3600),
+            isAllDay: false,
+            recurrence: ReminderRecurrence(type: .daily),
+            endRule: ReminderEndRule(type: .afterCount, occurrenceCount: 3),
+            leadMinutes: []
+        )
+
+        let requests = try scheduler.buildRequests(for: info)
+
+        // After-N must NOT be a single infinite repeating trigger — it expands to N discrete fires.
+        #expect(requests.count == 3, "Expected 3 discrete occurrences, got \(requests.count)")
+        for request in requests {
+            let trigger = request.trigger as? UNCalendarNotificationTrigger
+            #expect(trigger?.repeats == false, "After-N occurrences must be non-repeating: \(request.identifier)")
+        }
+        let identifiers = Set(requests.map(\.identifier))
+        #expect(identifiers == ["\(reminderID)-occ-0", "\(reminderID)-occ-1", "\(reminderID)-occ-2"],
+                "After-N must use -occ-<n> identifiers, got \(identifiers)")
+    }
+
+    @Test("endOnDateExpandsBounded: daily end-on-date 6 days out builds a bounded set of dated triggers — WR-02/SC-R2")
+    func endOnDateExpandsBounded() throws {
+        let scheduler = NotificationScheduler(center: SpyCenter())
+        let start = Date(timeIntervalSinceNow: 3600)
+        let info = ReminderInfo(
+            id: UUID(),
+            title: "Daily Until",
+            date: start,
+            isAllDay: false,
+            recurrence: ReminderRecurrence(type: .daily),
+            endRule: ReminderEndRule(type: .onDate, endDate: start.addingTimeInterval(86_400 * 6)),
+            leadMinutes: []
+        )
+
+        let requests = try scheduler.buildRequests(for: info)
+
+        // Bounded: today + 6 days inclusive ≈ 7 fires; must be finite and non-repeating.
+        #expect(requests.count >= 6 && requests.count <= 8,
+                "Expected ~7 bounded occurrences, got \(requests.count)")
+        for request in requests {
+            #expect((request.trigger as? UNCalendarNotificationTrigger)?.repeats == false,
+                    "End-on-date occurrences must be non-repeating: \(request.identifier)")
+        }
+    }
+
+    // MARK: - WR-01: Monthly day-of-month clamped so a repeating trigger always fires
+
+    @Test("monthlyClampsDayToSafeRange: day-31 monthly (never) clamps to day-28 — WR-01/D3-14")
+    func monthlyClampsDayToSafeRange() throws {
+        let scheduler = NotificationScheduler(center: SpyCenter())
+
+        // Build a date on the 31st (Jan 31 fires in every-month context only if clamped).
+        var comps = DateComponents()
+        comps.year = 2026; comps.month = 1; comps.day = 31; comps.hour = 10; comps.minute = 0
+        let date = Calendar.current.date(from: comps)!
+
+        let info = ReminderInfo(
+            id: UUID(),
+            title: "Monthly-31",
+            date: date,
+            isAllDay: false,
+            recurrence: ReminderRecurrence(type: .monthly),
+            endRule: ReminderEndRule(type: .never),
+            leadMinutes: []
+        )
+
+        let requests = try scheduler.buildRequests(for: info)
+        #expect(requests.count == 1, "Unbounded monthly is a single repeating trigger")
+        let trigger = requests.first?.trigger as? UNCalendarNotificationTrigger
+        #expect(trigger?.repeats == true, "Unbounded monthly must repeat")
+        #expect(trigger?.dateComponents.day == NotificationScheduler.maxSafeMonthlyDay,
+                "Day-31 monthly must clamp to \(NotificationScheduler.maxSafeMonthlyDay) so it fires every month")
+    }
+
+    // MARK: - WR-03: All-day repeating reminders fire at the agreed hour, not midnight
+
+    @Test("allDayDailyFiresAtNine: all-day daily fires at 09:00 local, not midnight — WR-03")
+    func allDayDailyFiresAtNine() throws {
+        let scheduler = NotificationScheduler(center: SpyCenter())
+        let info = ReminderInfo(
+            id: UUID(),
+            title: "All-day Daily",
+            date: Date(timeIntervalSinceNow: 3600),
+            isAllDay: true,
+            recurrence: ReminderRecurrence(type: .daily),
+            endRule: ReminderEndRule(type: .never),
+            leadMinutes: []
+        )
+
+        let requests = try scheduler.buildRequests(for: info)
+        let trigger = requests.first?.trigger as? UNCalendarNotificationTrigger
+        #expect(trigger?.dateComponents.hour == NotificationScheduler.allDayFireHour,
+                "All-day daily must fire at \(NotificationScheduler.allDayFireHour):00, not midnight")
+        #expect(trigger?.dateComponents.minute == 0, "All-day fire minute must be 0")
     }
 }

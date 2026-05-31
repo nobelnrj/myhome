@@ -75,6 +75,20 @@ public struct NotificationScheduler {
     /// Maximum number of pending notification requests iOS allows (D3-15).
     public static let iOSPendingCap = 64
 
+    /// Default hour-of-day for all-day reminders (WR-03).
+    ///
+    /// All-day reminders fire at 09:00 local rather than midnight, applied consistently
+    /// across one-shot/daily/weekly/monthly/yearly so the contract never diverges by frequency.
+    public static let allDayFireHour = 9
+
+    /// Highest day-of-month a *repeating* monthly trigger can safely use in every month (WR-01).
+    ///
+    /// `UNCalendarNotificationTrigger(repeats: true)` does not fire on a missing day (e.g. day-31
+    /// in April), so a `.never`-ending monthly reminder clamps its day to 28 to guarantee a fire
+    /// every month. Bounded monthly reminders (after-N / end-on-date) are expanded into discrete
+    /// dated triggers instead, which preserve the true day-of-month via Calendar clamping.
+    public static let maxSafeMonthlyDay = 28
+
     private let center: any NotificationCenterPort
 
     public init(center: any NotificationCenterPort) {
@@ -121,92 +135,152 @@ public struct NotificationScheduler {
             break
         }
 
-        var requests: [UNNotificationRequest] = []
-
         // --- Build DateComponents in device timezone (Pitfall 5) -----------
         let deviceCal = deviceCalendar()
 
         switch info.recurrence.type {
-
         case .none:
-            // One-shot main fire + lead-time alerts
-            let mainComponents = dateComponents(from: info.date, isAllDay: info.isAllDay, calendar: deviceCal)
-            let mainTrigger = UNCalendarNotificationTrigger(dateMatching: mainComponents, repeats: false)
-            let mainRequest = makeRequest(
-                identifier: "\(info.id)-main",
-                info: info,
-                trigger: mainTrigger
-            )
-            requests.append(mainRequest)
-
-            // Lead-time alerts (only meaningful for one-shot reminders)
-            for (index, leadMin) in info.leadMinutes.enumerated() {
-                guard leadMin >= 0 else { continue }
-                let leadDate = info.date.addingTimeInterval(-Double(leadMin) * 60)
-                let leadComponents = dateComponents(from: leadDate, isAllDay: false, calendar: deviceCal)
-                let leadTrigger = UNCalendarNotificationTrigger(dateMatching: leadComponents, repeats: false)
-                let leadRequest = makeRequest(
-                    identifier: "\(info.id)-lead-\(index)",
-                    info: info,
-                    trigger: leadTrigger
-                )
-                requests.append(leadRequest)
+            return oneShotRequests(for: info, calendar: deviceCal)
+        case .daily, .weekly, .monthly, .yearly:
+            // WR-02: bounded recurrences (after-N / end-on-date) expand into discrete dated
+            // triggers so they actually stop. Only `.never` uses a single repeating trigger.
+            switch info.endRule.type {
+            case .never:
+                return repeatingRequests(for: info, calendar: deviceCal)
+            case .afterCount:
+                let n = max(0, min(info.endRule.occurrenceCount ?? 1, Self.iOSPendingCap))
+                let dates = occurrenceDates(for: info, calendar: deviceCal, limit: n)
+                return discreteRequests(for: info, dates: dates, calendar: deviceCal)
+            case .onDate:
+                guard let endDate = info.endRule.endDate else {
+                    return repeatingRequests(for: info, calendar: deviceCal)
+                }
+                // Cutoff is the end of the chosen end-day (inclusive of that whole day).
+                let cutoff = deviceCal.startOfDay(for: endDate).addingTimeInterval(86_400)
+                let candidates = occurrenceDates(for: info, calendar: deviceCal, limit: Self.iOSPendingCap)
+                let dates = candidates.filter { $0 < cutoff }
+                return discreteRequests(for: info, dates: dates, calendar: deviceCal)
             }
+        }
+    }
 
-        case .daily:
-            // One repeating trigger on the time-of-day portion
-            let comps = timeComponents(from: info.date, isAllDay: info.isAllDay, calendar: deviceCal)
-            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
-            let request = makeRequest(
-                identifier: "\(info.id)-main",
-                info: info,
-                trigger: trigger
-            )
-            requests.append(request)
+    // MARK: - Request builders (pure)
 
-        case .weekly:
-            let weekdays = resolvedWeekdays(for: info, calendar: deviceCal)
-            for weekday in weekdays {
-                var comps = timeComponents(from: info.date, isAllDay: info.isAllDay, calendar: deviceCal)
-                comps.weekday = weekday
-                let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
-                let request = makeRequest(
-                    identifier: "\(info.id)-weekday-\(weekday)",
-                    info: info,
-                    trigger: trigger
-                )
-                requests.append(request)
-            }
+    /// One-shot main fire plus any lead-time advance alerts (recurrence == .none).
+    private func oneShotRequests(for info: ReminderInfo, calendar: Calendar) -> [UNNotificationRequest] {
+        var requests: [UNNotificationRequest] = []
 
-        case .monthly:
-            var comps = timeComponents(from: info.date, isAllDay: info.isAllDay, calendar: deviceCal)
-            // Clamp day to last-valid-day (e.g. day-31 in April) — D3-14
-            let rawDay = deviceCal.component(.day, from: info.date)
-            comps.day = rawDay   // UNCalendarNotificationTrigger handles month-end clamping
-            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
-            let request = makeRequest(
-                identifier: "\(info.id)-main",
-                info: info,
-                trigger: trigger
-            )
-            requests.append(request)
+        let mainComponents = dateComponents(from: info.date, isAllDay: info.isAllDay, calendar: calendar)
+        let mainTrigger = UNCalendarNotificationTrigger(dateMatching: mainComponents, repeats: false)
+        requests.append(makeRequest(identifier: "\(info.id)-main", info: info, trigger: mainTrigger))
 
-        case .yearly:
-            var comps = dateComponents(from: info.date, isAllDay: info.isAllDay, calendar: deviceCal)
-            // Remove year so it repeats annually; keep month+day+hour+minute
-            comps.year = nil
-            // Clamp Feb-29 to Feb-28 in non-leap-years: UNCalendarNotificationTrigger
-            // handles this internally; no extra work needed for iOS
-            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
-            let request = makeRequest(
-                identifier: "\(info.id)-main",
-                info: info,
-                trigger: trigger
-            )
-            requests.append(request)
+        // Lead-time alerts (only meaningful for one-shot reminders)
+        for (index, leadMin) in info.leadMinutes.enumerated() {
+            guard leadMin >= 0 else { continue }
+            let leadDate = info.date.addingTimeInterval(-Double(leadMin) * 60)
+            let leadComponents = dateComponents(from: leadDate, isAllDay: false, calendar: calendar)
+            let leadTrigger = UNCalendarNotificationTrigger(dateMatching: leadComponents, repeats: false)
+            requests.append(makeRequest(identifier: "\(info.id)-lead-\(index)", info: info, trigger: leadTrigger))
         }
 
         return requests
+    }
+
+    /// Single repeating trigger(s) for an unbounded (`.never`) recurrence.
+    ///
+    /// - daily:   one repeating trigger on the time-of-day.
+    /// - weekly:  one repeating trigger per resolved weekday.
+    /// - monthly: one repeating trigger, day clamped to `maxSafeMonthlyDay` (WR-01) so it fires
+    ///            every month. Bounded monthly reminders use `discreteRequests` for true days.
+    /// - yearly:  one repeating trigger on month+day+time (Feb-29 clamped by iOS).
+    private func repeatingRequests(for info: ReminderInfo, calendar: Calendar) -> [UNNotificationRequest] {
+        switch info.recurrence.type {
+        case .daily:
+            let comps = timeComponents(from: info.date, isAllDay: info.isAllDay, calendar: calendar)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+            return [makeRequest(identifier: "\(info.id)-main", info: info, trigger: trigger)]
+
+        case .weekly:
+            let weekdays = resolvedWeekdays(for: info, calendar: calendar)
+            return weekdays.map { weekday in
+                var comps = timeComponents(from: info.date, isAllDay: info.isAllDay, calendar: calendar)
+                comps.weekday = weekday
+                let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+                return makeRequest(identifier: "\(info.id)-weekday-\(weekday)", info: info, trigger: trigger)
+            }
+
+        case .monthly:
+            var comps = timeComponents(from: info.date, isAllDay: info.isAllDay, calendar: calendar)
+            // WR-01: explicitly clamp day to a day present in every month so the trigger fires.
+            let rawDay = calendar.component(.day, from: info.date)
+            comps.day = min(rawDay, Self.maxSafeMonthlyDay)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+            return [makeRequest(identifier: "\(info.id)-main", info: info, trigger: trigger)]
+
+        case .yearly:
+            var comps = dateComponents(from: info.date, isAllDay: info.isAllDay, calendar: calendar)
+            comps.year = nil   // repeat annually; iOS clamps Feb-29 in non-leap years
+            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+            return [makeRequest(identifier: "\(info.id)-main", info: info, trigger: trigger)]
+
+        case .none:
+            return []
+        }
+    }
+
+    /// Non-repeating dated triggers for a bounded recurrence (after-N / end-on-date).
+    ///
+    /// Each occurrence gets identifier `<id>-occ-<index>` so it survives cancellation
+    /// (`cancel(reminderID:…)` removes the whole `-occ-*` range).
+    private func discreteRequests(for info: ReminderInfo, dates: [Date], calendar: Calendar) -> [UNNotificationRequest] {
+        dates.enumerated().map { index, date in
+            let comps = dateComponents(from: date, isAllDay: info.isAllDay, calendar: calendar)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+            return makeRequest(identifier: "\(info.id)-occ-\(index)", info: info, trigger: trigger)
+        }
+    }
+
+    /// Generates up to `limit` successive occurrence dates by stepping the recurrence interval
+    /// forward from `info.date`. Used to expand bounded recurrences into discrete triggers.
+    private func occurrenceDates(for info: ReminderInfo, calendar: Calendar, limit: Int) -> [Date] {
+        guard limit > 0 else { return [] }
+        let start = info.date
+
+        switch info.recurrence.type {
+        case .none:
+            return [start]
+
+        case .daily:
+            return (0..<limit).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
+
+        case .weekly:
+            let weekdays = resolvedWeekdays(for: info, calendar: calendar)
+            if weekdays.count <= 1 {
+                return (0..<limit).compactMap { calendar.date(byAdding: .day, value: $0 * 7, to: start) }
+            }
+            // Multiple weekdays: walk forward day-by-day collecting matches.
+            let targetDays = Set(weekdays)
+            var result: [Date] = []
+            var cursor = start
+            var safety = 0
+            let maxSteps = limit * 7 + 14
+            while result.count < limit && safety < maxSteps {
+                if targetDays.contains(calendar.component(.weekday, from: cursor)) {
+                    result.append(cursor)
+                }
+                guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { break }
+                cursor = next
+                safety += 1
+            }
+            return result
+
+        case .monthly:
+            // Adding months to the original date clamps to month-end where needed (e.g. Jan-31 → Feb-28).
+            return (0..<limit).compactMap { calendar.date(byAdding: .month, value: $0, to: start) }
+
+        case .yearly:
+            return (0..<limit).compactMap { calendar.date(byAdding: .year, value: $0, to: start) }
+        }
     }
 
     // MARK: - Port-touching members
@@ -221,14 +295,26 @@ public struct NotificationScheduler {
         let requests = try buildRequests(for: info)
         guard !requests.isEmpty else { return }
 
-        // 64-cap budget enforcement
+        // 64-cap budget enforcement.
+        // CR-01: prioritize so the actual reminder fire is never dropped in favour of a
+        // pre-alert. Main / first occurrence first, then other fires, then lead alerts last.
         let existing = await pendingCount()
         let budget = max(0, Self.iOSPendingCap - existing)
-        let admitted = Array(requests.prefix(budget))
+        let prioritized = requests.sorted { Self.admissionRank($0.identifier) < Self.admissionRank($1.identifier) }
+        let admitted = Array(prioritized.prefix(budget))
 
         for request in admitted {
             try await center.add(request)
         }
+    }
+
+    /// Admission priority for the 64-cap (CR-01): lower fires first, so leads are trimmed before
+    /// the reminder itself. The primary fire (`-main` / first `-occ-0`) is never dropped while a
+    /// lead alert survives.
+    static func admissionRank(_ identifier: String) -> Int {
+        if identifier.hasSuffix("-main") || identifier.hasSuffix("-occ-0") { return 0 }
+        if identifier.contains("-lead-") { return 2 }
+        return 1   // weekday / later occurrences
     }
 
     /// Removes all pending requests for a reminder (main + leads + weekdays).
@@ -248,6 +334,11 @@ public struct NotificationScheduler {
         for weekday in weekdays {
             ids.append("\(reminderID)-weekday-\(weekday)")
         }
+        // WR-02: bounded recurrences schedule discrete `-occ-<n>` triggers (up to the cap).
+        // Remove the whole range so an after-N / end-on-date reminder is fully cleared.
+        for index in 0..<Self.iOSPendingCap {
+            ids.append("\(reminderID)-occ-\(index)")
+        }
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
@@ -264,20 +355,27 @@ public struct NotificationScheduler {
         return cal
     }
 
-    /// Builds DateComponents for a full date (used for one-shot and yearly triggers).
+    /// Builds DateComponents for a full date (used for one-shot, yearly, and discrete triggers).
+    ///
+    /// WR-03: all-day reminders fire at `allDayFireHour` (09:00 local), never midnight.
     private func dateComponents(from date: Date, isAllDay: Bool, calendar: Calendar) -> DateComponents {
         if isAllDay {
-            return calendar.dateComponents([.year, .month, .day], from: date)
+            var comps = calendar.dateComponents([.year, .month, .day], from: date)
+            comps.hour = Self.allDayFireHour
+            comps.minute = 0
+            return comps
         } else {
             return calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
         }
     }
 
     /// Builds time-only DateComponents (used for repeating daily/weekly/monthly triggers).
+    ///
+    /// WR-03: all-day repeating reminders fire at `allDayFireHour` (09:00 local), not midnight,
+    /// consistent with the timed and yearly paths.
     private func timeComponents(from date: Date, isAllDay: Bool, calendar: Calendar) -> DateComponents {
         if isAllDay {
-            // All-day repeating: fire at midnight (00:00) in device timezone
-            return DateComponents(hour: 0, minute: 0)
+            return DateComponents(hour: Self.allDayFireHour, minute: 0)
         } else {
             return calendar.dateComponents([.hour, .minute], from: date)
         }
