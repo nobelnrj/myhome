@@ -683,7 +683,11 @@ private static func weekBuckets(
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> Both questions are answered inline below (`Recommendation:`) and implemented by the plans:
+> Q1 → Plan 04-02 T3 + Plan 04-05 T1 (wire `uncategorizedSpend` into total spend);
+> Q2 → Plan 04-02 T3 + Plan 04-03 T1 (inline `fractionUsed` with 0.8/1.0 thresholds).
 
 1. **OVR-01 totalSpend scope: include uncategorized?**
    - What we know: `BudgetCalculator.monthlySpend` only counts categorized expenses. `uncategorizedSpend` is separate.
