@@ -330,7 +330,7 @@ struct OverviewAggregationTests {
         let dailyRoutineNote = Note(title: "Daily routine note")
         dailyRoutineNote.isPinned = true
         // Set recurrence to daily so NoteListOrganizer places it in .dailyRoutine, not .pinned
-        let recurrence = ReminderRecurrence(type: .daily, interval: 1)
+        let recurrence = ReminderRecurrence(type: .daily)
         dailyRoutineNote.reminderRecurrenceData = try? JSONEncoder().encode(recurrence)
         context.insert(dailyRoutineNote)
 
