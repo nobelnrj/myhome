@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 /// Overview dashboard — default launch tab (tag 0).
 ///
@@ -19,8 +20,17 @@ struct OverviewView: View {
 
     @State private var showAddExpense = false
 
+    /// The "now" the month boundaries are derived from. Backed by @State (rather than
+    /// reading `Date()` directly in a computed property) so a day/month rollover while
+    /// the app is left open updates the boundaries: `.significantTimeChangeNotification`
+    /// fires on midnight, timezone, and calendar-day changes, refreshing this value and
+    /// re-evaluating `body`, which re-inits `OverviewMonthContent` and re-runs its @Query
+    /// (WR-06). Without this, an app open across midnight-into-a-new-month kept showing
+    /// the previous month until some unrelated state change forced a re-render.
+    @State private var referenceDate = Date()
+
     private var currentMonth: DateComponents {
-        Calendar.current.dateComponents([.year, .month], from: Date())
+        Calendar.current.dateComponents([.year, .month], from: referenceDate)
     }
 
     var body: some View {
@@ -58,6 +68,14 @@ struct OverviewView: View {
         }
         .sheet(isPresented: $showAddExpense) {
             AddExpenseView()
+        }
+        // WR-06: refresh the reference date on a significant time change (midnight,
+        // timezone, or calendar-day rollover) so month boundaries stay current while
+        // the app is left open across a month boundary.
+        .onReceive(NotificationCenter.default.publisher(
+            for: UIApplication.significantTimeChangeNotification
+        )) { _ in
+            referenceDate = Date()
         }
     }
 }
