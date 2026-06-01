@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Manual Expense Spine** - Lock one-way-door IDs, CloudKit-ready SwiftData schema, and manual expense CRUD end-to-end (completed 2026-05-29)
 - [x] **Phase 2: Categories, Tags & Budgets** - Close the manual-expense loop with categories, single-tag, per-category budgets, and month view (completed 2026-05-30)
 - [x] **Phase 3: Notes & Checklists** - Independent note keeper with inline checklists, pin, search, and auto-save (completed 2026-05-30)
-- [ ] **Phase 4: Overview & Charts** - Motivating home surface: spend-vs-budget, top categories, pinned note, and Swift Charts
+- [x] **Phase 4: Overview & Charts** - Motivating home surface: spend-vs-budget, top categories, pinned note, and Swift Charts (completed 2026-06-01)
 - [ ] **Phase 5: Face ID Gate & Settings** - Biometric app lock with passcode fallback and a Settings shell for managing the household
 - [ ] **Phase 6: Gmail Sign-In & Client** - Prove Gmail OAuth + readonly fetch in isolation with secure Keychain token storage
 - [ ] **Phase 7: Bank Parsers & Ingestion Pipeline** - Zero-touch expense ingestion: parsers, confidence triage, Review Inbox, dedup, and background sync
@@ -141,7 +141,7 @@ Plans:
 - [x] 04-04-PLAN.md — SpendByCategoryChart (BarMark) + SpendOverTimeChart (LineMark + range control) (EXP-10/11)
 
 **Wave 4** — integration (UAT checkpoint)
-- [ ] 04-05-PLAN.md — OverviewView dashboard composition + RootView tab reorder/deep-link re-tag (OVR-01..04, EXP-10/11)
+- [x] 04-05-PLAN.md — OverviewView dashboard composition + RootView tab reorder/deep-link re-tag (OVR-01..04, EXP-10/11)
 
 ### Phase 5: Face ID Gate & Settings
 
@@ -213,7 +213,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
 | 3. Notes & Checklists | 6/6 | Complete   | 2026-05-30 |
-| 4. Overview & Charts | 4/5 | In Progress|  |
+| 4. Overview & Charts | 5/5 | Complete   | 2026-06-01 |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
 | 6. Gmail Sign-In & Client | 0/TBD | Not started | - |
 | 7. Bank Parsers & Ingestion Pipeline | 0/TBD | Not started | - |
