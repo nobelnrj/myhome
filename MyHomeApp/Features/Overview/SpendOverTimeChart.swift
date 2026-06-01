@@ -6,9 +6,10 @@ import SwiftData
 
 /// Card showing a LineMark + AreaMark trend chart with a Week/Month/Year segmented control (EXP-11).
 ///
-/// Accepts `monthExpenses: [Expense]` from the parent — the aggregator computes its own
-/// date windows from `Date()` (current day), so the expense array need not be bounded
-/// to a single month when `.week` or `.year` range is selected.
+/// Accepts `expenses: [Expense]` from the parent — the aggregator computes its own
+/// date windows from `Date()` (current day), so the parent MUST supply data spanning the
+/// widest range the chart can display (the current calendar year), NOT a month-bounded
+/// array (CR-01). OverviewView feeds this from a year-scoped `@Query`.
 ///
 /// Pitfall A guard: `bucketedData` is computed in `body` before the Chart DSL is entered;
 ///   the raw `[Expense]` array never enters `Chart {}` directly.
@@ -16,9 +17,10 @@ import SwiftData
 ///   no `Decimal` enters any `.value(...)` call.
 struct SpendOverTimeChart: View {
 
-    /// Pre-fetched expense array from the parent view's `@Query`.
-    /// The aggregator computes its own date windows internally.
-    let monthExpenses: [Expense]
+    /// Pre-fetched, year-scoped expense array from the parent view's `@Query`.
+    /// The aggregator computes its own date windows internally (rolling week /
+    /// current month / current calendar year), so this must span the calendar year.
+    let expenses: [Expense]
 
     /// Currently selected time range (default: month). View-local state, not persisted.
     @State private var selectedRange: SpendRange = .month
@@ -43,7 +45,7 @@ struct SpendOverTimeChart: View {
     var body: some View {
         // Pitfall A: aggregate OUTSIDE the Chart DSL
         let bucketedData = SpendOverTimeAggregator.bucket(
-            expenses: monthExpenses,
+            expenses: expenses,
             range: selectedRange
         )
         let hasSpend = bucketedData.contains { $0.spent > 0 }
@@ -123,7 +125,7 @@ private struct OverTimeChartPreviewHelper: View {
     @Query private var expenses: [Expense]
 
     var body: some View {
-        SpendOverTimeChart(monthExpenses: expenses)
+        SpendOverTimeChart(expenses: expenses)
             .padding()
     }
 }
@@ -147,6 +149,6 @@ private struct OverTimeChartPreviewHelper: View {
 }
 
 #Preview("Empty") {
-    SpendOverTimeChart(monthExpenses: [])
+    SpendOverTimeChart(expenses: [])
         .padding()
 }

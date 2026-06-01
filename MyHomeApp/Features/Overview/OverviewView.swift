@@ -70,6 +70,12 @@ private struct OverviewMonthContent: View {
 
     @Query(sort: \Category.sortOrder) private var categories: [Category]
     @Query private var monthExpenses: [Expense]
+    /// Year-scoped expenses for SpendOverTimeChart. The aggregator computes its own
+    /// date windows (rolling week / current month / current calendar year) so it needs
+    /// data spanning the widest range it can display — the calendar year — not just the
+    /// current month (CR-01: a month-bounded array makes the Year view show 11 empty
+    /// buckets and drops prior-month days from week views straddling a month boundary).
+    @Query private var yearExpenses: [Expense]
     @Query private var allNotes: [Note]
 
     init(start: Date, end: Date,
@@ -87,6 +93,18 @@ private struct OverviewMonthContent: View {
         _monthExpenses = Query(
             filter: #Predicate<Expense> { expense in
                 expense.date >= lo && expense.date <= hi
+            },
+            sort: \.date, order: .reverse
+        )
+
+        // Year-scoped query feeding SpendOverTimeChart (CR-01). Bounded to the start of
+        // the current calendar year so the Year range's 12 month-buckets and any
+        // month-straddling Week window receive the data the aggregator expects.
+        let cal = Calendar.current
+        let yearStart = cal.date(from: cal.dateComponents([.year], from: Date())) ?? start
+        _yearExpenses = Query(
+            filter: #Predicate<Expense> { expense in
+                expense.date >= yearStart
             },
             sort: \.date, order: .reverse
         )
@@ -143,7 +161,7 @@ private struct OverviewMonthContent: View {
 
                 SpendByCategoryChart(categoryItems: categoryItems)
 
-                SpendOverTimeChart(monthExpenses: monthExpenses)
+                SpendOverTimeChart(expenses: yearExpenses)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
