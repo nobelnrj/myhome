@@ -154,13 +154,18 @@ Plans:
   2. Face ID falls back to device passcode via LAPolicy.deviceOwnerAuthentication, and every LAError case is handled explicitly without locking the user out
   3. User can manage categories (add, rename, delete) and per-category monthly budgets from Settings
 
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
+
+> SC#3 wording note (D5-08): budget management is reached *via* Settings (a Budgets-tab deep-link), not hosted *in* Settings — budget editing stays on the Budgets screen.
 
 Plans:
 
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+**Wave 1** — testable lock-state core
+- [ ] 05-01-PLAN.md — BiometricAuthPort seam + SpyBiometricAuth + @Observable LockController (grace math, full LAError mapping, passcode-not-set hard-block) — TDD (SEC-01/02)
+
+**Wave 2** *(blocked on Wave 1)* — gate wiring + Settings shell
+- [ ] 05-02-PLAN.md — UnlockView + SettingsView (tab 4: Face ID toggle, ManageCategories sheet, Budgets deep-link, About) + RootView scenePhase/blur/overlay wiring (SEC-01, SET-01/02/03)
 
 ### Phase 6: Gmail Sign-In & Client
 
