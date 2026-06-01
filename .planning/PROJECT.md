@@ -23,6 +23,14 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 - [x] Local-only storage in v1 — SwiftData on an App Group store (single device, single user)
 - [x] Schema designed so adding CloudKit sharing later is additive, not a rewrite — CloudKit-ready `@Model` (all optional/defaulted, no `@Attribute(.unique)`), VersionedSchema + migration plan proven against a bundled v1 store
 
+**Phase 4: Overview & Charts** (2026-06-01)
+
+- [x] Charts — spend-by-category (`BarMark`) and spend-over-time (`LineMark`/`AreaMark` with Week/Month/Year range) (EXP-10, EXP-11)
+- [x] Current month spend vs. budget single bar with threshold colors (OVR-01)
+- [x] Top 3 spend categories this month (OVR-02)
+- [x] Pinned note / fallback checklist surfaced front-and-center with Notes deep-link (OVR-03)
+- [x] Overview as the default launch tab; tabs reordered Home → Expenses → Budgets → Notes (OVR-04)
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
@@ -33,7 +41,6 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 - [ ] Predefined category list (Groceries, Fuel, Dining, etc.) plus user-created custom tags
 - [ ] Per-category monthly budgets with progress visualization
 - [ ] Month view of expenses grouped by category/tag
-- [ ] Charts (at minimum: spend-by-category and spend-over-time) — chart scope refined in its phase
 - [ ] Future-proof schema: multi-tag-per-expense, multi-account, multi-currency-ready (single currency in v1)
 
 **Note keeper**
@@ -41,12 +48,6 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 - [ ] Notes with title + free-form text body
 - [ ] Optional checklist items embedded inside any note
 - [ ] List of all notes with most-recent-first ordering
-
-**Overview / Home**
-
-- [ ] Current month spend vs. budget (single bar)
-- [ ] Top 3 spend categories this month
-- [ ] Pinned notes / most recent checklist surfaced front-and-center
 
 **Foundational**
 
@@ -140,4 +141,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-29 — Phase 1 (Foundation & Manual Expense Spine) complete*
+*Last updated: 2026-06-01 — Phase 4 (Overview & Charts) complete*
