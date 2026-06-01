@@ -74,6 +74,9 @@
 		A406 /* SpendBudgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F406 /* SpendBudgetCard.swift */; };
 		A407 /* TopCategoriesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F407 /* TopCategoriesCard.swift */; };
 		A408 /* PinnedNoteCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F408 /* PinnedNoteCard.swift */; };
+		A409 /* SpendByCategoryChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F409 /* SpendByCategoryChart.swift */; };
+		A410 /* SpendOverTimeChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410 /* SpendOverTimeChart.swift */; };
+		A411 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F411 /* OverviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -148,6 +151,9 @@
 		F406 /* SpendBudgetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendBudgetCard.swift; sourceTree = "<group>"; };
 		F407 /* TopCategoriesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCategoriesCard.swift; sourceTree = "<group>"; };
 		F408 /* PinnedNoteCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedNoteCard.swift; sourceTree = "<group>"; };
+		F409 /* SpendByCategoryChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendByCategoryChart.swift; sourceTree = "<group>"; };
+		F410 /* SpendOverTimeChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeChart.swift; sourceTree = "<group>"; };
+		F411 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -224,9 +230,12 @@
 		G124 /* Overview */ = {
 			isa = PBXGroup;
 			children = (
+				F411 /* OverviewView.swift */,
 				F406 /* SpendBudgetCard.swift */,
 				F407 /* TopCategoriesCard.swift */,
 				F408 /* PinnedNoteCard.swift */,
+				F409 /* SpendByCategoryChart.swift */,
+				F410 /* SpendOverTimeChart.swift */,
 			);
 			path = Overview;
 			sourceTree = "<group>";
@@ -509,9 +518,12 @@
 				A145NA /* NotificationActions.swift in Sources */,
 				A404 /* SpendOverTimeAggregator.swift in Sources */,
 				A405 /* OverviewAggregation.swift in Sources */,
+				A411 /* OverviewView.swift in Sources */,
 				A406 /* SpendBudgetCard.swift in Sources */,
 				A407 /* TopCategoriesCard.swift in Sources */,
 				A408 /* PinnedNoteCard.swift in Sources */,
+				A409 /* SpendByCategoryChart.swift in Sources */,
+				A410 /* SpendOverTimeChart.swift in Sources */,
 				A127 /* BudgetProgressView.swift in Sources */,
 				A128 /* BudgetCategoryCard.swift in Sources */,
 				A129 /* EditBudgetSheet.swift in Sources */,

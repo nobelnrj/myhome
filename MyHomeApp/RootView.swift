@@ -1,16 +1,16 @@
 import SwiftUI
 
-/// Root TabView host (D2-10, D3-17).
+/// Root TabView host (D2-10, D3-17, D4-01).
 ///
-/// Phase 3 tabs (3-tab bar, lean — D3-17):
-/// 1. Expenses — ExpenseListView (owns its NavigationStack).  tag: 0
-/// 2. Budgets — BudgetsView (owns its NavigationStack).        tag: 1
-/// 3. Notes — NotesHomeView (segmented List|Calendar host).    tag: 2
+/// Phase 4 tabs (4-tab bar — D4-01):
+/// 0. Home — OverviewView (dashboard, default launch tab).      tag: 0
+/// 1. Expenses — ExpenseListView (owns its NavigationStack).    tag: 1
+/// 2. Budgets — BudgetsView (owns its NavigationStack).         tag: 2
+/// 3. Notes — NotesHomeView (segmented List|Calendar host).     tag: 3
 ///
 /// The `selectedTab` binding allows programmatic tab switching, e.g. on a
 /// notification deep-link (kOpenNoteNotification → switch to Notes tab, open note).
 ///
-/// Future tabs (Overview Phase 4, Settings Phase 5) slot in here.
 /// No shared NavigationPath — each tab owns its navigation independently.
 struct RootView: View {
 
@@ -22,23 +22,29 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
+            OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID)
+                .tabItem {
+                    Label("Home", systemImage: "house")
+                }
+                .tag(0)
+
             ExpenseListView()
                 .tabItem {
                     Label("Expenses", systemImage: "list.bullet")
                 }
-                .tag(0)
+                .tag(1)
 
             BudgetsView()
                 .tabItem {
                     Label("Budgets", systemImage: "chart.bar")
                 }
-                .tag(1)
+                .tag(2)
 
             NotesHomeView(deepLinkNoteID: $deepLinkNoteID, deepLinkBlockID: $deepLinkBlockID)
                 .tabItem {
                     Label("Notes", systemImage: "note.text")
                 }
-                .tag(2)
+                .tag(3)
         }
         // Deep-link observer: notification banner tap → switch to Notes tab + open note
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in
@@ -46,7 +52,7 @@ struct RootView: View {
                 deepLinkNoteID = noteID
                 // CR-03: forward block target when present
                 deepLinkBlockID = notification.userInfo?["blockID"] as? UUID
-                selectedTab = 2
+                selectedTab = 3
             }
         }
     }
