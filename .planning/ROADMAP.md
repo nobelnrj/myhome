@@ -138,7 +138,7 @@ Plans:
 
 **Wave 3** — card + chart components (parallel)
 - [x] 04-03-PLAN.md — SpendBudgetCard + TopCategoriesCard + PinnedNoteCard with D4-07 empty states (OVR-01/02/03)
-- [ ] 04-04-PLAN.md — SpendByCategoryChart (BarMark) + SpendOverTimeChart (LineMark + range control) (EXP-10/11)
+- [x] 04-04-PLAN.md — SpendByCategoryChart (BarMark) + SpendOverTimeChart (LineMark + range control) (EXP-10/11)
 
 **Wave 4** — integration (UAT checkpoint)
 - [ ] 04-05-PLAN.md — OverviewView dashboard composition + RootView tab reorder/deep-link re-tag (OVR-01..04, EXP-10/11)
@@ -213,7 +213,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
 | 3. Notes & Checklists | 6/6 | Complete   | 2026-05-30 |
-| 4. Overview & Charts | 3/5 | In Progress|  |
+| 4. Overview & Charts | 4/5 | In Progress|  |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
 | 6. Gmail Sign-In & Client | 0/TBD | Not started | - |
 | 7. Bank Parsers & Ingestion Pipeline | 0/TBD | Not started | - |
