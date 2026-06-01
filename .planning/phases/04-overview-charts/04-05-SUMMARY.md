@@ -119,17 +119,17 @@ selectedTab = 3   // was 2; Notes is now tag 3
 
 ### Manual Smoke (Task 3 — checkpoint:human-verify)
 
-**Status: Awaiting human verification.**
+**Status: APPROVED by user (2026-06-01).**
 
-The automated tasks are complete. The following items require manual verification on the iPhone 17 simulator:
+All manual verification items confirmed on iPhone 17 simulator:
 
-1. App LANDS on "Home" tab (leftmost, `house` icon) — not Expenses
-2. Tab order left→right: Home, Expenses, Budgets, Notes
-3. Five cards top→bottom: This Month, Top Categories, Pinned Note, Spend by Category, Spend Over Time
-4. Toolbar `+` → full Add Expense sheet appears; add expense → Overview updates
-5. Spend Over Time: Week/Month/Year Picker recomputes line
-6. Empty states render (no blank/broken charts)
-7. Notes deep-link lands on Notes tab (tag 3), not Budgets
+1. App LANDS on "Home" tab (leftmost, `house` icon) — not Expenses — VERIFIED
+2. Tab order left→right: Home, Expenses, Budgets, Notes — VERIFIED
+3. Five cards top→bottom: This Month, Top Categories, Pinned Note, Spend by Category, Spend Over Time — VERIFIED
+4. Toolbar `+` → full Add Expense sheet appears; add expense → Overview updates — VERIFIED
+5. Spend Over Time: Week/Month/Year Picker recomputes line — VERIFIED
+6. Empty states render (no blank/broken charts) — VERIFIED
+7. Notes deep-link lands on Notes tab (tag 3), not Budgets — VERIFIED
 
 ---
 
@@ -177,3 +177,4 @@ None. No new network endpoints, auth paths, file access patterns, or schema chan
 | commit 1ba77a9 exists (Task 1) | FOUND |
 | commit 726abb7 exists (Task 2) | FOUND |
 | Full test suite: 76 passed, 0 failed | CONFIRMED |
+| Task 3 human-verify checkpoint approved | APPROVED (2026-06-01) |
