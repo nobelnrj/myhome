@@ -71,6 +71,9 @@
 		A403 /* DecimalINRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F403 /* DecimalINRTests.swift */; };
 		A404 /* SpendOverTimeAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F404 /* SpendOverTimeAggregator.swift */; };
 		A405 /* OverviewAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F405 /* OverviewAggregation.swift */; };
+		A406 /* SpendBudgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F406 /* SpendBudgetCard.swift */; };
+		A407 /* TopCategoriesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F407 /* TopCategoriesCard.swift */; };
+		A408 /* PinnedNoteCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F408 /* PinnedNoteCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -142,6 +145,9 @@
 		F403 /* DecimalINRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalINRTests.swift; sourceTree = "<group>"; };
 		F404 /* SpendOverTimeAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeAggregator.swift; sourceTree = "<group>"; };
 		F405 /* OverviewAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewAggregation.swift; sourceTree = "<group>"; };
+		F406 /* SpendBudgetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendBudgetCard.swift; sourceTree = "<group>"; };
+		F407 /* TopCategoriesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCategoriesCard.swift; sourceTree = "<group>"; };
+		F408 /* PinnedNoteCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedNoteCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,11 +213,22 @@
 		G120 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				G124 /* Overview */,
 				G121 /* Expenses */,
 				G122 /* Budgets */,
 				G123 /* Notes */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		G124 /* Overview */ = {
+			isa = PBXGroup;
+			children = (
+				F406 /* SpendBudgetCard.swift */,
+				F407 /* TopCategoriesCard.swift */,
+				F408 /* PinnedNoteCard.swift */,
+			);
+			path = Overview;
 			sourceTree = "<group>";
 		};
 		G123 /* Notes */ = {
@@ -492,6 +509,9 @@
 				A145NA /* NotificationActions.swift in Sources */,
 				A404 /* SpendOverTimeAggregator.swift in Sources */,
 				A405 /* OverviewAggregation.swift in Sources */,
+				A406 /* SpendBudgetCard.swift in Sources */,
+				A407 /* TopCategoriesCard.swift in Sources */,
+				A408 /* PinnedNoteCard.swift in Sources */,
 				A127 /* BudgetProgressView.swift in Sources */,
 				A128 /* BudgetCategoryCard.swift in Sources */,
 				A129 /* EditBudgetSheet.swift in Sources */,
