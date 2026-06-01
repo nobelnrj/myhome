@@ -125,13 +125,23 @@ Plans:
   3. User can view a spend-by-category chart for the current month (Swift Charts)
   4. User can view a spend-over-time chart across configurable date ranges (Swift Charts)
 
-**Plans**: TBD
+**Plans**: 5 plans
 **UI hint**: yes
 
 Plans:
 
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+**Wave 1** — failing-test scaffold (Nyquist gate)
+- [ ] 04-01-PLAN.md — Wave 0 test stubs: SpendOverTimeAggregatorTests + OverviewAggregationTests + DecimalINRTests (RED) (OVR-01/02/03, EXP-11)
+
+**Wave 2** — pure helpers (GREEN)
+- [ ] 04-02-PLAN.md — formattedINRCompact() + SpendOverTimeAggregator + OverviewAggregation pure helpers (OVR-01/02/03, EXP-11)
+
+**Wave 3** — card + chart components (parallel)
+- [ ] 04-03-PLAN.md — SpendBudgetCard + TopCategoriesCard + PinnedNoteCard with D4-07 empty states (OVR-01/02/03)
+- [ ] 04-04-PLAN.md — SpendByCategoryChart (BarMark) + SpendOverTimeChart (LineMark + range control) (EXP-10/11)
+
+**Wave 4** — integration (UAT checkpoint)
+- [ ] 04-05-PLAN.md — OverviewView dashboard composition + RootView tab reorder/deep-link re-tag (OVR-01..04, EXP-10/11)
 
 ### Phase 5: Face ID Gate & Settings
 
