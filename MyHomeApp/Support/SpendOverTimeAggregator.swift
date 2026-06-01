@@ -31,7 +31,12 @@ struct SpendBucket: Identifiable {
     /// The calendar slot this bucket represents.
     let date: Date
     /// Total spend in this slot, converted from Decimal at the aggregation boundary.
+    /// Used ONLY as the Chart plot value (Plottable requires Double).
     let spent: Double
+    /// Original Decimal spend, carried alongside `spent` so the point annotation /
+    /// accessibility label format from the exact value — never reconstruct
+    /// `Decimal(spent)` from the lossy Double (WR-03, Pitfall B: no float drift).
+    let spentDecimal: Decimal
     /// Accessibility / chart tooltip label for this date slot.
     var dateLabel: String
 }
@@ -101,7 +106,7 @@ enum SpendOverTimeAggregator {
             let decimalSpent = totals[day] ?? .zero
             let doubleSpent = NSDecimalNumber(decimal: decimalSpent).doubleValue
             let label = day.formatted(.dateTime.weekday(.abbreviated).day())
-            return SpendBucket(id: day, date: day, spent: doubleSpent, dateLabel: label)
+            return SpendBucket(id: day, date: day, spent: doubleSpent, spentDecimal: decimalSpent, dateLabel: label)
         }
     }
 
@@ -139,7 +144,7 @@ enum SpendOverTimeAggregator {
             let decimalSpent = totals[day] ?? .zero
             let doubleSpent = NSDecimalNumber(decimal: decimalSpent).doubleValue
             let label = day.formatted(.dateTime.month(.abbreviated).day())
-            return SpendBucket(id: day, date: day, spent: doubleSpent, dateLabel: label)
+            return SpendBucket(id: day, date: day, spent: doubleSpent, spentDecimal: decimalSpent, dateLabel: label)
         }
     }
 
@@ -177,7 +182,7 @@ enum SpendOverTimeAggregator {
             let decimalSpent = totals[monthStart] ?? .zero
             let doubleSpent = NSDecimalNumber(decimal: decimalSpent).doubleValue
             let label = monthStart.formatted(.dateTime.month(.abbreviated))
-            return SpendBucket(id: monthStart, date: monthStart, spent: doubleSpent, dateLabel: label)
+            return SpendBucket(id: monthStart, date: monthStart, spent: doubleSpent, spentDecimal: decimalSpent, dateLabel: label)
         }
     }
 

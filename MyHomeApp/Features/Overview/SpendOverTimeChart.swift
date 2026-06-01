@@ -87,7 +87,7 @@ struct SpendOverTimeChart: View {
                     .lineStyle(StrokeStyle(lineWidth: 2))
                     .symbol(.circle)
                     .symbolSize(30)
-                    .accessibilityLabel("\(point.dateLabel), \(Decimal(point.spent).formattedINR())")
+                    .accessibilityLabel("\(point.dateLabel), \(point.spentDecimal.formattedINR())")
                 }
                 .chartXAxis {
                     AxisMarks(values: .automatic) { value in

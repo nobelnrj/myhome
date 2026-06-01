@@ -15,7 +15,12 @@ struct CategorySpendItem: Identifiable {
     /// Category display name.
     let name: String
     /// Total spend converted from Decimal at the caller's aggregation boundary.
+    /// Used ONLY as the Chart plot value (Plottable requires Double).
     let spent: Double
+    /// Original Decimal spend, carried alongside `spent` so display strings format from
+    /// the exact value — never reconstruct `Decimal(spent)` from the lossy Double (WR-03,
+    /// Pitfall B: no float drift in displayed money).
+    let spentDecimal: Decimal
 }
 
 // MARK: - SpendByCategoryChart
@@ -55,11 +60,11 @@ struct SpendByCategoryChart: View {
                     )
                     .foregroundStyle(Color.accentColor)
                     .annotation(position: .trailing) {
-                        Text(Decimal(item.spent).formattedINRCompact())
+                        Text(item.spentDecimal.formattedINRCompact())
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    .accessibilityLabel("\(item.name), \(Decimal(item.spent).formattedINR())")
+                    .accessibilityLabel("\(item.name), \(item.spentDecimal.formattedINR())")
                 }
                 .chartXAxis(.hidden)
                 .chartYAxis {
@@ -88,10 +93,12 @@ private struct CategoryChartPreviewHelper: View {
 
     var body: some View {
         let items = categories.prefix(8).enumerated().map { index, cat in
-            CategorySpendItem(
+            let amount = (8 - index) * 2000 + 500
+            return CategorySpendItem(
                 id: cat.persistentModelID,
                 name: cat.name ?? "Category \(index + 1)",
-                spent: Double((8 - index) * 2000 + 500)
+                spent: Double(amount),
+                spentDecimal: Decimal(amount)
             )
         }
         SpendByCategoryChart(categoryItems: items)

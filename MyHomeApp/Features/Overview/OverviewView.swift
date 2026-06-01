@@ -133,7 +133,8 @@ private struct OverviewMonthContent: View {
                 return CategorySpendItem(
                     id: id,
                     name: category.name ?? "Unnamed",
-                    spent: NSDecimalNumber(decimal: spend).doubleValue
+                    spent: NSDecimalNumber(decimal: spend).doubleValue,
+                    spentDecimal: spend
                 )
             }
             .sorted { $0.spent > $1.spent }
