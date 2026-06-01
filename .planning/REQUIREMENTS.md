@@ -19,8 +19,8 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 ### Security
 
-- [ ] **SEC-01**: User can require Face ID to open the app; toggle in Settings
-- [ ] **SEC-02**: Face ID falls back to device passcode via `LAPolicy.deviceOwnerAuthentication`; every `LAError` case is handled explicitly (`.biometryNotAvailable`, `.biometryNotEnrolled`, `.biometryLockout`, `.userFallback`, `.userCancel`, `.appCancel`, `.systemCancel`)
+- [x] **SEC-01**: User can require Face ID to open the app; toggle in Settings
+- [x] **SEC-02**: Face ID falls back to device passcode via `LAPolicy.deviceOwnerAuthentication`; every `LAError` case is handled explicitly (`.biometryNotAvailable`, `.biometryNotEnrolled`, `.biometryLockout`, `.userFallback`, `.userCancel`, `.appCancel`, `.systemCancel`)
 - [ ] **SEC-03**: Gmail OAuth refresh token is stored in Keychain with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (never `WhenUnlocked`, never `biometryCurrentSet`)
 
 ### Expense Tracker (manual)
@@ -174,8 +174,8 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | FND-05 | Phase 1 | Complete |
 | FND-06 | Phase 1 | Complete |
 | FND-07 | Phase 1 | Complete |
-| SEC-01 | Phase 5 | Pending |
-| SEC-02 | Phase 5 | Pending |
+| SEC-01 | Phase 5 | Complete |
+| SEC-02 | Phase 5 | Complete |
 | SEC-03 | Phase 6 | Pending |
 | EXP-01 | Phase 1 | Complete |
 | EXP-02 | Phase 1 | Complete |

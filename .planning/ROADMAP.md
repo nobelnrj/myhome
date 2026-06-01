@@ -162,7 +162,7 @@ Plans:
 Plans:
 
 **Wave 1** — testable lock-state core
-- [ ] 05-01-PLAN.md — BiometricAuthPort seam + SpyBiometricAuth + @Observable LockController (grace math, full LAError mapping, passcode-not-set hard-block) — TDD (SEC-01/02)
+- [x] 05-01-PLAN.md — BiometricAuthPort seam + SpyBiometricAuth + @Observable LockController (grace math, full LAError mapping, passcode-not-set hard-block) — TDD (SEC-01/02)
 
 **Wave 2** *(blocked on Wave 1)* — gate wiring + Settings shell
 - [ ] 05-02-PLAN.md — UnlockView + SettingsView (tab 4: Face ID toggle, ManageCategories sheet, Budgets deep-link, About) + RootView scenePhase/blur/overlay wiring (SEC-01, SET-01/02/03)
@@ -219,6 +219,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
 | 3. Notes & Checklists | 6/6 | Complete   | 2026-05-30 |
 | 4. Overview & Charts | 5/5 | Complete    | 2026-06-01 |
-| 5. Face ID Gate & Settings | 0/TBD | Not started | - |
+| 5. Face ID Gate & Settings | 1/2 | In Progress|  |
 | 6. Gmail Sign-In & Client | 0/TBD | Not started | - |
 | 7. Bank Parsers & Ingestion Pipeline | 0/TBD | Not started | - |

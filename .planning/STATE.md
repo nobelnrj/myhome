@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-last_updated: "2026-06-01T18:48:01.584Z"
+status: executing
+last_updated: "2026-06-01T19:23:32.610Z"
 last_activity: 2026-06-01
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 20
-  completed_plans: 20
+  total_plans: 22
+  completed_plans: 21
   percent: 57
 ---
 
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-28)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 5 — face id gate & settings
+**Current focus:** Phase 05 — face-id-gate-settings
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
-Status: Ready to plan
+Phase: 05 (face-id-gate-settings) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-06-01
 
-Progress: [██████████] 100%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [██████████] 100%
 | Phase 04-overview-charts P01 | 31 | 3 tasks | 4 files |
 | Phase 04-overview-charts P02 | 45 | 3 tasks | 5 files |
 | Phase 04-overview-charts P04 | 25 | 2 tasks | 2 files |
+| Phase 05-face-id-gate-settings P01 | 45 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Recent decisions affecting current work:
 - [Phase ?]: 03-06: categoryIdentifier must be stamped in NotificationScheduler.makeRequest — iOS drops actions if absent
 - [Phase ?]: 03-06: Deep-link via kOpenNoteNotification + RootView @State tab-selection Binding — no environment key needed
 - [Phase ?]: 03-06: Calendar day-agenda binds live to Note/NoteBlock @Model via AgendaReminderItem — never snapshot for completion-state UI
+- [Phase ?]: BiometricAuthPort protocol-port seam (mirrors NotificationCenterPort) makes every LAError path unit-testable without a device
+- [Phase ?]: LockController @MainActor for Swift 6 strict concurrency when scenePhase onChange mutates @Observable state
+- [Phase ?]: canEvaluate called before evaluate in authenticate() — passcodeNotSet only detectable from canEvaluatePolicy path (D5-05)
 
 ### Pending Todos
 
@@ -115,6 +119,6 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 
 ## Session Continuity
 
-Last session: 2026-06-01T18:48:01.576Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-face-id-gate-settings/05-CONTEXT.md
+Last session: 2026-06-01T19:23:26.357Z
+Stopped at: Phase 5 planned (2 plans, verified)
+Resume file: None
