@@ -74,7 +74,14 @@ enum OverviewAggregation {
                 // Alphabetical tie-break on category name (nil name sorts last)
                 let lName = lhs.category.name ?? ""
                 let rName = rhs.category.name ?? ""
-                return lName < rName
+                if lName != rName {
+                    return lName < rName
+                }
+                // Final stable discriminator so the comparator is a strict total order
+                // (WR-05): equal-spend + equal/nil-name pairs would otherwise be ordered
+                // non-deterministically, flipping the rendered top-3 between renders.
+                return String(describing: lhs.category.persistentModelID)
+                    < String(describing: rhs.category.persistentModelID)
             }
             .prefix(3)
             .map { $0 }
