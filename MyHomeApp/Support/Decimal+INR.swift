@@ -15,4 +15,21 @@ extension Decimal {
             .locale(Locale(identifier: "en_IN"))
         )
     }
+
+    /// Compact INR formatter for chart axis labels and bar annotations only.
+    ///
+    /// Thresholds (truncation via Int, no rounding):
+    ///   ≥ 1,00,000 → "₹NL"   (lakhs,   e.g. "₹1L", "₹5L")
+    ///   ≥ 1,000    → "₹Nk"   (thousands, e.g. "₹1k", "₹50k")
+    ///   else       → "₹N"    (units,     e.g. "₹500", "₹999")
+    ///
+    /// Conversion via NSDecimalNumber(decimal:).doubleValue — never Double(truncating:)
+    /// or String(format:) (Pitfall B/17 guard). Do NOT use this for stored money or
+    /// displayed totals — use formattedINR() everywhere else.
+    func formattedINRCompact() -> String {
+        let d = NSDecimalNumber(decimal: self).doubleValue
+        if d >= 100_000 { return "₹\(Int(d / 100_000))L" }
+        if d >= 1_000   { return "₹\(Int(d / 1_000))k" }
+        return "₹\(Int(d))"
+    }
 }
