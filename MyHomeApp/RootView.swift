@@ -1,12 +1,20 @@
 import SwiftUI
 
-/// Root TabView host (D2-10, D3-17, D4-01).
+/// Root TabView host (D2-10, D3-17, D4-01, D5-11).
+///
+/// Phase 5 additions:
+/// - @State lockController = LockController() — owns the Face ID gate state (@Observable, D5-11)
+/// - scenePhase observation drives blur + grace-period re-lock (D5-02, D5-01)
+/// - Privacy blur (.blur radius 20) applied to TabView on inactive/background (T-05-04)
+/// - UnlockView overlay when lockController.isLocked && lockController.lockEnabled (T-05-01)
+/// - Settings tab (tag 4, gearshape icon — D5-11, D5-12)
 ///
 /// Phase 4 tabs (4-tab bar — D4-01):
 /// 0. Home — OverviewView (dashboard, default launch tab).      tag: 0
 /// 1. Expenses — ExpenseListView (owns its NavigationStack).    tag: 1
 /// 2. Budgets — BudgetsView (owns its NavigationStack).         tag: 2
 /// 3. Notes — NotesHomeView (segmented List|Calendar host).     tag: 3
+/// 4. Settings — SettingsView (Face ID toggle, categories, about). tag: 4
 ///
 /// The `selectedTab` binding allows programmatic tab switching, e.g. on a
 /// notification deep-link (kOpenNoteNotification → switch to Notes tab, open note).
@@ -14,11 +22,15 @@ import SwiftUI
 /// No shared NavigationPath — each tab owns its navigation independently.
 struct RootView: View {
 
+    @Environment(\.scenePhase) private var scenePhase
+
     @State private var selectedTab: Int = 0
     @State private var deepLinkNoteID: UUID? = nil
     /// CR-03: Thread blockID deep-link through the view hierarchy so EditNoteView can
     /// scroll to and highlight the target block row when a block-level reminder is tapped.
     @State private var deepLinkBlockID: UUID? = nil
+    /// Face ID gate state — @Observable owned via @State, never @StateObject (PITFALLS.md Pitfall 10)
+    @State private var lockController = LockController()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -45,6 +57,12 @@ struct RootView: View {
                     Label("Notes", systemImage: "note.text")
                 }
                 .tag(3)
+
+            SettingsView(selectedTab: $selectedTab, lockController: lockController)
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .tag(4)
         }
         // Deep-link observer: notification banner tap → switch to Notes tab + open note
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in
@@ -53,6 +71,25 @@ struct RootView: View {
                 // CR-03: forward block target when present
                 deepLinkBlockID = notification.userInfo?["blockID"] as? UUID
                 selectedTab = 3
+            }
+        }
+        // Privacy blur: active on inactive + background so app-switcher snapshot is obscured (T-05-04, D5-02)
+        .blur(radius: lockController.isBlurred ? 20 : 0)
+        .animation(.easeInOut(duration: 0.2), value: lockController.isBlurred)
+        // UnlockView overlay: shown when locked + lock enabled (T-05-01, D5-02)
+        .overlay {
+            if lockController.isLocked && lockController.lockEnabled {
+                UnlockView(lockController: lockController)
+                    .transition(.opacity)
+            }
+        }
+        // Scene phase observation: drives blur, grace-period re-lock, and auto-authenticate on foreground
+        .onChange(of: scenePhase) { _, newPhase in
+            lockController.scenePhaseChanged(newPhase)
+            // Auto-trigger auth on foreground when locked (banking-app feel — D5-02, D5-01)
+            // Pitfall: never call async directly in onChange; always wrap in Task
+            if newPhase == .active && lockController.isLocked && lockController.lockEnabled {
+                Task { await lockController.authenticate() }
             }
         }
     }

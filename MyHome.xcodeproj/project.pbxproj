@@ -81,6 +81,7 @@
 		A409 /* SpendByCategoryChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F409 /* SpendByCategoryChart.swift */; };
 		A410 /* SpendOverTimeChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410 /* SpendOverTimeChart.swift */; };
 		A411 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F411 /* OverviewView.swift */; };
+		A603 /* LockSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F603 /* LockSettingsTests.swift */; };
 		A601 /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F601 /* UnlockView.swift */; };
 		A602 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
@@ -164,6 +165,7 @@
 		F502 /* SpyBiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyBiometricAuth.swift; sourceTree = "<group>"; };
 		F503 /* LockStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockStateTests.swift; sourceTree = "<group>"; };
 		F504 /* LockController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockController.swift; sourceTree = "<group>"; };
+		F603 /* LockSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockSettingsTests.swift; sourceTree = "<group>"; };
 		F601 /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
 		F602 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -375,6 +377,7 @@
 				F402 /* OverviewAggregationTests.swift */,
 				F403 /* DecimalINRTests.swift */,
 				F503 /* LockStateTests.swift */,
+				F603 /* LockSettingsTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -595,6 +598,7 @@
 				A403 /* DecimalINRTests.swift in Sources */,
 				A502 /* SpyBiometricAuth.swift in Sources */,
 				A503 /* LockStateTests.swift in Sources */,
+				A603 /* LockSettingsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
