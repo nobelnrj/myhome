@@ -72,6 +72,7 @@
 		A501 /* BiometricAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F501 /* BiometricAuthPort.swift */; };
 		A502 /* SpyBiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F502 /* SpyBiometricAuth.swift */; };
 		A503 /* LockStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F503 /* LockStateTests.swift */; };
+		A504 /* LockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F504 /* LockController.swift */; };
 		A404 /* SpendOverTimeAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F404 /* SpendOverTimeAggregator.swift */; };
 		A405 /* OverviewAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F405 /* OverviewAggregation.swift */; };
 		A406 /* SpendBudgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F406 /* SpendBudgetCard.swift */; };
@@ -160,6 +161,7 @@
 		F501 /* BiometricAuthPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuthPort.swift; sourceTree = "<group>"; };
 		F502 /* SpyBiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyBiometricAuth.swift; sourceTree = "<group>"; };
 		F503 /* LockStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockStateTests.swift; sourceTree = "<group>"; };
+		F504 /* LockController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -319,6 +321,7 @@
 			isa = PBXGroup;
 			children = (
 				F501 /* BiometricAuthPort.swift */,
+				F504 /* LockController.swift */,
 			);
 			path = Security;
 			sourceTree = "<group>";
@@ -548,6 +551,7 @@
 				A131 /* FilteredExpenseListView.swift in Sources */,
 				A132 /* BudgetsView.swift in Sources */,
 				A501 /* BiometricAuthPort.swift in Sources */,
+				A504 /* LockController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
