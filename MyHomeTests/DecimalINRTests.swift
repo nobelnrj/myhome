@@ -82,4 +82,24 @@ struct DecimalINRTests {
         #expect(Decimal(500000).formattedINRCompact() == "₹5L",
                 "500000 = 5 L; expected \"₹5L\"")
     }
+
+    // MARK: - Negative amounts (refunds — WR-01): compact on magnitude, sign before ₹
+
+    @Test("negativeUnits: Decimal(-500).formattedINRCompact() == \"-₹500\"")
+    func negativeUnits() {
+        #expect(Decimal(-500).formattedINRCompact() == "-₹500",
+                "Negative below 1000 keeps magnitude, sign before ₹ (matches formattedINR \"-₹500\")")
+    }
+
+    @Test("negativeThousands: Decimal(-50000).formattedINRCompact() == \"-₹50k\"")
+    func negativeThousands() {
+        #expect(Decimal(-50000).formattedINRCompact() == "-₹50k",
+                "Negative ≥ 1000 must still compact to k on magnitude; expected \"-₹50k\"")
+    }
+
+    @Test("negativeLakhs: Decimal(-150000).formattedINRCompact() == \"-₹1L\"")
+    func negativeLakhs() {
+        #expect(Decimal(-150000).formattedINRCompact() == "-₹1L",
+                "Negative ≥ 100000 must compact to L on magnitude; expected \"-₹1L\"")
+    }
 }

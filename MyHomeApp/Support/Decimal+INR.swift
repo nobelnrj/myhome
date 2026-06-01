@@ -26,10 +26,16 @@ extension Decimal {
     /// Conversion via NSDecimalNumber(decimal:).doubleValue — never Double(truncating:)
     /// or String(format:) (Pitfall B/17 guard). Do NOT use this for stored money or
     /// displayed totals — use formattedINR() everywhere else.
+    ///
+    /// Negative amounts (refunds — a first-class concept; a large refund can drive a
+    /// daily/monthly bucket negative) compact on magnitude with the sign placed before
+    /// the symbol, matching formattedINR()'s "-₹500" convention (WR-01).
     func formattedINRCompact() -> String {
         let d = NSDecimalNumber(decimal: self).doubleValue
-        if d >= 100_000 { return "₹\(Int(d / 100_000))L" }
-        if d >= 1_000   { return "₹\(Int(d / 1_000))k" }
-        return "₹\(Int(d))"
+        let sign = d < 0 ? "-" : ""
+        let a = abs(d)
+        if a >= 100_000 { return "\(sign)₹\(Int(a / 100_000))L" }
+        if a >= 1_000   { return "\(sign)₹\(Int(a / 1_000))k" }
+        return "\(sign)₹\(Int(a))"
     }
 }
