@@ -81,6 +81,8 @@
 		A409 /* SpendByCategoryChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F409 /* SpendByCategoryChart.swift */; };
 		A410 /* SpendOverTimeChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410 /* SpendOverTimeChart.swift */; };
 		A411 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F411 /* OverviewView.swift */; };
+		A601 /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F601 /* UnlockView.swift */; };
+		A602 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -162,6 +164,8 @@
 		F502 /* SpyBiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyBiometricAuth.swift; sourceTree = "<group>"; };
 		F503 /* LockStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockStateTests.swift; sourceTree = "<group>"; };
 		F504 /* LockController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockController.swift; sourceTree = "<group>"; };
+		F601 /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
+		F602 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -232,6 +236,7 @@
 				G121 /* Expenses */,
 				G122 /* Budgets */,
 				G123 /* Notes */,
+				G125 /* Settings */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -394,6 +399,15 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		G125 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F601 /* UnlockView.swift */,
+				F602 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -550,6 +564,8 @@
 				A130 /* ManageCategoriesView.swift in Sources */,
 				A131 /* FilteredExpenseListView.swift in Sources */,
 				A132 /* BudgetsView.swift in Sources */,
+				A601 /* UnlockView.swift in Sources */,
+				A602 /* SettingsView.swift in Sources */,
 				A501 /* BiometricAuthPort.swift in Sources */,
 				A504 /* LockController.swift in Sources */,
 			);
