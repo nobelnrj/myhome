@@ -69,6 +69,8 @@
 		A401 /* SpendOverTimeAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F401 /* SpendOverTimeAggregatorTests.swift */; };
 		A402 /* OverviewAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F402 /* OverviewAggregationTests.swift */; };
 		A403 /* DecimalINRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F403 /* DecimalINRTests.swift */; };
+		A404 /* SpendOverTimeAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F404 /* SpendOverTimeAggregator.swift */; };
+		A405 /* OverviewAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F405 /* OverviewAggregation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -138,6 +140,8 @@
 		F401 /* SpendOverTimeAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeAggregatorTests.swift; sourceTree = "<group>"; };
 		F402 /* OverviewAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewAggregationTests.swift; sourceTree = "<group>"; };
 		F403 /* DecimalINRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalINRTests.swift; sourceTree = "<group>"; };
+		F404 /* SpendOverTimeAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeAggregator.swift; sourceTree = "<group>"; };
+		F405 /* OverviewAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewAggregation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -272,6 +276,8 @@
 				F143NSF /* NoteSearchFilter.swift */,
 				F144CA /* CalendarAggregator.swift */,
 				F145NA /* NotificationActions.swift */,
+				F404 /* SpendOverTimeAggregator.swift */,
+				F405 /* OverviewAggregation.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -484,6 +490,8 @@
 				A156REV /* ReminderEditView.swift in Sources */,
 				A157CV /* CalendarView.swift in Sources */,
 				A145NA /* NotificationActions.swift in Sources */,
+				A404 /* SpendOverTimeAggregator.swift in Sources */,
+				A405 /* OverviewAggregation.swift in Sources */,
 				A127 /* BudgetProgressView.swift in Sources */,
 				A128 /* BudgetCategoryCard.swift in Sources */,
 				A129 /* EditBudgetSheet.swift in Sources */,
