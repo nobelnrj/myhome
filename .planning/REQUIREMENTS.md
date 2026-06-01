@@ -78,9 +78,9 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 ### Settings
 
-- [ ] **SET-01**: User can toggle Face ID lock on / off
-- [ ] **SET-02**: User can manage categories (add, rename, delete)
-- [ ] **SET-03**: User can manage per-category monthly budgets
+- [x] **SET-01**: User can toggle Face ID lock on / off
+- [x] **SET-02**: User can manage categories (add, rename, delete)
+- [x] **SET-03**: User can manage per-category monthly budgets
 - [ ] **SET-04**: User can sign out of Gmail and reconnect
 - [ ] **SET-05**: Settings shows last-synced timestamp and a manual "Sync now" button
 
@@ -218,9 +218,9 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | OVR-02 | Phase 4 | Complete |
 | OVR-03 | Phase 4 | Complete |
 | OVR-04 | Phase 4 | Complete |
-| SET-01 | Phase 5 | Pending |
-| SET-02 | Phase 5 | Pending |
-| SET-03 | Phase 5 | Pending |
+| SET-01 | Phase 5 | Complete |
+| SET-02 | Phase 5 | Complete |
+| SET-03 | Phase 5 | Complete |
 | SET-04 | Phase 6 | Pending |
 | SET-05 | Phase 6 | Pending |
 
