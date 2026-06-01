@@ -33,6 +33,15 @@ struct OverviewView: View {
                     deepLinkNoteID: $deepLinkNoteID,
                     showAddExpense: $showAddExpense
                 )
+            } else {
+                // WR-04: monthBoundaries is Optional (guards cal.date(from:)). It should
+                // never fail for the current month in practice, but a silently-blank
+                // default launch tab is a robustness defect — show an observable fallback.
+                ContentUnavailableView(
+                    "Couldn't load this month",
+                    systemImage: "calendar.badge.exclamationmark",
+                    description: Text("Please reopen the Home tab.")
+                )
             }
         }
         .navigationTitle("Home")
