@@ -66,6 +66,9 @@
 		A307 /* RecurrenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F307 /* RecurrenceTests.swift */; };
 		A308 /* CalendarAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F308 /* CalendarAggregationTests.swift */; };
 		A310 /* MyHomeV2Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F310 /* MyHomeV2Seed.store */; };
+		A401 /* SpendOverTimeAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F401 /* SpendOverTimeAggregatorTests.swift */; };
+		A402 /* OverviewAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F402 /* OverviewAggregationTests.swift */; };
+		A403 /* DecimalINRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F403 /* DecimalINRTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -132,6 +135,9 @@
 		F307 /* RecurrenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceTests.swift; sourceTree = "<group>"; };
 		F308 /* CalendarAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAggregationTests.swift; sourceTree = "<group>"; };
 		F310 /* MyHomeV2Seed.store */ = {isa = PBXFileReference; lastKnownFileType = "file"; path = MyHomeV2Seed.store; sourceTree = "<group>"; };
+		F401 /* SpendOverTimeAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeAggregatorTests.swift; sourceTree = "<group>"; };
+		F402 /* OverviewAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewAggregationTests.swift; sourceTree = "<group>"; };
+		F403 /* DecimalINRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalINRTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -310,6 +316,9 @@
 				F306 /* NotificationSchedulerTests.swift */,
 				F307 /* RecurrenceTests.swift */,
 				F308 /* CalendarAggregationTests.swift */,
+				F401 /* SpendOverTimeAggregatorTests.swift */,
+				F402 /* OverviewAggregationTests.swift */,
+				F403 /* DecimalINRTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -503,6 +512,9 @@
 				A306 /* NotificationSchedulerTests.swift in Sources */,
 				A307 /* RecurrenceTests.swift in Sources */,
 				A308 /* CalendarAggregationTests.swift in Sources */,
+				A401 /* SpendOverTimeAggregatorTests.swift in Sources */,
+				A402 /* OverviewAggregationTests.swift in Sources */,
+				A403 /* DecimalINRTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
