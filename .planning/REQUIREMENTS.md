@@ -35,7 +35,7 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 - [x] **EXP-08**: Per-category budget progress is shown as a ₹-remaining + % bar with color shift at 80% and 100%
 - [x] **EXP-09**: Month view shows expenses grouped by category with tap-through to the transaction list
 - [ ] **EXP-10**: User can view a spend-by-category chart for the current month (Swift Charts)
-- [ ] **EXP-11**: User can view a spend-over-time chart across configurable date ranges (Swift Charts)
+- [x] **EXP-11**: User can view a spend-over-time chart across configurable date ranges (Swift Charts)
 
 ### Gmail Ingestion
 
@@ -71,9 +71,9 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 ### Overview
 
-- [ ] **OVR-01**: Overview screen shows current-month total spend vs. total monthly budget as a single bar
-- [ ] **OVR-02**: Overview screen shows the top 3 spend categories this month with absolute ₹ amounts
-- [ ] **OVR-03**: Overview screen surfaces the most-recent pinned note (or latest checklist) as a card
+- [x] **OVR-01**: Overview screen shows current-month total spend vs. total monthly budget as a single bar
+- [x] **OVR-02**: Overview screen shows the top 3 spend categories this month with absolute ₹ amounts
+- [x] **OVR-03**: Overview screen surfaces the most-recent pinned note (or latest checklist) as a card
 - [ ] **OVR-04**: Overview screen exposes a quick-add expense `+` action
 
 ### Settings
@@ -187,7 +187,7 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | EXP-08 | Phase 2 | Complete |
 | EXP-09 | Phase 2 | Complete |
 | EXP-10 | Phase 4 | Pending |
-| EXP-11 | Phase 4 | Pending |
+| EXP-11 | Phase 4 | Complete |
 | ING-01 | Phase 6 | Pending |
 | ING-02 | Phase 6 | Pending |
 | ING-03 | Phase 6 | Pending |
@@ -214,9 +214,9 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | NOT-08 | Phase 3 | Complete |
 | NOT-09 | Phase 3 | Complete |
 | NOT-10 | Phase 3 | Complete |
-| OVR-01 | Phase 4 | Pending |
-| OVR-02 | Phase 4 | Pending |
-| OVR-03 | Phase 4 | Pending |
+| OVR-01 | Phase 4 | Complete |
+| OVR-02 | Phase 4 | Complete |
+| OVR-03 | Phase 4 | Complete |
 | OVR-04 | Phase 4 | Pending |
 | SET-01 | Phase 5 | Pending |
 | SET-02 | Phase 5 | Pending |
