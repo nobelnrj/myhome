@@ -94,3 +94,30 @@ struct LockSettingsTests {
         #expect(controller2.lockEnabled == true, "Fresh LockController must see persisted lockEnabled=true (T-05-03, SEC-01)")
     }
 }
+
+// MARK: - UAT Verification Log (human_verify_mode = end-of-phase)
+//
+// These behaviors require OS-level Face ID / app-switcher / tab-switch interaction and cannot
+// be exercised in unit tests. Captured here for end-of-phase manual sign-off (05-VALIDATION.md).
+//
+// UAT-1 [SEC-01, D5-07a]: Enable Face ID Lock in Settings → system auth prompt appears;
+//        on success toggle stays ON. (Requires simulator or device with biometrics enabled.)
+//
+// UAT-2 [D5-01, D5-02]: Kill and relaunch the app with lock enabled → UnlockView shows over
+//        blurred content; Face ID/passcode prompt fires automatically; Unlock button is visible.
+//
+// UAT-3 [D5-02, T-05-04]: Background the app and open the app switcher → app content is
+//        blurred in the snapshot; no financial data legible.
+//
+// UAT-4 [SET-02]: In Settings tap "Manage Categories" → ManageCategoriesView sheet presents;
+//        add/rename/delete a category and confirm it persists.
+//
+// UAT-5 [SET-03, D5-08]: In Settings tap "Budgets" → app switches to the Budgets tab (tag 2).
+//
+// UAT-6 [D5-07b]: Turn the lock OFF in Settings → auth prompt appears first; only after
+//        success does the toggle go OFF.
+//
+// UAT-7 [D5-05, T-05-02]: On a device with NO passcode set (or using SpyBiometricAuth with
+//        canEvaluateResult=(false, LAError(.passcodeNotSet))): UnlockView shows the no-passcode
+//        guidance text and remains escapable — no lockout.
+
