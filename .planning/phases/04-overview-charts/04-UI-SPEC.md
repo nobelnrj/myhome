@@ -1,10 +1,11 @@
 ---
 phase: 4
 slug: overview-charts
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-01
+reviewed_at: 2026-06-01T00:00:00Z
 ---
 
 # Phase 4 — UI Design Contract
@@ -70,12 +71,21 @@ Exceptions (inherited from Phase 1):
 
 ## Typography
 
-**Inherited from Phase 1 UI-SPEC.** All four roles remain:
+**Inherited from Phase 1 UI-SPEC.** All four roles remain.
 
-| Role | SwiftUI Style | Approx Size | Weight | Line Height | Usage |
-|------|---------------|-------------|--------|-------------|-------|
+**Declared weight tokens (2 maximum):**
+
+| Token | Weight | Usage |
+|-------|--------|-------|
+| Regular | 400 | Body text, secondary labels, axis labels, empty state prompts |
+| Bold | 700 | Display (hero numbers), Heading (card titles) |
+
+> **Note on SwiftUI semantic styles:** The Heading role uses `.font(.title2)`, which SwiftUI renders at system-semibold weight automatically via the semantic style — no distinct "Semibold (600)" token is declared in this contract. The visual output is identical; the executor uses native semantic styles and does not need to specify `.fontWeight(.semibold)` explicitly. Only Regular and Bold are contract-level weight tokens.
+
+| Role | SwiftUI Style | Approx Size | Weight Token | Line Height | Usage |
+|------|---------------|-------------|--------------|-------------|-------|
 | Display | `.font(.largeTitle)` | 34pt | Bold (700) | 1.2 | Aggregate spend amount (hero number on OVR-01 bar card) |
-| Heading | `.font(.title2)` | 22pt | Semibold (600) | 1.2 | Card titles ("This Month", "Top Categories", etc.) |
+| Heading | `.font(.title2)` | 22pt | Bold (700) | 1.2 | Card titles ("This Month", "Top Categories", etc.) — system renders as semibold via semantic style |
 | Body | `.font(.body)` | 17pt | Regular (400) | 1.5 | Category names in top-3 list; pinned note title |
 | Label | `.font(.subheadline)` | 15pt | Regular (400) | 1.4 | Secondary amounts, chart axis labels, empty state prompts, "X% used" |
 
@@ -85,7 +95,7 @@ Exceptions (inherited from Phase 1):
 |---------|------|-------|
 | Aggregate spend amount ("₹X,XX,XXX.00") | Display (`.largeTitle`, bold) | The hero number above the OVR-01 bar |
 | "of ₹X budget" label beneath the hero amount | Label (`.subheadline`) | `.secondary` foreground; qualifies the bar |
-| Card section title ("This Month", "Top Categories", "Pinned Note", "Spend by Category", "Spend Over Time") | Heading (`.title2`, semibold) | Left-aligned inside each card |
+| Card section title ("This Month", "Top Categories", "Pinned Note", "Spend by Category", "Spend Over Time") | Heading (`.title2`) | Left-aligned inside each card |
 | Top-3 category row: category name | Body (`.body`) | Left of amount |
 | Top-3 category row: ₹ amount | Body (`.body`) | Right-aligned; `.formattedINR()` |
 | Top-3 category row: rank indicator (#1, #2, #3) | Label (`.subheadline`) | `.secondary`; left of SF Symbol icon |
