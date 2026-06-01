@@ -89,16 +89,23 @@ enum OverviewAggregation {
     ///    are automatically excluded even if their `isPinned == true`.
     /// 2. First note (in input order) that contains a checkbox `NoteBlock` (kindRaw == "checkbox").
     /// 3. `nil` — empty state; Overview card shows a "no notes" prompt.
-    static func pinnedOrChecklistNote(from notes: [Note]) -> Note? {
+    ///
+    /// Returns the resolved note alongside `isFallback` provenance: `true` when the note
+    /// came from the checklist-fallback path (priority 2), `false` when it came from the
+    /// pinned path (priority 1) or when there is no note. The caller uses `isFallback`
+    /// directly instead of re-running `NoteListOrganizer.organize` to derive the flag —
+    /// a single organize call, no divergence risk (WR-02).
+    static func pinnedOrChecklistNote(from notes: [Note]) -> (note: Note?, isFallback: Bool) {
         // Priority 1: pinned via NoteListOrganizer (Pitfall E guard)
         let sections = NoteListOrganizer.organize(notes)
         if let pinned = sections.pinned.first {
-            return pinned
+            return (note: pinned, isFallback: false)
         }
 
         // Priority 2: fallback to first note with a checkbox block
-        return notes.first { note in
+        let checklist = notes.first { note in
             note.blocks?.contains { $0.kindRaw == "checkbox" } == true
         }
+        return (note: checklist, isFallback: checklist != nil)
     }
 }

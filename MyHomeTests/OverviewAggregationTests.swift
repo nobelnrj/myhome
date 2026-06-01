@@ -281,8 +281,10 @@ struct OverviewAggregationTests {
 
         let result = OverviewAggregation.pinnedOrChecklistNote(from: [pinnedNote, otherNote])
 
-        #expect(result?.title == "Pinned note",
+        #expect(result.note?.title == "Pinned note",
                 "Pinned note must be returned when one exists")
+        #expect(result.isFallback == false,
+                "A real pinned note must report isFallback == false")
     }
 
     // MARK: - OVR-03: No pinned, but checklist note exists → returns checklist note (fallback)
@@ -312,8 +314,10 @@ struct OverviewAggregationTests {
 
         let result = OverviewAggregation.pinnedOrChecklistNote(from: [checklistNote, textNote])
 
-        #expect(result?.title == "Shopping list",
+        #expect(result.note?.title == "Shopping list",
                 "Checklist note should be returned as fallback when no note is pinned")
+        #expect(result.isFallback == true,
+                "A checklist-fallback note must report isFallback == true")
     }
 
     // MARK: - OVR-03: Verify routing through NoteListOrganizer (not note.isPinned directly — Pitfall E)
@@ -352,8 +356,10 @@ struct OverviewAggregationTests {
 
         // OverviewAggregation.pinnedOrChecklistNote must use NoteListOrganizer, not note.isPinned
         let result = OverviewAggregation.pinnedOrChecklistNote(from: [dailyRoutineNote, checklistNote])
-        #expect(result?.title == "Grocery list",
+        #expect(result.note?.title == "Grocery list",
                 "Daily-routine-pinned note must be excluded; checklist note should be the fallback")
+        #expect(result.isFallback == true,
+                "Excluded-pinned -> checklist fallback must report isFallback == true")
     }
 
     // MARK: - OVR-03: No pinned, no checklist → returns nil (empty state)
@@ -376,8 +382,10 @@ struct OverviewAggregationTests {
 
         let result = OverviewAggregation.pinnedOrChecklistNote(from: [note1, note2])
 
-        #expect(result == nil,
+        #expect(result.note == nil,
                 "nil must be returned (empty state) when no note is pinned and no note has a checkbox block")
+        #expect(result.isFallback == false,
+                "Empty state must report isFallback == false")
     }
 
     // MARK: - OVR-03: Empty notes array → nil
@@ -385,7 +393,9 @@ struct OverviewAggregationTests {
     @Test("pinnedOrChecklistNote_emptyArray: empty notes array → nil")
     func pinnedOrChecklistNote_emptyArray() throws {
         let result = OverviewAggregation.pinnedOrChecklistNote(from: [])
-        #expect(result == nil,
+        #expect(result.note == nil,
                 "nil must be returned when notes array is empty")
+        #expect(result.isFallback == false,
+                "Empty array must report isFallback == false")
     }
 }

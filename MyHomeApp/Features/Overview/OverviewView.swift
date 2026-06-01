@@ -121,13 +121,9 @@ private struct OverviewMonthContent: View {
             spendByCategory: spendByCategory,
             categories: categories
         )
-        let pinnedNote = OverviewAggregation.pinnedOrChecklistNote(from: allNotes)
-        let isFallbackChecklist: Bool = {
-            guard let note = pinnedNote else { return false }
-            // Determine if this is the fallback checklist note (not a real pinned note)
-            let sections = NoteListOrganizer.organize(allNotes)
-            return sections.pinned.first == nil
-        }()
+        let noteResult = OverviewAggregation.pinnedOrChecklistNote(from: allNotes)
+        let pinnedNote = noteResult.note
+        let isFallbackChecklist = noteResult.isFallback
         // Build CategorySpendItem array (Double, sorted descending) for by-category chart
         let categoryItems: [CategorySpendItem] = spendByCategory
             .compactMap { (id, spend) -> CategorySpendItem? in
