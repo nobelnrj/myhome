@@ -134,7 +134,7 @@ Plans:
 - [x] 04-01-PLAN.md — Wave 0 test stubs: SpendOverTimeAggregatorTests + OverviewAggregationTests + DecimalINRTests (RED) (OVR-01/02/03, EXP-11)
 
 **Wave 2** — pure helpers (GREEN)
-- [ ] 04-02-PLAN.md — formattedINRCompact() + SpendOverTimeAggregator + OverviewAggregation pure helpers (OVR-01/02/03, EXP-11)
+- [x] 04-02-PLAN.md — formattedINRCompact() + SpendOverTimeAggregator + OverviewAggregation pure helpers (OVR-01/02/03, EXP-11)
 
 **Wave 3** — card + chart components (parallel)
 - [ ] 04-03-PLAN.md — SpendBudgetCard + TopCategoriesCard + PinnedNoteCard with D4-07 empty states (OVR-01/02/03)
@@ -213,7 +213,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundation & Manual Expense Spine | 4/4 | Complete    | 2026-05-29 |
 | 2. Categories, Tags & Budgets | 5/5 | Complete   | 2026-05-30 |
 | 3. Notes & Checklists | 6/6 | Complete   | 2026-05-30 |
-| 4. Overview & Charts | 1/5 | In Progress|  |
+| 4. Overview & Charts | 2/5 | In Progress|  |
 | 5. Face ID Gate & Settings | 0/TBD | Not started | - |
 | 6. Gmail Sign-In & Client | 0/TBD | Not started | - |
 | 7. Bank Parsers & Ingestion Pipeline | 0/TBD | Not started | - |
