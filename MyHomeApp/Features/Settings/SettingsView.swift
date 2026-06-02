@@ -46,8 +46,32 @@ struct SettingsView: View {
 
                 Section("Gmail") {
                     if !gmailSyncController.isConnected {
-                        Button("Connect Gmail") {
-                            Task { await gmailSyncController.signIn() }
+                        if gmailSyncController.syncStatus == .authorizing {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Connecting…")
+                                    .font(.subheadline)
+                                Spacer()
+                            }
+                        } else {
+                            Button("Connect Gmail") {
+                                Task { await gmailSyncController.signIn() }
+                            }
+                        }
+
+                        // Surface sign-in errors while still disconnected (otherwise the
+                        // error case below — nested in the connected branch — never renders).
+                        if case let .error(msg) = gmailSyncController.syncStatus {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(msg)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.red)
+                                Button("Try again", action: {
+                                    Task { await gmailSyncController.signIn() }
+                                })
+                                .font(.subheadline)
+                            }
                         }
                     } else {
                         if let email = gmailSyncController.connectedEmail {

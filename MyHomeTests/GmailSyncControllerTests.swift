@@ -77,6 +77,53 @@ struct GmailSyncControllerTests {
                 "signIn() must store the refresh token from TokenResponse in Keychain — ING-02, SEC-03")
     }
 
+    // MARK: - SET-05: isConnected is an observable stored property (UI reactivity)
+
+    @Test("initSeedsIsConnectedFromKeychain: a refresh token already in Keychain makes isConnected true at launch — SET-05")
+    func initSeedsIsConnectedFromKeychain() {
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let keychain = SpyKeychainStore()
+        try? keychain.save("pre_existing_refresh", forKey: "refresh_token")
+        let controller = GmailSyncController(auth: SpyGmailAuth(), keychain: keychain, now: Date.init)
+
+        #expect(controller.isConnected == true,
+                "init must seed isConnected=true when a refresh token exists in Keychain — SET-05")
+    }
+
+    @Test("signInSetsIsConnectedTrue: a successful signIn flips isConnected to true so the UI re-renders — SET-05")
+    func signInSetsIsConnectedTrue() async {
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let spy = SpyGmailAuth()
+        let keychain = SpyKeychainStore()
+        let controller = GmailSyncController(auth: spy, keychain: keychain, now: Date.init)
+
+        #expect(controller.isConnected == false, "isConnected must start false with empty Keychain")
+        await controller.signIn()
+
+        #expect(controller.isConnected == true,
+                "signIn() must set the observable isConnected=true (no app relaunch required) — SET-05")
+    }
+
+    @Test("signOutSetsIsConnectedFalse: signOut flips isConnected back to false — SET-04")
+    func signOutSetsIsConnectedFalse() async {
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let keychain = SpyKeychainStore()
+        try? keychain.save("pre_existing_refresh", forKey: "refresh_token")
+        let controller = GmailSyncController(auth: SpyGmailAuth(), keychain: keychain, now: Date.init)
+        #expect(controller.isConnected == true, "precondition: seeded connected")
+
+        controller.signOut()
+
+        #expect(controller.isConnected == false,
+                "signOut() must set the observable isConnected=false — SET-04")
+    }
+
     // MARK: - ING-03: sync transitions idle → syncing → done
 
     @Test("syncTransitionsIdleSyncingDone: sync() transitions syncStatus idle → syncing → done — ING-03")

@@ -75,9 +75,12 @@ final class GmailSyncController {
     // MARK: - Derived state
 
     /// Whether a refresh token is currently stored in Keychain.
-    var isConnected: Bool {
-        (try? keychain.load(forKey: "refresh_token")) != nil
-    }
+    ///
+    /// Stored (not computed) so `@Observable` can track it: a computed property that reads
+    /// the Keychain is invisible to SwiftUI, so the connect/connected UI never refreshed after
+    /// `signIn()` saved the token (it required an app relaunch). Seeded from Keychain in `init`,
+    /// then flipped by `signIn()` / `signOut()`.
+    private(set) var isConnected: Bool = false
 
     /// Whether the access token has expired according to the stored expiry date.
     /// D6-06: Check expiry within 5 minutes before each sync.
@@ -120,6 +123,8 @@ final class GmailSyncController {
         self.auth = auth
         self.keychain = keychain
         self.now = now
+        // Seed connection state from Keychain at launch so the UI reflects a prior sign-in.
+        self.isConnected = (try? keychain.load(forKey: "refresh_token")) != nil
     }
 
     // MARK: - Scene phase hook (called from RootView/SettingsView .onChange)
@@ -184,6 +189,10 @@ final class GmailSyncController {
 
             // SEC-03: Store refresh token in Keychain (never in UserDefaults — T-06-TOKEN)
             try keychain.save(refreshToken, forKey: "refresh_token")
+
+            // Flip observable connection state so SwiftUI re-renders into the connected view
+            // immediately (no app relaunch required).
+            isConnected = true
 
             // D6-07: access_token in memory only; expiry timestamp in UserDefaults
             accessToken = tokenResponse.access_token
@@ -264,6 +273,9 @@ final class GmailSyncController {
     func signOut() {
         // SEC-03 / T-06-TOKEN: Delete refresh token from Keychain
         try? keychain.delete(forKey: "refresh_token")
+
+        // Flip observable connection state so the UI returns to the "Connect Gmail" view.
+        isConnected = false
 
         // Clear in-memory token state
         accessToken = nil
