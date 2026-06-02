@@ -2,9 +2,10 @@ import SwiftData
 
 /// Convenience typealias so views and tests use bare `Category` without the version prefix.
 ///
-/// If a SchemaV3 renames or extends Category, flip this typealias in one line.
+/// Flipped from SchemaV3.Category → SchemaV4.Category in Phase 7 (plan 07-02).
+/// If a future schema renames or extends Category, flip this typealias in one line.
 ///
 /// Usage:
 ///   let category = Category(name: "Groceries", symbolName: "cart")
 ///   @Query(sort: \Category.sortOrder) var categories: [Category]
-typealias Category = SchemaV3.Category
+typealias Category = SchemaV4.Category
