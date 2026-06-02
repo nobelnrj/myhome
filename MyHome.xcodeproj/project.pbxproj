@@ -96,6 +96,13 @@
 		A702GFP /* GmailFetchPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F702GFP /* GmailFetchPort.swift */; };
 		A703BEP /* BankEmailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703BEP /* BankEmailParser.swift */; };
 		A704SGF /* SpyGmailFetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = F704SGF /* SpyGmailFetch.swift */; };
+		A705HDFC /* HDFCParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F705HDFC /* HDFCParserTests.swift */; };
+		A706ICICI /* ICICIParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706ICICI /* ICICIParserTests.swift */; };
+		A707CS /* ConfidenceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F707CS /* ConfidenceScorerTests.swift */; };
+		A708DC /* DedupCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F708DC /* DedupCheckerTests.swift */; };
+		A709MN /* MerchantNormalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709MN /* MerchantNormalizerTests.swift */; };
+		A710IP /* IngestionPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F710IP /* IngestionPipelineTests.swift */; };
+		A711FIX /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = F711FIX /* Fixtures */; };
 		A616PT /* PKCETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F616PT /* PKCETests.swift */; };
 		A617GAUT /* GmailAuthURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F617GAUT /* GmailAuthURLTests.swift */; };
 		A618KPT /* KeychainPortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F618KPT /* KeychainPortTests.swift */; };
@@ -202,6 +209,13 @@
 		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
 		F703BEP /* BankEmailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankEmailParser.swift; sourceTree = "<group>"; };
 		F704SGF /* SpyGmailFetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailFetch.swift; sourceTree = "<group>"; };
+		F705HDFC /* HDFCParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParserTests.swift; sourceTree = "<group>"; };
+		F706ICICI /* ICICIParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParserTests.swift; sourceTree = "<group>"; };
+		F707CS /* ConfidenceScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorerTests.swift; sourceTree = "<group>"; };
+		F708DC /* DedupCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupCheckerTests.swift; sourceTree = "<group>"; };
+		F709MN /* MerchantNormalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizerTests.swift; sourceTree = "<group>"; };
+		F710IP /* IngestionPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestionPipelineTests.swift; sourceTree = "<group>"; };
+		F711FIX /* Fixtures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fixtures; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -450,6 +464,12 @@
 				F618KPT /* KeychainPortTests.swift */,
 				F619GSCT /* GmailSyncControllerTests.swift */,
 				F620RTT /* RelativeTimestampTests.swift */,
+				F705HDFC /* HDFCParserTests.swift */,
+				F706ICICI /* ICICIParserTests.swift */,
+				F707CS /* ConfidenceScorerTests.swift */,
+				F708DC /* DedupCheckerTests.swift */,
+				F709MN /* MerchantNormalizerTests.swift */,
+				F710IP /* IngestionPipelineTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -473,6 +493,7 @@
 			children = (
 				F203 /* MyHomeV1Seed.store */,
 				F310 /* MyHomeV2Seed.store */,
+				F711FIX /* Fixtures */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -584,6 +605,7 @@
 			files = (
 				A203 /* MyHomeV1Seed.store in Resources */,
 				A310 /* MyHomeV2Seed.store in Resources */,
+				A711FIX /* Fixtures in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -691,6 +713,12 @@
 				A618KPT /* KeychainPortTests.swift in Sources */,
 				A619GSCT /* GmailSyncControllerTests.swift in Sources */,
 				A620RTT /* RelativeTimestampTests.swift in Sources */,
+				A705HDFC /* HDFCParserTests.swift in Sources */,
+				A706ICICI /* ICICIParserTests.swift in Sources */,
+				A707CS /* ConfidenceScorerTests.swift in Sources */,
+				A708DC /* DedupCheckerTests.swift in Sources */,
+				A709MN /* MerchantNormalizerTests.swift in Sources */,
+				A710IP /* IngestionPipelineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
