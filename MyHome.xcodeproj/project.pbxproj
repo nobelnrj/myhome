@@ -84,6 +84,17 @@
 		A603 /* LockSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F603 /* LockSettingsTests.swift */; };
 		A601 /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F601 /* UnlockView.swift */; };
 		A602 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602 /* SettingsView.swift */; };
+		A610GAP /* GmailAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F610GAP /* GmailAuthPort.swift */; };
+		A611KP /* KeychainPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F611KP /* KeychainPort.swift */; };
+		A612PKCE /* PKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = F612PKCE /* PKCE.swift */; };
+		A613GSC /* GmailSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GSC /* GmailSyncController.swift */; };
+		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
+		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
+		A616PT /* PKCETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F616PT /* PKCETests.swift */; };
+		A617GAUT /* GmailAuthURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F617GAUT /* GmailAuthURLTests.swift */; };
+		A618KPT /* KeychainPortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F618KPT /* KeychainPortTests.swift */; };
+		A619GSCT /* GmailSyncControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619GSCT /* GmailSyncControllerTests.swift */; };
+		A620RTT /* RelativeTimestampTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F620RTT /* RelativeTimestampTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -168,6 +179,17 @@
 		F603 /* LockSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockSettingsTests.swift; sourceTree = "<group>"; };
 		F601 /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
 		F602 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F610GAP /* GmailAuthPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAuthPort.swift; sourceTree = "<group>"; };
+		F611KP /* KeychainPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPort.swift; sourceTree = "<group>"; };
+		F612PKCE /* PKCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCE.swift; sourceTree = "<group>"; };
+		F613GSC /* GmailSyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailSyncController.swift; sourceTree = "<group>"; };
+		F614SGA /* SpyGmailAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailAuth.swift; sourceTree = "<group>"; };
+		F615SKS /* SpyKeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyKeychainStore.swift; sourceTree = "<group>"; };
+		F616PT /* PKCETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCETests.swift; sourceTree = "<group>"; };
+		F617GAUT /* GmailAuthURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAuthURLTests.swift; sourceTree = "<group>"; };
+		F618KPT /* KeychainPortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPortTests.swift; sourceTree = "<group>"; };
+		F619GSCT /* GmailSyncControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailSyncControllerTests.swift; sourceTree = "<group>"; };
+		F620RTT /* RelativeTimestampTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTimestampTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +240,7 @@
 				G130 /* Persistence */,
 				G140 /* Support */,
 				G150 /* Security */,
+				G160 /* Gmail */,
 			);
 			path = MyHomeApp;
 			sourceTree = "<group>";
@@ -239,6 +262,7 @@
 				G122 /* Budgets */,
 				G123 /* Notes */,
 				G125 /* Settings */,
+				G126 /* Gmail (Features) */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -333,6 +357,24 @@
 			path = Security;
 			sourceTree = "<group>";
 		};
+		G160 /* Gmail */ = {
+			isa = PBXGroup;
+			children = (
+				F610GAP /* GmailAuthPort.swift */,
+				F611KP /* KeychainPort.swift */,
+				F612PKCE /* PKCE.swift */,
+			);
+			path = Gmail;
+			sourceTree = "<group>";
+		};
+		G126 /* Gmail (Features) */ = {
+			isa = PBXGroup;
+			children = (
+				F613GSC /* GmailSyncController.swift */,
+			);
+			path = Gmail;
+			sourceTree = "<group>";
+		};
 		G131 /* Schema */ = {
 			isa = PBXGroup;
 			children = (
@@ -378,6 +420,11 @@
 				F403 /* DecimalINRTests.swift */,
 				F503 /* LockStateTests.swift */,
 				F603 /* LockSettingsTests.swift */,
+				F616PT /* PKCETests.swift */,
+				F617GAUT /* GmailAuthURLTests.swift */,
+				F618KPT /* KeychainPortTests.swift */,
+				F619GSCT /* GmailSyncControllerTests.swift */,
+				F620RTT /* RelativeTimestampTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -389,6 +436,8 @@
 			children = (
 				F301 /* SpyCenter.swift */,
 				F502 /* SpyBiometricAuth.swift */,
+				F614SGA /* SpyGmailAuth.swift */,
+				F615SKS /* SpyKeychainStore.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -571,6 +620,10 @@
 				A602 /* SettingsView.swift in Sources */,
 				A501 /* BiometricAuthPort.swift in Sources */,
 				A504 /* LockController.swift in Sources */,
+				A610GAP /* GmailAuthPort.swift in Sources */,
+				A611KP /* KeychainPort.swift in Sources */,
+				A612PKCE /* PKCE.swift in Sources */,
+				A613GSC /* GmailSyncController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -599,6 +652,13 @@
 				A502 /* SpyBiometricAuth.swift in Sources */,
 				A503 /* LockStateTests.swift in Sources */,
 				A603 /* LockSettingsTests.swift in Sources */,
+				A614SGA /* SpyGmailAuth.swift in Sources */,
+				A615SKS /* SpyKeychainStore.swift in Sources */,
+				A616PT /* PKCETests.swift in Sources */,
+				A617GAUT /* GmailAuthURLTests.swift in Sources */,
+				A618KPT /* KeychainPortTests.swift in Sources */,
+				A619GSCT /* GmailSyncControllerTests.swift in Sources */,
+				A620RTT /* RelativeTimestampTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
