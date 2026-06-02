@@ -191,7 +191,7 @@ Plans:
 - [x] 06-02-PLAN.md — PKCE.generate() + buildAuthorizationURL + Date.relativeToNow (ING-01/05, SET-05)
 
 **Wave 3** *(blocked on Wave 2)* — controller state machine GREEN
-- [ ] 06-03-PLAN.md — GmailSyncController signIn/sync/signOut/refresh/expiry via spies (ING-02/03/05/16, SEC-03, SET-04/05)
+- [x] 06-03-PLAN.md — GmailSyncController signIn/sync/signOut/refresh/expiry via spies (ING-02/03/05/16, SEC-03, SET-04/05)
 
 **Wave 4** *(blocked on Wave 3; UAT checkpoint)* — production conformers + UI wiring
 - [ ] 06-04-PLAN.md — SystemGmailAuth + SystemKeychainStore + GmailOAuthConfig + Gmail Settings section + RootView wiring + Info.plist URL type (ING-01/02/03/05/16, SEC-03, SET-04/05)
@@ -229,5 +229,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. Notes & Checklists | 6/6 | Complete   | 2026-05-30 |
 | 4. Overview & Charts | 5/5 | Complete    | 2026-06-01 |
 | 5. Face ID Gate & Settings | 2/2 | Complete   | 2026-06-01 |
-| 6. Gmail Sign-In & Client | 2/4 | In Progress|  |
+| 6. Gmail Sign-In & Client | 3/4 | In Progress|  |
 | 7. Bank Parsers & Ingestion Pipeline | 0/TBD | Not started | - |

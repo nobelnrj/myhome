@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-06-02T04:48:33.507Z"
+last_updated: "2026-06-02T05:06:07.761Z"
 last_activity: 2026-06-02
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 26
-  completed_plans: 24
+  completed_plans: 25
   percent: 71
 ---
 
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 06 (gmail-sign-in-client) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-06-02
 
-Progress: [█████████░] 92%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [█████████░] 92%
 | Phase 05-face-id-gate-settings P02 | 35 | 3 tasks | 5 files |
 | Phase 06 P01 | 45 | 2 tasks | 13 files |
 | Phase 06 P02 | 15 | 2 tasks | 5 files |
+| Phase 06-gmail-sign-in-client P03 | 20 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,7 @@ Recent decisions affecting current work:
 - [Phase ?]: BiometricAuthPort protocol-port seam (mirrors NotificationCenterPort) makes every LAError path unit-testable without a device
 - [Phase ?]: LockController @MainActor for Swift 6 strict concurrency when scenePhase onChange mutates @Observable state
 - [Phase ?]: canEvaluate called before evaluate in authenticate() — passcodeNotSet only detectable from canEvaluatePolicy path (D5-05)
+- [Phase ?]: shouldRefresh in sync() uses (accessToken==nil || (expiry!=nil && needsProactiveRefresh))
 
 ### Pending Todos
 
@@ -122,6 +124,6 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 
 ## Session Continuity
 
-Last session: 2026-06-02T04:48:33.502Z
+Last session: 2026-06-02T05:05:59.695Z
 Stopped at: Phase 5 planned (2 plans, verified)
 Resume file: None
