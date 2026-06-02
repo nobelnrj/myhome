@@ -44,10 +44,10 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 - [x] **ING-03**: User can trigger ingestion on demand via "Sync now" in Settings
 - [ ] **ING-04**: `BGAppRefreshTask` is registered and runs ingestion opportunistically when iOS schedules it (best-effort, never the primary path)
 - [x] **ING-05**: An always-visible "Last synced at …" timestamp appears in Settings
-- [ ] **ING-06**: v1 ships with two bank parsers (defaults: HDFC + ICICI; final pick confirmed at Phase 7 discuss)
-- [ ] **ING-07**: Each parser performs whole-template fingerprint matching separate from value extraction (no single regex per bank)
-- [ ] **ING-08**: Parsers reject OTP, promotional, and verification emails via sender + subject pre-filters
-- [ ] **ING-09**: Parsers detect reversal / refund emails (`reversed`, `refund`, `credited back`, `reversal of`) and create negative-amount entries, not duplicates
+- [x] **ING-06**: v1 ships with two bank parsers (defaults: HDFC + ICICI; final pick confirmed at Phase 7 discuss)
+- [x] **ING-07**: Each parser performs whole-template fingerprint matching separate from value extraction (no single regex per bank)
+- [x] **ING-08**: Parsers reject OTP, promotional, and verification emails via sender + subject pre-filters
+- [x] **ING-09**: Parsers detect reversal / refund emails (`reversed`, `refund`, `credited back`, `reversal of`) and create negative-amount entries, not duplicates
 - [ ] **ING-10**: Raw email body (or hash + first 500 chars) is stored against every ingested expense for parser replay
 - [ ] **ING-11**: Every ingested expense records `parserID` and `parserVersion` for drift forensics
 - [ ] **ING-12**: Parse confidence ≥ 0.85 auto-saves the expense; below threshold routes to the Review Inbox
@@ -193,10 +193,10 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | ING-03 | Phase 6 | Complete |
 | ING-04 | Phase 7 | Pending |
 | ING-05 | Phase 6 | Complete |
-| ING-06 | Phase 7 | Pending |
-| ING-07 | Phase 7 | Pending |
-| ING-08 | Phase 7 | Pending |
-| ING-09 | Phase 7 | Pending |
+| ING-06 | Phase 7 | Complete |
+| ING-07 | Phase 7 | Complete |
+| ING-08 | Phase 7 | Complete |
+| ING-09 | Phase 7 | Complete |
 | ING-10 | Phase 7 | Pending |
 | ING-11 | Phase 7 | Pending |
 | ING-12 | Phase 7 | Pending |

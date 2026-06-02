@@ -233,4 +233,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Overview & Charts | 5/5 | Complete    | 2026-06-01 |
 | 5. Face ID Gate & Settings | 2/2 | Complete   | 2026-06-01 |
 | 6. Gmail Sign-In & Client | 3/4 | In Progress|  |
-| 7. Bank Parsers & Ingestion Pipeline | 3/6 | In Progress|  |
+| 7. Bank Parsers & Ingestion Pipeline | 5/6 | In Progress|  |
