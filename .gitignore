@@ -12,3 +12,6 @@ DerivedData/
 
 # Local agent/session state
 .claude
+
+# Raw, un-anonymized bank email originals (local only — PII, never commit)
+MyHomeTests/Fixtures/_raw/

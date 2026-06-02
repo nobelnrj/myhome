@@ -1,0 +1,15 @@
+From: <credit_cards@icici.bank.in>
+To: customer@example.com
+Subject: Amazon Pay ICICI Bank Credit Card Statement for the period April 13, 2026 to May 12, 2026
+Date: Wed, 13 May 2026 07:57:01 GMT
+Content-Type: text/html;charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+
+<html><body>
+<p>Dear Customer,</p>
+<p>Please find attached your Amazon Pay ICICI Bank Credit Card statement for the
+period April 13, 2026 to May 12, 2026. The PDF is password protected.</p>
+<p>Total Amount Due: INR 12,345.00 &nbsp; Minimum Amount Due: INR 617.00 &nbsp;
+Payment Due Date: June 02, 2026</p>
+<p>This is a monthly statement summary, not a transaction alert.</p>
+</body></html>

@@ -1,0 +1,14 @@
+From: Amazon Pay India <no-reply@amazonpay.in>
+To: customer@example.com
+Subject: Payment Reminder
+Date: Wed, 27 May 2026 06:53:15 +0000
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<html><body>
+<p>Hi,</p>
+<p>This is a friendly reminder that your Amazon Pay ICICI Bank Credit Card bill
+payment is due soon. Pay before the due date to avoid late fees.</p>
+<p>This is a promotional payment reminder from Amazon Pay, not a bank transaction
+alert.</p>
+</body></html>
