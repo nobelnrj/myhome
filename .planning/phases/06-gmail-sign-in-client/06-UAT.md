@@ -3,7 +3,8 @@ phase: 06
 title: "Phase 06 UAT — Gmail Sign-In & Client"
 date: "2026-06-02"
 timestamp: "2026-06-02T12:19:00Z"
-status: "in-progress"
+updated: "2026-06-02T14:55:00Z"
+status: "core-complete-1-deferred-issue"
 tester: "Reo"
 environment: "iPhone 17 Simulator, Xcode 26.5"
 ---
@@ -43,7 +44,7 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 - Google login page loads in Safari (system browser)
 - User can enter credentials without app-side interference
 
-**Result:** ⏳ PENDING
+**Result:** ✅ PASS (2026-06-02, live test — browser/OAuth sheet opened, "Connecting…" shown)
 
 **Evidence:**
 - Info.plist CFBundleURLTypes configured: ✓
@@ -64,7 +65,7 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 - First sync runs with newer_than:30d query
 - "Last synced" timestamp updates to current time
 
-**Result:** ⏳ PENDING
+**Result:** ✅ PASS (2026-06-02, live test — landed back in app, connected state + "Last synced" appeared immediately with no relaunch; verifies isConnected reactivity fix d02a5ea)
 
 **Evidence:**
 - GmailSyncController.signIn() calls sync() after OAuth: ✓
@@ -85,7 +86,7 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 - After sync completes, button returns to "Sync now"
 - "Last synced" timestamp updates
 
-**Result:** ⏳ PENDING
+**Result:** ✅ PASS (2026-06-02, live test — "Syncing…" shown, button disabled, timestamp updated)
 
 **Evidence:**
 - "Sync now" button rendered in connected state: ✓
@@ -106,7 +107,7 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 - After first sync: "Last synced" shows relative time (e.g., "2 seconds ago")
 - "Last synced" row is ALWAYS visible in Settings (even while syncing)
 
-**Result:** ⏳ PENDING
+**Result:** ✅ PASS (2026-06-02, live test — row always visible, relative time shown, "Never" seen pre-connect)
 
 **Evidence:**
 - "Last synced" section always renders (not conditional): ✓
@@ -126,14 +127,20 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 - Settings shows "Connected as: your-email@gmail.com"
 - Email address persists across app restarts
 
-**Result:** ⏳ PENDING
+**Result:** ❌ ISSUE (2026-06-02, live test — "Connected as: …" line absent; no email shown)
+**Severity:** minor (display-only; sign-in/sync fully functional)
+**Reported:** "line is absent, no email shown"
+**Root cause (pre-diagnosed):** `GmailSyncController.signIn()` never sets `connectedEmail`. The
+"Connected as: \(email)" row is gated on `if let email = connectedEmail`, so it never renders.
+Populating it requires a Gmail `users.getProfile` (emailAddress) call, which is stubbed in Phase 6
+and wired in Phase 7's Gmail API layer.
 
 **Evidence:**
-- connectedEmail stored in UserDefaults (key: "gmail_connected_email"): ✓
-- "Connected as: \(email)" text displayed: ✓
-- Text persists via UserDefaults persistence: ✓
+- connectedEmail stored in UserDefaults (key: "gmail_connected_email"): ✓ (storage exists)
+- connectedEmail is WRITTEN on sign-in: ✗ (never set — this is the gap)
+- "Connected as: \(email)" text displayed: ✓ (renders only when email non-nil)
 
-**Status:** Ready for manual testing (requires actual Gmail account)
+**Status:** ISSUE — display gap, deferred to Phase 7 (depends on stubbed Gmail API)
 
 ---
 
@@ -189,7 +196,7 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 - Settings now shows "Connect Gmail" button
 - "Last synced" shows "Never"
 
-**Result:** ⏳ PENDING
+**Result:** ✅ PASS (2026-06-02, live test — confirmation dialog shown; returned to "Connect Gmail" immediately, no relaunch)
 
 **Evidence:**
 - "Sign out" button rendered when connected: ✓
@@ -211,7 +218,7 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 - New token overwrites the old one in Keychain
 - "Last synced" and "Connected as" update correctly
 
-**Result:** ⏳ PENDING
+**Result:** ✅ PASS (2026-06-02, live test — OAuth re-ran, reconnected with fresh timestamp, no stuck state)
 
 **Evidence:**
 - signIn() runs after signOut(): ✓
@@ -231,7 +238,7 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 - No crash or stuck state
 - Tapping "Connect Gmail" again re-runs OAuth flow
 
-**Result:** ⏳ PENDING
+**Result:** ✅ PASS (2026-06-02, live test — cancel closed sheet cleanly, no crash, returned to idle, retry works)
 
 **Evidence:**
 - GmailAuthError.userCancelled mapped from ASWebAuthenticationSessionError.canceledLogin: ✓
@@ -318,17 +325,38 @@ environment: "iPhone 17 Simulator, Xcode 26.5"
 
 ## Test Results Summary
 
-**Status:** ✅ Code + Unit Tests Complete | ⏳ Manual UAT Pending
+**Status:** ✅ Manual UAT run 2026-06-02 (iPhone 17 sim, build incl. fix d02a5ea)
 
-**When Manual UAT Complete:**
-- All 8 core test cases pass → Phase 06 **VERIFIED**
-- Any failures → Diagnose → Plan fixes → `/gsd-execute-phase --phase 06 --fix`
+| Result  | Count | Tests |
+|---------|-------|-------|
+| Passed  | 7     | 6-01, 6-02, 6-03, 6-04, 6-08, 6-09, 6-10 |
+| Issue   | 1     | 6-05 (Connected-email display — minor, deferred to Phase 7) |
+| Deferred| 2     | 6-06 (7-day token expiry — impractical), 6-07 (Keychain inspector — advanced) |
+
+**Verdict:** Core Phase 6 flow VERIFIED end-to-end against a live Google account —
+OAuth launch, first sync, manual sync, last-synced display, sign-out, reconnect, and
+cancel-recovery all pass. The reactivity fix (commit d02a5ea) was validated live: the
+connected/disconnected UI now updates without an app relaunch.
+
+## Gaps
+
+```yaml
+- truth: "Settings shows 'Connected as: <email>' after sign-in"
+  status: failed
+  reason: "User reported: line is absent, no email shown"
+  severity: minor
+  test: 6-05
+  root_cause: "GmailSyncController.signIn() never sets connectedEmail; the row is gated on a non-nil email."
+  fix_location: "Phase 7 (Gmail API layer) — requires users.getProfile (emailAddress), which is stubbed in Phase 6."
+  disposition: deferred-to-phase-07
+```
+
+**Deferred (not code defects):**
+- **6-06 Token expiry:** natural 7-day expiry impractical to wait out in UAT; logic is unit-tested (`isTokenExpired`, `scenePhaseChanged → .tokenExpired`). Manual check on deployed v1.
+- **6-07 Keychain inspection:** requires Xcode Keychain debugger / device; `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` covered by code + unit tests.
 
 **Next Action:**
-1. Run manual UAT on simulator (test cases listed above)
-2. Document any issues
-3. If all pass: Archive Phase 06, move to Phase 07 planning
-4. If failures: `/gsd-audit-fix --phase 06` to diagnose and fix
+- The one issue (6-05) is a display-only gap that **depends on Phase 7's Gmail API** — carry it into Phase 7 rather than fixing in isolation.
 
 ---
 
