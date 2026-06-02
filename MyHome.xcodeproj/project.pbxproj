@@ -92,6 +92,10 @@
 		A621RT /* RelativeTimestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F621RT /* RelativeTimestamp.swift */; };
 		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
 		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
+		A701SV4 /* SchemaV4.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV4 /* SchemaV4.swift */; };
+		A702GFP /* GmailFetchPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F702GFP /* GmailFetchPort.swift */; };
+		A703BEP /* BankEmailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703BEP /* BankEmailParser.swift */; };
+		A704SGF /* SpyGmailFetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = F704SGF /* SpyGmailFetch.swift */; };
 		A616PT /* PKCETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F616PT /* PKCETests.swift */; };
 		A617GAUT /* GmailAuthURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F617GAUT /* GmailAuthURLTests.swift */; };
 		A618KPT /* KeychainPortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F618KPT /* KeychainPortTests.swift */; };
@@ -194,6 +198,10 @@
 		F620RTT /* RelativeTimestampTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTimestampTests.swift; sourceTree = "<group>"; };
 		F621RT /* RelativeTimestamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTimestamp.swift; sourceTree = "<group>"; };
 		F622GOC /* GmailOAuthConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailOAuthConfig.swift; sourceTree = "<group>"; };
+		F701SV4 /* SchemaV4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV4.swift; sourceTree = "<group>"; };
+		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
+		F703BEP /* BankEmailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankEmailParser.swift; sourceTree = "<group>"; };
+		F704SGF /* SpyGmailFetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailFetch.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -267,8 +275,17 @@
 				G123 /* Notes */,
 				G125 /* Settings */,
 				G126 /* Gmail (Features) */,
+				G127 /* Ingestion */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		G127 /* Ingestion */ = {
+			isa = PBXGroup;
+			children = (
+				F703BEP /* BankEmailParser.swift */,
+			);
+			path = Ingestion;
 			sourceTree = "<group>";
 		};
 		G124 /* Overview */ = {
@@ -365,6 +382,7 @@
 			isa = PBXGroup;
 			children = (
 				F610GAP /* GmailAuthPort.swift */,
+				F702GFP /* GmailFetchPort.swift */,
 				F611KP /* KeychainPort.swift */,
 				F612PKCE /* PKCE.swift */,
 				F621RT /* RelativeTimestamp.swift */,
@@ -388,6 +406,7 @@
 				F112 /* MigrationPlan.swift */,
 				F117 /* SchemaV2.swift */,
 				F119V3 /* SchemaV3.swift */,
+				F701SV4 /* SchemaV4.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -444,6 +463,7 @@
 				F502 /* SpyBiometricAuth.swift */,
 				F614SGA /* SpyGmailAuth.swift */,
 				F615SKS /* SpyKeychainStore.swift */,
+				F704SGF /* SpyGmailFetch.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -627,11 +647,14 @@
 				A501 /* BiometricAuthPort.swift in Sources */,
 				A504 /* LockController.swift in Sources */,
 				A610GAP /* GmailAuthPort.swift in Sources */,
+				A702GFP /* GmailFetchPort.swift in Sources */,
 				A611KP /* KeychainPort.swift in Sources */,
 				A612PKCE /* PKCE.swift in Sources */,
 				A613GSC /* GmailSyncController.swift in Sources */,
 				A621RT /* RelativeTimestamp.swift in Sources */,
 				A622GOC /* GmailOAuthConfig.swift in Sources */,
+				A701SV4 /* SchemaV4.swift in Sources */,
+				A703BEP /* BankEmailParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -662,6 +685,7 @@
 				A603 /* LockSettingsTests.swift in Sources */,
 				A614SGA /* SpyGmailAuth.swift in Sources */,
 				A615SKS /* SpyKeychainStore.swift in Sources */,
+				A704SGF /* SpyGmailFetch.swift in Sources */,
 				A616PT /* PKCETests.swift in Sources */,
 				A617GAUT /* GmailAuthURLTests.swift in Sources */,
 				A618KPT /* KeychainPortTests.swift in Sources */,

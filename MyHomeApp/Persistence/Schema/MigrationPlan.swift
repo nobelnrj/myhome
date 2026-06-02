@@ -7,11 +7,11 @@ import SwiftData
 /// existing schema versions from this list).
 enum AppMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [SchemaV1.self, SchemaV2.self, SchemaV3.self]   // append V3 — never remove V1/V2
+        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self]   // append V4 — never remove V1/V2/V3
     }
 
     static var stages: [MigrationStage] {
-        [v1ToV2, v2ToV3]
+        [v1ToV2, v2ToV3, v3ToV4]
     }
 
     // Use .custom(willMigrate: nil, didMigrate: nil) rather than .lightweight
@@ -29,6 +29,15 @@ enum AppMigrationPlan: SchemaMigrationPlan {
     static let v2ToV3 = MigrationStage.custom(
         fromVersion: SchemaV2.self,
         toVersion: SchemaV3.self,
+        willMigrate: nil,
+        didMigrate: nil
+    )
+
+    // V4 adds only new optional/defaulted fields to Expense — purely additive.
+    // willMigrate/didMigrate are nil. .custom over .lightweight sidesteps FB13812722.
+    static let v3ToV4 = MigrationStage.custom(
+        fromVersion: SchemaV3.self,
+        toVersion: SchemaV4.self,
         willMigrate: nil,
         didMigrate: nil
     )
