@@ -1,0 +1,184 @@
+Delivered-To: ananyasharma@gmail.com
+Received: by 2002:a05:7108:928c:b0:570:a2d5:6436 with SMTP id hr12csp1888225gdb;
+        Tue, 2 Jun 2026 03:35:17 -0700 (PDT)
+X-Received: by 2002:a05:6a21:7a96:b0:3b1:884a:c3d5 with SMTP id adf61e73a8af0-3b42823a975mr17151808637.24.1780396517383;
+        Tue, 02 Jun 2026 03:35:17 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1780396517; cv=none;
+        d=google.com; s=arc-20240605;
+        b=CBG5PBePbwIqitBLnYtZcymmQG/5GVvmgNKzbPfMrEnkVcqDhgNP2sqY/S+/1Ae62c
+         W+6UZWs84egqtA1PoE8ig5LdPoaewfUglLN8UeiYLiWRQSQk6lLZPVIbsoPoCAO7LNBL
+         /zJRnqPbD/oioUexQ1Zas9mpLxo+U8j0bmKLDKmG8dX40sfYHxM//Iw7fGzQi5HQPb41
+         gaJzWm/8rNpBAWHdKybF2rDnGWCMbrxaO9yO5/lFY9FPNkC/NCOuY1+ztoVNC9L1gsUC
+         s92dACjqyKk1P5DZEEKkNQ2ppJAJuypczst/vEm3+LYt/WfEFWB56aWgoafEP+I1fUlF
+         h9Dg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=mime-version:subject:message-id:to:from:date:dkim-signature;
+        bh=Ly9HloK7AhRS/iFXt7h4oxulzMxi2vcojnDEiPi9Rec=;
+        fh=EsjxdY3tAdooPIoWuuuI3uXONRNSUYrKZ2a2xlDp66o=;
+        b=HOPRp9RuqjmSK5+DXfrGLA8aU0z4bI5ab06WhVPRl4Sg+rc/7Ny/Nd1vQGbEd7C97q
+         zty30qIDYElH3723kAEu6UjZlnqwuG03PF0SFIT7+NjgzqO4/owObwXkyBJjRmCG/6Ak
+         cy20eb9pK3FGKxkh84iB4OJhxlJt/Hv56IEHmRl6MFb5ULB2Ze+/TxK3JgMMLK8rp4ob
+         pgQ/Apsx+q6uP5hV3zJ/QucB4rlixdDkVM3OgqVStVhCAAxQ0n7xAbmmMXbXSued7+V8
+         52xJeRuvqk3VUk3j5JW+8eMf1iqf4iNHpRZUBcXgKJ0gftfDl34yr4JjxcMbGJEqAsRo
+         kJQg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@icici.bank.in header.s=icici header.b=Mm3Wly5a;
+       spf=pass (google.com: domain of credit_cards@icici.bank.in designates 103.87.41.234 as permitted sender) smtp.mailfrom=credit_cards@icici.bank.in;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=icici.bank.in
+Return-Path: <credit_cards@icici.bank.in>
+Received: from hydinmail5.icicibank.com (hydinmail5.icicibank.com. [103.87.41.234])
+        by mx.google.com with ESMTPS id 41be03b00d2f7-c857720bdb4si20711212a12.73.2026.06.02.03.35.17
+        for <ananyasharma@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 02 Jun 2026 03:35:17 -0700 (PDT)
+Received-SPF: pass (google.com: domain of credit_cards@icici.bank.in designates 103.87.41.234 as permitted sender) client-ip=103.87.41.234;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@icici.bank.in header.s=icici header.b=Mm3Wly5a;
+       spf=pass (google.com: domain of credit_cards@icici.bank.in designates 103.87.41.234 as permitted sender) smtp.mailfrom=credit_cards@icici.bank.in;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=icici.bank.in
+Received: from JPRCORPMASSSMTP01.icicibank.com (unknown [10.78.43.121])
+	by hydmsmail3.icicibank.com (Postfix) with ESMTP id 4gV6fW5jcLz1LQKHT
+	for <ananyasharma@GMAIL.COM>; Tue,  2 Jun 2026 16:05:15 +0530 (IST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=icici.bank.in;
+	s=icici; t=1780396515;
+	bh=Ly9HloK7AhRS/iFXt7h4oxulzMxi2vcojnDEiPi9Rec=;
+	h=Date:From:To:Subject;
+	b=Mm3Wly5aZlxQoSh+XgPusK/U7ay9S4w1JMBSkpV25k3KiduZ3OUETLp/Iv9+7r9xf
+	 7kXJqfuNBw1/qfpKpx30VwUuTUCD6t+RCZTZcHwxalrHsGxTG3NGBkLrHk/ZqURut4
+	 iHlLOE+0itSaAVh2B6eXEa7MG3vBlf8ilpJTcQUOT7EDfz3ODKyvA+qfnlOz1Ur8EJ
+	 Atk0qoxEVpLbXMViZQMhZEPpBMRa9xIFXtuqpGY76kqOMopXE/6j96Mx8tafKWHt5+
+	 Rz7fOg0Ig7XQj98Tj5fMH5eiahep7dMc+XAV9KyTX7y6Jz2jKoJex2TI1CgsJgoKGw
+	 zf+6TIUiKfhMw==
+Received: from JPRIOPTAPPDR ()
+	by JPRCORPMASSSMTP01.icicibank.com  with ESMTP id 652AY12I1073974
+	for <ananyasharma@GMAIL.COM>; Tue, 2 Jun 2026 16:04:01 +0530
+Date: Tue, 2 Jun 2026 16:04:01 +0530
+From: credit_cards@icici.bank.in
+To: ananyasharma@GMAIL.COM
+Message-ID: <387955699.14204261780396441562.JavaMail.op_tsg5@JPRIOPTAPPDR>
+Subject: Transaction alert for your ICICI Bank Credit Card
+MIME-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_1420426_2040798904.1780396441562"
+
+------=_Part_1420426_2040798904.1780396441562
+Content-Type: text/html; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>ICICI Bank Online</title>
+</head>
+<body topmargin="0">
+<table width="650" border="0" align="center" cellpadding="0" cellspacing="0" style="font-size:0px;">
+  <tbody>
+    <tr>
+      <td><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/top.jpg" width="650" height="86" /></td>
+    </tr>
+    <tr>
+      <td style="border-left:#e56e2e solid 1px;border-right:#e56e2e solid 1px"><table width="100%" border="0" align="center" cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr>
+            <td style="padding:15px;"><table width="580" border="0" align="center" cellpadding="0" cellspacing="0">
+              <tr>
+                <td></td>
+                </tr>
+              <tr>
+                <td height="10" style="text-align:justify;"><font face="Zurich BT, Zurich Cn BT, Arial" color="#000000" style="font-size:14px">
+Dear Customer, <br />
+  <br /> Your ICICI Bank Credit Card XX5005 has been used for a transaction of INR 833.00 on Jun 02, 2026 at 04:03:50. Info: AMAZON PAY IN E COMMERCE. <br /><br />
+  The Available Credit Limit on your card is INR 2,57,941.00 and Total Credit Limit is INR 2,62,000.00. </p>
+The above limits are a total of the limits of all the Credit Cards  issued to the primary card holder, including any supplementary cards.<br />
+<br />
+In case you have not done this transaction, to report it please call on  18002662 or SMS BLOCK space 1122 to 9215676766 from your registered mobile  number and if you are outside India, call on 04071403333. <br />
+<br />
+In case you require any further information, you may call our Customer Care or  write to us at <a href="mailto:customer.care@icicibank.com" style="color:#a41c2b;">customer.care@icicibank.com</a> <br />
+<br />
+Contact your RM @ Express Relationship Banking 022-44400000.<br />
+<br />
+<br />
+Never share your OTP, URN, CVV or passwords with  anyone even if the person claims to be a bank employee. <br />
+<br />
+Sincerely, <br />
+<br />
+Team ICICI Bank
+                </font></td>
+                </tr>
+              <tr>
+                <td height="10" style="text-align:justify;"></td>
+                </tr>
+              <tr>
+                <td height="1" bgcolor="#ded7bd"></td>
+                </tr>
+              <tr>
+                <td height="10" style="text-align:justify;"></td>
+                </tr><tr>	                <td height="10" style="text-align:justify;"><font face="Zurich BT, Zurich Cn BT, Arial" color="#000000" style="font-size:12px">This is an auto-generated e-mail. Please do not reply.<br />
+                  <br />
+                  Discover a new way of paying your Credit Card bills from your bank account anytime anywhere by using ICICI Bank iMobile Pay. GPRS users, SMS iMobile Pay to 56767661. For details, please <a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/click.html" target="_blank"> <font color="#a41c2b"> click here</font></a>. </font></td>
+                </tr>
+              <tr>
+                <td height="14"></td>
+                </tr>
+              <tr>
+                <td height="70" align="center"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/ed.html" target="_blank"><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/middleimg.gif" width="580" border="0" height="142" class="mobile_img_width"  style="display:block;"/></a></td>
+                </tr>
+              <tr>
+                <td height="14"></td>
+                </tr>
+              <tr>
+                <td align="left" style="text-align:justify"><font face="Zurich BT, Zurich Cn BT, Arial" color="#000000" style="font-size:10px;">
+				</font></td>
+                </tr>
+              </table></td>
+          </tr>
+        </tbody>
+      </table></td>
+    </tr>
+    <tr>
+      <td><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/bottom.gif" width="650" height="30" /></td>
+    </tr>
+    <tr>
+      <td height="25"><font face="Arial" color="#a41c2b" style="font-size:12px">Now banking is more convenient with: </font></td>
+    </tr>
+    <tr>
+      <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tbody>
+          <tr>
+            <td width="6" align="right"><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/BAleft.gif" width="6" height="48" /></td>
+            <td style="border-top:#a41c2b solid 1px;border-bottom:#a41c2b solid 1px"><table width="100%" border="0" cellpadding="0" cellspacing="0">
+              <tbody>
+                <tr> <td width="6%" height="35"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/1.html" target="_blank"><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/bank.jpg" width="27" height="26" border="0" /></a></td>
+                  <td width="17%" height="35" style="border-right:#a41c2b solid 1px"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/1.html" target="_blank" style="text-decoration:none;"><font face="Arial" color="#000000" style="font-size:9px;text-decoration:none">More than
+                    5000<br />	Branches</font></a></td><td width="8%" height="35" align="center"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/2.html" target="_blank" style="text-decoration:none;"><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/atm.jpg" width="28" height="27" border="0" /></a></td>
+                  <td width="9%" height="35" align="left" style="border-right:#a41c2b solid 1px"><font face="Arial" color="#000000" style="font-size:9px;text-decoration:none"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/2.html" target="_blank" style="text-decoration:none;"><font face="Arial" color="#000000" style="font-size:9px;text-decoration:none">24x7 ATM Services</font></a></font></td>
+                  <td width="8%" height="35" align="center"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/3.html" target="_blank" style="text-decoration:none;"><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/phone.jpg" width="27" height="27" border="0" /></a></td>
+                  <td width="12%" height="35" align="left" style="border-right:#a41c2b solid 1px"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/3.html" target="_blank" style="text-decoration:none;"><font face="Arial" color="#000000" style="font-size:9px;text-decoration:none">Customer Care</font></a></td>
+                  <td width="8%" height="35" align="center"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/4.html" target="_blank" style="text-decoration:none;"><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/mouse.jpg" width="27" height="26" border="0" /></a></td>
+                  <td width="13%" height="35" align="left" style="border-right:#a41c2b solid 1px"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/4.html" target="_blank" style="text-decoration:none;"><font face="Arial" color="#000000" style="font-size:9px;text-decoration:none">                    Internet Banking </font></a></td>
+                  <td width="8%" height="35" align="center"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/5.html" target="_blank"><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/mobile.jpg" width="26" height="26" border="0" /></a></td>
+                  <td width="11%" height="35" align="left"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/5.html" target="_blank" style="text-decoration:none;"><font face="Arial" color="#000000" style="font-size:9px;text-decoration:none">iMobile Banking</font></a></td>
+                </tr> </tbody>
+            </table></td>
+            <td width="6" align="left"><img src="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/images/BAright.gif" width="6" height="48" /></td>
+          </tr>
+        </tbody>
+      </table></td>
+    </tr>
+    <tr>
+      <td height="8"></td>
+    </tr>
+    <tr>
+      <td style="text-align:justify"><font face="Zurich BT, Zurich Cn BT, Arial" color="#000000" style="font-size:10px;"><a href="https://www.icicibank.com/campaigns/mailers/june-2020/transaction-alert/disclaimerview.html" target="_blank" style="color:#a41c2b;">Disclaimer </font></td>
+    </tr>
+    <tr>
+      <td height="8"></td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
+------=_Part_1420426_2040798904.1780396441562--
+

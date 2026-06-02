@@ -99,6 +99,8 @@
 		A703CS /* ConfidenceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CS /* ConfidenceScorer.swift */; };
 		A703DK /* DedupChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DK /* DedupChecker.swift */; };
 		A703DS /* DismissedMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DS /* DismissedMessageStore.swift */; };
+		A703HP /* HDFCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703HP /* HDFCParser.swift */; };
+		A703IP /* ICICIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703IP /* ICICIParser.swift */; };
 		A704SGF /* SpyGmailFetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = F704SGF /* SpyGmailFetch.swift */; };
 		A705HDFC /* HDFCParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F705HDFC /* HDFCParserTests.swift */; };
 		A706ICICI /* ICICIParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706ICICI /* ICICIParserTests.swift */; };
@@ -216,6 +218,8 @@
 		F703CS /* ConfidenceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorer.swift; sourceTree = "<group>"; };
 		F703DK /* DedupChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupChecker.swift; sourceTree = "<group>"; };
 		F703DS /* DismissedMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissedMessageStore.swift; sourceTree = "<group>"; };
+		F703HP /* HDFCParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParser.swift; sourceTree = "<group>"; };
+		F703IP /* ICICIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParser.swift; sourceTree = "<group>"; };
 		F704SGF /* SpyGmailFetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailFetch.swift; sourceTree = "<group>"; };
 		F705HDFC /* HDFCParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParserTests.swift; sourceTree = "<group>"; };
 		F706ICICI /* ICICIParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParserTests.swift; sourceTree = "<group>"; };
@@ -310,6 +314,8 @@
 				F703CS /* ConfidenceScorer.swift */,
 				F703DK /* DedupChecker.swift */,
 				F703DS /* DismissedMessageStore.swift */,
+				F703HP /* HDFCParser.swift */,
+				F703IP /* ICICIParser.swift */,
 			);
 			path = Ingestion;
 			sourceTree = "<group>";
@@ -693,6 +699,8 @@
 				A703CS /* ConfidenceScorer.swift in Sources */,
 				A703DK /* DedupChecker.swift in Sources */,
 				A703DS /* DismissedMessageStore.swift in Sources */,
+				A703HP /* HDFCParser.swift in Sources */,
+				A703IP /* ICICIParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

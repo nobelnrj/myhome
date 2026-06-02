@@ -1,0 +1,463 @@
+import Foundation
+
+// MARK: - HDFCParser
+// ING-06, ING-07, ING-08, ING-09
+// Threat: T-07-08 (body treated as plain String — no eval, no HTML rendering)
+// Threat: T-07-09 (canHandle pre-filter rejects non-bank senders)
+
+/// Two-stage HDFC bank email parser.
+///
+/// Stage 1 (ING-08): sender host + blocked-subject pre-filter via `canHandle`.
+/// Stage 2 (ING-07): fingerprint → extraction → normalization → reversal detection.
+///
+/// All HDFC transaction emails in the confirmed corpus are HTML-only
+/// (multipart/alternative with a single text/html part, quoted-printable encoded).
+/// The parser extracts visible text by decoding quoted-printable and stripping HTML tags.
+///
+/// **Confirmed corpus (07-04):**
+/// - HDFC UPI debit:    "Rs.<amt> is debited … towards VPA <vpa> (<MERCHANT>) on <dd-mm-yy>"
+/// - HDFC debit-card:  "Rs.<amt> is debited from your HDFC Bank Debit Card ending <NNNN> at <MERCHANT> on <dd Mon, yyyy>"
+/// - HDFC refund:      "Rs. <amt> is successfully credited to your account **<NNNN> by VPA <vpa> <MERCHANT> on <dd-mm-yy>"
+/// - HDFC P2P credit:  "Rs.<amt> has been successfully credited … Sender:" → SKIP (not expense)
+public struct HDFCParser: BankEmailParser {
+
+    public let parserID = "hdfc-v1"
+    public let parserVersion = "1.0"
+
+    public init() {}
+
+    // MARK: - Allowed senders (confirmed, ING-08)
+
+    /// Confirmed HDFC sender host (domain portion after @) from plan 07-04 corpus.
+    private static let allowedSenderHost = "hdfcbank.bank.in"
+
+    // MARK: - Blocked subject keywords (ING-08)
+
+    private static let blockedSubjectKeywords: [String] = [
+        "otp",
+        "one time password",
+        "verification code",
+        "verify",
+        "promotional",
+        "offer",
+        "statement",
+    ]
+
+    // MARK: - canHandle
+
+    public func canHandle(sender: String, subject: String) -> Bool {
+        // Sender host must match (T-07-09: rejects non-HDFC senders)
+        let senderLower = sender.lowercased()
+        guard senderLower.hasSuffix("@\(HDFCParser.allowedSenderHost)") ||
+              senderLower.hasSuffix(".\(HDFCParser.allowedSenderHost)") else {
+            return false
+        }
+        // Block OTP/promo/statement subjects (ING-08)
+        let subjectLower = subject.lowercased()
+        for keyword in HDFCParser.blockedSubjectKeywords {
+            if subjectLower.contains(keyword) {
+                return false
+            }
+        }
+        return true
+    }
+
+    // MARK: - parse
+
+    public func parse(rawEmail: String) -> ParsedExpense? {
+        // Extract visible text (quoted-printable decode + HTML strip)
+        let body = extractVisibleText(from: rawEmail)
+
+        // Extract message Date header for fallback
+        let fallbackDate = extractDate(from: rawEmail) ?? Date()
+
+        // Try each known template in order
+        if let expense = parseUPIDebit(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        if let expense = parseDebitCard(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        if let expense = parseRefund(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        // P2P credit and unrecognised templates → nil (ING-07)
+        return nil
+    }
+
+    // MARK: - Template parsers
+
+    /// HDFC UPI debit: "Rs.<amt> is debited from your account ending <NNNN> towards VPA <vpa> (<MERCHANT>) on <dd-mm-yy>"
+    private func parseUPIDebit(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT — required literals (ING-07): if any missing, return nil
+        guard body.contains("is debited from your account ending"),
+              body.contains("towards VPA"),
+              body.contains("UPI transaction reference no") else {
+            return nil
+        }
+        // Skip P2P credit (same "account ending" phrasing but has "has been successfully credited")
+        if body.contains("has been successfully credited") { return nil }
+
+        // EXTRACT amount — pattern: "Rs.<amount> is debited"
+        guard let amount = extractAmount(pattern: #"Rs\.(\d[\d,]*(?:\.\d{1,2})?)\s+is debited"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT merchant — text inside last (...) before " on "
+        guard let merchant = extractUPIMerchant(from: body) else { return nil }
+
+        // EXTRACT account tail — "account ending <NNNN>"
+        let sourceTail = extractAccountTail(pattern: #"account ending\s+(\d{4})"#, from: body) ?? ""
+        let sourceLabel = sourceTail.isEmpty ? "HDFC Debit" : "HDFC ••\(sourceTail)"
+
+        // EXTRACT date — "on <dd-mm-yy>"
+        let date = extractDDMMYY(from: body) ?? fallbackDate
+
+        // NORMALISE
+        let normalized = MerchantNormalizer.normalize(merchant)
+
+        return ParsedExpense(
+            amount: amount,
+            rawMerchant: merchant,
+            normalizedMerchant: normalized.normalizedName,
+            categoryHint: normalized.categoryHint,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: false,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
+    /// HDFC debit-card: "Rs.<amt> is debited from your HDFC Bank Debit Card ending <NNNN> at <MERCHANT> on <dd Mon, yyyy>"
+    private func parseDebitCard(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT
+        guard body.contains("is debited from your HDFC Bank Debit Card ending"),
+              body.contains(" at "),
+              body.contains(" on ") else {
+            return nil
+        }
+
+        // EXTRACT amount — "Rs.<amount> is debited from your HDFC Bank Debit Card"
+        guard let amount = extractAmount(pattern: #"Rs\.(\d[\d,]*(?:\.\d{1,2})?)\s+is debited from your HDFC Bank Debit Card"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT card tail — "Debit Card ending <NNNN>"
+        let cardTail = extractAccountTail(pattern: #"Debit Card ending\s+(\d{4})"#, from: body) ?? ""
+        let sourceLabel = cardTail.isEmpty ? "HDFC Debit Card" : "HDFC ••\(cardTail)"
+
+        // EXTRACT merchant — text between " at " and " on "
+        guard let merchant = extractDebitCardMerchant(from: body) else { return nil }
+
+        // EXTRACT date — "on <dd Mon, yyyy>"
+        let date = extractDDMonYYYY(from: body) ?? fallbackDate
+
+        // NORMALISE
+        let normalized = MerchantNormalizer.normalize(merchant)
+
+        return ParsedExpense(
+            amount: amount,
+            rawMerchant: merchant,
+            normalizedMerchant: normalized.normalizedName,
+            categoryHint: normalized.categoryHint,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: false,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
+    /// HDFC refund/reversal: "Rs. <amt> is successfully credited to your account **<NNNN> by VPA <vpa> <MERCHANT> on <dd-mm-yy>"
+    ///
+    /// Disambiguates from P2P credit by requiring "by VPA" (refund) instead of "Sender:" (P2P).
+    private func parseRefund(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT — required literals for refund template
+        guard body.contains("is successfully credited to your account"),
+              body.contains("by VPA"),
+              body.contains("UPI transaction reference number") else {
+            return nil
+        }
+        // P2P credit has "Sender:" line — exclude (ING-09 disambiguation)
+        if body.contains("Sender:") { return nil }
+        // P2P credit uses "has been successfully credited" — also exclude
+        if body.contains("has been successfully credited") { return nil }
+
+        // EXTRACT amount — "Rs. <amount> is successfully credited"
+        guard let amount = extractAmount(pattern: #"Rs\.?\s*(\d[\d,]*(?:\.\d{1,2})?)\s+is successfully credited"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT account tail — "account **<NNNN>"
+        let accountTail = extractAccountTail(pattern: #"account \*{1,2}(\d{4})"#, from: body) ?? ""
+        let sourceLabel = accountTail.isEmpty ? "HDFC Debit" : "HDFC ••\(accountTail)"
+
+        // EXTRACT merchant — text after VPA identifier, up to " on "
+        guard let merchant = extractRefundMerchant(from: body) else { return nil }
+
+        // EXTRACT date — "on <dd-mm-yy>"
+        let date = extractDDMMYY(from: body) ?? fallbackDate
+
+        // NORMALISE
+        let normalized = MerchantNormalizer.normalize(merchant)
+
+        return ParsedExpense(
+            amount: -abs(amount),   // Reversal → negative amount (ING-09)
+            rawMerchant: merchant,
+            normalizedMerchant: normalized.normalizedName,
+            categoryHint: normalized.categoryHint,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: true,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
+    // MARK: - Extraction helpers
+
+    /// Decodes quoted-printable and strips HTML tags to get visible text.
+    ///
+    /// All HDFC emails in the confirmed corpus are multipart/alternative with a single
+    /// text/html part (quoted-printable encoded). There is no text/plain part.
+    /// This method handles both quoted-printable (HDFC) and plain 7bit (ICICI) HTML.
+    private func extractVisibleText(from rawEmail: String) -> String {
+        // Locate the HTML body section — find first "<html" or "<HTML"
+        let lower = rawEmail.lowercased()
+        var htmlContent = rawEmail
+
+        if let htmlStart = lower.range(of: "<html") {
+            htmlContent = String(rawEmail[htmlStart.lowerBound...])
+        }
+
+        // Decode quoted-printable soft line breaks and =XX escapes
+        let qpDecoded = decodeQuotedPrintable(htmlContent)
+
+        // Strip HTML tags — replace tags with spaces, then collapse whitespace
+        let stripped = stripHTMLTags(qpDecoded)
+
+        return stripped
+    }
+
+    /// Decodes quoted-printable encoded text.
+    /// Handles soft line breaks (=\r\n and =\n) and hex escapes (=XX).
+    ///
+    /// Works on Unicode scalars (not Character/grapheme clusters) because Swift treats
+    /// \r\n as a SINGLE grapheme cluster, which breaks QP soft-line-break detection.
+    private func decodeQuotedPrintable(_ input: String) -> String {
+        let scalars = Array(input.unicodeScalars)
+        var result = ""
+        result.reserveCapacity(scalars.count)
+        var i = 0
+
+        while i < scalars.count {
+            let sc = scalars[i]
+            if sc.value == 0x3D {  // '='
+                if i + 1 < scalars.count {
+                    let next = scalars[i + 1]
+                    // Soft line break: =\n
+                    if next.value == 0x0A {
+                        i += 2
+                        continue
+                    }
+                    // Soft line break: =\r\n (must check CR then LF separately)
+                    if next.value == 0x0D {
+                        if i + 2 < scalars.count && scalars[i + 2].value == 0x0A {
+                            i += 3
+                            continue
+                        }
+                    }
+                    // Hex escape: =XX (two hex digits)
+                    if i + 2 < scalars.count {
+                        let h1 = scalars[i + 1]
+                        let h2 = scalars[i + 2]
+                        let hexStr = "\(Character(h1))\(Character(h2))"
+                        if let byte = UInt8(hexStr, radix: 16) {
+                            let scalar = Unicode.Scalar(byte)
+                            result.append(Character(scalar))
+                            i += 3
+                            continue
+                        }
+                    }
+                }
+            }
+            result.append(Character(sc))
+            i += 1
+        }
+        return result
+    }
+
+    /// Strips HTML tags and normalises whitespace to produce visible text.
+    private func stripHTMLTags(_ html: String) -> String {
+        // Replace block-level tags with newlines to preserve word boundaries
+        var text = html
+        // Replace <br>, <br/>, <BR> with space
+        text = text.replacingOccurrences(of: "<br", with: " ", options: .caseInsensitive)
+        // Remove remaining tags
+        // Simple character-level scan — no regex, no HTML parser dependency (T-07-SC)
+        var result = ""
+        result.reserveCapacity(text.count)
+        var inTag = false
+        for ch in text {
+            if ch == "<" {
+                inTag = true
+            } else if ch == ">" {
+                inTag = false
+                result.append(" ")
+            } else if !inTag {
+                result.append(ch)
+            }
+        }
+        // Normalise whitespace (collapse runs of spaces/newlines)
+        let components = result.components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+        return components.joined(separator: " ")
+    }
+
+    /// Extracts the `Date:` header value and parses it as a Date.
+    private func extractDate(from rawEmail: String) -> Date? {
+        // Look for "Date: " header line
+        guard let range = rawEmail.range(of: "Date: ", options: .caseInsensitive) else {
+            return nil
+        }
+        let after = String(rawEmail[range.upperBound...])
+        let line = after.components(separatedBy: "\n").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        // Try RFC 2822 date format
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        let formats = [
+            "EEE, dd MMM yyyy HH:mm:ss Z",
+            "dd MMM yyyy HH:mm:ss Z",
+            "EEE, d MMM yyyy HH:mm:ss Z",
+        ]
+        for fmt in formats {
+            formatter.dateFormat = fmt
+            if let date = formatter.date(from: line) { return date }
+        }
+        return nil
+    }
+
+    /// Extracts Decimal amount using an NSRegularExpression pattern.
+    /// Group 1 of the pattern must capture the numeric string (may include commas).
+    /// Never uses Double — Pitfall 17.
+    private func extractAmount(pattern: String, from body: String) -> Decimal? {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+            return nil
+        }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range),
+              match.numberOfRanges > 1 else {
+            return nil
+        }
+        let amtRange = match.range(at: 1)
+        guard amtRange.location != NSNotFound else { return nil }
+        let amtStr = nsBody.substring(with: amtRange)
+            .replacingOccurrences(of: ",", with: "")  // strip Indian grouping commas
+        return Decimal(string: amtStr)
+    }
+
+    /// Extracts account/card last-4-digits.
+    private func extractAccountTail(pattern: String, from body: String) -> String? {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+            return nil
+        }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range),
+              match.numberOfRanges > 1 else {
+            return nil
+        }
+        let tailRange = match.range(at: 1)
+        guard tailRange.location != NSNotFound else { return nil }
+        return nsBody.substring(with: tailRange)
+    }
+
+    /// Extracts UPI merchant: text inside last `(...)` that appears before " on <dd-mm-yy>".
+    private func extractUPIMerchant(from body: String) -> String? {
+        // Pattern: "towards VPA <vpa> (<MERCHANT>) on"
+        let pattern = #"towards VPA\s+\S+\s+\(([^)]+)\)\s+on"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            return nil
+        }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range),
+              match.numberOfRanges > 1 else {
+            return nil
+        }
+        let mRange = match.range(at: 1)
+        guard mRange.location != NSNotFound else { return nil }
+        return nsBody.substring(with: mRange).trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Extracts debit-card merchant: text between " at " and " on " in debit-card template.
+    private func extractDebitCardMerchant(from body: String) -> String? {
+        // Pattern: "Debit Card ending NNNN at <MERCHANT> on <date>"
+        let pattern = #"Debit Card ending\s+\d{4}\s+at\s+(.+?)\s+on\s+\d{2}\s+\w{3}"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            return nil
+        }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range),
+              match.numberOfRanges > 1 else {
+            return nil
+        }
+        let mRange = match.range(at: 1)
+        guard mRange.location != NSNotFound else { return nil }
+        return nsBody.substring(with: mRange).trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Extracts refund merchant: text after "by VPA <vpa-identifier>" up to " on ".
+    ///
+    /// Corpus example: "by VPA gpayrefund-online@axisbank Google India Digital Services Pvt Ltd on 01-05-26"
+    private func extractRefundMerchant(from body: String) -> String? {
+        // Pattern: "by VPA <vpa-local-part@domain> <MERCHANT> on <dd-mm-yy>"
+        let pattern = #"by VPA\s+\S+\s+(.+?)\s+on\s+\d{2}-\d{2}-\d{2}"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            return nil
+        }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range),
+              match.numberOfRanges > 1 else {
+            return nil
+        }
+        let mRange = match.range(at: 1)
+        guard mRange.location != NSNotFound else { return nil }
+        return nsBody.substring(with: mRange).trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Parses HDFC UPI date format: "dd-mm-yy" (e.g. "02-06-26" = 2 Jun 2026).
+    private func extractDDMMYY(from body: String) -> Date? {
+        let pattern = #"\b(\d{2}-\d{2}-\d{2})\b"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range) else { return nil }
+        let dateStr = nsBody.substring(with: match.range(at: 1))
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Kolkata")
+        formatter.dateFormat = "dd-MM-yy"
+        return formatter.date(from: dateStr)
+    }
+
+    /// Parses HDFC debit-card date format: "dd Mon, yyyy" (e.g. "01 Jun, 2026").
+    private func extractDDMonYYYY(from body: String) -> Date? {
+        let pattern = #"\b(\d{1,2}\s+\w{3},\s*\d{4})\b"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range) else { return nil }
+        let dateStr = nsBody.substring(with: match.range(at: 1))
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Kolkata")
+        formatter.dateFormat = "d MMM, yyyy"
+        return formatter.date(from: dateStr)
+    }
+}
