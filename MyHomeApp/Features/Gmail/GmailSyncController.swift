@@ -195,7 +195,18 @@ final class GmailSyncController {
         pkce: PKCE,
         state: String
     ) -> URL? {
-        // STUB — plan 02 implements; GmailAuthURLTests asserts RED
-        return nil
+        var components = URLComponents(string: "https://accounts.google.com/o/oauth2/v2/auth")
+        components?.queryItems = [
+            URLQueryItem(name: "client_id", value: clientID),
+            URLQueryItem(name: "redirect_uri", value: redirectURI),
+            URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "scope", value: "https://www.googleapis.com/auth/gmail.readonly"),
+            URLQueryItem(name: "code_challenge", value: pkce.challenge),
+            URLQueryItem(name: "code_challenge_method", value: "S256"),
+            URLQueryItem(name: "access_type", value: "offline"),  // Required for refresh_token
+            URLQueryItem(name: "state", value: state),            // CSRF protection (T-06-CSRF)
+            URLQueryItem(name: "prompt", value: "consent"),       // Force consent on reconnect
+        ]
+        return components?.url
     }
 }

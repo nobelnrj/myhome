@@ -88,6 +88,7 @@
 		A611KP /* KeychainPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F611KP /* KeychainPort.swift */; };
 		A612PKCE /* PKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = F612PKCE /* PKCE.swift */; };
 		A613GSC /* GmailSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GSC /* GmailSyncController.swift */; };
+		A621RT /* RelativeTimestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F621RT /* RelativeTimestamp.swift */; };
 		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
 		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
 		A616PT /* PKCETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F616PT /* PKCETests.swift */; };
@@ -190,6 +191,7 @@
 		F618KPT /* KeychainPortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPortTests.swift; sourceTree = "<group>"; };
 		F619GSCT /* GmailSyncControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailSyncControllerTests.swift; sourceTree = "<group>"; };
 		F620RTT /* RelativeTimestampTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTimestampTests.swift; sourceTree = "<group>"; };
+		F621RT /* RelativeTimestamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTimestamp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -363,6 +365,7 @@
 				F610GAP /* GmailAuthPort.swift */,
 				F611KP /* KeychainPort.swift */,
 				F612PKCE /* PKCE.swift */,
+				F621RT /* RelativeTimestamp.swift */,
 			);
 			path = Gmail;
 			sourceTree = "<group>";
@@ -624,6 +627,7 @@
 				A611KP /* KeychainPort.swift in Sources */,
 				A612PKCE /* PKCE.swift in Sources */,
 				A613GSC /* GmailSyncController.swift in Sources */,
+				A621RT /* RelativeTimestamp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

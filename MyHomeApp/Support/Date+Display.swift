@@ -110,17 +110,4 @@ extension Date {
         return formatter.string(from: self)
     }
 
-    // MARK: - Phase 6: Relative timestamp (D6-16, ING-05, SET-05)
-
-    /// Returns a human-readable relative date string (e.g., "2 hours ago").
-    ///
-    /// Uses `RelativeDateTimeFormatter` with `unitsStyle = .full` (D6-16).
-    /// D6-16: Display format = "Last synced 2 hours ago".
-    ///
-    /// NOTE: **STUB** — returns empty string until plan 02 implements this.
-    /// RelativeTimestampTests will fail RED against this stub.
-    var relativeToNow: String {
-        // STUB — plan 02 will implement: RelativeDateTimeFormatter().localizedString(for: self, relativeTo: Date())
-        return ""
-    }
 }
