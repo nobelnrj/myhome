@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 // MARK: - KeychainPort
 
@@ -48,4 +49,88 @@ public enum KeychainError: Error, Sendable {
     case unexpectedData
     /// An unexpected OSStatus code was returned by the Security framework.
     case unexpectedStatus(OSStatus)
+}
+
+// MARK: - SystemKeychainStore
+
+/// Production conformer that wraps Security.framework Keychain APIs.
+///
+/// This is the only type in the Gmail subsystem that touches the OS Keychain.
+/// All unit tests inject SpyKeychainStore instead.
+///
+/// SEC-03 / D6-05: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly — prevents
+/// backup/restore exfiltration (T-06-04-KEYCHAIN); ThisDeviceOnly also prevents
+/// the item appearing on another device via iCloud Keychain.
+///
+/// Save uses add-then-update (upsert): try SecItemAdd first; on errSecDuplicateItem
+/// update via SecItemUpdate WITHOUT kSecReturnData in the update query (Security
+/// framework anti-pattern: including kSecReturnData in an update query causes
+/// errSecParam on some OS versions).
+public struct SystemKeychainStore: KeychainPort, @unchecked Sendable {
+
+    private let service: String
+
+    public init(service: String = "com.reojacob.myhome.gmail") {
+        self.service = service
+    }
+
+    public func save(_ value: String, forKey key: String) throws {
+        let data = Data(value.utf8)
+        let addQuery: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: key,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            kSecValueData: data,
+        ]
+        let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
+        if addStatus == errSecDuplicateItem {
+            // Item exists — update value only; do NOT include kSecReturnData in update query
+            let searchQuery: [CFString: Any] = [
+                kSecClass: kSecClassGenericPassword,
+                kSecAttrService: service,
+                kSecAttrAccount: key,
+            ]
+            let attributes: [CFString: Any] = [kSecValueData: data]
+            let updateStatus = SecItemUpdate(searchQuery as CFDictionary, attributes as CFDictionary)
+            guard updateStatus == errSecSuccess else {
+                throw KeychainError.unexpectedStatus(updateStatus)
+            }
+        } else if addStatus != errSecSuccess {
+            throw KeychainError.unexpectedStatus(addStatus)
+        }
+    }
+
+    public func load(forKey key: String) throws -> String? {
+        let query: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: key,
+            kSecReturnData: true,
+            kSecMatchLimit: kSecMatchLimitOne,
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecItemNotFound { return nil }
+        guard status == errSecSuccess else {
+            throw KeychainError.unexpectedStatus(status)
+        }
+        guard let data = result as? Data, let value = String(data: data, encoding: .utf8) else {
+            throw KeychainError.unexpectedData
+        }
+        return value
+    }
+
+    public func delete(forKey key: String) throws {
+        let query: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: key,
+        ]
+        let status = SecItemDelete(query as CFDictionary)
+        // Tolerant of item-not-found (idempotent delete)
+        if status != errSecSuccess && status != errSecItemNotFound {
+            throw KeychainError.unexpectedStatus(status)
+        }
+    }
 }

@@ -18,47 +18,17 @@ public enum SyncStatus: Equatable, Sendable {
     case error(String)
 }
 
-// MARK: - GmailOAuthConfig
-
-/// Placeholder OAuth configuration constants.
-/// Plan 04 replaces these with the real committed config values.
-enum GmailOAuthConfig {
-    static let clientID: String = "REPLACE_IN_PLAN_04"
-    static let redirectURI: String = "myhome-oauth://callback"
-    static let callbackScheme: String = "myhome-oauth"
-}
-
-// MARK: - Wave-0 stub dependencies (replaced by System* types in plan 04)
-
-/// Temporary stub satisfying GmailAuthPort default for Wave 0 compilation.
-/// Plan 04 replaces with SystemGmailAuth.
-private struct _StubGmailAuth: GmailAuthPort {
-    func authorize(authURL: URL, callbackScheme: String) async throws -> String {
-        throw GmailAuthError.userCancelled
-    }
-    func exchangeCode(_ code: String, verifier: String, clientID: String, redirectURI: String) async throws -> TokenResponse {
-        throw GmailAuthError.userCancelled
-    }
-    func refreshToken(_ refreshToken: String, clientID: String) async throws -> RefreshResponse {
-        throw GmailAuthError.userCancelled
-    }
-}
-
-/// Temporary stub satisfying KeychainPort default for Wave 0 compilation.
-/// Plan 04 replaces with SystemKeychainStore.
-private struct _StubKeychain: KeychainPort {
-    func save(_ value: String, forKey key: String) throws {}
-    func load(forKey key: String) throws -> String? { nil }
-    func delete(forKey key: String) throws {}
-}
+// NOTE: GmailOAuthConfig is defined in MyHomeApp/Gmail/GmailOAuthConfig.swift (plan 04).
+// The inline placeholder and Wave-0 stubs (_StubGmailAuth/_StubKeychain) have been removed.
+// GmailSyncController.init now uses SystemGmailAuth() and SystemKeychainStore() as defaults.
 
 // MARK: - GmailSyncController
 
 /// Observable state controller for the Gmail sign-in, sync, and token management lifecycle.
 ///
-/// Owned by the Settings tab (or RootView) via `@State private var gmailSync = GmailSyncController()`.
-/// Wraps `GmailAuthPort` (defaulting to `_StubGmailAuth` in Wave 0, `SystemGmailAuth` in plan 04)
-/// and `KeychainPort` (defaulting to `_StubKeychain` in Wave 0, `SystemKeychainStore` in plan 04)
+/// Owned by RootView via `@State private var gmailSyncController = GmailSyncController()`.
+/// Wraps `GmailAuthPort` (defaulting to `SystemGmailAuth()` in production) and
+/// `KeychainPort` (defaulting to `SystemKeychainStore()` in production)
 /// for full unit testability of every OAuth path.
 ///
 /// All persistent metadata is backed by App Group UserDefaults.
@@ -139,14 +109,12 @@ final class GmailSyncController {
 
     /// Creates a GmailSyncController with injected ports and optional time provider.
     /// - Parameters:
-    ///   - auth: `GmailAuthPort` conformer; defaults to `_StubGmailAuth()` in Wave 0
-    ///           (plan 04 swaps for `SystemGmailAuth()`).
-    ///   - keychain: `KeychainPort` conformer; defaults to `_StubKeychain()` in Wave 0
-    ///               (plan 04 swaps for `SystemKeychainStore()`).
+    ///   - auth: `GmailAuthPort` conformer; defaults to `SystemGmailAuth()` in production.
+    ///   - keychain: `KeychainPort` conformer; defaults to `SystemKeychainStore()` in production.
     ///   - now: Time provider; defaults to `Date.init` in production. Injectable for tests.
     init(
-        auth: any GmailAuthPort = _StubGmailAuth(),
-        keychain: any KeychainPort = _StubKeychain(),
+        auth: any GmailAuthPort = SystemGmailAuth(),
+        keychain: any KeychainPort = SystemKeychainStore(),
         now: @escaping () -> Date = Date.init
     ) {
         self.auth = auth

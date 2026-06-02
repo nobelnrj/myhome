@@ -1,5 +1,6 @@
 import Foundation
 import AuthenticationServices
+import UIKit
 
 // MARK: - GmailAuthPort
 
@@ -94,4 +95,165 @@ public enum GmailAuthError: Error, Sendable {
     case networkError(Error)
     /// The OAuth server returned an error response (e.g., invalid_grant).
     case oauthError(String)
+}
+
+// MARK: - SceneContextProvider
+
+/// Provides a presentation anchor for ASWebAuthenticationSession.
+/// iOS 17+: picks the first connected UIWindowScene's keyWindow.
+/// Nonisolated conformance; UIApplication access is via the SceneDelegate/UIWindowScene API.
+private final class SceneContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding, @unchecked Sendable {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        return UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.keyWindow ?? UIWindow()
+    }
+}
+
+// MARK: - SystemGmailAuth
+
+/// Production conformer that wraps ASWebAuthenticationSession + URLSession.
+///
+/// This is the only type in the Gmail subsystem that touches the OS authentication
+/// stack and the network for OAuth. All unit tests inject SpyGmailAuth instead.
+///
+/// D6-01: ASWebAuthenticationSession (no Google SignIn SDK).
+/// D6-23: Wrapped behind GmailAuthPort protocol seam (mirrors NotificationCenterPort).
+/// D6-24: 60s URLSession timeout for the token endpoint.
+///
+/// ING-01: authorize() is @MainActor — ASWebAuthenticationSession must present UI on main thread.
+/// The continuation is resumed exactly once per branch (RESEARCH Pitfall 4 guard pattern).
+public final class SystemGmailAuth: GmailAuthPort, @unchecked Sendable {
+
+    // Session is kept as an instance property so it stays retained until the callback fires.
+    // (RESEARCH Pitfall: session must not be deallocated before the callback.)
+    private var activeSession: ASWebAuthenticationSession?
+
+    public init() {}
+
+    /// Presents the OAuth browser sheet and returns the authorization code.
+    /// Must be called on the main actor because ASWebAuthenticationSession presents UI.
+    @MainActor
+    public func authorize(authURL: URL, callbackScheme: String) async throws -> String {
+        return try await withCheckedThrowingContinuation { continuation in
+            let contextProvider = SceneContextProvider()
+            let session = ASWebAuthenticationSession(
+                url: authURL,
+                callbackURLScheme: callbackScheme
+            ) { [weak self] callbackURL, error in
+                defer { self?.activeSession = nil }
+
+                if let error = error {
+                    let nsError = error as NSError
+                    if nsError.domain == ASWebAuthenticationSessionErrorDomain,
+                       nsError.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+                        continuation.resume(throwing: GmailAuthError.userCancelled)
+                    } else {
+                        continuation.resume(throwing: GmailAuthError.networkError(error))
+                    }
+                    return
+                }
+
+                guard let url = callbackURL,
+                      let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+                else {
+                    continuation.resume(throwing: GmailAuthError.callbackURLInvalid)
+                    return
+                }
+
+                // D6-19: extract "error" query param first — OAuth server error takes priority
+                if let oauthError = components.queryItems?.first(where: { $0.name == "error" })?.value {
+                    continuation.resume(throwing: GmailAuthError.oauthError(oauthError))
+                    return
+                }
+
+                guard let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
+                    continuation.resume(throwing: GmailAuthError.noAuthCode)
+                    return
+                }
+
+                continuation.resume(returning: code)
+            }
+            session.presentationContextProvider = contextProvider
+            session.prefersEphemeralWebBrowserSession = false  // reuse browser cookies for faster re-auth
+            activeSession = session  // retain until callback fires
+            session.start()
+        }
+    }
+
+    /// Exchanges an authorization code for access + refresh tokens via URLSession POST.
+    /// D6-24: 60s timeout.
+    public func exchangeCode(_ code: String, verifier: String, clientID: String, redirectURI: String) async throws -> TokenResponse {
+        let url = URL(string: "https://oauth2.googleapis.com/token")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 60
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+        let bodyParams: [String: String] = [
+            "client_id": clientID,
+            "code": code,
+            "code_verifier": verifier,
+            "grant_type": "authorization_code",
+            "redirect_uri": redirectURI,
+        ]
+        request.httpBody = bodyParams
+            .map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }
+            .sorted()  // stable ordering for reproducibility
+            .joined(separator: "&")
+            .data(using: .utf8)
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 400 {
+                // ING-16: 400 invalid_grant → decode and surface as oauthError so controller
+                // treats it as token expiry / re-auth required
+                if let body = try? JSONDecoder().decode([String: String].self, from: data),
+                   let errorMsg = body["error"] {
+                    throw GmailAuthError.oauthError(errorMsg)
+                }
+            }
+            return try JSONDecoder().decode(TokenResponse.self, from: data)
+        } catch let gmailError as GmailAuthError {
+            throw gmailError
+        } catch {
+            throw GmailAuthError.networkError(error)
+        }
+    }
+
+    /// Exchanges a refresh token for a new access token via URLSession POST.
+    /// D6-24: 60s timeout. Maps 400 invalid_grant to oauthError (ING-16).
+    public func refreshToken(_ refreshToken: String, clientID: String) async throws -> RefreshResponse {
+        let url = URL(string: "https://oauth2.googleapis.com/token")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 60
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+        let bodyParams: [String: String] = [
+            "client_id": clientID,
+            "refresh_token": refreshToken,
+            "grant_type": "refresh_token",
+        ]
+        request.httpBody = bodyParams
+            .map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }
+            .sorted()
+            .joined(separator: "&")
+            .data(using: .utf8)
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 400 {
+                if let body = try? JSONDecoder().decode([String: String].self, from: data),
+                   let errorMsg = body["error"] {
+                    throw GmailAuthError.oauthError(errorMsg)
+                }
+            }
+            return try JSONDecoder().decode(RefreshResponse.self, from: data)
+        } catch let gmailError as GmailAuthError {
+            throw gmailError
+        } catch {
+            throw GmailAuthError.networkError(error)
+        }
+    }
 }

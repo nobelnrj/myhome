@@ -31,6 +31,8 @@ struct RootView: View {
     @State private var deepLinkBlockID: UUID? = nil
     /// Face ID gate state — @Observable owned via @State, never @StateObject (PITFALLS.md Pitfall 10)
     @State private var lockController = LockController()
+    /// Gmail sync controller for OAuth + token refresh — @Observable owned via @State (D6-28)
+    @State private var gmailSyncController = GmailSyncController()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -58,7 +60,7 @@ struct RootView: View {
                 }
                 .tag(3)
 
-            SettingsView(selectedTab: $selectedTab, lockController: lockController)
+            SettingsView(selectedTab: $selectedTab, lockController: lockController, gmailSyncController: gmailSyncController)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
@@ -84,13 +86,14 @@ struct RootView: View {
             }
         }
         // Scene phase observation: drives blur, grace-period re-lock, and auto-authenticate on foreground
-        .onChange(of: scenePhase) { _, newPhase in
-            lockController.scenePhaseChanged(newPhase)
-            // Auto-trigger auth on foreground when locked (banking-app feel — D5-02, D5-01)
-            // Pitfall: never call async directly in onChange; always wrap in Task
-            if newPhase == .active && lockController.isLocked && lockController.lockEnabled {
-                Task { await lockController.authenticate() }
-            }
-        }
+         .onChange(of: scenePhase) { _, newPhase in
+             lockController.scenePhaseChanged(newPhase)
+             gmailSyncController.scenePhaseChanged(newPhase)
+             // Auto-trigger auth on foreground when locked (banking-app feel — D5-02, D5-01)
+             // Pitfall: never call async directly in onChange; always wrap in Task
+             if newPhase == .active && lockController.isLocked && lockController.lockEnabled {
+                 Task { await lockController.authenticate() }
+             }
+         }
     }
 }

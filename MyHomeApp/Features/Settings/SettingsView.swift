@@ -16,8 +16,10 @@ struct SettingsView: View {
 
     @Binding var selectedTab: Int
     let lockController: LockController
+    let gmailSyncController: GmailSyncController
 
     @State private var showManageCategories = false
+    @State private var showSignOutConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -38,6 +40,80 @@ struct SettingsView: View {
                             }
                         }
                     ))
+                }
+
+                // MARK: Gmail Section
+
+                Section("Gmail") {
+                    if !gmailSyncController.isConnected {
+                        Button("Connect Gmail") {
+                            Task { await gmailSyncController.signIn() }
+                        }
+                    } else {
+                        if let email = gmailSyncController.connectedEmail {
+                            Text("Connected as: \(email)")
+                                .font(.subheadline)
+                        }
+
+                        HStack {
+                            Text("Last synced")
+                            Spacer()
+                            if let lastSynced = gmailSyncController.lastSyncedAt {
+                                Text(lastSynced.relativeToNow)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("Never")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+
+                        if gmailSyncController.syncStatus == .syncing {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Syncing…")
+                                    .font(.subheadline)
+                                Spacer()
+                            }
+                        } else {
+                            Button("Sync now") {
+                                Task { await gmailSyncController.sync() }
+                            }
+                            .disabled(gmailSyncController.syncStatus == .syncing)
+                        }
+
+                        if gmailSyncController.syncStatus == .tokenExpired {
+                            Button("Reconnect Gmail", action: {
+                                Task { await gmailSyncController.signIn() }
+                            })
+                            .foregroundStyle(.orange)
+                        }
+
+                        if case let .error(msg) = gmailSyncController.syncStatus {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(msg)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.red)
+                                Button("Try again", action: {
+                                    Task { await gmailSyncController.sync() }
+                                })
+                                .font(.subheadline)
+                            }
+                        }
+
+                        Button("Sign out", action: {
+                            showSignOutConfirmation = true
+                        })
+                        .foregroundStyle(.red)
+                    }
+                }
+                .confirmationDialog("Sign out of Gmail?", isPresented: $showSignOutConfirmation) {
+                    Button("Sign out", role: .destructive) {
+                        Task { await gmailSyncController.signOut() }
+                    }
+                    Button("Cancel", role: .cancel) { }
                 }
 
                 // MARK: Data Section
