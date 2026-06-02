@@ -34,13 +34,14 @@ struct MigrationTests {
 
         // 3. Open with the migration plan.
         //    If migration fails, ModelContainer.init throws — the test fails with a clear error.
-        //    Schema target is SchemaV3 (the top schema after plan 03-02); AppMigrationPlan
-        //    drives V1→V2→V3 in sequence.
+        //    Schema target is SchemaV3 (current Expense typealias target — flip to V4 in plan 07-02).
+        //    Uses MigrationTestsPlanV3 (a trimmed plan stopping at V3) because AppMigrationPlan
+        //    now chains to V4, and the Expense typealias still points to SchemaV3.Expense in plan 07-01.
         let schema = Schema(versionedSchema: SchemaV3.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
-            migrationPlan: AppMigrationPlan.self,
+            migrationPlan: MigrationTestsPlanV3.self,
             configurations: [config]
         )
 
@@ -78,12 +79,14 @@ struct MigrationTests {
         try FileManager.default.copyItem(at: bundledStoreURL, to: tempURL)
 
         // 3. Open with the migration plan targeting SchemaV3.
-        //    AppMigrationPlan now lists V1 → V2 → V3; if migration fails, ModelContainer.init throws.
+        //    Uses MigrationTestsPlanV3 (trimmed plan stopping at V3) because AppMigrationPlan
+        //    now chains to V4, and the Expense typealias still points to SchemaV3.Expense in plan 07-01.
+        //    (Flip to AppMigrationPlan + SchemaV4 in plan 07-02 when typealias is updated.)
         let schema = Schema(versionedSchema: SchemaV3.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
-            migrationPlan: AppMigrationPlan.self,
+            migrationPlan: MigrationTestsPlanV3.self,
             configurations: [config]
         )
 
@@ -108,3 +111,31 @@ struct MigrationTests {
 /// Swift Testing runs test structs without a class context; using a dedicated
 /// class here is the reliable cross-platform pattern (Assumption A5).
 private final class MigrationTestsClass {}
+
+// ---------------------------------------------------------------------------
+// MigrationTestsPlanV3 — trimmed migration plan stopping at SchemaV3.
+//
+// Used by MigrationTests in plan 07-01 onwards because AppMigrationPlan now
+// chains to SchemaV4, but the Expense typealias still points to SchemaV3.Expense
+// until plan 07-02 flips it. A plan whose `schemas` top is V4 cannot be used
+// with a Schema(versionedSchema: SchemaV3.self) container.
+//
+// Remove this type and update MigrationTests to use AppMigrationPlan + SchemaV4
+// in plan 07-02 when the Expense typealias is flipped to SchemaV4.Expense.
+// ---------------------------------------------------------------------------
+enum MigrationTestsPlanV3: SchemaMigrationPlan {
+    static var schemas: [any VersionedSchema.Type] {
+        [SchemaV1.self, SchemaV2.self, SchemaV3.self]
+    }
+    static var stages: [MigrationStage] {
+        [v1ToV2, v2ToV3]
+    }
+    static let v1ToV2 = MigrationStage.custom(
+        fromVersion: SchemaV1.self, toVersion: SchemaV2.self,
+        willMigrate: nil, didMigrate: nil
+    )
+    static let v2ToV3 = MigrationStage.custom(
+        fromVersion: SchemaV2.self, toVersion: SchemaV3.self,
+        willMigrate: nil, didMigrate: nil
+    )
+}
