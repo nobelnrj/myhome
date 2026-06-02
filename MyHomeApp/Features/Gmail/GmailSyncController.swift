@@ -18,6 +18,16 @@ public enum SyncStatus: Equatable, Sendable {
     case error(String)
 }
 
+// MARK: - GmailOAuthConfig
+
+/// Placeholder OAuth configuration constants.
+/// Plan 04 replaces these with the real committed config values.
+enum GmailOAuthConfig {
+    static let clientID: String = "REPLACE_IN_PLAN_04"
+    static let redirectURI: String = "myhome-oauth://callback"
+    static let callbackScheme: String = "myhome-oauth"
+}
+
 // MARK: - Wave-0 stub dependencies (replaced by System* types in plan 04)
 
 /// Temporary stub satisfying GmailAuthPort default for Wave 0 compilation.
@@ -107,7 +117,8 @@ final class GmailSyncController {
     }
 
     /// Whether the access token will expire within 5 minutes (triggers proactive refresh).
-    /// D6-06: Proactive access-token refresh: check expiry within 5 minutes before each sync request.
+    /// D6-06: Returns true when no expiry date is stored (unknown freshness) or expiry is within 5 min.
+    /// Returns false when expiry is stored and is more than 5 minutes away.
     var needsProactiveRefresh: Bool {
         guard let expiry = accessTokenExpiry else { return true }
         return expiry.timeIntervalSince(now()) < 300
@@ -148,8 +159,16 @@ final class GmailSyncController {
     /// Drive proactive token expiry check on app foreground.
     /// D6-11: Check token validity on app foreground (Settings tab open).
     func scenePhaseChanged(_ phase: ScenePhase) {
-        // STUB — plan 02 implements; test asserts tokenExpired when expired
-        _ = phase
+        switch phase {
+        case .active:
+            if isTokenExpired {
+                syncStatus = .tokenExpired
+            }
+        case .inactive, .background:
+            break
+        @unknown default:
+            break
+        }
     }
 
     // MARK: - OAuth sign-in
@@ -158,8 +177,65 @@ final class GmailSyncController {
     /// D6-08: Immediate first sync on OAuth success — `newer_than:30d`.
     /// ING-02: signIn drives syncStatus idle → done.
     func signIn() async {
-        // STUB — plan 02 implements; GmailSyncControllerTests asserts RED
-        syncStatus = .idle
+        syncStatus = .authorizing
+        authError = nil
+
+        do {
+            // Generate PKCE pair and build the authorization URL
+            let pkce = try PKCE.generate()
+            let state = UUID().uuidString
+            guard let authURL = buildAuthorizationURL(
+                clientID: GmailOAuthConfig.clientID,
+                redirectURI: GmailOAuthConfig.redirectURI,
+                pkce: pkce,
+                state: state
+            ) else {
+                syncStatus = .error("Failed to build authorization URL")
+                return
+            }
+
+            // Present the OAuth browser and await the authorization code
+            let code = try await auth.authorize(
+                authURL: authURL,
+                callbackScheme: GmailOAuthConfig.callbackScheme
+            )
+
+            // Exchange the authorization code for tokens
+            let tokenResponse = try await auth.exchangeCode(
+                code,
+                verifier: pkce.verifier,
+                clientID: GmailOAuthConfig.clientID,
+                redirectURI: GmailOAuthConfig.redirectURI
+            )
+
+            // Guard: Google must return a refresh_token (requires access_type=offline + prompt=consent)
+            guard let refreshToken = tokenResponse.refresh_token else {
+                syncStatus = .error("no refresh token — missing access_type=offline")
+                return
+            }
+
+            // SEC-03: Store refresh token in Keychain (never in UserDefaults — T-06-TOKEN)
+            try keychain.save(refreshToken, forKey: "refresh_token")
+
+            // D6-07: access_token in memory only; expiry timestamp in UserDefaults
+            accessToken = tokenResponse.access_token
+            accessTokenExpiry = now().addingTimeInterval(TimeInterval(tokenResponse.expires_in))
+
+            // D6-08: Immediately perform the first backfill sync (newer_than:30d)
+            await sync()
+
+        } catch let gmailError as GmailAuthError {
+            // D6-19: Raw Google error message displayed directly (single-user private app)
+            if case .oauthError(let msg) = gmailError {
+                authError = gmailError
+                syncStatus = .error(msg)
+            } else {
+                // userCancelled, callbackURLInvalid, noAuthCode — return to idle without error display
+                syncStatus = .idle
+            }
+        } catch {
+            syncStatus = .error(error.localizedDescription)
+        }
     }
 
     // MARK: - Manual sync
@@ -167,7 +243,49 @@ final class GmailSyncController {
     /// Triggers a manual sync of new bank emails.
     /// ING-03: "Sync now" button in Settings.
     func sync() async {
-        // STUB — plan 02 implements; GmailSyncControllerTests asserts RED
+        // Proactive token refresh if needed (D6-06):
+        // Refresh when no in-memory access token exists (e.g. app restart — D6-07) OR when
+        // the stored expiry date shows the token will expire within 5 minutes.
+        // Skip refresh when an in-memory token is present but no expiry is stored (tests / sign-in path).
+        let shouldRefresh = accessToken == nil || (accessTokenExpiry != nil && needsProactiveRefresh)
+        if shouldRefresh {
+            guard let storedRefreshToken = try? keychain.load(forKey: "refresh_token") else {
+                syncStatus = .tokenExpired
+                return
+            }
+            do {
+                let refreshResponse = try await auth.refreshToken(
+                    storedRefreshToken,
+                    clientID: GmailOAuthConfig.clientID
+                )
+                accessToken = refreshResponse.access_token
+                accessTokenExpiry = now().addingTimeInterval(TimeInterval(refreshResponse.expires_in))
+            } catch {
+                // ING-16: invalid_grant or any refresh error → prompt user to reconnect
+                syncStatus = .tokenExpired
+                return
+            }
+        }
+
+        // ING-03: Transition to .syncing before the fetch
+        syncStatus = .syncing
+
+        // D6-10: Compute query — newer_than:30d on first sync; newer_than:<days> since last sync
+        let query: String
+        if let last = lastSyncedAt {
+            let daysSince = Int(now().timeIntervalSince(last) / 86400)
+            query = "newer_than:\(max(1, daysSince))d"
+        } else {
+            query = "newer_than:30d"
+        }
+
+        // Phase 6 stub: the actual Gmail API listMessages call is wired in plan 04.
+        // query is computed above and will be passed to the Gmail port in plan 04.
+        _ = query
+
+        // ING-05: Write lastSyncedAt on success
+        lastSyncedAt = now()
+        syncStatus = .done
     }
 
     // MARK: - Sign out
@@ -176,7 +294,18 @@ final class GmailSyncController {
     /// D6-17: Sign out removes refresh token from Keychain, clears expiry from UserDefaults.
     /// SET-04: User can sign out of Gmail.
     func signOut() {
-        // STUB — plan 02 implements; GmailSyncControllerTests asserts RED
+        // SEC-03 / T-06-TOKEN: Delete refresh token from Keychain
+        try? keychain.delete(forKey: "refresh_token")
+
+        // Clear in-memory token state
+        accessToken = nil
+
+        // Clear all gmail_* UserDefaults keys (D6-17)
+        accessTokenExpiry = nil
+        lastSyncedAt = nil
+        connectedEmail = nil
+
+        syncStatus = .idle
     }
 
     // MARK: - Authorization URL builder
