@@ -209,6 +209,9 @@ Plans:
   4. A merchant-normalization seed table cleans raw merchant strings (e.g. "AMAZON IN BLR" → "Amazon"), and every ingested expense stores raw email body, parserID, and parserVersion for replay/forensics
   5. BGAppRefreshTask is registered and runs ingestion opportunistically as a best-effort path (never the primary path; "Sync now" remains the reliable path)
 
+**Carried over from Phase 6 UAT:**
+- UAT-6-05 — populate `GmailSyncController.connectedEmail` via Gmail `users.getProfile` (emailAddress) so Settings shows "Connected as: <email>". Deferred from Phase 6 because the Gmail API layer is stubbed there. See `.planning/phases/06-gmail-sign-in-client/06-UAT.md` (Gaps).
+
 **Plans**: TBD
 
 Plans:
