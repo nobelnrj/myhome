@@ -185,7 +185,7 @@ Plans:
 Plans:
 
 **Wave 1** — failing-test scaffold (Nyquist gate)
-- [ ] 06-01-PLAN.md — Port protocols + value types + PKCE/controller stubs + 2 spies + 5 failing test files + pbxproj registration (ING-01/02/03/05/16, SEC-03, SET-04/05)
+- [x] 06-01-PLAN.md — Port protocols + value types + PKCE/controller stubs + 2 spies + 5 failing test files + pbxproj registration (ING-01/02/03/05/16, SEC-03, SET-04/05)
 
 **Wave 2** — pure logic GREEN
 - [ ] 06-02-PLAN.md — PKCE.generate() + buildAuthorizationURL + Date.relativeToNow (ING-01/05, SET-05)
@@ -229,5 +229,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. Notes & Checklists | 6/6 | Complete   | 2026-05-30 |
 | 4. Overview & Charts | 5/5 | Complete    | 2026-06-01 |
 | 5. Face ID Gate & Settings | 2/2 | Complete   | 2026-06-01 |
-| 6. Gmail Sign-In & Client | 0/TBD | Not started | - |
+| 6. Gmail Sign-In & Client | 1/4 | In Progress|  |
 | 7. Bank Parsers & Ingestion Pipeline | 0/TBD | Not started | - |

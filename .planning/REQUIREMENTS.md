@@ -21,7 +21,7 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 - [x] **SEC-01**: User can require Face ID to open the app; toggle in Settings
 - [x] **SEC-02**: Face ID falls back to device passcode via `LAPolicy.deviceOwnerAuthentication`; every `LAError` case is handled explicitly (`.biometryNotAvailable`, `.biometryNotEnrolled`, `.biometryLockout`, `.userFallback`, `.userCancel`, `.appCancel`, `.systemCancel`)
-- [ ] **SEC-03**: Gmail OAuth refresh token is stored in Keychain with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (never `WhenUnlocked`, never `biometryCurrentSet`)
+- [x] **SEC-03**: Gmail OAuth refresh token is stored in Keychain with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (never `WhenUnlocked`, never `biometryCurrentSet`)
 
 ### Expense Tracker (manual)
 
@@ -39,11 +39,11 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 
 ### Gmail Ingestion
 
-- [ ] **ING-01**: User can sign in to Gmail via `ASWebAuthenticationSession` + PKCE (no Google SDK), scope = `gmail.readonly` only
-- [ ] **ING-02**: First OAuth grant performs an initial backfill bounded to `newer_than:30d`
-- [ ] **ING-03**: User can trigger ingestion on demand via "Sync now" in Settings
+- [x] **ING-01**: User can sign in to Gmail via `ASWebAuthenticationSession` + PKCE (no Google SDK), scope = `gmail.readonly` only
+- [x] **ING-02**: First OAuth grant performs an initial backfill bounded to `newer_than:30d`
+- [x] **ING-03**: User can trigger ingestion on demand via "Sync now" in Settings
 - [ ] **ING-04**: `BGAppRefreshTask` is registered and runs ingestion opportunistically when iOS schedules it (best-effort, never the primary path)
-- [ ] **ING-05**: An always-visible "Last synced at …" timestamp appears in Settings
+- [x] **ING-05**: An always-visible "Last synced at …" timestamp appears in Settings
 - [ ] **ING-06**: v1 ships with two bank parsers (defaults: HDFC + ICICI; final pick confirmed at Phase 7 discuss)
 - [ ] **ING-07**: Each parser performs whole-template fingerprint matching separate from value extraction (no single regex per bank)
 - [ ] **ING-08**: Parsers reject OTP, promotional, and verification emails via sender + subject pre-filters
@@ -54,7 +54,7 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 - [ ] **ING-13**: User can review Review Inbox entries one-tap-accept, tap-to-edit, or swipe-to-discard
 - [ ] **ING-14**: Ingestion deduplicates against existing expenses using (amount + merchant-substring + date ±1 day); duplicates flag in inbox, never silent merge
 - [ ] **ING-15**: A merchant-normalization seed table (~20–30 common Indian merchants: "AMAZON IN BLR" → "Amazon", "ZOMATO ONL BANGAL" → "Zomato", etc.) is applied at parse time
-- [ ] **ING-16**: When the Gmail refresh token expires (Testing-mode OAuth = every 7 days), the app shows a clear "Reconnect Gmail" CTA
+- [x] **ING-16**: When the Gmail refresh token expires (Testing-mode OAuth = every 7 days), the app shows a clear "Reconnect Gmail" CTA
 
 ### Notes
 
@@ -81,8 +81,8 @@ Requirements for initial release. Each maps to a roadmap phase. Manual expense e
 - [x] **SET-01**: User can toggle Face ID lock on / off
 - [x] **SET-02**: User can manage categories (add, rename, delete)
 - [x] **SET-03**: User can manage per-category monthly budgets
-- [ ] **SET-04**: User can sign out of Gmail and reconnect
-- [ ] **SET-05**: Settings shows last-synced timestamp and a manual "Sync now" button
+- [x] **SET-04**: User can sign out of Gmail and reconnect
+- [x] **SET-05**: Settings shows last-synced timestamp and a manual "Sync now" button
 
 ## v2 Requirements
 
@@ -176,7 +176,7 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | FND-07 | Phase 1 | Complete |
 | SEC-01 | Phase 5 | Complete |
 | SEC-02 | Phase 5 | Complete |
-| SEC-03 | Phase 6 | Pending |
+| SEC-03 | Phase 6 | Complete |
 | EXP-01 | Phase 1 | Complete |
 | EXP-02 | Phase 1 | Complete |
 | EXP-03 | Phase 1 | Complete |
@@ -188,11 +188,11 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | EXP-09 | Phase 2 | Complete |
 | EXP-10 | Phase 4 | Complete |
 | EXP-11 | Phase 4 | Complete |
-| ING-01 | Phase 6 | Pending |
-| ING-02 | Phase 6 | Pending |
-| ING-03 | Phase 6 | Pending |
+| ING-01 | Phase 6 | Complete |
+| ING-02 | Phase 6 | Complete |
+| ING-03 | Phase 6 | Complete |
 | ING-04 | Phase 7 | Pending |
-| ING-05 | Phase 6 | Pending |
+| ING-05 | Phase 6 | Complete |
 | ING-06 | Phase 7 | Pending |
 | ING-07 | Phase 7 | Pending |
 | ING-08 | Phase 7 | Pending |
@@ -203,7 +203,7 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | ING-13 | Phase 7 | Pending |
 | ING-14 | Phase 7 | Pending |
 | ING-15 | Phase 7 | Pending |
-| ING-16 | Phase 6 | Pending |
+| ING-16 | Phase 6 | Complete |
 | NOT-01 | Phase 3 | Complete |
 | NOT-02 | Phase 3 | Complete |
 | NOT-03 | Phase 3 | Complete |
@@ -221,8 +221,8 @@ Each v1 requirement maps to exactly one phase. Filled by the roadmapper when ROA
 | SET-01 | Phase 5 | Complete |
 | SET-02 | Phase 5 | Complete |
 | SET-03 | Phase 5 | Complete |
-| SET-04 | Phase 6 | Pending |
-| SET-05 | Phase 6 | Pending |
+| SET-04 | Phase 6 | Complete |
+| SET-05 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 56 total
