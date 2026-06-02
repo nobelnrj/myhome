@@ -167,10 +167,13 @@ final class GmailSyncController {
                 return
             }
 
-            // Present the OAuth browser and await the authorization code
+            // Present the OAuth browser and await the authorization code.
+            // expectedState binds the callback to this request (T-06-CSRF): the conformer
+            // rejects any callback whose `state` doesn't match the value we put in authURL.
             let code = try await auth.authorize(
                 authURL: authURL,
-                callbackScheme: GmailOAuthConfig.callbackScheme
+                callbackScheme: GmailOAuthConfig.callbackScheme,
+                expectedState: state
             )
 
             // Exchange the authorization code for tokens
@@ -203,10 +206,16 @@ final class GmailSyncController {
 
         } catch let gmailError as GmailAuthError {
             // D6-19: Raw Google error message displayed directly (single-user private app)
-            if case .oauthError(let msg) = gmailError {
+            switch gmailError {
+            case .oauthError(let msg):
                 authError = gmailError
                 syncStatus = .error(msg)
-            } else {
+            case .stateMismatch:
+                // T-06-CSRF: a mismatched callback state is a security rejection, not a benign
+                // cancel — surface it so the user/owner knows the sign-in was refused.
+                authError = gmailError
+                syncStatus = .error("Sign-in rejected: response did not match the request. Please try again.")
+            default:
                 // userCancelled, callbackURLInvalid, noAuthCode — return to idle without error display
                 syncStatus = .idle
             }

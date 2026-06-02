@@ -124,6 +124,49 @@ struct GmailSyncControllerTests {
                 "signOut() must set the observable isConnected=false — SET-04")
     }
 
+    // MARK: - T-06-CSRF: OAuth state binding + mismatch rejection
+
+    @Test("signInPassesGeneratedStateToAuthorize: signIn binds the callback to the state placed in the auth URL — T-06-CSRF")
+    func signInPassesGeneratedStateToAuthorize() async {
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let spy = SpyGmailAuth()
+        let controller = GmailSyncController(auth: spy, keychain: SpyKeychainStore(), now: Date.init)
+
+        await controller.signIn()
+
+        #expect(spy.authorizeCalls.count == 1, "authorize() must be called once")
+        let (authURL, _, expectedState) = spy.authorizeCalls[0]
+        #expect(!expectedState.isEmpty, "a non-empty state must be passed to authorize() — T-06-CSRF")
+
+        // The expectedState passed to authorize() must equal the `state` query item in the auth URL.
+        let urlState = URLComponents(url: authURL, resolvingAgainstBaseURL: false)?
+            .queryItems?.first(where: { $0.name == "state" })?.value
+        #expect(urlState == expectedState,
+                "authorize() expectedState must match the state embedded in the authorization URL — T-06-CSRF")
+    }
+
+    @Test("signInRejectsStateMismatch: a stateMismatch from authorize surfaces an error and stores no token — T-06-CSRF")
+    func signInRejectsStateMismatch() async {
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let spy = SpyGmailAuth()
+        spy.shouldThrowOnAuthorize = GmailAuthError.stateMismatch
+        let keychain = SpyKeychainStore()
+        let controller = GmailSyncController(auth: spy, keychain: keychain, now: Date.init)
+
+        await controller.signIn()
+
+        if case .error = controller.syncStatus {} else {
+            Issue.record("stateMismatch must drive syncStatus to .error, not idle — T-06-CSRF")
+        }
+        #expect(controller.isConnected == false, "no connection on a rejected (CSRF) callback")
+        #expect((try? keychain.load(forKey: "refresh_token")) == nil,
+                "no refresh token may be stored when the callback is rejected — T-06-CSRF")
+    }
+
     // MARK: - ING-03: sync transitions idle → syncing → done
 
     @Test("syncTransitionsIdleSyncingDone: sync() transitions syncStatus idle → syncing → done — ING-03")

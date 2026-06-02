@@ -47,8 +47,8 @@ public final class SpyGmailAuth: GmailAuthPort, @unchecked Sendable {
 
     // MARK: - Recorded calls
 
-    /// All (authURL, callbackScheme) pairs passed to authorize(), in call order.
-    public private(set) var authorizeCalls: [(URL, String)] = []
+    /// All (authURL, callbackScheme, expectedState) tuples passed to authorize(), in call order.
+    public private(set) var authorizeCalls: [(URL, String, String)] = []
 
     /// All (code, verifier, clientID, redirectURI) tuples passed to exchangeCode(), in call order.
     public private(set) var exchangeCalls: [(String, String, String, String)] = []
@@ -60,8 +60,8 @@ public final class SpyGmailAuth: GmailAuthPort, @unchecked Sendable {
 
     // MARK: - GmailAuthPort
 
-    public func authorize(authURL: URL, callbackScheme: String) async throws -> String {
-        authorizeCalls.append((authURL, callbackScheme))
+    public func authorize(authURL: URL, callbackScheme: String, expectedState: String) async throws -> String {
+        authorizeCalls.append((authURL, callbackScheme, expectedState))
         if let error = shouldThrowOnAuthorize { throw error }
         return authorizeResult
     }

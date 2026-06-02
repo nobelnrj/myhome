@@ -19,9 +19,11 @@ public protocol GmailAuthPort: Sendable {
     /// - Parameters:
     ///   - authURL: The full authorization URL (with PKCE challenge, state, etc.)
     ///   - callbackScheme: The custom URL scheme to register with ASWebAuthenticationSession
+    ///   - expectedState: The `state` value that was placed in `authURL`; the callback's
+    ///     returned `state` MUST equal this or the response is rejected (T-06-CSRF / T-06-04-CALLBACK).
     /// - Returns: The authorization code extracted from the callback URL
-    /// - Throws: `GmailAuthError` for cancellation, invalid callback, or missing code
-    func authorize(authURL: URL, callbackScheme: String) async throws -> String
+    /// - Throws: `GmailAuthError` for cancellation, invalid callback, missing code, or state mismatch
+    func authorize(authURL: URL, callbackScheme: String, expectedState: String) async throws -> String
 
     /// Exchanges an authorization code for an access + refresh token pair.
     /// - Parameters:
@@ -91,6 +93,9 @@ public enum GmailAuthError: Error, Sendable {
     case callbackURLInvalid
     /// The callback URL contained no `code` query parameter.
     case noAuthCode
+    /// The callback's `state` did not match the value sent in the authorization request
+    /// — possible CSRF / response injection (T-06-CSRF / T-06-04-CALLBACK).
+    case stateMismatch
     /// A network-level error occurred during token exchange or refresh.
     case networkError(Error)
     /// The OAuth server returned an error response (e.g., invalid_grant).
@@ -134,7 +139,7 @@ public final class SystemGmailAuth: GmailAuthPort, @unchecked Sendable {
     /// Presents the OAuth browser sheet and returns the authorization code.
     /// Must be called on the main actor because ASWebAuthenticationSession presents UI.
     @MainActor
-    public func authorize(authURL: URL, callbackScheme: String) async throws -> String {
+    public func authorize(authURL: URL, callbackScheme: String, expectedState: String) async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
             let contextProvider = SceneContextProvider()
             let session = ASWebAuthenticationSession(
@@ -164,6 +169,14 @@ public final class SystemGmailAuth: GmailAuthPort, @unchecked Sendable {
                 // D6-19: extract "error" query param first — OAuth server error takes priority
                 if let oauthError = components.queryItems?.first(where: { $0.name == "error" })?.value {
                     continuation.resume(throwing: GmailAuthError.oauthError(oauthError))
+                    return
+                }
+
+                // T-06-CSRF / T-06-04-CALLBACK: the returned state MUST match the value we sent.
+                // A missing or mismatched state means a forged/injected callback — reject it.
+                let returnedState = components.queryItems?.first(where: { $0.name == "state" })?.value
+                guard returnedState == expectedState else {
+                    continuation.resume(throwing: GmailAuthError.stateMismatch)
                     return
                 }
 
