@@ -179,13 +179,22 @@ Plans:
   3. Settings shows an always-visible "Last synced at …" timestamp and lets the user sign out and reconnect Gmail
   4. When the refresh token expires, the app shows a clear "Reconnect Gmail" CTA
 
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
 
 Plans:
 
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+**Wave 1** — failing-test scaffold (Nyquist gate)
+- [ ] 06-01-PLAN.md — Port protocols + value types + PKCE/controller stubs + 2 spies + 5 failing test files + pbxproj registration (ING-01/02/03/05/16, SEC-03, SET-04/05)
+
+**Wave 2** — pure logic GREEN
+- [ ] 06-02-PLAN.md — PKCE.generate() + buildAuthorizationURL + Date.relativeToNow (ING-01/05, SET-05)
+
+**Wave 3** *(blocked on Wave 2)* — controller state machine GREEN
+- [ ] 06-03-PLAN.md — GmailSyncController signIn/sync/signOut/refresh/expiry via spies (ING-02/03/05/16, SEC-03, SET-04/05)
+
+**Wave 4** *(blocked on Wave 3; UAT checkpoint)* — production conformers + UI wiring
+- [ ] 06-04-PLAN.md — SystemGmailAuth + SystemKeychainStore + GmailOAuthConfig + Gmail Settings section + RootView wiring + Info.plist URL type (ING-01/02/03/05/16, SEC-03, SET-04/05)
 
 ### Phase 7: Bank Parsers & Ingestion Pipeline
 
