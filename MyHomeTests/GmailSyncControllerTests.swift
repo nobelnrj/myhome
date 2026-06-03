@@ -42,8 +42,10 @@ struct GmailSyncControllerTests {
 
         let spy = SpyGmailAuth()
         let keychain = SpyKeychainStore()
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = []
         let fixedNow = Date(timeIntervalSinceReferenceDate: 1_000_000)
-        let controller = GmailSyncController(auth: spy, keychain: keychain, now: { fixedNow })
+        let controller = GmailSyncController(auth: spy, keychain: keychain, fetch: fetch, now: { fixedNow })
 
         await controller.signIn()
 
@@ -67,8 +69,10 @@ struct GmailSyncControllerTests {
             scope: "https://www.googleapis.com/auth/gmail.readonly"
         )
         let keychain = SpyKeychainStore()
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = []
         let fixedNow = Date(timeIntervalSinceReferenceDate: 1_000_000)
-        let controller = GmailSyncController(auth: spy, keychain: keychain, now: { fixedNow })
+        let controller = GmailSyncController(auth: spy, keychain: keychain, fetch: fetch, now: { fixedNow })
 
         await controller.signIn()
 
@@ -99,7 +103,9 @@ struct GmailSyncControllerTests {
 
         let spy = SpyGmailAuth()
         let keychain = SpyKeychainStore()
-        let controller = GmailSyncController(auth: spy, keychain: keychain, now: Date.init)
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = []
+        let controller = GmailSyncController(auth: spy, keychain: keychain, fetch: fetch, now: Date.init)
 
         #expect(controller.isConnected == false, "isConnected must start false with empty Keychain")
         await controller.signIn()
@@ -132,7 +138,9 @@ struct GmailSyncControllerTests {
         defer { resetDefaults() }
 
         let spy = SpyGmailAuth()
-        let controller = GmailSyncController(auth: spy, keychain: SpyKeychainStore(), now: Date.init)
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = []
+        let controller = GmailSyncController(auth: spy, keychain: SpyKeychainStore(), fetch: fetch, now: Date.init)
 
         await controller.signIn()
 
@@ -176,8 +184,10 @@ struct GmailSyncControllerTests {
 
         let spy = SpyGmailAuth()
         let keychain = SpyKeychainStore()
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = []  // no messages — pipeline runs but inserts nothing
         let fixedNow = Date(timeIntervalSinceReferenceDate: 1_000_000)
-        let controller = GmailSyncController(auth: spy, keychain: keychain, now: { fixedNow })
+        let controller = GmailSyncController(auth: spy, keychain: keychain, fetch: fetch, now: { fixedNow })
         controller.accessToken = "existing_access_token"
 
         await controller.sync()
@@ -193,8 +203,10 @@ struct GmailSyncControllerTests {
 
         let spy = SpyGmailAuth()
         let keychain = SpyKeychainStore()
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = []
         let fixedNow = Date(timeIntervalSinceReferenceDate: 1_000_000)
-        let controller = GmailSyncController(auth: spy, keychain: keychain, now: { fixedNow })
+        let controller = GmailSyncController(auth: spy, keychain: keychain, fetch: fetch, now: { fixedNow })
         controller.accessToken = "existing_access_token"
 
         await controller.sync()
@@ -340,7 +352,9 @@ struct GmailSyncControllerTests {
             token_type: "Bearer",
             scope: "https://www.googleapis.com/auth/gmail.readonly"
         )
-        let controller = GmailSyncController(auth: spy, keychain: keychain)
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = []
+        let controller = GmailSyncController(auth: spy, keychain: keychain, fetch: fetch)
         await controller.signIn()
 
         // Second sign-in (reconnect) with token B

@@ -45,6 +45,15 @@ public struct DismissedMessageStore {
         defaults.set(Array(set), forKey: key)
     }
 
+    /// Removes `messageID` from the dismissed set.
+    ///
+    /// Used in tests to clean up between test cases. Not intended for production use.
+    static func undismiss(_ messageID: String) {
+        var set = dismissed()
+        set.remove(messageID)
+        defaults.set(Array(set), forKey: key)
+    }
+
     // MARK: - Internal
 
     /// Reads the current dismissed set from UserDefaults.

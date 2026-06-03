@@ -27,6 +27,7 @@
 		A122 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F122 /* AddExpenseView.swift */; };
 		A123 /* ExpenseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123 /* ExpenseListView.swift */; };
 		A124 /* ExpenseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F124 /* ExpenseRow.swift */; };
+		A706RIR /* ReviewInboxRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706RIR /* ReviewInboxRow.swift */; };
 		A125 /* EditExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F125 /* EditExpenseView.swift */; };
 		A126 /* CategoryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F126 /* CategoryPickerView.swift */; };
 		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
@@ -141,6 +142,7 @@
 		F122 /* AddExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseView.swift; sourceTree = "<group>"; };
 		F123 /* ExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseListView.swift; sourceTree = "<group>"; };
 		F124 /* ExpenseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseRow.swift; sourceTree = "<group>"; };
+		F706RIR /* ReviewInboxRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewInboxRow.swift; sourceTree = "<group>"; };
 		F125 /* EditExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseView.swift; sourceTree = "<group>"; };
 		F126 /* CategoryPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPickerView.swift; sourceTree = "<group>"; };
 		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
@@ -367,6 +369,7 @@
 				F122 /* AddExpenseView.swift */,
 				F123 /* ExpenseListView.swift */,
 				F124 /* ExpenseRow.swift */,
+				F706RIR /* ReviewInboxRow.swift */,
 				F125 /* EditExpenseView.swift */,
 				F126 /* CategoryPickerView.swift */,
 			);
@@ -652,6 +655,7 @@
 				A122 /* AddExpenseView.swift in Sources */,
 				A123 /* ExpenseListView.swift in Sources */,
 				A124 /* ExpenseRow.swift in Sources */,
+				A706RIR /* ReviewInboxRow.swift in Sources */,
 				A125 /* EditExpenseView.swift in Sources */,
 				A126 /* CategoryPickerView.swift in Sources */,
 				A119 /* BudgetCalculator.swift in Sources */,

@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import SwiftData
 import AuthenticationServices
 
 // MARK: - SyncStatus
@@ -101,12 +102,31 @@ final class GmailSyncController {
 
     private let auth: any GmailAuthPort
     private let keychain: any KeychainPort
+    private let fetch: any GmailFetchPort
     /// Provides the current time; injectable for deterministic expiry tests.
     private let now: () -> Date
 
-    private var defaults: UserDefaults {
-        UserDefaults(suiteName: "group.com.reojacob.myhome") ?? .standard
-    }
+    /// ModelContext for persisting ingested expenses. Injected by RootView (foreground) or
+    /// set from MyHomeApp's BGTask handler (background — uses a fresh container).
+    var modelContext: ModelContext? = nil
+
+    /// App Group UserDefaults backing all persistent metadata (lastSyncedAt, expiry, connectedEmail).
+    /// Injectable so tests can isolate state — sharing the live App Group suite across parallel test
+    /// suites caused a race where one suite cleared `gmail_connected_email` mid-sync (UAT-6-05 flake).
+    private let defaults: UserDefaults
+
+    // MARK: - Pipeline components
+
+    /// The bank email parsers registered for ingestion (HDFC, ICICI — ING-06/07/08/09).
+    private let parsers: [any BankEmailParser] = [HDFCParser(), ICICIParser()]
+
+    /// Confirmed bank sender domains used to build the Gmail query filter (T-07-09).
+    private static let bankSenderFilter = "from:(hdfcbank.bank.in OR icici.bank.in)"
+
+    /// Minimum confidence score for auto-saving an expense without review (ING-12, D7-03).
+    ///
+    /// Exposed as a named constant — tunable, pending real-usage calibration (D7-03).
+    static let autoSaveThreshold: Double = ConfidenceScorer.autoSaveThreshold
 
     // MARK: - Init
 
@@ -114,17 +134,31 @@ final class GmailSyncController {
     /// - Parameters:
     ///   - auth: `GmailAuthPort` conformer; defaults to `SystemGmailAuth()` in production.
     ///   - keychain: `KeychainPort` conformer; defaults to `SystemKeychainStore()` in production.
+    ///   - fetch: `GmailFetchPort` conformer; defaults to `SystemGmailFetch()` in production.
     ///   - now: Time provider; defaults to `Date.init` in production. Injectable for tests.
+    ///   - defaults: Backing `UserDefaults`; defaults to the App Group suite. Injectable for test isolation.
     init(
         auth: any GmailAuthPort = SystemGmailAuth(),
         keychain: any KeychainPort = SystemKeychainStore(),
-        now: @escaping () -> Date = Date.init
+        fetch: any GmailFetchPort = SystemGmailFetch(),
+        now: @escaping () -> Date = Date.init,
+        defaults: UserDefaults = UserDefaults(suiteName: "group.com.reojacob.myhome") ?? .standard
     ) {
         self.auth = auth
         self.keychain = keychain
+        self.fetch = fetch
         self.now = now
+        self.defaults = defaults
         // Seed connection state from Keychain at launch so the UI reflects a prior sign-in.
         self.isConnected = (try? keychain.load(forKey: "refresh_token")) != nil
+    }
+
+    /// Injects the ModelContext for ingestion persistence.
+    ///
+    /// Called by RootView on appear (foreground path) and by the BGTask handler
+    /// using a fresh container (background path — Open Question 3).
+    func setContext(_ context: ModelContext) {
+        self.modelContext = context
     }
 
     // MARK: - Scene phase hook (called from RootView/SettingsView .onChange)
@@ -260,14 +294,103 @@ final class GmailSyncController {
         let query: String
         if let last = lastSyncedAt {
             let daysSince = Int(now().timeIntervalSince(last) / 86400)
-            query = "newer_than:\(max(1, daysSince))d"
+            let bankFilter = GmailSyncController.bankSenderFilter
+            query = "\(bankFilter) newer_than:\(max(1, daysSince))d"
         } else {
-            query = "newer_than:30d"
+            query = "\(GmailSyncController.bankSenderFilter) newer_than:30d"
         }
 
-        // Phase 6 stub: the actual Gmail API listMessages call is wired in plan 04.
-        // query is computed above and will be passed to the Gmail port in plan 04.
-        _ = query
+        // Run the full ingestion pipeline (ING-12/13/14, UAT-6-05).
+        // Any fetch/parse error sets .error or .tokenExpired — Phase 6 token mitigations intact.
+        do {
+            guard let token = accessToken else {
+                syncStatus = .tokenExpired
+                return
+            }
+
+            // Step 1: getProfile → connectedEmail (UAT-6-05)
+            let profile = try await fetch.getProfile(accessToken: token)
+            connectedEmail = profile.emailAddress
+
+            // Step 2: list message IDs matching the bank sender + time filter (T-07-09)
+            let messageIDs = try await fetch.listMessageIDs(accessToken: token, q: query, maxResults: 50)
+
+            // Step 3: Fetch existing expenses for dedup (caller supplies array — DedupChecker pattern)
+            let existingExpenses: [Expense]
+            if let ctx = modelContext {
+                existingExpenses = (try? ctx.fetch(FetchDescriptor<Expense>())) ?? []
+            } else {
+                existingExpenses = []
+            }
+
+            // Step 4: Process each message through the pipeline
+            for messageID in messageIDs {
+                // D7-07: Skip already-dismissed message IDs
+                if DismissedMessageStore.isDismissed(messageID) {
+                    continue
+                }
+
+                // Fetch the raw email
+                let rawEmail = try await fetch.getRawMessage(accessToken: token, messageID: messageID)
+
+                // Extract sender and subject from raw headers
+                let sender = extractHeader("From", from: rawEmail)
+                let subject = extractHeader("Subject", from: rawEmail)
+
+                // Pick the parser whose canHandle returns true
+                guard let parser = parsers.first(where: { $0.canHandle(sender: sender, subject: subject) }) else {
+                    continue
+                }
+
+                // Parse the email (fingerprint fail → skip)
+                guard let parsed = parser.parse(rawEmail: rawEmail) else {
+                    continue
+                }
+
+                // Triage: score + dedup
+                let confidence = ConfidenceScorer.score(parsed)
+                let duplicate = DedupChecker.findDuplicate(of: parsed, in: existingExpenses)
+
+                // Build the ingestion state
+                let ingestionState: String
+                if duplicate != nil {
+                    ingestionState = "possibleDuplicate"
+                } else if confidence >= GmailSyncController.autoSaveThreshold {
+                    ingestionState = "autoSaved"
+                } else {
+                    ingestionState = "needsReview"
+                }
+
+                // Persist the Expense (ING-10/11/12/13/14 — SchemaV4 fields)
+                let expense = Expense(
+                    amount: parsed.isReversal ? -abs(parsed.amount) : parsed.amount,
+                    date: parsed.date,
+                    note: parsed.normalizedMerchant.isEmpty ? parsed.rawMerchant : parsed.normalizedMerchant
+                )
+                expense.rawEmailBody = rawEmail
+                expense.parserID = parser.parserID
+                expense.parserVersion = parser.parserVersion
+                expense.sourceLabel = parsed.rawSourceLabel
+                expense.gmailMessageID = messageID
+                expense.parseConfidence = confidence
+                expense.ingestionStateRaw = ingestionState
+
+                // Insert into SwiftData context if available
+                if let ctx = modelContext {
+                    ctx.insert(expense)
+                    try ctx.save()
+                }
+            }
+        } catch {
+            // Token-expiry variants from fetch layer
+            let errMsg = error.localizedDescription.lowercased()
+            if errMsg.contains("401") || errMsg.contains("unauthorized") || errMsg.contains("invalid_grant") {
+                syncStatus = .tokenExpired
+                return
+            }
+            syncStatus = .error(error.localizedDescription)
+            return
+        }
 
         // ING-05: Write lastSyncedAt on success
         lastSyncedAt = now()
@@ -326,5 +449,34 @@ final class GmailSyncController {
             URLQueryItem(name: "prompt", value: "consent"),       // Force consent on reconnect
         ]
         return components?.url
+    }
+
+    // MARK: - Private helpers
+
+    /// Extracts a named email header value from a raw RFC 2822 email string.
+    ///
+    /// Handles folded headers (whitespace continuation lines).
+    /// Returns an empty string if the header is not found.
+    private nonisolated func extractHeader(_ name: String, from rawEmail: String) -> String {
+        let lines = rawEmail.components(separatedBy: "\n")
+        let prefix = "\(name):"
+        for (idx, line) in lines.enumerated() {
+            if line.hasPrefix(prefix) {
+                var value = String(line.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces)
+                // Handle folded header continuation lines (RFC 2822: starts with whitespace)
+                var nextIdx = idx + 1
+                while nextIdx < lines.count {
+                    let next = lines[nextIdx]
+                    if next.first == " " || next.first == "\t" {
+                        value += " " + next.trimmingCharacters(in: .whitespaces)
+                        nextIdx += 1
+                    } else {
+                        break
+                    }
+                }
+                return value
+            }
+        }
+        return ""
     }
 }

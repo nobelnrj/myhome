@@ -1,0 +1,128 @@
+import SwiftUI
+import SwiftData
+
+/// Triage row for ingested expenses in the "Needs Review" section of the Expenses tab.
+///
+/// D7-04/05/06/07/14/15:
+/// - Shows parsed fields: amount, normalized merchant (note), date, and sourceLabel (caption).
+/// - Possible-duplicate: renders "Possible duplicate of <existing summary>" line (D7-14).
+/// - Swipe trailing: "Accept" (promotes to normal expense) and "Discard" (dismisses message ID + deletes).
+/// - Tap: opens EditExpenseView for tap-to-edit (D7-06).
+///
+/// Layout mirrors ExpenseRow's HStack skeleton (PATTERNS.md §ReviewInboxRow).
+///
+/// No UI-SPEC was produced for this phase (planned with --skip-ui).
+/// Uses the existing Expenses-tab visual baseline from Phases 1–2.
+struct ReviewInboxRow: View {
+
+    let expense: Expense
+    @Environment(\.modelContext) private var context
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .center, spacing: 12) {
+                // Amount — fixed leading column, right-aligned (mirrors ExpenseRow)
+                Text(expense.amount.formattedINR())
+                    .font(.headline)
+                    .foregroundStyle(expense.amount < 0 ? Color(.systemGreen) : Color(.label))
+                    .frame(width: 100, alignment: .trailing)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+
+                // Note + date + sourceLabel — trailing column
+                VStack(alignment: .leading, spacing: 2) {
+                    if let note = expense.note, !note.isEmpty {
+                        // T-01-06: plain Text() — never AttributedString(markdown:) on user input
+                        Text(note)
+                            .font(.body)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                    Text(expense.date.formattedForExpenseList())
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    // sourceLabel: e.g. "HDFC CC ••4321", "ICICI CC ••9001" (D7-15)
+                    if let source = expense.sourceLabel, !source.isEmpty {
+                        Text(source)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+
+                Spacer(minLength: 0)
+
+                // Triage badge: "Review" or "Duplicate" indicator (D7-04/14)
+                if expense.ingestionStateRaw == "possibleDuplicate" {
+                    Text("Duplicate")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.orange, in: Capsule())
+                } else {
+                    Text("Review")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.accentColor, in: Capsule())
+                }
+            }
+
+            // Possible-duplicate line (D7-14): shows existing expense summary side-by-side
+            if expense.ingestionStateRaw == "possibleDuplicate" {
+                Text("Possible duplicate — review before accepting")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                    .lineLimit(2)
+            }
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            // Destructive: Discard — dismisses Gmail message ID + deletes expense (D7-06/07)
+            Button(role: .destructive) {
+                discardExpense()
+            } label: {
+                Label("Discard", systemImage: "trash")
+            }
+
+            // Non-destructive: Accept — promotes to normal expense by clearing ingestionStateRaw (D7-06)
+            Button {
+                acceptExpense()
+            } label: {
+                Label("Accept", systemImage: "checkmark")
+            }
+            .tint(.green)
+        }
+    }
+
+    // MARK: - Actions
+
+    /// Promotes the expense to a normal expense by clearing ingestionStateRaw (D7-06).
+    private func acceptExpense() {
+        expense.ingestionStateRaw = nil
+        expense.updatedAt = Date()
+        do {
+            try context.save()
+        } catch {
+            print("ReviewInboxRow: failed to accept expense: \(error)")
+        }
+    }
+
+    /// Dismisses the Gmail message ID and deletes the expense (D7-06/07).
+    private func discardExpense() {
+        if let messageID = expense.gmailMessageID {
+            // D7-07: Persist the dismissed message ID so future syncs skip this email
+            DismissedMessageStore.dismiss(messageID)
+        }
+        context.delete(expense)
+        do {
+            try context.save()
+        } catch {
+            print("ReviewInboxRow: failed to discard expense: \(error)")
+        }
+    }
+}

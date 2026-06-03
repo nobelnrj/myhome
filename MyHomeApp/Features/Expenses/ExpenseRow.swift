@@ -6,6 +6,10 @@ import SwiftUI
 /// - Leading: amount formatted with en-IN lakh grouping (headline weight, ~100pt column)
 /// - Trailing: note (Body, one line, truncated) over date (Label/subheadline, secondary)
 /// - Negative amounts: systemGreen color AND leading minus from formattedINR (color never sole differentiator)
+///
+/// Phase 7 additions (D7-08/15):
+/// - When ingestionStateRaw == "autoSaved": shows a subtle envelope icon (caption2, secondary) — auto marker.
+/// - When sourceLabel is present: shows sourceLabel below the date (caption, secondary).
 struct ExpenseRow: View {
 
     let expense: Expense
@@ -33,9 +37,23 @@ struct ExpenseRow: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                // sourceLabel: shown when present (D7-15) — e.g. "HDFC CC ••4321"
+                if let source = expense.sourceLabel, !source.isEmpty {
+                    Text(source)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
 
             Spacer(minLength: 0)
+
+            // Auto marker: subtle envelope icon when autoSaved from email ingestion (D7-08)
+            if expense.ingestionStateRaw == "autoSaved" {
+                Image(systemName: "envelope")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)

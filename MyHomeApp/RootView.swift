@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// Root TabView host (D2-10, D3-17, D4-01, D5-11).
 ///
@@ -8,6 +9,11 @@ import SwiftUI
 /// - Privacy blur (.blur radius 20) applied to TabView on inactive/background (T-05-04)
 /// - UnlockView overlay when lockController.isLocked && lockController.lockEnabled (T-05-01)
 /// - Settings tab (tag 4, gearshape icon — D5-11, D5-12)
+///
+/// Phase 7 additions:
+/// - gmailSyncController moved to MyHomeApp, passed in here (BGTask needs it — Open Question 2)
+/// - reviewBadgeCount @State drives Expenses tab .badge (D7-04)
+/// - .onAppear injects modelContext into gmailSyncController for foreground sync persistence
 ///
 /// Phase 4 tabs (4-tab bar — D4-01):
 /// 0. Home — OverviewView (dashboard, default launch tab).      tag: 0
@@ -23,6 +29,7 @@ import SwiftUI
 struct RootView: View {
 
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.modelContext) private var modelContext
 
     @State private var selectedTab: Int = 0
     @State private var deepLinkNoteID: UUID? = nil
@@ -31,8 +38,12 @@ struct RootView: View {
     @State private var deepLinkBlockID: UUID? = nil
     /// Face ID gate state — @Observable owned via @State, never @StateObject (PITFALLS.md Pitfall 10)
     @State private var lockController = LockController()
-    /// Gmail sync controller for OAuth + token refresh — @Observable owned via @State (D6-28)
-    @State private var gmailSyncController = GmailSyncController()
+
+    /// Gmail sync controller — owned by MyHomeApp, passed in here (Phase 7: BGTask ownership).
+    let gmailSyncController: GmailSyncController
+
+    /// Review-inbox badge count — updated by ExpenseListView via @Binding (D7-04).
+    @State private var reviewBadgeCount: Int = 0
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -42,10 +53,11 @@ struct RootView: View {
                 }
                 .tag(0)
 
-            ExpenseListView()
+            ExpenseListView(reviewBadgeCount: $reviewBadgeCount)
                 .tabItem {
                     Label("Expenses", systemImage: "list.bullet")
                 }
+                .badge(reviewBadgeCount)
                 .tag(1)
 
             BudgetsView()
@@ -65,6 +77,11 @@ struct RootView: View {
                     Label("Settings", systemImage: "gearshape")
                 }
                 .tag(4)
+        }
+        .onAppear {
+            // Inject the SwiftData context into the sync controller so sync() can persist
+            // ingested expenses. Called here (not in init) so the @Environment is populated.
+            gmailSyncController.setContext(modelContext)
         }
         // Deep-link observer: notification banner tap → switch to Notes tab + open note
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in
