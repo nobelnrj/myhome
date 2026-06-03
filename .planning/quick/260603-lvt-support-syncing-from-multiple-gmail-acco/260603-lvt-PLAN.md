@@ -80,6 +80,22 @@ Design decisions (implementer discretion per task brief — documented here):
   refresh tokens stay Keychain-only with kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly (SEC-03).
 - D-MA-05 UI shape: one row per account (email + last-synced + per-account Reconnect/Disconnect),
   an "Add account" button, and one overall "Sync now" that syncs all.
+- D-MA-06 Legacy-expense dedup backfill (CAVEAT — added 2026-06-03 before execution). Expenses
+  ingested by the shipped single-account build carry `sourceAccount = nil`. The new (account,
+  messageID) idempotency set is rebuilt from existing expenses, so nil-source legacy rows would NOT
+  be recognized on the FIRST multi-account sync — risking re-fetch + a possibleDuplicate flag on
+  every previously-ingested email (no silent double-count: the global amount+merchant+date
+  DedupChecker still catches them — just review-inbox noise). Mitigation, do BOTH:
+  (a) In `migrateLegacyIfNeeded()` (Task 2): after seeding the migrated account, backfill
+      `sourceAccount = <migrated email>` on every existing Expense that has a non-nil
+      `gmailMessageID` and a nil `sourceAccount`. This requires the migration to run with a
+      ModelContext available (or be invoked once on first sync when the context exists) — if no
+      context is reachable at init, defer the backfill to the first `syncAccount` run for the
+      migrated email and guard it with the one-shot `gmail_multiacct_migrated_v2` flag.
+  (b) In the Task 3 dedup guard: treat a nil-source existing expense as matching ANY account for
+      its messageID (fallback to messageID-only membership when `sourceAccount == nil`), so even if
+      the backfill has not yet run, a legacy-ingested email is not re-ingested. Exact-match on
+      (account, messageID) still applies for rows that DO have a sourceAccount.
 </objective>
 
 <execution_context>
@@ -150,6 +166,9 @@ Design decisions (implementer discretion per task brief — documented here):
       migration-done flag prevents re-running. The legacy `refresh_token` item is left in place OR
       deleted only after the per-account copy is confirmed written (no window where the token is lost).
     - migrateLegacyIfNeeded() is a no-op when there is no legacy email or migration already ran.
+    - D-MA-06(a): after migrating, existing expenses with a non-nil gmailMessageID and nil
+      sourceAccount are backfilled to sourceAccount == <migrated email> (deferred to first sync if
+      no ModelContext is reachable at init; still guarded by the one-shot migrated flag).
   </behavior>
   <action>
     Create `GmailAccountStore` (a plain struct/class, @MainActor not required — pure state, injectable
@@ -185,7 +204,9 @@ Design decisions (implementer discretion per task brief — documented here):
     - sync(): iterates all connected accounts; for each, proactive-refresh → fetch → ingest, stamping
       `expense.sourceAccount = <email>`. The idempotency guard skips a message only when an existing
       expense has the SAME sourceAccount AND gmailMessageID (account-scoped) — the same messageID under
-      a different account is NOT skipped.
+      a different account is NOT skipped. D-MA-06(b): a nil-sourceAccount existing expense matches
+      ANY account for its messageID (messageID-only fallback) so legacy-ingested emails are not
+      re-ingested before the backfill runs.
     - One account whose refresh throws invalid_grant is marked needsReconnect and skipped; sync still
       processes the remaining accounts and finishes (not aborted). Overall syncStatus reflects success
       when at least one account synced; surfaces per-account reconnect state.
