@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal iOS app for a two-person household (Reo and his wife) that consolidates day-to-day "home ops" into one place. v1 covers two features — an automated expense tracker fed by bank email alerts, and a shared note keeper with optional checklists — plus a home overview screen. It is deliberately built for two specific users, not for distribution, with a future-proof schema that can absorb new household features (chores, calendar, grocery, etc.) without rework.
+A personal iOS app for a two-person household (Reo and his wife) that consolidates day-to-day "home ops" into one place. v1.0 shipped (2026-06-03): an automated expense tracker fed by bank email alerts (Gmail) with manual fallback, categories/tags/per-category budgets, a notes + reminders hub (inline checklists, recurrence, local notifications, calendar), an overview dashboard with Swift Charts, and a Face ID gate. It is deliberately built for two specific users, not for distribution, on a CloudKit-ready SwiftData schema that can absorb new household features (chores, calendar, grocery, etc.) and post-v1 sync without rework.
 
 ## Core Value
 
@@ -14,44 +14,27 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 
 ### Validated
 
-<!-- Shipped and confirmed valuable. -->
+<!-- Shipped and confirmed valuable. All v1.0 (56/56 requirements). -->
 
-**Phase 1: Foundation & Manual Expense Spine** (2026-05-29)
-
-- [x] Manual expense entry — add/edit/delete an expense end-to-end (custom decimal keypad, ≤3-tap add)
-- [x] INR as the v1 currency — en-IN formatting (₹1,00,000.00), money stored as `Decimal`, dates stored UTC
-- [x] Local-only storage in v1 — SwiftData on an App Group store (single device, single user)
-- [x] Schema designed so adding CloudKit sharing later is additive, not a rewrite — CloudKit-ready `@Model` (all optional/defaulted, no `@Attribute(.unique)`), VersionedSchema + migration plan proven against a bundled v1 store
-
-**Phase 4: Overview & Charts** (2026-06-01)
-
-- [x] Charts — spend-by-category (`BarMark`) and spend-over-time (`LineMark`/`AreaMark` with Week/Month/Year range) (EXP-10, EXP-11)
-- [x] Current month spend vs. budget single bar with threshold colors (OVR-01)
-- [x] Top 3 spend categories this month (OVR-02)
-- [x] Pinned note / fallback checklist surfaced front-and-center with Notes deep-link (OVR-03)
-- [x] Overview as the default launch tab; tabs reordered Home → Expenses → Budgets → Notes (OVR-04)
+- ✓ Manual expense entry — add/edit/delete end-to-end via custom decimal keypad — v1.0 (Phase 1)
+- ✓ INR currency with en-IN formatting (₹1,00,000.00), money as `Decimal`, dates UTC — v1.0 (Phase 1)
+- ✓ CloudKit-ready SwiftData schema (all optional/defaulted, no `.unique`), VersionedSchema + migration plan proven against bundled stores — v1.0 (Phase 1)
+- ✓ India-tuned predefined categories + custom categories; single-tag (multi-tag-ready schema) — v1.0 (Phase 2)
+- ✓ Per-category monthly budgets with ₹-remaining + % progress bars (80%/100% threshold colors) — v1.0 (Phase 2)
+- ✓ Month view of expenses grouped by category with tap-through — v1.0 (Phase 2)
+- ✓ Notes & reminders hub — block notes (text + inline checklists), pin, search, auto-save — v1.0 (Phase 3)
+- ✓ Reminders with recurrence + end rules, local notifications (Complete/Snooze/deep-link), calendar view — v1.0 (Phase 3, scope expanded from plain notes)
+- ✓ Overview dashboard — spend-vs-budget bar, top-3 categories, pinned-note card, quick-add — v1.0 (Phase 4)
+- ✓ Swift Charts — spend-by-category (`BarMark`) + spend-over-time (`LineMark` with range control) — v1.0 (Phase 4)
+- ✓ Face ID app lock with full LAError handling + passcode fallback; Settings shell — v1.0 (Phase 5)
+- ✓ Gmail read-only OAuth (ASWebAuthenticationSession + PKCE, no SDK), Keychain token, 30-day backfill, Sync now, last-synced, reconnect CTA — v1.0 (Phase 6)
+- ✓ Automated bank-email ingestion — HDFC + ICICI parsers, 0.85-confidence triage, Review Inbox, dedup, reversal/refund handling, merchant normalization, parser provenance, best-effort BGAppRefreshTask — v1.0 (Phase 7)
 
 ### Active
 
-<!-- Current scope. Building toward these. -->
+<!-- Next milestone (v1.1) scope — to be defined via /gsd-new-milestone. -->
 
-**Expense tracker**
-
-- [ ] Ingest expenses automatically from bank email alerts (Gmail) — zero-touch for accounts/cards with email alerts enabled
-- [ ] Predefined category list (Groceries, Fuel, Dining, etc.) plus user-created custom tags
-- [ ] Per-category monthly budgets with progress visualization
-- [ ] Month view of expenses grouped by category/tag
-- [ ] Future-proof schema: multi-tag-per-expense, multi-account, multi-currency-ready (single currency in v1)
-
-**Note keeper**
-
-- [ ] Notes with title + free-form text body
-- [ ] Optional checklist items embedded inside any note
-- [ ] List of all notes with most-recent-first ordering
-
-**Foundational**
-
-- [ ] Face ID required to open the app (toggle in settings)
+(None — v1.0 shipped. Run `/gsd-new-milestone` to scope v1.1.)
 
 ### Out of Scope
 
@@ -70,6 +53,8 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 - **Web or macOS clients** — iOS-only is a deliberate constraint to keep scope small.
 
 ## Context
+
+**Current state (v1.0, 2026-06-03):** ~16,000 LOC Swift across 106 files, 209 commits over ~6 days. Stack: Swift 6.2 / SwiftUI / SwiftData, iOS 17+, schema at SchemaV4, local-only on one device. All 56 v1 requirements complete. 4 open human-verification artifacts deferred (manual on-device UAT/verification passes — see STATE.md). Confidence threshold (0.85) and BGAppRefreshTask behavior want real-week validation.
 
 **Users:** Reo (primary, developer) and his wife. Two iPhones, two Apple Watches. iCloud users. Based in India. Daily-use household tool — not a side project to ship publicly.
 
@@ -111,17 +96,19 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| iOS-only, no cross-platform | Both users on iPhone; goals include watchOS widgets which RN can't deliver | — Pending |
-| Swift + SwiftUI (not React Native) | iOS-only removes RN's main benefit; doubles as Swift learning vehicle | — Pending |
-| CloudKit for sync (when sync arrives) | Free, native, fits 2-user shared-data model, no backend to host | — Pending |
-| Gmail-based email ingestion (not SMS) | iOS blocks SMS access; email is the only legitimate zero-touch path on iOS | — Pending |
-| Single-user v1 on Reo's phone | Free Apple Developer account can't do reliable CloudKit sharing across Apple IDs | — Pending |
-| Defer $99/yr Apple Developer cost | "Prove before paying" — validate the app is used daily before committing the only recurring spend | — Pending |
-| Notes = text body + optional checklists (single model) | Maximum flexibility for grocery / recipes / brainstorms without two separate entities | — Pending |
-| Predefined categories + custom tags, single tag default, schema supports multiple | Sane defaults reduce setup friction; multi-tag schema is future-proof | — Pending |
-| Face ID required to open app | Financial data; toggleable in settings for paranoia override | — Pending |
-| INR single-currency v1, schema multi-currency-ready | Simplifies v1 UI; schema absorbs future travel/forex without migration | — Pending |
-| TDD as default development style | User preference; aligns with shipping-confidence in a learning-vehicle project | — Pending |
+| iOS-only, no cross-platform | Both users on iPhone; goals include watchOS widgets which RN can't deliver | ✓ Good — v1.0 shipped iOS-only |
+| Swift + SwiftUI (not React Native) | iOS-only removes RN's main benefit; doubles as Swift learning vehicle | ✓ Good — full v1.0 built in Swift 6.2 / SwiftUI / SwiftData |
+| CloudKit for sync (when sync arrives) | Free, native, fits 2-user shared-data model, no backend to host | — Pending (deferred to v2; schema kept CloudKit-ready throughout) |
+| Gmail-based email ingestion (not SMS) | iOS blocks SMS access; email is the only legitimate zero-touch path on iOS | ✓ Good — Phase 7 ingested real HDFC/ICICI emails zero-touch |
+| Single-user v1 on Reo's phone | Free Apple Developer account can't do reliable CloudKit sharing across Apple IDs | ✓ Good — v1.0 runs local-only on one device |
+| Defer $99/yr Apple Developer cost | "Prove before paying" — validate the app is used daily before committing the only recurring spend | — Pending (v2 trigger; awaiting real v1 usage) |
+| Notes = text body + optional checklists (single model) | Maximum flexibility for grocery / recipes / brainstorms without two separate entities | ✓ Good — block model (text + inline checklists) shipped Phase 3 |
+| Predefined categories + custom tags, single tag default, schema supports multiple | Sane defaults reduce setup friction; multi-tag schema is future-proof | ✓ Good — Phase 2 |
+| Face ID required to open app | Financial data; toggleable in settings for paranoia override | ✓ Good — Phase 5, full LAError handling |
+| INR single-currency v1, schema multi-currency-ready | Simplifies v1 UI; schema absorbs future travel/forex without migration | ✓ Good — en-IN throughout |
+| TDD as default development style | User preference; aligns with shipping-confidence in a learning-vehicle project | ✓ Good — Wave-0 RED scaffolds + pure-helper GREEN used across phases |
+| Phase 3 scope expanded to Notes + Reminders hub | One coherent household hub (reminders, recurrence, notifications, calendar) instead of deferring | ✓ Good — shipped in one phase, human UAT passed |
+| Gmail OAuth split (Phase 6 isolation → Phase 7 pipeline) | De-risk the riskiest auth/network sub-system before building parsers on top | ✓ Good — isolated proof simplified Phase 7 wiring |
 
 ## Evolution
 
@@ -141,4 +128,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-01 — Phase 4 (Overview & Charts) complete*
+*Last updated: 2026-06-03 after v1.0 MVP milestone (Phases 1-7 shipped)*

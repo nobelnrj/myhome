@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone-complete
-last_updated: "2026-06-03T00:00:00.000Z"
-last_activity: 2026-06-03
+status: Awaiting next milestone
+last_updated: "2026-06-03T10:06:23.412Z"
+last_activity: 2026-06-03 — Milestone v1.0 completed and archived
 progress:
   total_phases: 7
   completed_phases: 7
@@ -17,19 +17,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-28)
+See: .planning/PROJECT.md (updated 2026-06-03)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Milestone v1.0 complete — all 7 phases done; ready for /gsd-complete-milestone
+**Current focus:** v1.0 MVP shipped and archived — planning next milestone (run /gsd-new-milestone)
 
 ## Current Position
 
-Phase: 07 (bank-parsers-ingestion-pipeline) — COMPLETE
-Plan: 6 of 6 (all complete)
-Status: Milestone v1.0 complete — ready to archive
-Last activity: 2026-06-03
-
-Progress: [██████████] 100%
+Phase: Milestone v1.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-03 — Milestone v1.0 completed and archived
 
 ## Performance Metrics
 
@@ -124,8 +122,23 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 | Expense v1.x | Per-merchant category memory, more bank parsers, today's tile, vs-prior-month | Deferred to v2 | Roadmap |
 | Notes/Notifications | Share-sheet receive, Spotlight, budget/inbox notifications, haptics | Deferred to v2 | Roadmap |
 
+### Acknowledged at v1.0 Milestone Close (2026-06-03)
+
+Open human-verification artifacts deferred at milestone close — code is implemented; these are manual on-device verification/UAT passes that remain outstanding:
+
+| Category | Item | Status |
+|----------|------|--------|
+| uat_gap | 04-HUMAN-UAT.md | partial (1 pending scenario) |
+| uat_gap | 06-UAT.md | core-complete-1-deferred-issue |
+| verification_gap | 02-VERIFICATION.md | human_needed |
+| verification_gap | 04-VERIFICATION.md | human_needed |
+
 ## Session Continuity
 
 Last session: 2026-06-02T19:31:19.426Z
 Stopped at: Phase 7 context gathered
 Resume file: None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
