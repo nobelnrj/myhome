@@ -18,8 +18,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Notes & Checklists** - Independent note keeper with inline checklists, pin, search, and auto-save (completed 2026-05-30)
 - [x] **Phase 4: Overview & Charts** - Motivating home surface: spend-vs-budget, top categories, pinned note, and Swift Charts (completed 2026-06-01)
 - [x] **Phase 5: Face ID Gate & Settings** - Biometric app lock with passcode fallback and a Settings shell for managing the household (completed 2026-06-01)
-- [ ] **Phase 6: Gmail Sign-In & Client** - Prove Gmail OAuth + readonly fetch in isolation with secure Keychain token storage
-- [ ] **Phase 7: Bank Parsers & Ingestion Pipeline** - Zero-touch expense ingestion: parsers, confidence triage, Review Inbox, dedup, and background sync
+- [x] **Phase 6: Gmail Sign-In & Client** - Prove Gmail OAuth + readonly fetch in isolation with secure Keychain token storage (completed 2026-06-02)
+- [x] **Phase 7: Bank Parsers & Ingestion Pipeline** - Zero-touch expense ingestion: parsers, confidence triage, Review Inbox, dedup, and background sync (completed 2026-06-03)
 
 ## Phase Details
 
@@ -233,4 +233,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Overview & Charts | 5/5 | Complete    | 2026-06-01 |
 | 5. Face ID Gate & Settings | 2/2 | Complete   | 2026-06-01 |
 | 6. Gmail Sign-In & Client | 3/4 | In Progress|  |
-| 7. Bank Parsers & Ingestion Pipeline | 5/6 | In Progress|  |
+| 7. Bank Parsers & Ingestion Pipeline | 6/6 | Complete   | 2026-06-03 |
