@@ -6,7 +6,9 @@ import SwiftData
 /// Layout (UI-SPEC Screen 1):
 /// - NavigationStack, navigationTitle "Expenses" inline
 /// - "Needs Review" section at the top for ingested expenses needing triage (D7-04)
-/// - List insetGrouped of @Query(sort by date, order .reverse) expenses
+/// - Main expenses grouped into month sections (header = "May 2026" + month total),
+///   newest month first; rows within a month stay date-descending.
+/// - Toolbar filter menu to scope the list by category (All / each category / Uncategorized).
 /// - Each row: ExpenseRow with onTapGesture → edit sheet
 /// - .onDelete: swipe-to-delete via modelContext.delete
 /// - Toolbar: "+" (SF Symbol plus, accent, accessibilityLabel "Add Expense")
@@ -18,6 +20,9 @@ struct ExpenseListView: View {
 
     /// All expenses sorted by date descending (includes autoSaved ingested ones).
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
+
+    /// Categories for the filter menu, in their predefined display order.
+    @Query(sort: \Category.sortOrder) private var categories: [Category]
 
     /// Review items: ingested expenses that need triage (needsReview or possibleDuplicate).
     /// Sorted by createdAt descending (most recent first) — RESEARCH Code Example 2.
@@ -32,8 +37,26 @@ struct ExpenseListView: View {
     @State private var showingAddSheet: Bool = false
     @State private var editingExpense: Expense? = nil
 
+    /// Active category filter for the main list. Defaults to showing everything.
+    @State private var categoryFilter: CategoryFilter = .all
+
     /// Bound to RootView so it can drive the Expenses tab badge (D7-04).
     @Binding var reviewBadgeCount: Int
+
+    /// Single-selection filter for the main expense list.
+    private enum CategoryFilter: Hashable {
+        case all
+        case uncategorized
+        case category(UUID)
+    }
+
+    /// One month's worth of expenses, used as a List section.
+    private struct MonthSection: Identifiable {
+        let id: Date            // first instant of the month (stable section identity)
+        let title: String       // "May 2026"
+        let total: Decimal       // sum of amounts in this month
+        let expenses: [Expense]  // date-descending (inherited from the @Query order)
+    }
 
     var body: some View {
         NavigationStack {
@@ -59,17 +82,35 @@ struct ExpenseListView: View {
                             }
                         }
 
-                        // Main expense list (all expenses including autoSaved)
-                        if !expenses.isEmpty {
+                        // Main list — grouped into month sections (filtered by category).
+                        if monthSections.isEmpty {
                             Section {
-                                ForEach(expenses) { expense in
-                                    ExpenseRow(expense: expense)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            editingExpense = expense
-                                        }
+                                ContentUnavailableView(
+                                    "No Matching Expenses",
+                                    systemImage: "line.3.horizontal.decrease.circle",
+                                    description: Text("No expenses for \(filterLabel).")
+                                )
+                            }
+                        } else {
+                            ForEach(monthSections) { section in
+                                Section {
+                                    ForEach(section.expenses) { expense in
+                                        ExpenseRow(expense: expense)
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
+                                                editingExpense = expense
+                                            }
+                                    }
+                                    .onDelete { offsets in
+                                        deleteExpenses(in: section.expenses, at: offsets)
+                                    }
+                                } header: {
+                                    HStack {
+                                        Text(section.title)
+                                        Spacer()
+                                        Text(section.total.formattedINR())
+                                    }
                                 }
-                                .onDelete(perform: deleteExpenses)
                             }
                         }
                     }
@@ -79,6 +120,11 @@ struct ExpenseListView: View {
             .navigationTitle("Expenses")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                if !expenses.isEmpty {
+                    ToolbarItem(placement: .topBarLeading) {
+                        filterMenu
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: { showingAddSheet = true }) {
                         Image(systemName: "plus")
@@ -103,11 +149,83 @@ struct ExpenseListView: View {
         }
     }
 
+    // MARK: - Filter menu
+
+    private var filterMenu: some View {
+        Menu {
+            Picker("Filter", selection: $categoryFilter) {
+                Label("All Categories", systemImage: "tray.full").tag(CategoryFilter.all)
+                ForEach(categories) { category in
+                    Label(category.name ?? "Untitled", systemImage: category.symbolName ?? "tag")
+                        .tag(CategoryFilter.category(category.id))
+                }
+                Label("Uncategorized", systemImage: "questionmark.circle").tag(CategoryFilter.uncategorized)
+            }
+        } label: {
+            // Filled icon signals an active (non-"All") filter.
+            Image(systemName: categoryFilter == .all
+                  ? "line.3.horizontal.decrease.circle"
+                  : "line.3.horizontal.decrease.circle.fill")
+        }
+        .accessibilityLabel("Filter Expenses")
+    }
+
+    // MARK: - Derived data
+
+    /// Expenses after applying the active category filter, preserving @Query date order.
+    private var filteredExpenses: [Expense] {
+        switch categoryFilter {
+        case .all:
+            return expenses
+        case .uncategorized:
+            return expenses.filter { $0.categories.isEmpty }
+        case .category(let id):
+            return expenses.filter { expense in
+                expense.categories.contains { $0.id == id }
+            }
+        }
+    }
+
+    /// Filtered expenses grouped into month sections, newest month first.
+    private var monthSections: [MonthSection] {
+        let calendar = Calendar.current
+        let grouped = Dictionary(grouping: filteredExpenses) { expense -> Date in
+            let components = calendar.dateComponents([.year, .month], from: expense.date)
+            return calendar.date(from: components) ?? expense.date
+        }
+        return grouped.keys.sorted(by: >).map { monthStart in
+            let items = grouped[monthStart] ?? []  // already date-descending from the @Query
+            let total = items.reduce(Decimal(0)) { $0 + $1.amount }
+            return MonthSection(
+                id: monthStart,
+                title: monthStart.formattedAsMonthYear(),
+                total: total,
+                expenses: items
+            )
+        }
+    }
+
+    /// Human-readable label for the active filter (used in the empty state).
+    private var filterLabel: String {
+        switch categoryFilter {
+        case .all:
+            return "this filter"
+        case .uncategorized:
+            return "uncategorized"
+        case .category(let id):
+            return categories.first { $0.id == id }?.name ?? "this category"
+        }
+    }
+
     // MARK: - Actions
 
-    private func deleteExpenses(at offsets: IndexSet) {
+    /// Delete swiped rows from a specific month section.
+    ///
+    /// Offsets are relative to `sectionExpenses`, so we resolve them against that array
+    /// (not the full `expenses` query) before deleting.
+    private func deleteExpenses(in sectionExpenses: [Expense], at offsets: IndexSet) {
         for index in offsets {
-            context.delete(expenses[index])
+            context.delete(sectionExpenses[index])
         }
         // CR-01: persist the delete explicitly — do not rely on implicit autosave.
         do {
