@@ -123,6 +123,11 @@ final class GmailSyncController {
     /// Confirmed bank sender domains used to build the Gmail query filter (T-07-09).
     private static let bankSenderFilter = "from:(hdfcbank.bank.in OR icici.bank.in)"
 
+    /// First-sync backfill window in days. D6-08 originally used 30d; widened to 120d (~4 months)
+    /// so the initial sync captures a meaningful spend history. Incremental syncs still use the
+    /// days-since-last-sync window.
+    private static let initialBackfillDays = 120
+
     /// Minimum confidence score for auto-saving an expense without review (ING-12, D7-03).
     ///
     /// Exposed as a named constant — tunable, pending real-usage calibration (D7-03).
@@ -290,14 +295,15 @@ final class GmailSyncController {
         // ING-03: Transition to .syncing before the fetch
         syncStatus = .syncing
 
-        // D6-10: Compute query — newer_than:30d on first sync; newer_than:<days> since last sync
+        // D6-10: Compute query — initial backfill window on first sync (no watermark);
+        // newer_than:<days-since-last-sync> on incremental syncs.
         let query: String
         if let last = lastSyncedAt {
             let daysSince = Int(now().timeIntervalSince(last) / 86400)
             let bankFilter = GmailSyncController.bankSenderFilter
             query = "\(bankFilter) newer_than:\(max(1, daysSince))d"
         } else {
-            query = "\(GmailSyncController.bankSenderFilter) newer_than:30d"
+            query = "\(GmailSyncController.bankSenderFilter) newer_than:\(GmailSyncController.initialBackfillDays)d"
         }
 
         // Run the full ingestion pipeline (ING-12/13/14, UAT-6-05).
@@ -323,6 +329,21 @@ final class GmailSyncController {
                 existingExpenses = []
             }
 
+            // ING-14: message IDs already ingested — re-sync must be idempotent. The DedupChecker
+            // (amount+merchant+date) flags matches against *other* emails / manual expenses; this
+            // gmailMessageID guard prevents re-inserting the *same* email on every sync.
+            let ingestedMessageIDs = Set(existingExpenses.compactMap { $0.gmailMessageID })
+
+            // D7-09/D7-12/ING-15: resolve the parser's category hint to a seeded Category by name.
+            // Fetched once (the seed is ~14 categories). Unknown merchants have a nil hint → the
+            // expense stays uncategorised (Uncategorized fallback — D7-09).
+            var categoriesByName: [String: Category] = [:]
+            if let ctx = modelContext {
+                for cat in (try? ctx.fetch(FetchDescriptor<Category>())) ?? [] {
+                    if let name = cat.name { categoriesByName[name] = cat }
+                }
+            }
+
             // Step 4: Process each message through the pipeline
             for messageID in messageIDs {
                 // D7-07: Skip already-dismissed message IDs
@@ -330,11 +351,18 @@ final class GmailSyncController {
                     continue
                 }
 
+                // ING-14: Skip emails already ingested in a prior sync (idempotent re-sync)
+                if ingestedMessageIDs.contains(messageID) {
+                    continue
+                }
+
                 // Fetch the raw email
                 let rawEmail = try await fetch.getRawMessage(accessToken: token, messageID: messageID)
 
-                // Extract sender and subject from raw headers
-                let sender = extractHeader("From", from: rawEmail)
+                // Extract sender and subject from raw headers.
+                // Normalize the From value to a bare address (unwrap `Display <addr>`) so the
+                // parsers' host-suffix match works against real-world headers.
+                let sender = emailAddress(from: extractHeader("From", from: rawEmail))
                 let subject = extractHeader("Subject", from: rawEmail)
 
                 // Pick the parser whose canHandle returns true
@@ -374,6 +402,11 @@ final class GmailSyncController {
                 expense.gmailMessageID = messageID
                 expense.parseConfidence = confidence
                 expense.ingestionStateRaw = ingestionState
+
+                // D7-09/D7-12/ING-15: auto-categorise via the merchant→category hint.
+                if let hint = parsed.categoryHint, let cat = categoriesByName[hint] {
+                    expense.categories = [cat]
+                }
 
                 // Insert into SwiftData context if available
                 if let ctx = modelContext {
@@ -455,20 +488,22 @@ final class GmailSyncController {
 
     /// Extracts a named email header value from a raw RFC 2822 email string.
     ///
-    /// Handles folded headers (whitespace continuation lines).
+    /// Handles folded headers (whitespace continuation lines). Real Gmail RAW emails use CRLF line
+    /// endings, so values are trimmed with `.whitespacesAndNewlines` to strip the trailing `\r` —
+    /// otherwise a sender like `credit_cards@icici.bank.in\r` fails the parser's host suffix match.
     /// Returns an empty string if the header is not found.
     private nonisolated func extractHeader(_ name: String, from rawEmail: String) -> String {
         let lines = rawEmail.components(separatedBy: "\n")
         let prefix = "\(name):"
         for (idx, line) in lines.enumerated() {
             if line.hasPrefix(prefix) {
-                var value = String(line.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces)
+                var value = String(line.dropFirst(prefix.count)).trimmingCharacters(in: .whitespacesAndNewlines)
                 // Handle folded header continuation lines (RFC 2822: starts with whitespace)
                 var nextIdx = idx + 1
                 while nextIdx < lines.count {
                     let next = lines[nextIdx]
                     if next.first == " " || next.first == "\t" {
-                        value += " " + next.trimmingCharacters(in: .whitespaces)
+                        value += " " + next.trimmingCharacters(in: .whitespacesAndNewlines)
                         nextIdx += 1
                     } else {
                         break
@@ -478,5 +513,21 @@ final class GmailSyncController {
             }
         }
         return ""
+    }
+
+    /// Normalizes a `From` header value to a bare email address for sender matching.
+    ///
+    /// Real `From` headers come in several forms: `addr@host`, `<addr@host>`, and
+    /// `Display Name <addr@host>`. The bank parsers' `canHandle` matches on a host suffix
+    /// (`@host` / `.host`), so the angle-bracketed address must be unwrapped first — otherwise a
+    /// value ending in `>` (or carrying a display name) fails the match and a valid alert is dropped.
+    private nonisolated func emailAddress(from headerValue: String) -> String {
+        if let open = headerValue.lastIndex(of: "<"),
+           let close = headerValue.lastIndex(of: ">"),
+           open < close {
+            let inner = headerValue[headerValue.index(after: open)..<close]
+            return inner.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return headerValue.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

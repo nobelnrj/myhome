@@ -75,6 +75,9 @@ public struct HDFCParser: BankEmailParser {
         if let expense = parseUPIDebit(body: body, fallbackDate: fallbackDate) {
             return expense
         }
+        if let expense = parseUPIInstaAlert(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
         if let expense = parseDebitCard(body: body, fallbackDate: fallbackDate) {
             return expense
         }
@@ -109,6 +112,54 @@ public struct HDFCParser: BankEmailParser {
         // EXTRACT account tail — "account ending <NNNN>"
         let sourceTail = extractAccountTail(pattern: #"account ending\s+(\d{4})"#, from: body) ?? ""
         let sourceLabel = sourceTail.isEmpty ? "HDFC Debit" : "HDFC ••\(sourceTail)"
+
+        // EXTRACT date — "on <dd-mm-yy>"
+        let date = extractDDMMYY(from: body) ?? fallbackDate
+
+        // NORMALISE
+        let normalized = MerchantNormalizer.normalize(merchant)
+
+        return ParsedExpense(
+            amount: amount,
+            rawMerchant: merchant,
+            normalizedMerchant: normalized.normalizedName,
+            categoryHint: normalized.categoryHint,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: false,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
+    /// HDFC UPI InstaAlert debit (newer "You have done a UPI txn" format, sender HDFC Bank InstaAlerts):
+    /// "Rs.<amt> has been debited from account <NNNN> to VPA <vpa> <MERCHANT> on <dd-mm-yy>.
+    ///  Your UPI transaction reference number is <ref>."
+    ///
+    /// Distinct from `parseUPIDebit` ("is debited from your account ending … towards VPA") and from
+    /// `parseRefund` (credit, "by VPA"). Added from real-corpus verification (07-06) — this format
+    /// was not present in the original 07-04 sample corpus.
+    private func parseUPIInstaAlert(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT — required literals; if any missing, return nil
+        guard body.contains("has been debited from account"),
+              body.contains("to VPA"),
+              body.contains("UPI transaction reference number") else {
+            return nil
+        }
+        // Credits use "credited" not "debited" — exclude defensively
+        if body.contains("has been credited to") { return nil }
+
+        // EXTRACT amount — "Rs.<amount> has been debited"
+        guard let amount = extractAmount(pattern: #"Rs\.?\s*(\d[\d,]*(?:\.\d{1,2})?)\s+has been debited"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT account tail — "from account <NNNN>"
+        let accountTail = extractAccountTail(pattern: #"from account\s+(\d{4})"#, from: body) ?? ""
+        let sourceLabel = accountTail.isEmpty ? "HDFC Bank A/c" : "HDFC ••\(accountTail)"
+
+        // EXTRACT merchant — text after the VPA token, up to " on <dd-mm-yy>"
+        guard let merchant = extractInstaAlertMerchant(from: body) else { return nil }
 
         // EXTRACT date — "on <dd-mm-yy>"
         let date = extractDDMMYY(from: body) ?? fallbackDate
@@ -391,6 +442,29 @@ public struct HDFCParser: BankEmailParser {
         let mRange = match.range(at: 1)
         guard mRange.location != NSNotFound else { return nil }
         return nsBody.substring(with: mRange).trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Extracts InstaAlert UPI merchant: the display name after the VPA token, before " on <dd-mm-yy>".
+    /// Format: "to VPA <vpa> <MERCHANT> on <dd-mm-yy>". Falls back to the VPA token when no display
+    /// name is present ("to VPA <vpa> on <dd-mm-yy>").
+    private func extractInstaAlertMerchant(from body: String) -> String? {
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        // Preferred: capture the display name that follows the VPA token.
+        let withName = #"to VPA\s+\S+\s+(.+?)\s+on\s+\d{2}-\d{2}-\d{2}"#
+        if let regex = try? NSRegularExpression(pattern: withName, options: []),
+           let m = regex.firstMatch(in: body, options: [], range: range),
+           m.numberOfRanges > 1, m.range(at: 1).location != NSNotFound {
+            return nsBody.substring(with: m.range(at: 1)).trimmingCharacters(in: .whitespaces)
+        }
+        // Fallback: no display name — use the VPA token itself.
+        let vpaOnly = #"to VPA\s+(\S+)\s+on\s+\d{2}-\d{2}-\d{2}"#
+        if let regex = try? NSRegularExpression(pattern: vpaOnly, options: []),
+           let m = regex.firstMatch(in: body, options: [], range: range),
+           m.numberOfRanges > 1, m.range(at: 1).location != NSNotFound {
+            return nsBody.substring(with: m.range(at: 1)).trimmingCharacters(in: .whitespaces)
+        }
+        return nil
     }
 
     /// Extracts debit-card merchant: text between " at " and " on " in debit-card template.
