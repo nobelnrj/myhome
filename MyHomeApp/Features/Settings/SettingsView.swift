@@ -2,16 +2,14 @@ import SwiftUI
 
 /// Settings tab (tag 4) — Face ID toggle, Manage Categories sheet, Budgets deep-link, About footer.
 ///
+/// Restyled to the `MyHome.html` design: a profile header card plus colored `IconTile` glyphs on
+/// each row. **All behavior is unchanged** — the Face-ID-gated toggle binding, the full Gmail
+/// connect/sync/sign-out logic, Manage Categories sheet, and Budgets deep-link are identical to
+/// before; only the row presentation changed.
+///
 /// Security:
 /// - Face ID Lock toggle uses a custom Binding that calls auth-gated enableLock()/disableLock().
 ///   The toggle never flips the flag without authentication success (T-05-03, D5-07a/b, SEC-01).
-///
-/// Data:
-/// - "Manage Categories" presents ManageCategoriesView as a .sheet (D5-09).
-/// - "Budgets" switches to tab 2 via selectedTab binding (D5-08) — no budget UI duplicated here.
-///
-/// About footer: reads version/build from Bundle.main (D5-10, D5-12 discretion).
-/// No Gmail placeholder rows (D5-10).
 struct SettingsView: View {
 
     @Binding var selectedTab: Int
@@ -25,10 +23,19 @@ struct SettingsView: View {
         NavigationStack {
             List {
 
+                // MARK: Profile Header
+
+                Section {
+                    profileHeader
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+
                 // MARK: Security Section
 
                 Section("Security") {
-                    Toggle("Face ID Lock", isOn: Binding(
+                    Toggle(isOn: Binding(
                         get: { lockController.lockEnabled },
                         set: { newValue in
                             Task {
@@ -39,7 +46,9 @@ struct SettingsView: View {
                                 }
                             }
                         }
-                    ))
+                    )) {
+                        rowLabel("Face ID Lock", symbol: "faceid", color: Color(.systemGreen))
+                    }
                 }
 
                 // MARK: Gmail Section
@@ -55,8 +64,10 @@ struct SettingsView: View {
                                 Spacer()
                             }
                         } else {
-                            Button("Connect Gmail") {
+                            Button {
                                 Task { await gmailSyncController.signIn() }
+                            } label: {
+                                rowLabel("Connect Gmail", symbol: "envelope", color: Color(.systemRed))
                             }
                         }
 
@@ -75,8 +86,15 @@ struct SettingsView: View {
                         }
                     } else {
                         if let email = gmailSyncController.connectedEmail {
-                            Text("Connected as: \(email)")
-                                .font(.subheadline)
+                            HStack {
+                                rowLabel("Gmail", symbol: "envelope", color: Color(.systemRed))
+                                Spacer()
+                                Text(email)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
                         }
 
                         HStack {
@@ -143,17 +161,20 @@ struct SettingsView: View {
                 // MARK: Data Section
 
                 Section("Data") {
-                    Button("Manage Categories") {
+                    Button {
                         showManageCategories = true
+                    } label: {
+                        rowLabel("Manage Categories", symbol: "square.grid.2x2", color: Color(.systemIndigo))
                     }
 
                     Button {
                         selectedTab = 2
                     } label: {
                         HStack {
-                            Text("Budgets")
+                            rowLabel("Budgets", symbol: "chart.pie", color: .accentColor)
                             Spacer()
                             Image(systemName: "chevron.right")
+                                .font(.footnote.weight(.semibold))
                                 .foregroundStyle(.tertiary)
                         }
                     }
@@ -163,9 +184,9 @@ struct SettingsView: View {
                 // MARK: About Section (footer — no header)
 
                 Section {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("MyHome")
-                            .font(.subheadline)
+                    HStack {
+                        rowLabel("About MyHome", symbol: "house", color: .accentColor)
+                        Spacer()
                         Text(versionString)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
@@ -177,6 +198,62 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showManageCategories) {
             ManageCategoriesView()
+        }
+    }
+
+    // MARK: - Profile Header
+
+    private var profileHeader: some View {
+        HStack(spacing: 14) {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [.accentColor, .accentColor.opacity(0.55)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 56, height: 56)
+                .overlay(
+                    Group {
+                        if let initial = avatarInitial {
+                            Text(initial)
+                                .font(.title2.weight(.semibold))
+                                .foregroundStyle(.white)
+                        } else {
+                            Image(systemName: "person.fill")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                        }
+                    }
+                )
+            VStack(alignment: .leading, spacing: 2) {
+                Text(gmailSyncController.connectedEmail ?? "MyHome")
+                    .font(.title3.weight(.semibold))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Text(gmailSyncController.isConnected ? "Gmail connected" : "Not connected")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .cardStyle(cornerRadius: 14)
+    }
+
+    private var avatarInitial: String? {
+        guard let first = gmailSyncController.connectedEmail?.first else { return nil }
+        return String(first).uppercased()
+    }
+
+    // MARK: - Row Label
+
+    /// A standard settings row label: colored `IconTile` + title. Wrapping existing buttons /
+    /// toggles in this keeps their behavior unchanged while matching the design.
+    private func rowLabel(_ title: String, symbol: String, color: Color) -> some View {
+        HStack(spacing: 12) {
+            IconTile(symbol: symbol, color: color, size: 29)
+            Text(title)
+                .foregroundStyle(.primary)
         }
     }
 

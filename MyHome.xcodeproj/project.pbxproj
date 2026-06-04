@@ -13,43 +13,35 @@
 		A104 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F104 /* PrivacyInfo.xcprivacy */; };
 		A111 /* SchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = F111 /* SchemaV1.swift */; };
 		A112 /* MigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F112 /* MigrationPlan.swift */; };
-		A117 /* SchemaV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F117 /* SchemaV2.swift */; };
-		A119V3 /* SchemaV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119V3 /* SchemaV3.swift */; };
-		A120RV /* ReminderValueTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F120RV /* ReminderValueTypes.swift */; };
-		A133N /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = F133N /* Note.swift */; };
-		A134NB /* NoteBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = F134NB /* NoteBlock.swift */; };
 		A113 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = F113 /* Expense.swift */; };
-		A118 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F118 /* Category.swift */; };
 		A114 /* ModelContainer+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = F114 /* ModelContainer+App.swift */; };
 		A115 /* Decimal+INR.swift in Sources */ = {isa = PBXBuildFile; fileRef = F115 /* Decimal+INR.swift */; };
 		A116 /* Date+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = F116 /* Date+Display.swift */; };
+		A117 /* SchemaV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F117 /* SchemaV2.swift */; };
+		A118 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F118 /* Category.swift */; };
+		A119 /* BudgetCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119 /* BudgetCalculator.swift */; };
+		A119V3 /* SchemaV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119V3 /* SchemaV3.swift */; };
+		A120RV /* ReminderValueTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F120RV /* ReminderValueTypes.swift */; };
 		A121 /* DecimalKeypadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F121 /* DecimalKeypadView.swift */; };
 		A122 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F122 /* AddExpenseView.swift */; };
 		A123 /* ExpenseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123 /* ExpenseListView.swift */; };
 		A124 /* ExpenseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F124 /* ExpenseRow.swift */; };
-		A706RIR /* ReviewInboxRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706RIR /* ReviewInboxRow.swift */; };
 		A125 /* EditExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F125 /* EditExpenseView.swift */; };
 		A126 /* CategoryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F126 /* CategoryPickerView.swift */; };
-		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
-		A202 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F202 /* MigrationTests.swift */; };
-		A203 /* MyHomeV1Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F203 /* MyHomeV1Seed.store */; };
-		A204 /* CategorySeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F204 /* CategorySeedTests.swift */; };
-		A205 /* CategoryCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F205 /* CategoryCRUDTests.swift */; };
-		A206 /* ExpenseCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F206 /* ExpenseCategoryTests.swift */; };
-		A207 /* BudgetModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F207 /* BudgetModelTests.swift */; };
-		A119 /* BudgetCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119 /* BudgetCalculator.swift */; };
-		A208 /* BudgetCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208 /* BudgetCalculatorTests.swift */; };
 		A127 /* BudgetProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F127 /* BudgetProgressView.swift */; };
 		A128 /* BudgetCategoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F128 /* BudgetCategoryCard.swift */; };
 		A129 /* EditBudgetSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F129 /* EditBudgetSheet.swift */; };
 		A130 /* ManageCategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F130 /* ManageCategoriesView.swift */; };
 		A131 /* FilteredExpenseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F131 /* FilteredExpenseListView.swift */; };
 		A132 /* BudgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F132 /* BudgetsView.swift */; };
+		A133N /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = F133N /* Note.swift */; };
+		A134NB /* NoteBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = F134NB /* NoteBlock.swift */; };
 		A140NCP /* NotificationCenterPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F140NCP /* NotificationCenterPort.swift */; };
 		A141NS /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F141NS /* NotificationScheduler.swift */; };
 		A142NLO /* NoteListOrganizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F142NLO /* NoteListOrganizer.swift */; };
 		A143NSF /* NoteSearchFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F143NSF /* NoteSearchFilter.swift */; };
 		A144CA /* CalendarAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F144CA /* CalendarAggregator.swift */; };
+		A145NA /* NotificationActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F145NA /* NotificationActions.swift */; };
 		A151NHV /* NotesHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F151NHV /* NotesHomeView.swift */; };
 		A152NLV /* NotesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F152NLV /* NotesListView.swift */; };
 		A153NRW /* NoteRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F153NRW /* NoteRow.swift */; };
@@ -57,7 +49,14 @@
 		A155ENV /* EditNoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F155ENV /* EditNoteView.swift */; };
 		A156REV /* ReminderEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F156REV /* ReminderEditView.swift */; };
 		A157CV /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F157CV /* CalendarView.swift */; };
-		A145NA /* NotificationActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F145NA /* NotificationActions.swift */; };
+		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
+		A202 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F202 /* MigrationTests.swift */; };
+		A203 /* MyHomeV1Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F203 /* MyHomeV1Seed.store */; };
+		A204 /* CategorySeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F204 /* CategorySeedTests.swift */; };
+		A205 /* CategoryCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F205 /* CategoryCRUDTests.swift */; };
+		A206 /* ExpenseCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F206 /* ExpenseCategoryTests.swift */; };
+		A207 /* BudgetModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F207 /* BudgetModelTests.swift */; };
+		A208 /* BudgetCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208 /* BudgetCalculatorTests.swift */; };
 		A301 /* SpyCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F301 /* SpyCenter.swift */; };
 		A302 /* NoteModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F302 /* NoteModelTests.swift */; };
 		A303 /* NoteListOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F303 /* NoteListOrderingTests.swift */; };
@@ -70,10 +69,6 @@
 		A401 /* SpendOverTimeAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F401 /* SpendOverTimeAggregatorTests.swift */; };
 		A402 /* OverviewAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F402 /* OverviewAggregationTests.swift */; };
 		A403 /* DecimalINRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F403 /* DecimalINRTests.swift */; };
-		A501 /* BiometricAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F501 /* BiometricAuthPort.swift */; };
-		A502 /* SpyBiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F502 /* SpyBiometricAuth.swift */; };
-		A503 /* LockStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F503 /* LockStateTests.swift */; };
-		A504 /* LockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F504 /* LockController.swift */; };
 		A404 /* SpendOverTimeAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F404 /* SpendOverTimeAggregator.swift */; };
 		A405 /* OverviewAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F405 /* OverviewAggregation.swift */; };
 		A406 /* SpendBudgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F406 /* SpendBudgetCard.swift */; };
@@ -82,40 +77,60 @@
 		A409 /* SpendByCategoryChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F409 /* SpendByCategoryChart.swift */; };
 		A410 /* SpendOverTimeChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410 /* SpendOverTimeChart.swift */; };
 		A411 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F411 /* OverviewView.swift */; };
-		A603 /* LockSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F603 /* LockSettingsTests.swift */; };
+		A801SH /* CategoryStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F801SH /* CategoryStyle.swift */; };
+		A802SH /* IconTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F802SH /* IconTile.swift */; };
+		A803SH /* CardStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F803SH /* CardStyle.swift */; };
+		A804SH /* DonutChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F804SH /* DonutChart.swift */; };
+		A805SH /* StackBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F805SH /* StackBar.swift */; };
+		A501 /* BiometricAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F501 /* BiometricAuthPort.swift */; };
+		A502 /* SpyBiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F502 /* SpyBiometricAuth.swift */; };
+		A503 /* LockStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F503 /* LockStateTests.swift */; };
+		A504 /* LockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F504 /* LockController.swift */; };
 		A601 /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F601 /* UnlockView.swift */; };
 		A602 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602 /* SettingsView.swift */; };
+		A603 /* LockSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F603 /* LockSettingsTests.swift */; };
 		A610GAP /* GmailAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F610GAP /* GmailAuthPort.swift */; };
 		A611KP /* KeychainPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F611KP /* KeychainPort.swift */; };
 		A612PKCE /* PKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = F612PKCE /* PKCE.swift */; };
 		A613GSC /* GmailSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GSC /* GmailSyncController.swift */; };
-		A622GOC /* GmailOAuthConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F622GOC /* GmailOAuthConfig.swift */; };
-		A621RT /* RelativeTimestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F621RT /* RelativeTimestamp.swift */; };
 		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
 		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
-		A701SV4 /* SchemaV4.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV4 /* SchemaV4.swift */; };
-		A702GFP /* GmailFetchPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F702GFP /* GmailFetchPort.swift */; };
-		A703BEP /* BankEmailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703BEP /* BankEmailParser.swift */; };
-		A703MN /* MerchantNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703MN /* MerchantNormalizer.swift */; };
-		A703CS /* ConfidenceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CS /* ConfidenceScorer.swift */; };
-		A703DK /* DedupChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DK /* DedupChecker.swift */; };
-		A703DS /* DismissedMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DS /* DismissedMessageStore.swift */; };
-		A703HP /* HDFCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703HP /* HDFCParser.swift */; };
-		A703IP /* ICICIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703IP /* ICICIParser.swift */; };
-		A704SGF /* SpyGmailFetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = F704SGF /* SpyGmailFetch.swift */; };
-		A705HDFC /* HDFCParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F705HDFC /* HDFCParserTests.swift */; };
-		A706ICICI /* ICICIParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706ICICI /* ICICIParserTests.swift */; };
-		A707CS /* ConfidenceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F707CS /* ConfidenceScorerTests.swift */; };
-		A708DC /* DedupCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F708DC /* DedupCheckerTests.swift */; };
-		A709MN /* MerchantNormalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709MN /* MerchantNormalizerTests.swift */; };
-		A710IP /* IngestionPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F710IP /* IngestionPipelineTests.swift */; };
-		A711FIX /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = F711FIX /* Fixtures */; };
 		A616PT /* PKCETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F616PT /* PKCETests.swift */; };
 		A617GAUT /* GmailAuthURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F617GAUT /* GmailAuthURLTests.swift */; };
 		A618KPT /* KeychainPortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F618KPT /* KeychainPortTests.swift */; };
 		A619GSCT /* GmailSyncControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619GSCT /* GmailSyncControllerTests.swift */; };
 		A620RTT /* RelativeTimestampTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F620RTT /* RelativeTimestampTests.swift */; };
+		A621RT /* RelativeTimestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F621RT /* RelativeTimestamp.swift */; };
+		A622GOC /* GmailOAuthConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F622GOC /* GmailOAuthConfig.swift */; };
+		A701SV4 /* SchemaV4.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV4 /* SchemaV4.swift */; };
+		A702GFP /* GmailFetchPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F702GFP /* GmailFetchPort.swift */; };
+		A703BEP /* BankEmailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703BEP /* BankEmailParser.swift */; };
+		A703CS /* ConfidenceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CS /* ConfidenceScorer.swift */; };
+		A703DK /* DedupChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DK /* DedupChecker.swift */; };
+		A703DS /* DismissedMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DS /* DismissedMessageStore.swift */; };
+		A703HP /* HDFCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703HP /* HDFCParser.swift */; };
+		A703IP /* ICICIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703IP /* ICICIParser.swift */; };
+		A703MN /* MerchantNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703MN /* MerchantNormalizer.swift */; };
+		A704SGF /* SpyGmailFetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = F704SGF /* SpyGmailFetch.swift */; };
+		A705HDFC /* HDFCParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F705HDFC /* HDFCParserTests.swift */; };
+		A706ICICI /* ICICIParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706ICICI /* ICICIParserTests.swift */; };
+		A706RIR /* ReviewInboxRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706RIR /* ReviewInboxRow.swift */; };
+		A707CS /* ConfidenceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F707CS /* ConfidenceScorerTests.swift */; };
+		A708DC /* DedupCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F708DC /* DedupCheckerTests.swift */; };
+		A709MN /* MerchantNormalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709MN /* MerchantNormalizerTests.swift */; };
+		A710IP /* IngestionPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F710IP /* IngestionPipelineTests.swift */; };
+		A711FIX /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = F711FIX /* Fixtures */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D001P /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = PROJ /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = T001;
+			remoteInfo = MyHome;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		F001 /* MyHome.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyHome.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -128,36 +143,35 @@
 		F106 /* MyHome.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MyHome.entitlements; sourceTree = "<group>"; };
 		F111 /* SchemaV1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV1.swift; sourceTree = "<group>"; };
 		F112 /* MigrationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationPlan.swift; sourceTree = "<group>"; };
-		F117 /* SchemaV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV2.swift; sourceTree = "<group>"; };
-		F119V3 /* SchemaV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV3.swift; sourceTree = "<group>"; };
-		F120RV /* ReminderValueTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderValueTypes.swift; sourceTree = "<group>"; };
-		F133N /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
-		F134NB /* NoteBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBlock.swift; sourceTree = "<group>"; };
 		F113 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
-		F118 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		F114 /* ModelContainer+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelContainer+App.swift"; sourceTree = "<group>"; };
 		F115 /* Decimal+INR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Decimal+INR.swift"; sourceTree = "<group>"; };
 		F116 /* Date+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Display.swift"; sourceTree = "<group>"; };
+		F117 /* SchemaV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV2.swift; sourceTree = "<group>"; };
+		F118 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		F119 /* BudgetCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculator.swift; sourceTree = "<group>"; };
+		F119V3 /* SchemaV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV3.swift; sourceTree = "<group>"; };
+		F120RV /* ReminderValueTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderValueTypes.swift; sourceTree = "<group>"; };
 		F121 /* DecimalKeypadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalKeypadView.swift; sourceTree = "<group>"; };
 		F122 /* AddExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseView.swift; sourceTree = "<group>"; };
 		F123 /* ExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseListView.swift; sourceTree = "<group>"; };
 		F124 /* ExpenseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseRow.swift; sourceTree = "<group>"; };
-		F706RIR /* ReviewInboxRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewInboxRow.swift; sourceTree = "<group>"; };
 		F125 /* EditExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseView.swift; sourceTree = "<group>"; };
 		F126 /* CategoryPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPickerView.swift; sourceTree = "<group>"; };
-		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
-		F202 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
-		F203 /* MyHomeV1Seed.store */ = {isa = PBXFileReference; lastKnownFileType = "file"; path = MyHomeV1Seed.store; sourceTree = "<group>"; };
-		F204 /* CategorySeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeedTests.swift; sourceTree = "<group>"; };
-		F205 /* CategoryCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCRUDTests.swift; sourceTree = "<group>"; };
-		F206 /* ExpenseCategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseCategoryTests.swift; sourceTree = "<group>"; };
-		F207 /* BudgetModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetModelTests.swift; sourceTree = "<group>"; };
-		F119 /* BudgetCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculator.swift; sourceTree = "<group>"; };
+		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
+		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
+		F129 /* EditBudgetSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBudgetSheet.swift; sourceTree = "<group>"; };
+		F130 /* ManageCategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageCategoriesView.swift; sourceTree = "<group>"; };
+		F131 /* FilteredExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredExpenseListView.swift; sourceTree = "<group>"; };
+		F132 /* BudgetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsView.swift; sourceTree = "<group>"; };
+		F133N /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
+		F134NB /* NoteBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBlock.swift; sourceTree = "<group>"; };
 		F140NCP /* NotificationCenterPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterPort.swift; sourceTree = "<group>"; };
 		F141NS /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
 		F142NLO /* NoteListOrganizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListOrganizer.swift; sourceTree = "<group>"; };
 		F143NSF /* NoteSearchFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSearchFilter.swift; sourceTree = "<group>"; };
 		F144CA /* CalendarAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAggregator.swift; sourceTree = "<group>"; };
+		F145NA /* NotificationActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationActions.swift; sourceTree = "<group>"; };
 		F151NHV /* NotesHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesHomeView.swift; sourceTree = "<group>"; };
 		F152NLV /* NotesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesListView.swift; sourceTree = "<group>"; };
 		F153NRW /* NoteRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRow.swift; sourceTree = "<group>"; };
@@ -165,14 +179,14 @@
 		F155ENV /* EditNoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNoteView.swift; sourceTree = "<group>"; };
 		F156REV /* ReminderEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEditView.swift; sourceTree = "<group>"; };
 		F157CV /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
-		F145NA /* NotificationActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationActions.swift; sourceTree = "<group>"; };
+		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
+		F202 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
+		F203 /* MyHomeV1Seed.store */ = {isa = PBXFileReference; lastKnownFileType = file; path = MyHomeV1Seed.store; sourceTree = "<group>"; };
+		F204 /* CategorySeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeedTests.swift; sourceTree = "<group>"; };
+		F205 /* CategoryCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCRUDTests.swift; sourceTree = "<group>"; };
+		F206 /* ExpenseCategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseCategoryTests.swift; sourceTree = "<group>"; };
+		F207 /* BudgetModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetModelTests.swift; sourceTree = "<group>"; };
 		F208 /* BudgetCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculatorTests.swift; sourceTree = "<group>"; };
-		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
-		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
-		F129 /* EditBudgetSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBudgetSheet.swift; sourceTree = "<group>"; };
-		F130 /* ManageCategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageCategoriesView.swift; sourceTree = "<group>"; };
-		F131 /* FilteredExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredExpenseListView.swift; sourceTree = "<group>"; };
-		F132 /* BudgetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsView.swift; sourceTree = "<group>"; };
 		F301 /* SpyCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyCenter.swift; sourceTree = "<group>"; };
 		F302 /* NoteModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModelTests.swift; sourceTree = "<group>"; };
 		F303 /* NoteListOrderingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListOrderingTests.swift; sourceTree = "<group>"; };
@@ -181,7 +195,7 @@
 		F306 /* NotificationSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSchedulerTests.swift; sourceTree = "<group>"; };
 		F307 /* RecurrenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceTests.swift; sourceTree = "<group>"; };
 		F308 /* CalendarAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAggregationTests.swift; sourceTree = "<group>"; };
-		F310 /* MyHomeV2Seed.store */ = {isa = PBXFileReference; lastKnownFileType = "file"; path = MyHomeV2Seed.store; sourceTree = "<group>"; };
+		F310 /* MyHomeV2Seed.store */ = {isa = PBXFileReference; lastKnownFileType = file; path = MyHomeV2Seed.store; sourceTree = "<group>"; };
 		F401 /* SpendOverTimeAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeAggregatorTests.swift; sourceTree = "<group>"; };
 		F402 /* OverviewAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewAggregationTests.swift; sourceTree = "<group>"; };
 		F403 /* DecimalINRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalINRTests.swift; sourceTree = "<group>"; };
@@ -197,9 +211,9 @@
 		F502 /* SpyBiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyBiometricAuth.swift; sourceTree = "<group>"; };
 		F503 /* LockStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockStateTests.swift; sourceTree = "<group>"; };
 		F504 /* LockController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockController.swift; sourceTree = "<group>"; };
-		F603 /* LockSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockSettingsTests.swift; sourceTree = "<group>"; };
 		F601 /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
 		F602 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F603 /* LockSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockSettingsTests.swift; sourceTree = "<group>"; };
 		F610GAP /* GmailAuthPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAuthPort.swift; sourceTree = "<group>"; };
 		F611KP /* KeychainPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPort.swift; sourceTree = "<group>"; };
 		F612PKCE /* PKCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCE.swift; sourceTree = "<group>"; };
@@ -216,31 +230,37 @@
 		F701SV4 /* SchemaV4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV4.swift; sourceTree = "<group>"; };
 		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
 		F703BEP /* BankEmailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankEmailParser.swift; sourceTree = "<group>"; };
-		F703MN /* MerchantNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizer.swift; sourceTree = "<group>"; };
 		F703CS /* ConfidenceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorer.swift; sourceTree = "<group>"; };
 		F703DK /* DedupChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupChecker.swift; sourceTree = "<group>"; };
 		F703DS /* DismissedMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissedMessageStore.swift; sourceTree = "<group>"; };
 		F703HP /* HDFCParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParser.swift; sourceTree = "<group>"; };
 		F703IP /* ICICIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParser.swift; sourceTree = "<group>"; };
+		F703MN /* MerchantNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizer.swift; sourceTree = "<group>"; };
 		F704SGF /* SpyGmailFetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailFetch.swift; sourceTree = "<group>"; };
 		F705HDFC /* HDFCParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParserTests.swift; sourceTree = "<group>"; };
 		F706ICICI /* ICICIParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParserTests.swift; sourceTree = "<group>"; };
+		F706RIR /* ReviewInboxRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewInboxRow.swift; sourceTree = "<group>"; };
 		F707CS /* ConfidenceScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorerTests.swift; sourceTree = "<group>"; };
 		F708DC /* DedupCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupCheckerTests.swift; sourceTree = "<group>"; };
 		F709MN /* MerchantNormalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizerTests.swift; sourceTree = "<group>"; };
 		F710IP /* IngestionPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestionPipelineTests.swift; sourceTree = "<group>"; };
 		F711FIX /* Fixtures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fixtures; sourceTree = "<group>"; };
+		F801SH /* CategoryStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryStyle.swift; sourceTree = "<group>"; };
+		F802SH /* IconTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconTile.swift; sourceTree = "<group>"; };
+		F803SH /* CardStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStyle.swift; sourceTree = "<group>"; };
+		F804SH /* DonutChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonutChart.swift; sourceTree = "<group>"; };
+		F805SH /* StackBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackBar.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B001 /* Frameworks (app) */ = {
+		B001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B002 /* Frameworks (tests) */ = {
+		B002 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -250,22 +270,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		G000 /* root */ = {
+		G000 = {
 			isa = PBXGroup;
 			children = (
 				G100 /* MyHomeApp */,
 				G200 /* MyHomeTests */,
 				G900 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		G900 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F001 /* MyHome.app */,
-				F002 /* MyHomeTests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		G100 /* MyHomeApp */ = {
@@ -302,64 +313,11 @@
 				G122 /* Budgets */,
 				G123 /* Notes */,
 				G125 /* Settings */,
-				G126 /* Gmail (Features) */,
+				G126 /* Gmail */,
 				G127 /* Ingestion */,
+				G128 /* Shared */,
 			);
 			path = Features;
-			sourceTree = "<group>";
-		};
-		G127 /* Ingestion */ = {
-			isa = PBXGroup;
-			children = (
-				F703BEP /* BankEmailParser.swift */,
-				F703MN /* MerchantNormalizer.swift */,
-				F703CS /* ConfidenceScorer.swift */,
-				F703DK /* DedupChecker.swift */,
-				F703DS /* DismissedMessageStore.swift */,
-				F703HP /* HDFCParser.swift */,
-				F703IP /* ICICIParser.swift */,
-			);
-			path = Ingestion;
-			sourceTree = "<group>";
-		};
-		G124 /* Overview */ = {
-			isa = PBXGroup;
-			children = (
-				F411 /* OverviewView.swift */,
-				F406 /* SpendBudgetCard.swift */,
-				F407 /* TopCategoriesCard.swift */,
-				F408 /* PinnedNoteCard.swift */,
-				F409 /* SpendByCategoryChart.swift */,
-				F410 /* SpendOverTimeChart.swift */,
-			);
-			path = Overview;
-			sourceTree = "<group>";
-		};
-		G123 /* Notes */ = {
-			isa = PBXGroup;
-			children = (
-				F151NHV /* NotesHomeView.swift */,
-				F152NLV /* NotesListView.swift */,
-				F153NRW /* NoteRow.swift */,
-				F154ANV /* AddNoteView.swift */,
-				F155ENV /* EditNoteView.swift */,
-				F156REV /* ReminderEditView.swift */,
-				F157CV /* CalendarView.swift */,
-			);
-			path = Notes;
-			sourceTree = "<group>";
-		};
-		G122 /* Budgets */ = {
-			isa = PBXGroup;
-			children = (
-				F127 /* BudgetProgressView.swift */,
-				F128 /* BudgetCategoryCard.swift */,
-				F129 /* EditBudgetSheet.swift */,
-				F130 /* ManageCategoriesView.swift */,
-				F131 /* FilteredExpenseListView.swift */,
-				F132 /* BudgetsView.swift */,
-			);
-			path = Budgets;
 			sourceTree = "<group>";
 		};
 		G121 /* Expenses */ = {
@@ -376,6 +334,89 @@
 			path = Expenses;
 			sourceTree = "<group>";
 		};
+		G122 /* Budgets */ = {
+			isa = PBXGroup;
+			children = (
+				F127 /* BudgetProgressView.swift */,
+				F128 /* BudgetCategoryCard.swift */,
+				F129 /* EditBudgetSheet.swift */,
+				F130 /* ManageCategoriesView.swift */,
+				F131 /* FilteredExpenseListView.swift */,
+				F132 /* BudgetsView.swift */,
+			);
+			path = Budgets;
+			sourceTree = "<group>";
+		};
+		G123 /* Notes */ = {
+			isa = PBXGroup;
+			children = (
+				F151NHV /* NotesHomeView.swift */,
+				F152NLV /* NotesListView.swift */,
+				F153NRW /* NoteRow.swift */,
+				F154ANV /* AddNoteView.swift */,
+				F155ENV /* EditNoteView.swift */,
+				F156REV /* ReminderEditView.swift */,
+				F157CV /* CalendarView.swift */,
+			);
+			path = Notes;
+			sourceTree = "<group>";
+		};
+		G124 /* Overview */ = {
+			isa = PBXGroup;
+			children = (
+				F411 /* OverviewView.swift */,
+				F406 /* SpendBudgetCard.swift */,
+				F407 /* TopCategoriesCard.swift */,
+				F408 /* PinnedNoteCard.swift */,
+				F409 /* SpendByCategoryChart.swift */,
+				F410 /* SpendOverTimeChart.swift */,
+			);
+			path = Overview;
+			sourceTree = "<group>";
+		};
+		G125 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F601 /* UnlockView.swift */,
+				F602 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		G126 /* Gmail */ = {
+			isa = PBXGroup;
+			children = (
+				F613GSC /* GmailSyncController.swift */,
+			);
+			path = Gmail;
+			sourceTree = "<group>";
+		};
+		G127 /* Ingestion */ = {
+			isa = PBXGroup;
+			children = (
+				F703BEP /* BankEmailParser.swift */,
+				F703MN /* MerchantNormalizer.swift */,
+				F703CS /* ConfidenceScorer.swift */,
+				F703DK /* DedupChecker.swift */,
+				F703DS /* DismissedMessageStore.swift */,
+				F703HP /* HDFCParser.swift */,
+				F703IP /* ICICIParser.swift */,
+			);
+			path = Ingestion;
+			sourceTree = "<group>";
+		};
+		G128 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				F801SH /* CategoryStyle.swift */,
+				F802SH /* IconTile.swift */,
+				F803SH /* CardStyle.swift */,
+				F804SH /* DonutChart.swift */,
+				F805SH /* StackBar.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		G130 /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
@@ -384,6 +425,30 @@
 				G132 /* Models */,
 			);
 			path = Persistence;
+			sourceTree = "<group>";
+		};
+		G131 /* Schema */ = {
+			isa = PBXGroup;
+			children = (
+				F111 /* SchemaV1.swift */,
+				F112 /* MigrationPlan.swift */,
+				F117 /* SchemaV2.swift */,
+				F119V3 /* SchemaV3.swift */,
+				F701SV4 /* SchemaV4.swift */,
+			);
+			path = Schema;
+			sourceTree = "<group>";
+		};
+		G132 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F113 /* Expense.swift */,
+				F118 /* Category.swift */,
+				F120RV /* ReminderValueTypes.swift */,
+				F133N /* Note.swift */,
+				F134NB /* NoteBlock.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		G140 /* Support */ = {
@@ -426,38 +491,6 @@
 			path = Gmail;
 			sourceTree = "<group>";
 		};
-		G126 /* Gmail (Features) */ = {
-			isa = PBXGroup;
-			children = (
-				F613GSC /* GmailSyncController.swift */,
-			);
-			path = Gmail;
-			sourceTree = "<group>";
-		};
-		G131 /* Schema */ = {
-			isa = PBXGroup;
-			children = (
-				F111 /* SchemaV1.swift */,
-				F112 /* MigrationPlan.swift */,
-				F117 /* SchemaV2.swift */,
-				F119V3 /* SchemaV3.swift */,
-				F701SV4 /* SchemaV4.swift */,
-			);
-			path = Schema;
-			sourceTree = "<group>";
-		};
-		G132 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				F113 /* Expense.swift */,
-				F118 /* Category.swift */,
-				F120RV /* ReminderValueTypes.swift */,
-				F133N /* Note.swift */,
-				F134NB /* NoteBlock.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
 		G200 /* MyHomeTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -497,6 +530,16 @@
 			path = MyHomeTests;
 			sourceTree = "<group>";
 		};
+		G210 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F203 /* MyHomeV1Seed.store */,
+				F310 /* MyHomeV2Seed.store */,
+				F711FIX /* Fixtures */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		G220 /* Support */ = {
 			isa = PBXGroup;
 			children = (
@@ -509,23 +552,13 @@
 			path = Support;
 			sourceTree = "<group>";
 		};
-		G210 /* Resources */ = {
+		G900 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F203 /* MyHomeV1Seed.store */,
-				F310 /* MyHomeV2Seed.store */,
-				F711FIX /* Fixtures */,
+				F001 /* MyHome.app */,
+				F002 /* MyHomeTests.xctest */,
 			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		G125 /* Settings */ = {
-			isa = PBXGroup;
-			children = (
-				F601 /* UnlockView.swift */,
-				F602 /* SettingsView.swift */,
-			);
-			path = Settings;
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -611,7 +644,7 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		P002 /* Resources (app) */ = {
+		P002 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -620,7 +653,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		P004 /* Resources (tests) */ = {
+		P004 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -633,7 +666,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		P001 /* Sources (app) */ = {
+		P001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -675,6 +708,11 @@
 				A404 /* SpendOverTimeAggregator.swift in Sources */,
 				A405 /* OverviewAggregation.swift in Sources */,
 				A411 /* OverviewView.swift in Sources */,
+				A801SH /* CategoryStyle.swift in Sources */,
+				A802SH /* IconTile.swift in Sources */,
+				A803SH /* CardStyle.swift in Sources */,
+				A804SH /* DonutChart.swift in Sources */,
+				A805SH /* StackBar.swift in Sources */,
 				A406 /* SpendBudgetCard.swift in Sources */,
 				A407 /* TopCategoriesCard.swift in Sources */,
 				A408 /* PinnedNoteCard.swift in Sources */,
@@ -708,7 +746,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		P003 /* Sources (tests) */ = {
+		P003 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -758,17 +796,10 @@
 			target = T001 /* MyHome */;
 			targetProxy = D001P /* PBXContainerItemProxy */;
 		};
-		D001P /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = PROJ /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = T001;
-			remoteInfo = MyHome;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		C001 /* Debug (project) */ = {
+		C001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -833,7 +864,7 @@
 			};
 			name = Debug;
 		};
-		C002 /* Release (project) */ = {
+		C002 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -890,7 +921,7 @@
 			};
 			name = Release;
 		};
-		C003 /* Debug (MyHome target) */ = {
+		C003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -899,6 +930,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = H2XW7F4236;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MyHomeApp/Info.plist;
@@ -922,7 +954,7 @@
 			};
 			name = Debug;
 		};
-		C004 /* Release (MyHome target) */ = {
+		C004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -931,6 +963,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = H2XW7F4236;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MyHomeApp/Info.plist;
@@ -954,7 +987,7 @@
 			};
 			name = Release;
 		};
-		C005 /* Debug (MyHomeTests target) */ = {
+		C005 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -973,7 +1006,7 @@
 			};
 			name = Debug;
 		};
-		C006 /* Release (MyHomeTests target) */ = {
+		C006 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -1023,7 +1056,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
 	rootObject = PROJ /* Project object */;
 }

@@ -52,17 +52,21 @@ struct NoteRow: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(note.isPinned ? "Unpin note" : "Pin note")
 
-                // Reminder badge — count of blocks + note-level reminders
+                // Reminder badge — design-style pill. Shows the next reminder date when the
+                // note itself has one, otherwise a count of block-level reminders.
                 let reminderCount = reminderBlockCount
                 if reminderCount > 0 {
-                    HStack(spacing: 2) {
+                    HStack(spacing: 3) {
                         Image(systemName: "bell.fill")
                             .font(.caption2)
-                            .foregroundStyle(Color.accentColor)
-                        Text("\(reminderCount)")
+                        Text(reminderBadgeText(count: reminderCount))
                             .font(.caption2)
-                            .foregroundStyle(Color.accentColor)
+                            .fontWeight(.medium)
                     }
+                    .foregroundStyle(Color.accentColor)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(Color.accentColor.opacity(0.12), in: Capsule())
                     .accessibilityLabel("\(reminderCount) reminder\(reminderCount == 1 ? "" : "s")")
                 }
             }
@@ -111,6 +115,14 @@ struct NoteRow: View {
         let open = sorted.filter { !$0.isChecked }
         let checked = sorted.filter { $0.isChecked }
         return open + checked
+    }
+
+    /// Pill text: the note-level reminder's short date when present, else the reminder count.
+    private func reminderBadgeText(count: Int) -> String {
+        if note.reminderEnabled, let date = note.reminderDate {
+            return date.formattedAsReminderBadge()
+        }
+        return "\(count)"
     }
 
     /// Count of reminder-enabled blocks + note-level reminder.

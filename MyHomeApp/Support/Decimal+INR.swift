@@ -16,6 +16,18 @@ extension Decimal {
         )
     }
 
+    /// Whole-rupee INR (no paise) with lakh grouping.
+    ///
+    /// Used by the refreshed UI's hero figures, donut centers, and budget glances where paise
+    /// add visual noise. `formattedINR()` (with paise) remains the default for row-level amounts.
+    func formattedINRWhole() -> String {
+        self.formatted(
+            .currency(code: "INR")
+            .locale(Locale(identifier: "en_IN"))
+            .precision(.fractionLength(0))
+        )
+    }
+
     /// Compact INR formatter for chart axis labels and bar annotations only.
     ///
     /// Thresholds (truncation via Int, no rounding):

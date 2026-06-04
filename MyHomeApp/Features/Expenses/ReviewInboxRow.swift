@@ -18,56 +18,53 @@ struct ReviewInboxRow: View {
     let expense: Expense
     @Environment(\.modelContext) private var context
 
+    private var category: Category? { expense.categories.first }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .center, spacing: 12) {
-                // Amount — fixed leading column, right-aligned (mirrors ExpenseRow)
-                Text(expense.amount.formattedINR())
-                    .font(.headline)
-                    .foregroundStyle(expense.amount < 0 ? Color(.systemGreen) : Color(.label))
-                    .frame(width: 100, alignment: .trailing)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                // Colored category tile (mirrors the design's review card)
+                IconTile(category: category, size: 38, cornerRadius: 10)
 
-                // Note + date + sourceLabel — trailing column
+                // Merchant (note) + source — leading column
                 VStack(alignment: .leading, spacing: 2) {
                     if let note = expense.note, !note.isEmpty {
                         // T-01-06: plain Text() — never AttributedString(markdown:) on user input
                         Text(note)
-                            .font(.body)
+                            .font(.headline)
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
-                    Text(expense.date.formattedForExpenseList())
+                    Text(subtitleText)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                    // sourceLabel: e.g. "HDFC CC ••4321", "ICICI CC ••9001" (D7-15)
-                    if let source = expense.sourceLabel, !source.isEmpty {
-                        Text(source)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
                 }
 
-                Spacer(minLength: 0)
+                Spacer(minLength: 8)
 
-                // Triage badge: "Review" or "Duplicate" indicator (D7-04/14)
-                if expense.ingestionStateRaw == "possibleDuplicate" {
-                    Text("Duplicate")
-                        .font(.caption2)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.orange, in: Capsule())
-                } else {
-                    Text("Review")
-                        .font(.caption2)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.accentColor, in: Capsule())
+                // Amount + triage badge — trailing column
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(expense.amount.formattedINR())
+                        .font(.headline)
+                        .foregroundStyle(expense.amount < 0 ? Color(.systemGreen) : Color(.label))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    if expense.ingestionStateRaw == "possibleDuplicate" {
+                        Text("Duplicate")
+                            .font(.caption2)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange, in: Capsule())
+                    } else {
+                        Text("Review")
+                            .font(.caption2)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.accentColor, in: Capsule())
+                    }
                 }
             }
 
@@ -97,6 +94,18 @@ struct ReviewInboxRow: View {
             }
             .tint(.green)
         }
+    }
+
+    // MARK: - Subtitle
+
+    /// "Category · Account" when both are known, otherwise whichever is available, falling back
+    /// to the parsed date so the row is never label-less.
+    private var subtitleText: String {
+        var parts: [String] = []
+        if let name = category?.name, !name.isEmpty { parts.append(name) }
+        if let source = expense.sourceLabel, !source.isEmpty { parts.append(source) }
+        if parts.isEmpty { parts.append(expense.date.formattedForExpenseList()) }
+        return parts.joined(separator: " · ")
     }
 
     // MARK: - Actions

@@ -4,15 +4,15 @@ import UIKit
 
 /// Overview dashboard — default launch tab (tag 0).
 ///
-/// Owns the three @Query sources (month expenses, categories, all notes), pre-aggregates with
-/// OverviewAggregation + BudgetCalculator helpers, and passes value-type data down to the five
-/// dumb card components (Plans 04-03 / 04-04). No raw @Query arrays enter any Chart DSL.
+/// Restyled to the `MyHome.html` design: a month label, the spend hero + stacked bar, a Gmail
+/// review banner, a "Where it's going" donut card, a Budgets glance, and a Recent list. The
+/// previous Pinned-Note card and Spend-over-time chart are intentionally not shown here (the
+/// user chose to match the design exactly).
 ///
-/// Architecture: mirrors BudgetsView — a thin parent that computes current-month boundaries
-/// and delegates @Query ownership to an inner `OverviewMonthContent` child. Re-initialising
-/// the child with new boundaries re-triggers @Query execution (RESEARCH OQ3 pattern).
+/// Owns the @Query sources, pre-aggregates with OverviewAggregation + BudgetCalculator, and
+/// passes value-type data down to dumb subviews. No raw @Query array enters any Chart DSL.
 ///
-/// Satisfies: OVR-01, OVR-02, OVR-03, OVR-04, EXP-10, EXP-11, D4-01, D4-03, D4-06.
+/// Satisfies: OVR-01, OVR-02, OVR-04, EXP-10, EXP-11, D4-01, D4-03, D4-06.
 struct OverviewView: View {
 
     @Binding var selectedTab: Int
@@ -20,13 +20,8 @@ struct OverviewView: View {
 
     @State private var showAddExpense = false
 
-    /// The "now" the month boundaries are derived from. Backed by @State (rather than
-    /// reading `Date()` directly in a computed property) so a day/month rollover while
-    /// the app is left open updates the boundaries: `.significantTimeChangeNotification`
-    /// fires on midnight, timezone, and calendar-day changes, refreshing this value and
-    /// re-evaluating `body`, which re-inits `OverviewMonthContent` and re-runs its @Query
-    /// (WR-06). Without this, an app open across midnight-into-a-new-month kept showing
-    /// the previous month until some unrelated state change forced a re-render.
+    /// The "now" the month boundaries are derived from. Backed by @State so a day/month
+    /// rollover while the app is left open refreshes the boundaries (WR-06).
     @State private var referenceDate = Date()
 
     private var currentMonth: DateComponents {
@@ -39,14 +34,13 @@ struct OverviewView: View {
                 OverviewMonthContent(
                     start: start,
                     end: end,
+                    monthLabel: start.formattedAsMonthYear(),
                     selectedTab: $selectedTab,
                     deepLinkNoteID: $deepLinkNoteID,
                     showAddExpense: $showAddExpense
                 )
             } else {
-                // WR-04: monthBoundaries is Optional (guards cal.date(from:)). It should
-                // never fail for the current month in practice, but a silently-blank
-                // default launch tab is a robustness defect — show an observable fallback.
+                // WR-04: monthBoundaries is Optional; show an observable fallback rather than blank.
                 ContentUnavailableView(
                     "Couldn't load this month",
                     systemImage: "calendar.badge.exclamationmark",
@@ -69,9 +63,7 @@ struct OverviewView: View {
         .sheet(isPresented: $showAddExpense) {
             AddExpenseView()
         }
-        // WR-06: refresh the reference date on a significant time change (midnight,
-        // timezone, or calendar-day rollover) so month boundaries stay current while
-        // the app is left open across a month boundary.
+        // WR-06: refresh the reference date on a significant time change (midnight / month rollover).
         .onReceive(NotificationCenter.default.publisher(
             for: UIApplication.significantTimeChangeNotification
         )) { _ in
@@ -84,33 +76,34 @@ struct OverviewView: View {
 
 /// Child view that owns the month-scoped @Query sources. Re-initialized when start/end change
 /// (RESEARCH OQ3 — child re-init triggers @Query re-execution with new bounds).
-///
-/// Pre-aggregates all data in `body` before passing value types to card subviews.
-/// No raw @Query array is ever passed into a Chart DSL.
 private struct OverviewMonthContent: View {
 
     let start: Date
     let end: Date
+    let monthLabel: String
     @Binding var selectedTab: Int
     @Binding var deepLinkNoteID: UUID?
     @Binding var showAddExpense: Bool
 
     @Query(sort: \Category.sortOrder) private var categories: [Category]
     @Query private var monthExpenses: [Expense]
-    /// Year-scoped expenses for SpendOverTimeChart. The aggregator computes its own
-    /// date windows (rolling week / current month / current calendar year) so it needs
-    /// data spanning the widest range it can display — the calendar year — not just the
-    /// current month (CR-01: a month-bounded array makes the Year view show 11 empty
-    /// buckets and drops prior-month days from week views straddling a month boundary).
-    @Query private var yearExpenses: [Expense]
-    @Query private var allNotes: [Note]
+    /// Review-inbox items needing triage — drives the Gmail review banner (D7-04). Reads existing
+    /// data only; the banner just routes to the Expenses tab.
+    @Query(
+        filter: #Predicate<Expense> { $0.ingestionStateRaw != nil && $0.ingestionStateRaw != "autoSaved" },
+        sort: \Expense.createdAt,
+        order: .reverse
+    ) private var reviewItems: [Expense]
 
-    init(start: Date, end: Date,
+    @State private var editingExpense: Expense?
+
+    init(start: Date, end: Date, monthLabel: String,
          selectedTab: Binding<Int>,
          deepLinkNoteID: Binding<UUID?>,
          showAddExpense: Binding<Bool>) {
         self.start = start
         self.end = end
+        self.monthLabel = monthLabel
         self._selectedTab = selectedTab
         self._deepLinkNoteID = deepLinkNoteID
         self._showAddExpense = showAddExpense
@@ -123,19 +116,6 @@ private struct OverviewMonthContent: View {
             },
             sort: \.date, order: .reverse
         )
-
-        // Year-scoped query feeding SpendOverTimeChart (CR-01). Bounded to the start of
-        // the current calendar year so the Year range's 12 month-buckets and any
-        // month-straddling Week window receive the data the aggregator expects.
-        let cal = Calendar.current
-        let yearStart = cal.date(from: cal.dateComponents([.year], from: Date())) ?? start
-        _yearExpenses = Query(
-            filter: #Predicate<Expense> { expense in
-                expense.date >= yearStart
-            },
-            sort: \.date, order: .reverse
-        )
-        _allNotes = Query(sort: \Note.modifiedAt, order: .reverse)
     }
 
     var body: some View {
@@ -144,51 +124,301 @@ private struct OverviewMonthContent: View {
         let totalBudget: Decimal = categories.compactMap(\.monthlyBudget).reduce(.zero, +)
         let totalSpend = spendByCategory.values.reduce(.zero, +)
             + BudgetCalculator.uncategorizedSpend(for: monthExpenses)
-        let top3 = OverviewAggregation.topCategories(
-            spendByCategory: spendByCategory,
-            categories: categories
-        )
-        let noteResult = OverviewAggregation.pinnedOrChecklistNote(from: allNotes)
-        let pinnedNote = noteResult.note
-        let isFallbackChecklist = noteResult.isFallback
-        // Build CategorySpendItem array (Double, sorted descending) for by-category chart
-        let categoryItems: [CategorySpendItem] = spendByCategory
-            .compactMap { (id, spend) -> CategorySpendItem? in
-                guard spend > .zero,
-                      let category = categories.first(where: { $0.persistentModelID == id })
-                else { return nil }
-                return CategorySpendItem(
-                    id: id,
-                    name: category.name ?? "Unnamed",
-                    spent: NSDecimalNumber(decimal: spend).doubleValue,
-                    spentDecimal: spend
-                )
+
+        // Category spend, sorted descending — feeds the stacked bar + donut + legend.
+        let rankedSpend: [(category: Category, spent: Decimal)] = categories
+            .compactMap { category in
+                let spent = spendByCategory[category.persistentModelID] ?? .zero
+                return spent > .zero ? (category, spent) : nil
             }
             .sorted { $0.spent > $1.spent }
 
+        // Budgeted categories, most-consumed first — feeds the Budgets glance.
+        let budgeted: [(category: Category, spent: Decimal, limit: Decimal)] = categories
+            .compactMap { category in
+                guard let limit = category.monthlyBudget, limit > 0 else { return nil }
+                return (category, spendByCategory[category.persistentModelID] ?? .zero, limit)
+            }
+            .sorted { fraction($0.spent, $0.limit) > fraction($1.spent, $1.limit) }
+
+        let recent = Array(monthExpenses.prefix(5))
+
         ScrollView(.vertical) {
-            LazyVStack(alignment: .leading, spacing: 16) {
+            LazyVStack(alignment: .leading, spacing: 22) {
+                // Month label
+                Text(monthLabel)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, -8)
+
+                // Hero
                 SpendBudgetCard(
                     totalSpend: totalSpend,
                     totalBudget: totalBudget,
+                    segments: rankedSpend.map { (double($0.spent), CategoryStyle.color(for: $0.category)) },
                     selectedTab: $selectedTab
                 )
 
-                TopCategoriesCard(top3: top3)
+                // Gmail review banner — only when there are items to triage
+                if !reviewItems.isEmpty {
+                    ReviewBanner(count: reviewItems.count) { selectedTab = 1 }
+                }
 
-                PinnedNoteCard(
-                    note: pinnedNote,
-                    isFallbackChecklist: isFallbackChecklist,
-                    selectedTab: $selectedTab,
-                    deepLinkNoteID: $deepLinkNoteID
-                )
+                // Where it's going — donut + legend
+                if !rankedSpend.isEmpty {
+                    sectionHeader("Where it’s going")
+                    WhereItsGoingCard(ranked: rankedSpend, total: totalSpend)
+                }
 
-                SpendByCategoryChart(categoryItems: categoryItems)
+                // Budgets glance
+                if !budgeted.isEmpty {
+                    sectionHeader("Budgets", action: ("See all", { selectedTab = 2 }))
+                    VStack(spacing: 0) {
+                        ForEach(Array(budgeted.prefix(3).enumerated()), id: \.element.category.id) { index, item in
+                            BudgetGlanceRow(category: item.category, spent: item.spent, limit: item.limit)
+                            if index < min(budgeted.count, 3) - 1 {
+                                Divider().padding(.leading, 36)
+                            }
+                        }
+                    }
+                    .cardStyle(cornerRadius: 16, padding: 16)
+                }
 
-                SpendOverTimeChart(expenses: yearExpenses)
+                // Recent
+                if !recent.isEmpty {
+                    sectionHeader("Recent", action: ("See all", { selectedTab = 1 }))
+                    VStack(spacing: 0) {
+                        ForEach(Array(recent.enumerated()), id: \.element.id) { index, expense in
+                            Button {
+                                editingExpense = expense
+                            } label: {
+                                RecentExpenseRow(expense: expense)
+                            }
+                            .buttonStyle(.plain)
+                            if index < recent.count - 1 {
+                                Divider().padding(.leading, 58)
+                            }
+                        }
+                    }
+                    .cardStyle(cornerRadius: 16, padding: nil)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
         }
+        .background(Color(.systemGroupedBackground))
+        .sheet(item: $editingExpense) { expense in
+            EditExpenseView(expense: expense)
+        }
+    }
+
+    // MARK: - Section header
+
+    @ViewBuilder
+    private func sectionHeader(_ title: String, action: (label: String, run: () -> Void)? = nil) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+                .font(.title2)
+                .fontWeight(.bold)
+            Spacer()
+            if let action {
+                Button(action.label, action: action.run)
+                    .font(.subheadline)
+                    .tint(.accentColor)
+            }
+        }
+        .padding(.bottom, -8)
+    }
+
+    // MARK: - Decimal helpers
+
+    private func double(_ d: Decimal) -> Double { NSDecimalNumber(decimal: d).doubleValue }
+    private func fraction(_ spent: Decimal, _ limit: Decimal) -> Double {
+        guard limit > 0 else { return 0 }
+        return double(spent) / double(limit)
+    }
+}
+
+// MARK: - Review banner
+
+private struct ReviewBanner: View {
+    let count: Int
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                IconTile(symbol: "envelope", color: .accentColor, size: 38, cornerRadius: 10)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("\(count) \(count == 1 ? "expense" : "expenses") to review")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Text("Imported from Gmail · tap to confirm")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .cardStyle(cornerRadius: 14, padding: 14)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Where it's going (donut + legend)
+
+private struct WhereItsGoingCard: View {
+    let ranked: [(category: Category, spent: Decimal)]
+    let total: Decimal
+
+    var body: some View {
+        HStack(spacing: 18) {
+            DonutChart(
+                segments: ranked.map {
+                    DonutSegment(
+                        id: $0.category.id.uuidString,
+                        label: $0.category.name ?? "—",
+                        value: NSDecimalNumber(decimal: $0.spent).doubleValue,
+                        color: CategoryStyle.color(for: $0.category)
+                    )
+                },
+                size: 132
+            ) {
+                VStack(spacing: 0) {
+                    Text("TOTAL")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                    Text(total.formattedINRWhole())
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 11) {
+                ForEach(ranked.prefix(4), id: \.category.id) { item in
+                    HStack(spacing: 9) {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(CategoryStyle.color(for: item.category))
+                            .frame(width: 10, height: 10)
+                        Text(item.category.name ?? "—")
+                            .font(.subheadline)
+                            .lineLimit(1)
+                        Spacer(minLength: 6)
+                        Text(item.spent.formattedINRWhole())
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .cardStyle(cornerRadius: 16, padding: 18)
+    }
+}
+
+// MARK: - Budgets glance row
+
+private struct BudgetGlanceRow: View {
+    let category: Category
+    let spent: Decimal
+    let limit: Decimal
+
+    private var fraction: Double {
+        guard limit > 0 else { return 0 }
+        return NSDecimalNumber(decimal: spent).doubleValue / NSDecimalNumber(decimal: limit).doubleValue
+    }
+    private var isOver: Bool { spent > limit }
+    private var barColor: Color {
+        if isOver { return Color(.systemRed) }
+        if fraction >= 0.85 { return Color(.systemOrange) }
+        return CategoryStyle.color(for: category)
+    }
+
+    var body: some View {
+        VStack(spacing: 9) {
+            HStack(spacing: 10) {
+                IconTile(category: category, size: 26)
+                Text(category.name ?? "—")
+                    .font(.subheadline)
+                    .lineLimit(1)
+                Spacer(minLength: 6)
+                HStack(spacing: 4) {
+                    Text(spent.formattedINRWhole())
+                        .foregroundStyle(isOver ? Color(.systemRed) : .secondary)
+                    Text("/ \(limit.formattedINRWhole())")
+                        .foregroundStyle(.tertiary)
+                }
+                .font(.subheadline)
+                .fontWeight(.medium)
+            }
+            ProgressBarLine(fraction: fraction, color: barColor)
+        }
+        .padding(.vertical, 13)
+    }
+}
+
+/// Thin inline progress bar used by the Overview glance (matches the design's `ProgressBar`).
+private struct ProgressBarLine: View {
+    let fraction: Double
+    let color: Color
+    var height: CGFloat = 8
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color(.tertiarySystemFill))
+                Capsule().fill(color)
+                    .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
+            }
+        }
+        .frame(height: height)
+        .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Recent expense row
+
+private struct RecentExpenseRow: View {
+    let expense: Expense
+
+    private var category: Category? { expense.categories.first }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            IconTile(category: category, size: 30)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 8)
+            Text(expense.amount.formattedINR())
+                .font(.body)
+                .foregroundStyle(expense.amount < 0 ? Color(.systemGreen) : .primary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 9)
+        .contentShape(Rectangle())
+    }
+
+    private var title: String {
+        if let note = expense.note, !note.isEmpty { return note }
+        return category?.name ?? "Expense"
+    }
+    private var subtitle: String {
+        let cat = category?.name ?? "Uncategorized"
+        return "\(cat) · \(expense.date.formattedForExpenseList())"
     }
 }

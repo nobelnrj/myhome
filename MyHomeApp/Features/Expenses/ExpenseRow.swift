@@ -2,60 +2,62 @@ import SwiftUI
 
 /// Single row in the expense list.
 ///
-/// Layout (UI-SPEC Screen 1):
-/// - Leading: amount formatted with en-IN lakh grouping (headline weight, ~100pt column)
-/// - Trailing: note (Body, one line, truncated) over date (Label/subheadline, secondary)
-/// - Negative amounts: systemGreen color AND leading minus from formattedINR (color never sole differentiator)
-///
-/// Phase 7 additions (D7-08/15):
-/// - When ingestionStateRaw == "autoSaved": shows a subtle envelope icon (caption2, secondary) — auto marker.
-/// - When sourceLabel is present: shows sourceLabel below the date (caption, secondary).
+/// Restyled to the `MyHome.html` design: a colored category `IconTile`, the merchant (note) as
+/// the title, a "category · account" subtitle (with an envelope glyph for email-ingested rows),
+/// and the amount trailing. Negative amounts stay systemGreen with the leading minus from
+/// `formattedINR()` so color is never the sole differentiator.
 struct ExpenseRow: View {
 
     let expense: Expense
 
+    private var category: Category? { expense.categories.first }
+
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            // Amount — fixed leading column, right-aligned (UI-SPEC headline weight)
+        HStack(spacing: 12) {
+            IconTile(category: category, size: 30)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                HStack(spacing: 4) {
+                    Text(subtitle)
+                        .lineLimit(1)
+                    if expense.ingestionStateRaw == "autoSaved" {
+                        Image(systemName: "envelope")
+                            .imageScale(.small)
+                    }
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 8)
+
             Text(expense.amount.formattedINR())
-                .font(.headline)
+                .font(.body)
                 .foregroundStyle(expense.amount < 0 ? Color(.systemGreen) : Color(.label))
-                .frame(width: 100, alignment: .trailing)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-
-            // Note + date — trailing column
-            VStack(alignment: .leading, spacing: 2) {
-                if let note = expense.note, !note.isEmpty {
-                    // T-01-06: plain Text() — never AttributedString(markdown:) on user input
-                    Text(note)
-                        .font(.body)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
-                Text(expense.date.formattedForExpenseList())
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                // sourceLabel: shown when present (D7-15) — e.g. "HDFC CC ••4321"
-                if let source = expense.sourceLabel, !source.isEmpty {
-                    Text(source)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-            }
-
-            Spacer(minLength: 0)
-
-            // Auto marker: subtle envelope icon when autoSaved from email ingestion (D7-08)
-            if expense.ingestionStateRaw == "autoSaved" {
-                Image(systemName: "envelope")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
+    }
+
+    /// Title prefers the free-form note/payee, falling back to the category name.
+    private var title: String {
+        if let note = expense.note, !note.isEmpty { return note }
+        return category?.name ?? "Expense"
+    }
+
+    /// Subtitle is "Category · Account" (account omitted when there's no source label).
+    private var subtitle: String {
+        let cat = category?.name ?? "Uncategorized"
+        if let source = expense.sourceLabel, !source.isEmpty {
+            return "\(cat) · \(source)"
+        }
+        return cat
     }
 }

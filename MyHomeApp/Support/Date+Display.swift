@@ -35,6 +35,22 @@ extension Date {
         }
     }
 
+    /// Relative day-group header for the expense list ("Today", "Yesterday", or "Wed, 3 Jun 2026").
+    ///
+    /// Displays in the user's current locale and timezone (D-02: store UTC, display local). The
+    /// year is dropped for dates in the current calendar year to keep headers compact.
+    func formattedAsRelativeDay() -> String {
+        let cal = Calendar.current
+        if cal.isDateInToday(self) { return "Today" }
+        if cal.isDateInYesterday(self) { return "Yesterday" }
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.timeZone = .current
+        let sameYear = cal.component(.year, from: self) == cal.component(.year, from: Date())
+        formatter.setLocalizedDateFormatFromTemplate(sameYear ? "EEEdMMM" : "EEEdMMMyyyy")
+        return formatter.string(from: self)
+    }
+
     /// Formats this date as "May 2026" for the Budgets tab month pager.
     ///
     /// Uses the user's current locale and timezone (D-02: store UTC, display local).

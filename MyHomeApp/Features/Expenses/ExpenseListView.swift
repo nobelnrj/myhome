@@ -50,11 +50,11 @@ struct ExpenseListView: View {
         case category(UUID)
     }
 
-    /// One month's worth of expenses, used as a List section.
-    private struct MonthSection: Identifiable {
-        let id: Date            // first instant of the month (stable section identity)
-        let title: String       // "May 2026"
-        let total: Decimal       // sum of amounts in this month
+    /// One day's worth of expenses, used as a List section (design groups by day).
+    private struct DaySection: Identifiable {
+        let id: Date            // start-of-day (stable section identity)
+        let title: String       // "Today" / "Yesterday" / "Wed, 3 Jun 2026"
+        let total: Decimal       // sum of amounts on this day
         let expenses: [Expense]  // date-descending (inherited from the @Query order)
     }
 
@@ -82,8 +82,8 @@ struct ExpenseListView: View {
                             }
                         }
 
-                        // Main list — grouped into month sections (filtered by category).
-                        if monthSections.isEmpty {
+                        // Main list — grouped into day sections (filtered by category).
+                        if daySections.isEmpty {
                             Section {
                                 ContentUnavailableView(
                                     "No Matching Expenses",
@@ -92,7 +92,7 @@ struct ExpenseListView: View {
                                 )
                             }
                         } else {
-                            ForEach(monthSections) { section in
+                            ForEach(daySections) { section in
                                 Section {
                                     ForEach(section.expenses) { expense in
                                         ExpenseRow(expense: expense)
@@ -186,19 +186,18 @@ struct ExpenseListView: View {
         }
     }
 
-    /// Filtered expenses grouped into month sections, newest month first.
-    private var monthSections: [MonthSection] {
+    /// Filtered expenses grouped into day sections, newest day first.
+    private var daySections: [DaySection] {
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: filteredExpenses) { expense -> Date in
-            let components = calendar.dateComponents([.year, .month], from: expense.date)
-            return calendar.date(from: components) ?? expense.date
+            calendar.startOfDay(for: expense.date)
         }
-        return grouped.keys.sorted(by: >).map { monthStart in
-            let items = grouped[monthStart] ?? []  // already date-descending from the @Query
+        return grouped.keys.sorted(by: >).map { dayStart in
+            let items = grouped[dayStart] ?? []  // already date-descending from the @Query
             let total = items.reduce(Decimal(0)) { $0 + $1.amount }
-            return MonthSection(
-                id: monthStart,
-                title: monthStart.formattedAsMonthYear(),
+            return DaySection(
+                id: dayStart,
+                title: dayStart.formattedAsRelativeDay(),
                 total: total,
                 expenses: items
             )
