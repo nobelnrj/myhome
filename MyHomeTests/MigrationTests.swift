@@ -35,10 +35,10 @@ struct MigrationTests {
 
         try FileManager.default.copyItem(at: bundledStoreURL, to: tempURL)
 
-        // 3. Open with the full migration plan targeting SchemaV4 (live schema post plan 07-02).
-        //    V1 → V2 → V3 → V4 chain via AppMigrationPlan.
+        // 3. Open with the full migration plan targeting SchemaV5 (live schema post 260603-lvt).
+        //    V1 → V2 → V3 → V4 → V5 chain via AppMigrationPlan.
         //    If migration fails, ModelContainer.init throws — the test fails with a clear error.
-        let schema = Schema(versionedSchema: SchemaV4.self)
+        let schema = Schema(versionedSchema: SchemaV5.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
@@ -78,8 +78,8 @@ struct MigrationTests {
 
         try FileManager.default.copyItem(at: bundledStoreURL, to: tempURL)
 
-        // 3. Open with the full migration plan targeting SchemaV4 (V2 → V3 → V4 via AppMigrationPlan).
-        let schema = Schema(versionedSchema: SchemaV4.self)
+        // 3. Open with the full migration plan targeting SchemaV5 (V2 → V3 → V4 → V5 via AppMigrationPlan).
+        let schema = Schema(versionedSchema: SchemaV5.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
@@ -90,7 +90,7 @@ struct MigrationTests {
         // 4. Verify the seeded expense is readable (store was pre-seeded with one Expense row).
         let context = container.mainContext
         let expenses = try context.fetch(FetchDescriptor<Expense>())
-        #expect(!expenses.isEmpty, "At least one Expense must survive the V2→V3→V4 migration (T-03-02)")
+        #expect(!expenses.isEmpty, "At least one Expense must survive the V2→V3→V4→V5 migration (T-03-02)")
 
         // 5. Verify the seeded data is intact (generator seeded amount=100, note="Seed").
         let seedExpense = expenses.first
@@ -101,17 +101,17 @@ struct MigrationTests {
 
     // MARK: - V3 → V4 migration
 
-    /// Validates that a V3-schema store migrates to V4 via AppMigrationPlan, with all new
-    /// ingestion fields defaulting to nil (T-07-04 / additive-only migration gate).
+    /// Validates that a V3-schema store migrates to V5 via AppMigrationPlan, with all new
+    /// fields defaulting to nil (T-07-04 + D-MA-03 / additive-only migration gate).
     ///
     /// The test constructs a V3 store in-memory, seeds one Expense, writes it to a temp
-    /// file, then re-opens it under AppMigrationPlan + SchemaV4 to exercise the v3ToV4 stage.
-    @Test("v3 store migrates to V4; ingestion fields default to nil (T-07-04)")
+    /// file, then re-opens it under AppMigrationPlan + SchemaV5 to exercise the v3ToV4→v4ToV5 stages.
+    @Test("v3 store migrates to V5; ingestion fields and sourceAccount default to nil (T-07-04, D-MA-03)")
     func v3StoreMigratesToV4() throws {
         let seedURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("migration-v3seed-\(UUID()).store")
         let migrateURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("migration-v3tov4-\(UUID()).store")
+            .appendingPathComponent("migration-v3tov5-\(UUID()).store")
         defer {
             try? FileManager.default.removeItem(at: seedURL)
             try? FileManager.default.removeItem(at: migrateURL)
@@ -139,11 +139,11 @@ struct MigrationTests {
         // 2. Copy the seed file to a second temp URL (no container lock contention).
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
-        // 3. Re-open under AppMigrationPlan targeting SchemaV4 — triggers v3ToV4 stage.
-        let v4Schema = Schema(versionedSchema: SchemaV4.self)
-        let migrateConfig = ModelConfiguration(schema: v4Schema, url: migrateURL)
+        // 3. Re-open under AppMigrationPlan targeting SchemaV5 — triggers v3ToV4 + v4ToV5 stages.
+        let v5Schema = Schema(versionedSchema: SchemaV5.self)
+        let migrateConfig = ModelConfiguration(schema: v5Schema, url: migrateURL)
         let migratedContainer = try ModelContainer(
-            for: v4Schema,
+            for: v5Schema,
             migrationPlan: AppMigrationPlan.self,
             configurations: [migrateConfig]
         )
@@ -151,22 +151,25 @@ struct MigrationTests {
         // 4. Assert the row survived migration.
         let ctx = migratedContainer.mainContext
         let expenses = try ctx.fetch(FetchDescriptor<Expense>())
-        #expect(!expenses.isEmpty, "Expense row must survive V3→V4 migration (T-07-04)")
+        #expect(!expenses.isEmpty, "Expense row must survive V3→V4→V5 migration (T-07-04)")
 
         // 5. Verify original fields are intact.
         let migratedExpense = expenses.first
-        #expect(migratedExpense?.amount == Decimal(250), "amount must be preserved across V3→V4 migration")
-        #expect(migratedExpense?.note == "V3SeedRow", "note must be preserved across V3→V4 migration")
-        #expect(migratedExpense?.currencyCode == "INR", "currencyCode must be preserved across V3→V4 migration")
+        #expect(migratedExpense?.amount == Decimal(250), "amount must be preserved across V3→V5 migration")
+        #expect(migratedExpense?.note == "V3SeedRow", "note must be preserved across V3→V5 migration")
+        #expect(migratedExpense?.currencyCode == "INR", "currencyCode must be preserved across V3→V5 migration")
 
         // 6. Assert all new V4 ingestion fields default to nil (additive migration, T-07-04).
-        #expect(migratedExpense?.rawEmailBody == nil, "rawEmailBody must be nil after V3→V4 migration")
-        #expect(migratedExpense?.parserID == nil, "parserID must be nil after V3→V4 migration")
-        #expect(migratedExpense?.parserVersion == nil, "parserVersion must be nil after V3→V4 migration")
-        #expect(migratedExpense?.sourceLabel == nil, "sourceLabel must be nil after V3→V4 migration")
-        #expect(migratedExpense?.gmailMessageID == nil, "gmailMessageID must be nil after V3→V4 migration")
-        #expect(migratedExpense?.ingestionStateRaw == nil, "ingestionStateRaw must be nil after V3→V4 migration")
-        #expect(migratedExpense?.parseConfidence == nil, "parseConfidence must be nil after V3→V4 migration")
+        #expect(migratedExpense?.rawEmailBody == nil, "rawEmailBody must be nil after V3→V5 migration")
+        #expect(migratedExpense?.parserID == nil, "parserID must be nil after V3→V5 migration")
+        #expect(migratedExpense?.parserVersion == nil, "parserVersion must be nil after V3→V5 migration")
+        #expect(migratedExpense?.sourceLabel == nil, "sourceLabel must be nil after V3→V5 migration")
+        #expect(migratedExpense?.gmailMessageID == nil, "gmailMessageID must be nil after V3→V5 migration")
+        #expect(migratedExpense?.ingestionStateRaw == nil, "ingestionStateRaw must be nil after V3→V5 migration")
+        #expect(migratedExpense?.parseConfidence == nil, "parseConfidence must be nil after V3→V5 migration")
+
+        // 7. Assert V5 sourceAccount field defaults to nil (additive migration, D-MA-03).
+        #expect(migratedExpense?.sourceAccount == nil, "sourceAccount must be nil after V3→V5 migration (D-MA-03)")
     }
 }
 

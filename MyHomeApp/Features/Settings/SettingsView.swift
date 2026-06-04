@@ -2,10 +2,11 @@ import SwiftUI
 
 /// Settings tab (tag 4) — Face ID toggle, Manage Categories sheet, Budgets deep-link, About footer.
 ///
-/// Restyled to the `MyHome.html` design: a profile header card plus colored `IconTile` glyphs on
-/// each row. **All behavior is unchanged** — the Face-ID-gated toggle binding, the full Gmail
-/// connect/sync/sign-out logic, Manage Categories sheet, and Budgets deep-link are identical to
-/// before; only the row presentation changed.
+/// Gmail Section (multi-account, D-MA-05, 260603-lvt):
+/// - When no accounts are connected: shows "Connect Gmail" button + authorizing/error states.
+/// - When one or more accounts are connected: renders one row per account (email + last-synced
+///   + per-account Reconnect/Disconnect). Below the list: "Add account" + overall "Sync now".
+/// - BGAppRefreshTask still drives gmailSyncController.sync() (the multi-account loop) unchanged.
 ///
 /// Security:
 /// - Face ID Lock toggle uses a custom Binding that calls auth-gated enableLock()/disableLock().
@@ -17,7 +18,8 @@ struct SettingsView: View {
     let gmailSyncController: GmailSyncController
 
     @State private var showManageCategories = false
-    @State private var showSignOutConfirmation = false
+    @State private var showSignOutAllConfirmation = false
+    @State private var pendingDisconnectEmail: String? = nil
 
     var body: some View {
         NavigationStack {
@@ -51,10 +53,13 @@ struct SettingsView: View {
                     }
                 }
 
-                // MARK: Gmail Section
+                // MARK: Gmail Section (multi-account, D-MA-05)
 
                 Section("Gmail") {
-                    if !gmailSyncController.isConnected {
+                    let accounts = gmailSyncController.store.accounts
+
+                    if accounts.isEmpty {
+                        // No accounts connected — show Connect button or authorizing state
                         if gmailSyncController.syncStatus == .authorizing {
                             HStack {
                                 ProgressView()
@@ -71,46 +76,25 @@ struct SettingsView: View {
                             }
                         }
 
-                        // Surface sign-in errors while still disconnected (otherwise the
-                        // error case below — nested in the connected branch — never renders).
+                        // Surface sign-in errors while disconnected
                         if case let .error(msg) = gmailSyncController.syncStatus {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(msg)
                                     .font(.subheadline)
                                     .foregroundStyle(.red)
-                                Button("Try again", action: {
+                                Button("Try again") {
                                     Task { await gmailSyncController.signIn() }
-                                })
+                                }
                                 .font(.subheadline)
                             }
                         }
                     } else {
-                        if let email = gmailSyncController.connectedEmail {
-                            HStack {
-                                rowLabel("Gmail", symbol: "envelope", color: Color(.systemRed))
-                                Spacer()
-                                Text(email)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                            }
+                        // One or more accounts connected — per-account rows (D-MA-05)
+                        ForEach(accounts, id: \.email) { account in
+                            accountRow(account)
                         }
 
-                        HStack {
-                            Text("Last synced")
-                            Spacer()
-                            if let lastSynced = gmailSyncController.lastSyncedAt {
-                                Text(lastSynced.relativeToNow)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                Text("Never")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-
+                        // Syncing indicator
                         if gmailSyncController.syncStatus == .syncing {
                             HStack {
                                 ProgressView()
@@ -119,43 +103,54 @@ struct SettingsView: View {
                                     .font(.subheadline)
                                 Spacer()
                             }
-                        } else {
-                            Button("Sync now") {
-                                Task { await gmailSyncController.sync() }
-                            }
-                            .disabled(gmailSyncController.syncStatus == .syncing)
                         }
 
-                        if gmailSyncController.syncStatus == .tokenExpired {
-                            Button("Reconnect Gmail", action: {
-                                Task { await gmailSyncController.signIn() }
-                            })
-                            .foregroundStyle(.orange)
-                        }
-
+                        // Global error display
                         if case let .error(msg) = gmailSyncController.syncStatus {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(msg)
                                     .font(.subheadline)
                                     .foregroundStyle(.red)
-                                Button("Try again", action: {
+                                Button("Try again") {
                                     Task { await gmailSyncController.sync() }
-                                })
+                                }
                                 .font(.subheadline)
                             }
                         }
 
-                        Button("Sign out", action: {
-                            showSignOutConfirmation = true
-                        })
-                        .foregroundStyle(.red)
+                        // Add account button (calls signIn — adds to existing, no clobber)
+                        Button {
+                            Task { await gmailSyncController.signIn() }
+                        } label: {
+                            rowLabel("Add account", symbol: "plus.circle", color: Color(.systemBlue))
+                        }
+                        .disabled(gmailSyncController.syncStatus == .authorizing ||
+                                  gmailSyncController.syncStatus == .syncing)
+
+                        // Overall "Sync now" syncs all accounts
+                        Button("Sync now") {
+                            Task { await gmailSyncController.sync() }
+                        }
+                        .disabled(gmailSyncController.syncStatus == .syncing)
                     }
                 }
-                .confirmationDialog("Sign out of Gmail?", isPresented: $showSignOutConfirmation) {
-                    Button("Sign out", role: .destructive) {
-                        Task { await gmailSyncController.signOut() }
+                // Per-account disconnect confirmation dialog
+                .confirmationDialog(
+                    "Disconnect \(pendingDisconnectEmail ?? "account")?",
+                    isPresented: Binding(
+                        get: { pendingDisconnectEmail != nil },
+                        set: { if !$0 { pendingDisconnectEmail = nil } }
+                    )
+                ) {
+                    if let email = pendingDisconnectEmail {
+                        Button("Disconnect", role: .destructive) {
+                            gmailSyncController.signOut(email: email)
+                            pendingDisconnectEmail = nil
+                        }
+                        Button("Cancel", role: .cancel) {
+                            pendingDisconnectEmail = nil
+                        }
                     }
-                    Button("Cancel", role: .cancel) { }
                 }
 
                 // MARK: Data Section
@@ -181,7 +176,7 @@ struct SettingsView: View {
                     .foregroundStyle(.primary)
                 }
 
-                // MARK: About Section (footer — no header)
+                // MARK: About Section (footer)
 
                 Section {
                     HStack {
@@ -199,6 +194,51 @@ struct SettingsView: View {
         .sheet(isPresented: $showManageCategories) {
             ManageCategoriesView()
         }
+    }
+
+    // MARK: - Per-account Row (D-MA-05)
+
+    /// Renders one row per connected account: email + last-synced + Reconnect/Disconnect affordances.
+    private func accountRow(_ account: GmailAccount) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: "envelope.circle.fill")
+                    .foregroundStyle(Color(.systemRed))
+                    .font(.title3)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(account.email)
+                        .font(.subheadline.weight(.medium))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    if let lastSynced = account.lastSyncedAt {
+                        Text("Last synced \(lastSynced.relativeToNow)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("Never synced")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                // Per-account actions
+                VStack(alignment: .trailing, spacing: 4) {
+                    if account.needsReconnect {
+                        Button("Reconnect") {
+                            Task { await gmailSyncController.signIn() }
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.orange)
+                    }
+                    Button("Disconnect") {
+                        pendingDisconnectEmail = account.email
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                }
+            }
+        }
+        .padding(.vertical, 2)
     }
 
     // MARK: - Profile Header
@@ -227,13 +267,25 @@ struct SettingsView: View {
                     }
                 )
             VStack(alignment: .leading, spacing: 2) {
+                // Show primary account email or "MyHome" if no accounts
                 Text(gmailSyncController.connectedEmail ?? "MyHome")
                     .font(.title3.weight(.semibold))
                     .lineLimit(1)
                     .truncationMode(.middle)
-                Text(gmailSyncController.isConnected ? "Gmail connected" : "Not connected")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                let accountCount = gmailSyncController.store.accounts.count
+                if accountCount == 0 {
+                    Text("Not connected")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else if accountCount == 1 {
+                    Text("Gmail connected")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("\(accountCount) Gmail accounts")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer(minLength: 0)
         }
@@ -247,8 +299,6 @@ struct SettingsView: View {
 
     // MARK: - Row Label
 
-    /// A standard settings row label: colored `IconTile` + title. Wrapping existing buttons /
-    /// toggles in this keeps their behavior unchanged while matching the design.
     private func rowLabel(_ title: String, symbol: String, color: Color) -> some View {
         HStack(spacing: 12) {
             IconTile(symbol: symbol, color: color, size: 29)
