@@ -19,6 +19,11 @@ public final class SpyGmailFetch: GmailFetchPort, @unchecked Sendable {
     /// Controls the return value of getProfile(accessToken:).
     public var profileResult: GmailProfile = GmailProfile(emailAddress: "test@gmail.com")
 
+    /// Per-access-token profile overrides. When non-empty, getProfile() looks up the access token
+    /// and returns the matching profile. Falls back to profileResult if not found.
+    /// Used by multi-account tests that need different profiles per token (D-MA-01).
+    public var profileResultsByToken: [String: GmailProfile] = [:]
+
     /// Controls the return value of listMessageIDs(accessToken:q:maxResults:).
     public var messageIDsResult: [String] = []
 
@@ -57,6 +62,7 @@ public final class SpyGmailFetch: GmailFetchPort, @unchecked Sendable {
     public func getProfile(accessToken: String) async throws -> GmailProfile {
         getProfileCalls.append(accessToken)
         if let error = shouldThrowOnGetProfile { throw error }
+        if let override = profileResultsByToken[accessToken] { return override }
         return profileResult
     }
 
@@ -87,6 +93,7 @@ public final class SpyGmailFetch: GmailFetchPort, @unchecked Sendable {
         shouldThrowOnListMessages = nil
         shouldThrowOnGetRaw = nil
         profileResult = GmailProfile(emailAddress: "test@gmail.com")
+        profileResultsByToken = [:]
         messageIDsResult = []
         rawMessageResult = ""
         rawMessagesByID = [:]

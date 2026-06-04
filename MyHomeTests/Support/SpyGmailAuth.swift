@@ -36,6 +36,11 @@ public final class SpyGmailAuth: GmailAuthPort, @unchecked Sendable {
         token_type: "Bearer"
     )
 
+    /// Per-refresh-token-key overrides. When non-empty, refreshToken() checks this first;
+    /// keys are the refresh token strings passed to the method. If not found, falls back to refreshResult.
+    /// Used by multi-account tests that need different tokens per account (D-MA-02).
+    public var refreshResultForKey: [String: TokenResponse] = [:]
+
     /// When non-nil, authorize() throws this error instead of returning authorizeResult.
     public var shouldThrowOnAuthorize: Error? = nil
 
@@ -75,6 +80,14 @@ public final class SpyGmailAuth: GmailAuthPort, @unchecked Sendable {
     public func refreshToken(_ refreshToken: String, clientID: String) async throws -> RefreshResponse {
         refreshCalls.append((refreshToken, clientID))
         if let error = shouldThrowOnRefresh { throw error }
+        // Per-key override: return the matching TokenResponse as a RefreshResponse if available
+        if let override = refreshResultForKey[refreshToken] {
+            return RefreshResponse(
+                access_token: override.access_token,
+                expires_in: override.expires_in,
+                token_type: override.token_type
+            )
+        }
         return refreshResult
     }
 

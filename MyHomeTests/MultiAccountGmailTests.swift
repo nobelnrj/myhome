@@ -40,6 +40,27 @@ struct MultiAccountGmailTests {
         GmailAccountStore(defaults: defaults, keychain: keychain)
     }
 
+    private func makeContainer() throws -> ModelContainer {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        return try ModelContainer(for: Expense.self, Category.self, Note.self, NoteBlock.self,
+                                  configurations: config)
+    }
+
+    private func makeICICIEmail(amount: String = "1,250.00", merchant: String = "Zomato") -> String {
+        """
+        From: credit_cards@icici.bank.in
+        To: test@gmail.com
+        Subject: ICICI Bank Credit Card Transaction
+        Date: Tue, 02 Jun 2026 10:00:00 +0530
+        MIME-Version: 1.0
+        Content-Type: text/html; charset=UTF-8
+
+        <html><body>
+        <p>Your ICICI Bank Credit Card XX9001 has been used for a transaction of INR \(amount) on Jun 02, 2026. Info: \(merchant).</p>
+        </body></html>
+        """
+    }
+
     // MARK: - MA-01: addOrUpdate two emails → accounts.count == 2
 
     @Test("MA-01: addOrUpdate two different emails results in accounts.count == 2 — no clobber (D-MA-02)")
@@ -254,5 +275,197 @@ struct MultiAccountGmailTests {
         _ = store.migrateLegacyIfNeeded(keychain: keychain)  // second call must be no-op
 
         #expect(store.accounts.count == 1, "Second migrateLegacyIfNeeded call must not add a duplicate")
+    }
+
+    // MARK: - MA-06: GmailSyncController.signIn adds account without clobbering (Task 3)
+
+    @Test("MA-06: signIn() for a second email preserves the first account — two per-account Keychain keys (D-MA-02)")
+    func signInSecondAccountPreservesFirst() async {
+        let defaults = makeDefaults()
+        let keychain = SpyKeychainStore()
+
+        let spy = SpyGmailAuth()
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = []
+
+        // First sign-in as alice
+        spy.exchangeResult = TokenResponse(
+            access_token: "access_alice",
+            expires_in: 3600,
+            refresh_token: "refresh_alice",
+            token_type: "Bearer",
+            scope: "https://www.googleapis.com/auth/gmail.readonly"
+        )
+        fetch.profileResult = GmailProfile(emailAddress: "alice@gmail.com")
+        let controller = GmailSyncController(auth: spy, keychain: keychain, fetch: fetch, defaults: defaults)
+        await controller.signIn()
+
+        let aliceToken = try? keychain.load(forKey: "refresh_token_alice@gmail.com")
+        #expect(aliceToken == "refresh_alice", "First account's token must be in Keychain")
+
+        // Second sign-in as bob
+        spy.exchangeResult = TokenResponse(
+            access_token: "access_bob",
+            expires_in: 3600,
+            refresh_token: "refresh_bob",
+            token_type: "Bearer",
+            scope: "https://www.googleapis.com/auth/gmail.readonly"
+        )
+        fetch.profileResult = GmailProfile(emailAddress: "bob@gmail.com")
+        fetch.messageIDsResult = []
+        await controller.signIn()
+
+        // Both tokens must exist
+        let aliceTokenAfter = try? keychain.load(forKey: "refresh_token_alice@gmail.com")
+        let bobToken = try? keychain.load(forKey: "refresh_token_bob@gmail.com")
+        #expect(aliceTokenAfter == "refresh_alice",
+                "First account's token must NOT be deleted when second is added (D-MA-02)")
+        #expect(bobToken == "refresh_bob",
+                "Second account's token must be saved under per-account key (D-MA-02)")
+        #expect(controller.isConnected == true, "isConnected must remain true")
+        #expect(controller.store.accounts.count == 2, "Two distinct accounts must be in the store")
+    }
+
+    // MARK: - MA-07: account-scoped dedup — same messageID from two accounts both ingested
+
+    @Test("MA-07: account-scoped dedup — same messageID from two accounts produces two expenses (T-MA-05)")
+    func accountScopedDedupAllowsSameMessageIDFromTwoAccounts() async throws {
+        let defaults = makeDefaults()
+        let keychain = SpyKeychainStore()
+
+        // Pre-seed both account tokens (refresh tokens)
+        try keychain.save("refresh_alice", forKey: "refresh_token_alice@gmail.com")
+        try keychain.save("refresh_bob", forKey: "refresh_token_bob@gmail.com")
+
+        var store = makeStore(defaults: defaults, keychain: keychain)
+        store.addOrUpdate(GmailAccount(email: "alice@gmail.com"))
+        store.addOrUpdate(GmailAccount(email: "bob@gmail.com"))
+
+        let container = try makeContainer()
+        let spy = SpyGmailAuth()
+        let fetch = SpyGmailFetch()
+
+        // Both accounts return the same messageID
+        fetch.messageIDsResult = ["msg-001"]
+        fetch.rawMessageResult = makeICICIEmail()
+
+        // Per-refresh-token responses
+        spy.refreshResultForKey = [
+            "refresh_alice": TokenResponse(access_token: "access_alice", expires_in: 3600,
+                                           refresh_token: nil, token_type: "Bearer", scope: ""),
+            "refresh_bob": TokenResponse(access_token: "access_bob", expires_in: 3600,
+                                         refresh_token: nil, token_type: "Bearer", scope: ""),
+        ]
+        // Per-access-token profiles
+        fetch.profileResultsByToken = [
+            "access_alice": GmailProfile(emailAddress: "alice@gmail.com"),
+            "access_bob": GmailProfile(emailAddress: "bob@gmail.com"),
+        ]
+
+        let controller = GmailSyncController(
+            auth: spy, keychain: keychain, fetch: fetch,
+            defaults: defaults, accountStore: store
+        )
+        controller.setContext(container.mainContext)
+        await controller.sync()
+
+        let expenses = try container.mainContext.fetch(FetchDescriptor<Expense>())
+        // Both accounts ingest "msg-001" → two expenses (one per account)
+        #expect(expenses.count == 2,
+                "Same messageID from two accounts must produce two distinct expenses (T-MA-05)")
+        let sourceAccounts = Set(expenses.compactMap { $0.sourceAccount })
+        #expect(sourceAccounts.contains("alice@gmail.com"), "alice's expense must have sourceAccount = alice")
+        #expect(sourceAccounts.contains("bob@gmail.com"), "bob's expense must have sourceAccount = bob")
+    }
+
+    // MARK: - MA-08: One expired account does not abort sync for others
+
+    @Test("MA-08: One expired account does not abort sync for the remaining accounts (T-MA-04)")
+    func oneExpiredAccountDoesNotAbortSync() async throws {
+        let defaults = makeDefaults()
+        let keychain = SpyKeychainStore()
+
+        // Only bob has a valid refresh token; alice has none (simulate expired/missing)
+        try keychain.save("refresh_bob", forKey: "refresh_token_bob@gmail.com")
+
+        var store = makeStore(defaults: defaults, keychain: keychain)
+        store.addOrUpdate(GmailAccount(email: "alice@gmail.com"))
+        store.addOrUpdate(GmailAccount(email: "bob@gmail.com"))
+
+        let container = try makeContainer()
+        let spy = SpyGmailAuth()
+        let fetch = SpyGmailFetch()
+
+        // Bob produces a message
+        fetch.rawMessageResult = makeICICIEmail()
+        spy.refreshResultForKey = [
+            "refresh_bob": TokenResponse(access_token: "access_bob", expires_in: 3600,
+                                         refresh_token: nil, token_type: "Bearer", scope: ""),
+        ]
+        fetch.profileResultsByToken = [
+            "access_bob": GmailProfile(emailAddress: "bob@gmail.com"),
+        ]
+        fetch.messageIDsResult = ["msg-bob-001"]
+
+        let controller = GmailSyncController(
+            auth: spy, keychain: keychain, fetch: fetch,
+            defaults: defaults, accountStore: store
+        )
+        controller.setContext(container.mainContext)
+        await controller.sync()
+
+        // Bob's expense must be persisted despite alice's failure
+        let expenses = try container.mainContext.fetch(FetchDescriptor<Expense>())
+        #expect(expenses.count >= 1,
+                "Bob's sync must complete even though alice has no refresh token (T-MA-04)")
+
+        // Alice must be marked needsReconnect
+        let aliceAccount = controller.store.accounts.first { $0.email == "alice@gmail.com" }
+        #expect(aliceAccount?.needsReconnect == true,
+                "Alice must be marked needsReconnect after token failure (T-MA-04)")
+
+        // Overall status must be .done (at least one account synced)
+        #expect(controller.syncStatus == .done,
+                "syncStatus must be .done when at least one account synced successfully")
+    }
+
+    // MARK: - MA-09: signOut(email:) removes only one account
+
+    @Test("MA-09: signOut(email:) removes only the named account; others remain connected (D-MA-05)")
+    func signOutEmailRemovesOnlyNamedAccount() {
+        let defaults = makeDefaults()
+        let keychain = SpyKeychainStore()
+
+        try? keychain.save("refresh_alice", forKey: "refresh_token_alice@gmail.com")
+        try? keychain.save("refresh_bob", forKey: "refresh_token_bob@gmail.com")
+
+        var store = makeStore(defaults: defaults, keychain: keychain)
+        store.addOrUpdate(GmailAccount(email: "alice@gmail.com"))
+        store.addOrUpdate(GmailAccount(email: "bob@gmail.com"))
+
+        let spy = SpyGmailAuth()
+        let fetch = SpyGmailFetch()
+        let controller = GmailSyncController(
+            auth: spy, keychain: keychain, fetch: fetch,
+            defaults: defaults, accountStore: store
+        )
+        #expect(controller.store.accounts.count == 2, "precondition: two accounts")
+
+        controller.signOut(email: "alice@gmail.com")
+
+        // Alice's token deleted
+        #expect((try? keychain.load(forKey: "refresh_token_alice@gmail.com")) == nil,
+                "signOut(email:) must delete alice's Keychain token")
+        // Bob's token preserved
+        #expect((try? keychain.load(forKey: "refresh_token_bob@gmail.com")) == "refresh_bob",
+                "signOut(email:) must NOT delete bob's Keychain token")
+        // isConnected still true (bob is connected)
+        #expect(controller.isConnected == true,
+                "isConnected must remain true when one account is still connected")
+        // Controller's store no longer has alice
+        #expect(!controller.store.accounts.map({ $0.email }).contains("alice@gmail.com"),
+                "alice must be removed from the store after signOut(email:)")
+        #expect(controller.store.accounts.map({ $0.email }).contains("bob@gmail.com"),
+                "bob must remain in the store after signOut(email:) for alice")
     }
 }
