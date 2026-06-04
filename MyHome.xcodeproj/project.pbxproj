@@ -93,6 +93,8 @@
 		A611KP /* KeychainPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F611KP /* KeychainPort.swift */; };
 		A612PKCE /* PKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = F612PKCE /* PKCE.swift */; };
 		A613GSC /* GmailSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GSC /* GmailSyncController.swift */; };
+		A613GAS /* GmailAccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GAS /* GmailAccountStore.swift */; };
+		A619MAGT /* MultiAccountGmailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619MAGT /* MultiAccountGmailTests.swift */; };
 		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
 		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
 		A616PT /* PKCETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F616PT /* PKCETests.swift */; };
@@ -219,6 +221,8 @@
 		F611KP /* KeychainPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPort.swift; sourceTree = "<group>"; };
 		F612PKCE /* PKCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCE.swift; sourceTree = "<group>"; };
 		F613GSC /* GmailSyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailSyncController.swift; sourceTree = "<group>"; };
+		F613GAS /* GmailAccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountStore.swift; sourceTree = "<group>"; };
+		F619MAGT /* MultiAccountGmailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAccountGmailTests.swift; sourceTree = "<group>"; };
 		F614SGA /* SpyGmailAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailAuth.swift; sourceTree = "<group>"; };
 		F615SKS /* SpyKeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyKeychainStore.swift; sourceTree = "<group>"; };
 		F616PT /* PKCETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCETests.swift; sourceTree = "<group>"; };
@@ -389,6 +393,7 @@
 			isa = PBXGroup;
 			children = (
 				F613GSC /* GmailSyncController.swift */,
+				F613GAS /* GmailAccountStore.swift */,
 			);
 			path = Gmail;
 			sourceTree = "<group>";
@@ -527,6 +532,7 @@
 				F708DC /* DedupCheckerTests.swift */,
 				F709MN /* MerchantNormalizerTests.swift */,
 				F710IP /* IngestionPipelineTests.swift */,
+				F619MAGT /* MultiAccountGmailTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -736,6 +742,7 @@
 				A611KP /* KeychainPort.swift in Sources */,
 				A612PKCE /* PKCE.swift in Sources */,
 				A613GSC /* GmailSyncController.swift in Sources */,
+				A613GAS /* GmailAccountStore.swift in Sources */,
 				A621RT /* RelativeTimestamp.swift in Sources */,
 				A622GOC /* GmailOAuthConfig.swift in Sources */,
 				A701SV4 /* SchemaV4.swift in Sources */,
@@ -789,6 +796,7 @@
 				A708DC /* DedupCheckerTests.swift in Sources */,
 				A709MN /* MerchantNormalizerTests.swift in Sources */,
 				A710IP /* IngestionPipelineTests.swift in Sources */,
+				A619MAGT /* MultiAccountGmailTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
