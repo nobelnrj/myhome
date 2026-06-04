@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-03)
 Phase: Milestone v1.0 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-06-03 — Milestone v1.0 completed and archived
+Last activity: 2026-06-05 — Quick task 260603-lvt (multi-Gmail account support) executed; UI restyle merged to main
 
 ## Performance Metrics
 
@@ -68,6 +68,12 @@ Last activity: 2026-06-03 — Milestone v1.0 completed and archived
 | Phase 06-gmail-sign-in-client P03 | 20 | 2 tasks | 1 files |
 | Phase 06-gmail-sign-in-client P04 | 25 | 2 tasks | 7 files |
 | Phase 07 P05 | 95 | 2 tasks | 12 files |
+
+## Quick Tasks Completed
+
+| Slug | Date | Status | Summary |
+|------|------|--------|---------|
+| 260603-lvt-support-syncing-from-multiple-gmail-acco | 2026-06-05 | complete ✓ | Multi-Gmail account support: SchemaV5 (Expense.sourceAccount), GmailAccountStore (per-account state + legacy forward-migration), multi-account signIn/sync/signOut, per-account Settings UI. 4 tasks, full suite green. |
 
 ## Accumulated Context
 
