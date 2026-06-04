@@ -103,6 +103,7 @@
 		A621RT /* RelativeTimestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F621RT /* RelativeTimestamp.swift */; };
 		A622GOC /* GmailOAuthConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F622GOC /* GmailOAuthConfig.swift */; };
 		A701SV4 /* SchemaV4.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV4 /* SchemaV4.swift */; };
+		A701SV5 /* SchemaV5.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV5 /* SchemaV5.swift */; };
 		A702GFP /* GmailFetchPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F702GFP /* GmailFetchPort.swift */; };
 		A703BEP /* BankEmailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703BEP /* BankEmailParser.swift */; };
 		A703CS /* ConfidenceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CS /* ConfidenceScorer.swift */; };
@@ -228,6 +229,7 @@
 		F621RT /* RelativeTimestamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTimestamp.swift; sourceTree = "<group>"; };
 		F622GOC /* GmailOAuthConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailOAuthConfig.swift; sourceTree = "<group>"; };
 		F701SV4 /* SchemaV4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV4.swift; sourceTree = "<group>"; };
+		F701SV5 /* SchemaV5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV5.swift; sourceTree = "<group>"; };
 		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
 		F703BEP /* BankEmailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankEmailParser.swift; sourceTree = "<group>"; };
 		F703CS /* ConfidenceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorer.swift; sourceTree = "<group>"; };
@@ -435,6 +437,7 @@
 				F117 /* SchemaV2.swift */,
 				F119V3 /* SchemaV3.swift */,
 				F701SV4 /* SchemaV4.swift */,
+				F701SV5 /* SchemaV5.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -736,6 +739,7 @@
 				A621RT /* RelativeTimestamp.swift in Sources */,
 				A622GOC /* GmailOAuthConfig.swift in Sources */,
 				A701SV4 /* SchemaV4.swift in Sources */,
+				A701SV5 /* SchemaV5.swift in Sources */,
 				A703BEP /* BankEmailParser.swift in Sources */,
 				A703MN /* MerchantNormalizer.swift in Sources */,
 				A703CS /* ConfidenceScorer.swift in Sources */,
