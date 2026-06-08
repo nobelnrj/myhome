@@ -85,6 +85,36 @@
 
 ## Traceability
 
-<!-- Filled by the roadmapper: REQ-ID → Phase. -->
-
-(Pending roadmap.)
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| STAB-01 | Phase 8 | Pending |
+| STAB-02 | Phase 8 | Pending |
+| STAB-03 | Phase 8 | Pending |
+| STAB-04 | Phase 9 | Pending |
+| ACCT-01 | Phase 9 | Pending |
+| ACCT-02 | Phase 9 | Pending |
+| ACCT-03 | Phase 9 | Pending |
+| ACCT-04 | Phase 9 | Pending |
+| ACCT-05 | Phase 9 | Pending |
+| ACCT-06 | Phase 9 | Pending |
+| ACCT-07 | Phase 9 | Pending |
+| ACCT-08 | Phase 9 | Pending |
+| XFER-01 | Phase 10 | Pending |
+| XFER-02 | Phase 10 | Pending |
+| XFER-03 | Phase 10 | Pending |
+| XFER-04 | Phase 10 | Pending |
+| XFER-05 | Phase 10 | Pending |
+| ASSET-01 | Phase 11 | Pending |
+| ASSET-02 | Phase 11 | Pending |
+| ASSET-03 | Phase 11 | Pending |
+| ASSET-04 | Phase 11 | Pending |
+| ASSET-05 | Phase 11 | Pending |
+| ASSET-06 | Phase 11 | Pending |
+| ASSET-07 | Phase 11 | Pending |
+| ASSET-08 | Phase 11 | Pending |
+| ASSET-09 | Phase 11 | Pending |
+| NOTE-01 | Phase 12 | Pending |
+| NOTE-02 | Phase 9 | Pending |
+| NOTE-03 | Phase 12 | Pending |
+| NOTE-04 | Phase 12 | Pending |
+| NOTE-05 | Phase 12 | Pending |

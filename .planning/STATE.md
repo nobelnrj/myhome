@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
-status: planning
-last_updated: "2026-06-08T15:48:41.106Z"
+status: roadmapped
+last_updated: "2026-06-08"
 last_activity: 2026-06-08
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,19 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-03)
+See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** v1.0 MVP shipped and archived — planning next milestone (run /gsd-new-milestone)
+**Current focus:** v1.1 roadmap complete — ready to plan Phase 8 (Stabilization)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 8 — Stabilization (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-08 — Milestone v1.1 started
+Status: Roadmapped; awaiting /gsd-plan-phase 8
+Last activity: 2026-06-08 — Roadmap written for v1.1 (Phases 8-12, 32 requirements)
+
+Progress: [░░░░░░░░░░] 0% (0/5 phases)
 
 ## Performance Metrics
 
@@ -80,6 +82,7 @@ Last activity: 2026-06-08 — Milestone v1.1 started
 ### Roadmap Evolution
 
 - Phase 3 edited: expanded scope to Notes + Reminders hub: reminders, recurrence, notifications, calendar (goal + 5 success criteria)
+- v1.1 roadmap created 2026-06-08: Phases 8-12 (Stabilization → SchemaV6+Accounts → Self-Transfer → Asset Tracker → Notes Enhancement); 32 requirements mapped; no orphans
 
 ### Decisions
 
@@ -89,6 +92,13 @@ Recent decisions affecting current work:
 - [Roadmap]: Manual expense entry ships before Gmail ingestion (load-bearing sequencing — validates schema/UI/budget loop before staking the project on the riskiest sub-system)
 - [Roadmap]: Foundation lock-ins (bundle/CloudKit/App-Group IDs, privacy manifest, CloudKit-ready schema) folded into Phase 1 because they are one-way doors
 - [Roadmap]: Gmail ingestion split — OAuth/client proven in isolation (Phase 6) before parsers + pipeline + background tasks (Phase 7)
+- [Roadmap v1.1]: Stabilization gates all schema work — crash vectors must be fixed before any schema migration begins
+- [Roadmap v1.1]: SchemaV6 (Account + Asset models + transfer + routine fields) bundled into Phase 9 with Accounts Management — one migration stage, not two
+- [Roadmap v1.1]: STAB-04 (daily routine reset) assigned to Phase 9 because its observable behavior requires the NoteBlock.lastCheckedDate schema field; Phase 8 ships the RoutineResetService skeleton only
+- [Roadmap v1.1]: NOTE-02 (lastCheckedDate field) placed in Phase 9 (schema phase) to avoid an intermediate migration stage; observable per-day reset behavior is a Phase 9 success criterion
+- [Roadmap v1.1]: ACCT-05 assigned to Phase 9 (baseline ± transactions); transfer balance-move semantics completed in Phase 10 (self-transfer confirm wires the balance-move)
+- [Roadmap v1.1]: Phase 11 (Asset Tracker) and Phase 12 (Notes Enhancement) are independent after Phase 9; serial order chosen (11 before 12) so spend accuracy is confirmed before net-worth figures are presented
+- [Phase 9 research flag]: V5→V6 didMigrate closure is first non-nil didMigrate in this codebase — verify error-handling (throwing closure: rollback vs. partial state) against FB13812722 workaround in MigrationPlan.swift before writing the migration stage
 - [Phase ?]: Expense @Model nested in SchemaV1 enum; typealias Expense = SchemaV1.Expense for clean view imports
 - [Phase ?]: FormatStyle .currency(code:INR).locale(en_IN) for lakh grouping — not NumberFormatter, not hand-rolled
 - [Phase ?]: App Group store URL with Application Support fallback for free-account provisioning
@@ -111,9 +121,15 @@ None yet.
 
 ### Blockers/Concerns
 
-Carried from research/SUMMARY.md, to resolve at the relevant phase:
+Carried from v1.1 research/SUMMARY.md, to resolve at the relevant phase:
 
-- [Phase 6]: Gmail OAuth library choice (raw ASWebAuthenticationSession vs GoogleSignIn SDK) — resolve at discuss-phase; VERIFY Google's current installed-app OAuth + scope rules
+- [Phase 9]: SchemaV6 didMigrate closure error handling — first non-nil didMigrate in this codebase; verify behavior of a throwing closure (rollback vs. partial store) against FB13812722 workaround in MigrationPlan.swift before writing the stage
+- [Phase 10]: Self-transfer 3-day window — well-reasoned for Indian settlement (NEFT/IMPS/UPI) but not yet validated against household's actual transaction history; spot-check historical expenses during Phase 10 planning
+- [Phase 11]: Yahoo Finance rate-limit and ToS risk — 2-person household is well within community-reported ~360 req/hr cap; implementation must fall back to manual immediately on any non-200 or decode error; do not retry or chase alternative endpoints
+- [Phase 11]: npsnav.in availability — single-maintainer hobby project; app must degrade gracefully to last-known NAV on any failure; manual override is the primary NPS entry path
+
+Carried from v1.0 (pre-existing, still outstanding):
+- [Phase 6]: Gmail OAuth library choice (raw ASWebAuthenticationSession vs GoogleSignIn SDK) — RESOLVED (shipped Phase 6); retained for reference
 - [Phase 7]: Collect 50+ real anonymized bank emails per target bank BEFORE building parsers; confirm final 2 banks (likely HDFC + ICICI); confidence threshold (0.85) needs real-data calibration after first week
 - [Phase 7]: BGAppRefreshTask must be verified on-device unplugged-overnight; simulator triggering is not representative
 
@@ -127,6 +143,10 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 | Apple surfaces | Widgets, App Intents/Siri, watchOS app | Deferred to v2 | Roadmap |
 | Expense v1.x | Per-merchant category memory, more bank parsers, today's tile, vs-prior-month | Deferred to v2 | Roadmap |
 | Notes/Notifications | Share-sheet receive, Spotlight, budget/inbox notifications, haptics | Deferred to v2 | Roadmap |
+| Asset Tracker v1.x | Stock quote auto-fetch (Yahoo Finance) — deferred until manual flow proven | Deferred to v1.2+ | REQUIREMENTS.md |
+| Asset Tracker v1.x | NPS NAV auto-fetch (npsnav.in) — single-maintainer source risk; manual entry suffices for v1.1 | Deferred to v1.2+ | REQUIREMENTS.md |
+| Asset Tracker v1.x | CAS / broker import, XIRR | Deferred to v2 | REQUIREMENTS.md |
+| Notes v1.x | RoutineCompletion-driven analytics beyond simple streaks (heatmaps, insights) | Deferred to v1.2+ | REQUIREMENTS.md |
 
 ### Acknowledged at v1.0 Milestone Close (2026-06-03)
 
@@ -141,10 +161,10 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-02T19:31:19.426Z
-Stopped at: Phase 7 context gathered
+Last session: 2026-06-08
+Stopped at: v1.1 roadmap created (Phases 8-12)
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Run /gsd-plan-phase 8 to plan Phase 8: Stabilization
