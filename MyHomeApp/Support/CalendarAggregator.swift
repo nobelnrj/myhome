@@ -60,10 +60,17 @@ enum CalendarAggregator {
     ///
     /// A reminder event exists for a note/block when `reminderEnabled == true`
     /// AND `reminderDate != nil`. Events are bucketed by device-timezone start-of-day.
+    ///
+    /// STAB-01: Both loops guard against tombstoned @Model objects using the established
+    /// `modelContext != nil` idiom (mirrors EditNoteView.swift:332). Accessing any stored
+    /// property on a tombstoned SwiftData object causes EXC_BAD_ACCESS; the guard skips
+    /// these objects silently before any property access.
     private static func events(from notes: [Note]) -> [ReminderEvent] {
         var result: [ReminderEvent] = []
 
         for note in notes {
+            guard note.modelContext != nil else { continue }  // STAB-01: skip tombstoned notes
+
             // Note-level reminder
             if note.reminderEnabled, let date = note.reminderDate {
                 let dayKey = startOfDay(date)
@@ -75,6 +82,7 @@ enum CalendarAggregator {
 
             // Block-level reminders
             for block in note.blocks ?? [] {
+                guard block.modelContext != nil else { continue }  // STAB-01: skip tombstoned blocks
                 if block.reminderEnabled, let date = block.reminderDate {
                     let dayKey = startOfDay(date)
                     result.append(ReminderEvent(dayKey: dayKey, isChecked: block.isChecked))
@@ -90,7 +98,7 @@ enum CalendarAggregator {
     private static func noteIsChecked(_ note: Note) -> Bool {
         let blocks = note.blocks ?? []
         guard !blocks.isEmpty else { return false }
-        return blocks.allSatisfy { $0.isChecked }
+        return blocks.allSatisfy { $0.modelContext != nil && $0.isChecked }
     }
 
     // MARK: - Public API
