@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import SwiftData
 @testable import MyHome
 
 // Requirements: ING-02/03/05/16 (sign-in, sync, timestamp, token expiry),
@@ -365,6 +366,98 @@ struct GmailSyncControllerTests {
         // Still only one account (same email)
         #expect(controller.store.accounts.count == 1,
                 "Same-email sign-in twice must not create two accounts — upsert behavior")
+    }
+    // MARK: - STAB-02: Category resolved by PersistentIdentifier across await suspension
+
+    /// In-memory SwiftData container for STAB-02 tests.
+    private func makeContainerStab02() throws -> ModelContainer {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        return try ModelContainer(for: Expense.self, Category.self, Note.self, NoteBlock.self,
+                                  configurations: config)
+    }
+
+    /// ICICI Zomato fixture — confirmed parseable by ICICIParser → categoryHint = "Dining".
+    private func makeICICIZomatoFixture() -> String {
+        """
+        From: credit_cards@icici.bank.in
+        To: test@gmail.com
+        Subject: ICICI Bank Credit Card Transaction
+        Date: Mon, 02 Jun 2026 10:00:00 +0530
+        MIME-Version: 1.0
+        Content-Type: text/html; charset=UTF-8
+
+        <html><body>
+        <p>Your ICICI Bank Credit Card XX9001 has been used for a transaction of INR 1,250.00 on Jun 02, 2026. Info: ZOMATO.</p>
+        </body></html>
+        """
+    }
+
+    @Test("syncResolvesCategoryByPersistentIDAcrossAwait: category resolved after await — STAB-02")
+    func syncResolvesCategoryByPersistentIDAcrossAwait() async throws {
+        // Arrange — in-memory container with a "Dining" category (matches Zomato→Dining hint)
+        let container = try makeContainerStab02()
+        let ctx = container.mainContext
+        let diningCategory = Category(name: "Dining", symbolName: nil)
+        ctx.insert(diningCategory)
+        try ctx.save()
+
+        let defaults = makeDefaults()
+        let fetch = SpyGmailFetch()
+        // One parseable ICICI/Zomato message; categoryHint = "Dining"
+        fetch.messageIDsResult = ["stab02-msg-001"]
+        fetch.rawMessagesByID = ["stab02-msg-001": makeICICIZomatoFixture()]
+        fetch.profileResult = GmailProfile(emailAddress: testEmail)
+
+        let controller = GmailSyncController(
+            auth: SpyGmailAuth(),
+            keychain: SpyKeychainStore(),
+            fetch: fetch,
+            now: Date.init,
+            defaults: defaults
+        )
+        // Inject access token directly → uses legacySingleAccountSync path
+        controller.accessToken = "test_access_token"
+        controller.setContext(ctx)
+
+        // Act
+        await controller.sync()
+
+        // Assert — STAB-02: one expense inserted, category resolved across the await suspension
+        let expenses = try ctx.fetch(FetchDescriptor<Expense>())
+        #expect(expenses.count == 1, "STAB-02: exactly one expense must be ingested")
+        #expect(expenses.first?.categories.isEmpty == false,
+                "STAB-02 category resolved across await: expense must have at least one category")
+    }
+
+    @Test("syncCompletesWhenCategoryHintMissing: missing category hint → expense still inserted — STAB-02 D-03")
+    func syncCompletesWhenCategoryHintMissing() async throws {
+        // Arrange — container with no categories; expense must still be ingested (D-03 resilience)
+        let container = try makeContainerStab02()
+        let ctx = container.mainContext
+
+        let defaults = makeDefaults()
+        let fetch = SpyGmailFetch()
+        fetch.messageIDsResult = ["stab02-resilience-001"]
+        fetch.rawMessagesByID = ["stab02-resilience-001": makeICICIZomatoFixture()]
+        fetch.profileResult = GmailProfile(emailAddress: testEmail)
+
+        let controller = GmailSyncController(
+            auth: SpyGmailAuth(),
+            keychain: SpyKeychainStore(),
+            fetch: fetch,
+            now: Date.init,
+            defaults: defaults
+        )
+        controller.accessToken = "test_access_token"
+        controller.setContext(ctx)
+
+        // Act
+        await controller.sync()
+
+        // Assert — even when no matching category exists, the expense is still ingested (D-03)
+        let expenses = try ctx.fetch(FetchDescriptor<Expense>())
+        #expect(expenses.count == 1,
+                "STAB-02 D-03: sync must complete and insert expense even when category re-fetch fails")
     }
 }
 

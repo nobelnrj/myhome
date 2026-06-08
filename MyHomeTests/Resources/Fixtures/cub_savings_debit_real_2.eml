@@ -1,0 +1,146 @@
+Delivered-To: mebhuvanya001@gmail.com
+Received: by 2002:a05:7022:785:b0:12d:e1a9:b57d with SMTP id 5csp3037857dlg;
+        Tue, 2 Jun 2026 22:45:56 -0700 (PDT)
+X-Received: by 2002:a05:6a21:3b89:b0:39b:8905:4e13 with SMTP id adf61e73a8af0-3b49731c454mr2307025637.6.1780465555903;
+        Tue, 02 Jun 2026 22:45:55 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1780465555; cv=none;
+        d=google.com; s=arc-20240605;
+        b=Rm9onW8vVAhe4tzKYHo6OZn9jqX7jtlvddQp86KKwez2B11RdTtAPeND/3DcSbPhzy
+         S72oR689UQi5E/E/YwrGcudA+NvTPT8+IeO0wA+xZo31XHL+9we20PPUfEZXdo3H2Psu
+         k6TDl9OPtC1/pyHHOO19aBaRH3OFDnappOfY+8S+uyPlqeuXl6klNAutf9O2wmY8/ZGR
+         kyfpf049tw0MoxG/NE0Z8oKZeXn3kNVIkwTWr3Mgynj91hRU/+VDGlwev6Cgu7P9UfqO
+         8SypRqrs19WYT0u71y1DctQW6jLuYpxCtZQnDzWVSZlM2lQAEu7COUtwRwzWE207N9b2
+         HPww==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=mime-version:date:from:subject:to:dkim-signature:dkim-signature
+         :message-id;
+        bh=TK0WE/kkNRRykO0oxkxTLXt+9I0PRZjVsSRjvAhmeI0=;
+        fh=LQQ0GnM6sMRd1/Hj5tLKcfIH+0+ShW0fTqtTWy4GOZY=;
+        b=SkRBYDdqsrkM7ctkSeJfcz8aByFMNPLAj/QvMyLz1S70oHx6Pl4VHSkf3knG9UQU1a
+         90Mvnb9l1ZzAATjsziGb6zgHAV1UkBlhArYGl/AMh6Ohz++64hDkh6nPgKZGhW0YJ8FV
+         nwiF64JS6m6wK3NP3wWwR4rUi+SeOVKgmaDlqqr16pyuCq46KQiVfvi58DbAWQ7ln6Z8
+         ++9V++jTiTtUWnOLraW5xuIvEVpn04oNNyj9POM0MwKY0HEPyEd2gaP1cpisDR5Ho8EY
+         o8O0Rn3Aaa2SQ5W7PjrDzC+nXV1VBCgBaElK0vL+sQsmCvyekDohsyBQJhXg9krzKO9y
+         EJXg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@cityunionbank.org header.s=acls01 header.b=DZhceKAv;
+       dkim=pass header.i=@aclmobile.net header.s=5nXKKHgBnyGAcLwvMLZIq header.b=HjGCMWsa;
+       spf=pass (google.com: domain of a.1780465555488791951.24123.1.5.1.0.0.1@comm.cityunionbank.org designates 103.54.236.103 as permitted sender) smtp.mailfrom=A.1780465555488791951.24123.1.5.1.0.0.1@comm.cityunionbank.org;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=cityunionbank.org
+Return-Path: <A.1780465555488791951.24123.1.5.1.0.0.1@comm.cityunionbank.org>
+Received: from o103.smtp-out.aclmobile.net (o103.smtp-out.aclmobile.net. [103.54.236.103])
+        by mx.google.com with ESMTPS id 41be03b00d2f7-c85df1ee324si2077371a12.346.2026.06.02.22.45.55
+        for <MEBHUVANYA001@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 02 Jun 2026 22:45:55 -0700 (PDT)
+Received-SPF: pass (google.com: domain of a.1780465555488791951.24123.1.5.1.0.0.1@comm.cityunionbank.org designates 103.54.236.103 as permitted sender) client-ip=103.54.236.103;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@cityunionbank.org header.s=acls01 header.b=DZhceKAv;
+       dkim=pass header.i=@aclmobile.net header.s=5nXKKHgBnyGAcLwvMLZIq header.b=HjGCMWsa;
+       spf=pass (google.com: domain of a.1780465555488791951.24123.1.5.1.0.0.1@comm.cityunionbank.org designates 103.54.236.103 as permitted sender) smtp.mailfrom=A.1780465555488791951.24123.1.5.1.0.0.1@comm.cityunionbank.org;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=cityunionbank.org
+Message-ID: <6a1fbf93.6847683d.2fabaf.3206SMTPIN_ADDED_BROKEN@mx.google.com>
+X-Google-Original-Message-ID: A.1780465555488791951.24123.1.5.1.0.0.1#MEBHUVANYA001@GMAIL.COM
+DKIM-Signature: v=1; a=rsa-sha256; d=cityunionbank.org; s=acls01; c=relaxed/relaxed;
+	bh=TK0WE/kkNRRykO0oxkxTLXt+9I0PRZjVsSRjvAhmeI0=;
+	h=content-type:message-id:subject:date:mime-version:to:from; t=1780465555;
+	b=DZhceKAvgo2uARymKSUUbR4UTGswUoRvrsd61Zt1xGjQnnYCSouppJ7uDL5J7BX1Tu7lSYc7Y
+	uB964CIynu2ibbGerqh8GgOnp2ACAOGmb7yJC9nhodO0WxB2xkF777+brNsq92y2+zLTu4Od9qj
+	ys6hVuzwd6Rpaq2AqqviWU+wkJsQxRYE9e7+NENoBoWPULZPbPot535j3pXmsinGab01zuXqkgX
+	fLzX/e3+FDTr/oRdH7ZOd6htKYYk/SJYZZ8tkITAEkGvnzg75AM6NqeEhtGqRWto6IkqA6H+ZJL
+	AksVQPzkO0lXcn+KogMUCjIMxo8DscKDi0uweevhprNA==;
+DKIM-Signature: v=1; a=rsa-sha256; d=aclmobile.net; s=5nXKKHgBnyGAcLwvMLZIq;
+	c=relaxed/relaxed; bh=TK0WE/kkNRRykO0oxkxTLXt+9I0PRZjVsSRjvAhmeI0=;
+	h=content-type:message-id:subject:date:mime-version:to:from; t=1780465555;
+	b=HjGCMWsawoVdtqxTcB0+v1OmjRIS91Z8sohV8/Nrq3Ov0NnS6caRPKm1/EFyAxItE5nqWd+WW
+	nBS290Qn2iAXTk2vU/kzD6ZqZsu8tSOCcXA2xMSi+XYaP2BrX5M3NGWvf0ye16L1HyA45196HM0
+	L5lJI94KZJYxvYm4PncHzOONXhwnOQEsPqw0pNUsgXVdOoj1DjauZ0TaIq2/WvorM64RJNUNJpG
+	y+JIZMZ6N1DMKzfuXBIgdl3tdvQiOEwUG7c3J8eYnxz6quOZv6j/ddHcU/QyEPTjRryE8S/Sfjk
+	KwPJxRndDMwOwiS8YBGNnlbwdCjIwgKSap4k1di/6X1A==;
+X-Ses-Configuration-Set: pool-t
+Content-Type: multipart/alternative;
+ boundary=b3f0eef94b55d7ba8cf89927aba9e423d4f40798770682b7f46a1407f4b1
+To: MEBHUVANYA001@GMAIL.COM
+Subject: CUB Transaction Alert
+From: CITYUNIONBANK <cubalert@cityunionbank.org>
+Date: Wed, 03 Jun 2026 11:15:55 +0530
+Mime-Version: 1.0
+X-Unique-Id: A.1780465555488791951.24123.1.5.1.0.0.1#MEBHUVANYA001@GMAIL.COM
+
+--b3f0eef94b55d7ba8cf89927aba9e423d4f40798770682b7f46a1407f4b1
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset=UTF-8
+
+<div class=3D"table-responsive">
+<table class=3D"table">
+	<tbody>
+<p>Dear Customer,<p>
+<p>Thank you for banking with City Union Bank.</p>
+
+
+<p>Savings No XXXXXXXX45 debited with INR 10000.00 towards TO ONL NACH_DR/C=
+IUB7020202261000973/INDIAN CLEARING C::00520 on 03-JUN-2026.Avl Bal 86843.9=
+8</p>
+
+
+
+
+<p> In case if you have not made this transaction, please call our Customer=
+ Care number 044-71225000 or <a href=3D"https://trkt.aclmails.in/v1/r/%2BCF=
+4ipo77q6GzvXsbS04KuG%2FA5wKNN3bMjyntPY0a0iTb7AIt1znvQ3nbCZetKZN9ucgOyczZL3O=
+6xhXq8ric76egPi%2FwrM1EJ3trL1XzNd6NpQfpQ8Sp7NdVAYs7Y2fsnqyTO2zSZDnAODmBDqGY=
+HFhNt6yfyIwcykzBGdJYXA2EwKMw4f3w7fSCKQ5X3FTm6aPLGz%2BhfmOpxT%2FVVVDljA009Pb=
+YrBUpV8Xsic%3D"><strong>Click here</strong></a> to lodge a complaint.</p>
+
+
+
+
+
+<h4 class=3D"text"><strong>RECENT UPDATES<h4 class=3D"text"></strong>
+=20
+
+<p> 1. Celebrate this Festive season with the offers on City Union Bank Deb=
+it and Credit Cards.Offers across segments near you like Textiles, Jeweller=
+y, Furniture, Super market, Hardwares, and many more. For details visit www=
+.cityunionbank.com/region-wise-offers and enjoy the benefits.</p>
+<p> 2. Now pay using Soft Token Digital Signature as Multi Factor Authentic=
+ation for your online transactions.</p>
+<p> 3. Now you can select City Union Bank in the Tax portal, pay your Direc=
+t Taxes with CUB Account and get challans instantly or Over the Counter (at=
+ CUB Branches).</p>
+<p> 4. Apply CUB DHI Credit card through our Mobile/Net Banking and enjoy 1=
+.25% cashback and get free CUB Keychain DEBIT Card.</p>
+<p> 5. Now you can set/reset pin using your aadhaar number on UPI.</p>
+
+
+
+
+
+
+</div>
+
+<p> Looking forward to more opportunities to be of service to you.</p>
+<div class=3D"col-lg-3 col-md-4 col-sm-6">
+
+<p> Sincerely,</p>
+<h4 class=3D"text"><strong>City Union Bank Ltd.</strong></h4>
+
+
+<p> Bank will never ask to download applications (.apk file) through social=
+ media/email/SMS and install it Beware of fake links, emails, phone calls, =
+SMS and messages in the name of update of Aadhaar Card using Bank Applicati=
+on through WhatsApp, etc.. Please do not share your UPI PIN, MPIN, ATM PIN,=
+ OTP, Login IDs, Passwords, Debit card/Credit card No, CVV, Expiry date etc=
+. with anyone. Bank will never ask for such details.</p>
+
+<p> Secure Today !           Safe Tomorrow !!      Be Alert, Stay Safe !!!<=
+/p>
+
+</div>
+</table>
+</div><img src=3D"https://trkt.aclmails.in/v1/w/YDaVamkCuyFDPHer%2BZX90wH2Z=
+CYCv7FmXh%2BP33gdtjTGn8yTkK41IjCaew6jHi62H8DBxvHnF7yPtugfMWPCZw2kdwdrbZUazY=
+TMG8zKc2oNLQhwPl3lhnB6fmv6w4ztKNT7p78%3D"  width=3D"1" height=3D"1" border=
+=3D"0">
+--b3f0eef94b55d7ba8cf89927aba9e423d4f40798770682b7f46a1407f4b1--

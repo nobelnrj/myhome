@@ -145,8 +145,8 @@ final class GmailSyncController {
 
     // MARK: - Pipeline components
 
-    private let parsers: [any BankEmailParser] = [HDFCParser(), ICICIParser()]
-    private static let bankSenderFilter = "from:(hdfcbank.bank.in OR icici.bank.in)"
+    private let parsers: [any BankEmailParser] = [HDFCParser(), ICICIParser(), CUBParser()]
+    private static let bankSenderFilter = "from:(hdfcbank.bank.in OR icici.bank.in OR cityunionbank.org)"
     private static let initialBackfillDays = 120
     static let autoSaveThreshold: Double = ConfidenceScorer.autoSaveThreshold
 

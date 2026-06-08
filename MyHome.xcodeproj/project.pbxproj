@@ -113,10 +113,12 @@
 		A703DS /* DismissedMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DS /* DismissedMessageStore.swift */; };
 		A703HP /* HDFCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703HP /* HDFCParser.swift */; };
 		A703IP /* ICICIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703IP /* ICICIParser.swift */; };
+		A703CUB /* CUBParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CUB /* CUBParser.swift */; };
 		A703MN /* MerchantNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703MN /* MerchantNormalizer.swift */; };
 		A704SGF /* SpyGmailFetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = F704SGF /* SpyGmailFetch.swift */; };
 		A705HDFC /* HDFCParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F705HDFC /* HDFCParserTests.swift */; };
 		A706ICICI /* ICICIParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706ICICI /* ICICIParserTests.swift */; };
+		A706CUB /* CUBParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706CUB /* CUBParserTests.swift */; };
 		A706RIR /* ReviewInboxRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706RIR /* ReviewInboxRow.swift */; };
 		A707CS /* ConfidenceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F707CS /* ConfidenceScorerTests.swift */; };
 		A708DC /* DedupCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F708DC /* DedupCheckerTests.swift */; };
@@ -241,10 +243,12 @@
 		F703DS /* DismissedMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissedMessageStore.swift; sourceTree = "<group>"; };
 		F703HP /* HDFCParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParser.swift; sourceTree = "<group>"; };
 		F703IP /* ICICIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParser.swift; sourceTree = "<group>"; };
+		F703CUB /* CUBParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CUBParser.swift; sourceTree = "<group>"; };
 		F703MN /* MerchantNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizer.swift; sourceTree = "<group>"; };
 		F704SGF /* SpyGmailFetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailFetch.swift; sourceTree = "<group>"; };
 		F705HDFC /* HDFCParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParserTests.swift; sourceTree = "<group>"; };
 		F706ICICI /* ICICIParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParserTests.swift; sourceTree = "<group>"; };
+		F706CUB /* CUBParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CUBParserTests.swift; sourceTree = "<group>"; };
 		F706RIR /* ReviewInboxRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewInboxRow.swift; sourceTree = "<group>"; };
 		F707CS /* ConfidenceScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorerTests.swift; sourceTree = "<group>"; };
 		F708DC /* DedupCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupCheckerTests.swift; sourceTree = "<group>"; };
@@ -408,6 +412,7 @@
 				F703DS /* DismissedMessageStore.swift */,
 				F703HP /* HDFCParser.swift */,
 				F703IP /* ICICIParser.swift */,
+				F703CUB /* CUBParser.swift */,
 			);
 			path = Ingestion;
 			sourceTree = "<group>";
@@ -528,6 +533,7 @@
 				F620RTT /* RelativeTimestampTests.swift */,
 				F705HDFC /* HDFCParserTests.swift */,
 				F706ICICI /* ICICIParserTests.swift */,
+				F706CUB /* CUBParserTests.swift */,
 				F707CS /* ConfidenceScorerTests.swift */,
 				F708DC /* DedupCheckerTests.swift */,
 				F709MN /* MerchantNormalizerTests.swift */,
@@ -754,6 +760,7 @@
 				A703DS /* DismissedMessageStore.swift in Sources */,
 				A703HP /* HDFCParser.swift in Sources */,
 				A703IP /* ICICIParser.swift in Sources */,
+				A703CUB /* CUBParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -792,6 +799,7 @@
 				A620RTT /* RelativeTimestampTests.swift in Sources */,
 				A705HDFC /* HDFCParserTests.swift in Sources */,
 				A706ICICI /* ICICIParserTests.swift in Sources */,
+				A706CUB /* CUBParserTests.swift in Sources */,
 				A707CS /* ConfidenceScorerTests.swift in Sources */,
 				A708DC /* DedupCheckerTests.swift in Sources */,
 				A709MN /* MerchantNormalizerTests.swift in Sources */,
