@@ -1,21 +1,19 @@
 # Project Research Summary
 
-**Project:** My Home — personal household-ops iOS app (expense tracker + note keeper)
-**Domain:** iOS-only native app for a two-person Indian household; SwiftUI + SwiftData; Gmail-based bank email ingestion; CloudKit-ready; Face ID-gated
-**Researched:** 2026-05-28
-**Confidence:** HIGH overall — HIGH on Apple stack/architecture/pitfalls, MEDIUM on Gmail SDK choice and Indian-bank email parser specifics
-
-> **Source caveat (preserve through roadmap):** Three of the four researchers (STACK / ARCHITECTURE / PITFALLS / FEATURES) had WebSearch denied. Apple-platform recommendations rely on documented APIs through iOS 17/18/26 era and are HIGH confidence. Items flagged **VERIFY** in this summary or in the source docs must be re-checked against current Apple / Google documentation at implementation time — they were correct as of training data but are exactly the surface area where Apple iterates fastest.
+**Project:** My Home — v1.1 Milestone: Accounts, Assets & Household Polish
+**Domain:** iOS-only personal-finance + household-ops app (SwiftData, SwiftUI, India-focused)
+**Researched:** 2026-06-08
+**Confidence:** HIGH (stack, architecture, pitfalls from direct codebase inspection); MEDIUM (NPS pricing source, self-transfer edge cases)
 
 ---
 
 ## Executive Summary
 
-Build a native iOS 17+ app in **Swift 6.2 / SwiftUI / SwiftData** with a CloudKit-ready model graph from day one, Gmail-based bank email ingestion as the core differentiator, and a deliberately small modular footprint (one app target + two SPM packages: `BankParsers`, `GmailClient`). Persistence uses SwiftData with `@Query` directly in views and small `actor` "stores" for multi-model writes — **no repository pattern, no MVVM-per-screen, no Clean Architecture cake**. Each domain concept is its own `@Model` type with shared concerns expressed as Swift protocols — never a `HouseholdItem` superclass with a payload blob. Bank parsers live behind a `ParserRegistry` strategy interface so each new bank is one file + one registry line. CloudKit sync is wired in by config, not code, once the $99/yr Apple Developer Program is justified — the schema discipline (UUID PKs, all fields optional+defaulted, no `.unique`, inverse-required relationships) makes the migration a flag flip rather than a rewrite.
+My Home v1.1 adds four feature areas — Accounts Management, Self-Transfer Detection, Asset Tracker, and Notes/Daily Routine enhancement — to a shipped, stable v1.0 app. All four agents converge on one non-negotiable ordering constraint: **stabilization must come first**. There are two confirmed crash vectors in the live app that must be fixed before any schema or feature work begins. The DayAgendaView/AgendaReminderItem path holds live references to cascade-deleted NoteBlock objects (EXC_BAD_ACCESS), and GmailSyncController.syncAccount() captures live `@Model` Category references across `await` suspension points and calls `ctx.save()` inside a per-message loop. Both crashes are well-understood and have deterministic fixes; neither requires a schema change. The daily-routine stale-completion bug (NoteBlock.isChecked persisting across days) is also resolved in this stabilization pass via a date-keyed approach — `RoutineResetService` triggered on `scenePhase .active`, not a timer or background job.
 
-The single load-bearing decision is to **build manual entry FIRST and Gmail ingestion SECOND**. Manual entry validates the schema, the SwiftUI patterns, and the formatting/Face ID/budget loop end-to-end without staking the project on the riskiest sub-system. It also guarantees the irreducible fallback exists when (not if) bank email templates drift. Gmail ingestion is then layered onto a proven spine: `GmailClient` package, then `BankParsers` package, then `IngestionCoordinator`, then `BackgroundTasks` — in that exact order, with foreground "Run ingestion now" buttons before any background scheduling. The Review Inbox is the linchpin: confidence-gated parses route here for one-tap fixes, which protects user trust on day one and produces the training data for the per-merchant category memory in v1.x.
+The single riskiest non-crash task in v1.1 is the SchemaV6 migration. All four research agents agree the migration must be **additive only**: `Expense.sourceAccount` (the Gmail dedup idempotency key) is retained unchanged, and `Expense.accountID` (UUID FK to the new `Account` entity) is added alongside it — the two fields serve different purposes and must coexist through at least SchemaV7. The one migration task that requires special attention is backfilling `accountID` on existing expenses from the legacy `sourceAccount` string. This is the single highest-risk task in the milestone and requires a real migration test against a V5 fixture store (a copy of the live simulator `default.store`) run under Swift Testing before the feature ships. All new fields across all four feature areas are additive and optional-with-defaults, keeping the migration stage `willMigrate: nil` and only requiring a non-nil `didMigrate` for the account-backfill pass.
 
-The biggest risks are not technical: **(a)** locking in the bundle ID + iCloud container ID + App Group store URL on day zero (renaming any of them later orphans every record on device and in CloudKit, with no in-place rename path); **(b)** designing the UX around the fact that `BGAppRefreshTask` is opportunistic and free Apple Developer accounts have no APNs — on-launch fetch must be the primary path, background is best-effort; **(c)** building per-(bank, template) parsers with **fingerprint + confidence gates**, never a single regex per bank, so template drift fails loudly into the Review Inbox instead of silently saving garbage; and **(d)** declaring the Privacy Manifest and Swift 6 strict concurrency from Phase 0, because both are far cheaper to wire in early than to retrofit at TestFlight time or after a concurrency-induced corruption bug.
+Data source reliability is tiered and the app design must reflect this: AMFI NAV (mutual funds via `portal.amfiindia.com/spages/NAVAll.txt`) is HIGH confidence — official, stable, free; NPS NAV via `npsnav.in` is MEDIUM confidence — reliable data from Protean CRA but single-maintainer risk; Indian stock quotes via Yahoo Finance `v8/finance/chart` are LOW confidence — undocumented, fragile, legally grey. Manual override is mandatory for stocks and NPS; it is the primary entry path, not a fallback. The net-worth view must always render from cached data and must never block on a network call. Zero new SPM dependencies are required across all four feature areas.
 
 ---
 
@@ -23,378 +21,224 @@ The biggest risks are not technical: **(a)** locking in the bundle ID + iCloud c
 
 ### Recommended Stack
 
-The Apple-blessed greenfield stack of mid-2026, with one third-party path for Gmail OAuth and zero recurring cost. See `/Users/reo/My Projects/my-home/.planning/research/STACK.md` for the full deliberation.
+The v1.0 stack (Swift 6.2 + SwiftUI + SwiftData + Swift Testing, iOS 17 minimum, Xcode 26) is unchanged for v1.1. The only meaningful additions are a set of free external HTTP data sources for asset pricing — all hit via existing `URLSession` — and a `PriceFetchService` actor pattern for fetch/cache. Zero new SPM packages are added.
 
-**Core technologies (HIGH confidence):**
+**Core technologies:**
+- **Swift 6.2 / Xcode 26:** Application language and IDE — no change from v1.0
+- **SwiftData (VersionedSchema → SchemaV6):** Persistence layer; additive migration adds `Account`, `Asset` @Model types and five fields on `Expense`, two on `Note`, one on `NoteBlock`
+- **URLSession (no SDK):** All price fetching (AMFI, npsnav.in, Yahoo Finance) — existing framework, zero new deps
+- **PriceFetchService (`@Observable` class):** Owns all external price fetching; owned by `AssetsView` via `@State`, not a singleton; matches `GmailSyncController` ownership pattern
+- **UNUserNotificationCenter / NotificationScheduler (existing):** Daily routine notification — reuse existing `.daily` recurrence path; no new infrastructure
+- **Swift Testing (in-toolchain):** Primary test harness — critical for migration fixture test (V5 → V6 backfill)
 
-- **Swift 6.2 / Xcode 26 / iOS 17.0 minimum** — Approachable Concurrency mode is the friendliest path for a Swift-newcomer; iOS 17 floor unlocks `@Observable`, SwiftData, modern Charts. Do **not** target iOS 16; you lose SwiftData entirely.
-- **SwiftUI throughout** — no UIKit needed; drop to `UIViewRepresentable` only if a missing control forces it (none expected here).
-- **SwiftData with `ModelConfiguration(cloudKitDatabase: .none)` for v1**, flipping to `.automatic` (or `.private("iCloud.com.<domain>.myhome")`) post-paid-account. Treat every `@Model` field as if it had to become a `CKRecord` field — this is a *day-zero schema discipline*, not a later refactor.
-- **Swift Testing for unit + integration tests; XCTest only for `XCUIApplication` UI tests** — Swift Testing ships in the toolchain (no SPM dep); `@Test` / `#expect`, parameterized, parallel-by-default, async-native.
-- **Swift Charts** — first-party, no third-party charting library is competitive on iOS 17+.
-- **LocalAuthentication + Keychain Services** — only correct choice on Apple platforms.
-- **BackgroundTasks (`BGAppRefreshTask`)** — for inbox polling; design around best-effort behavior.
-- **Observation framework (`@Observable`)** — replaces `ObservableObject`/`@Published`/`@StateObject` entirely; do not mix old and new in the same module.
-- **Swift Package Manager only** — CocoaPods is sunsetting; Carthage is niche.
+**Data source reliability (critical for design decisions):**
 
-**Gmail OAuth stack (MEDIUM confidence — open choice; see Conflicts section):**
-
-- **Option A (recommended default): GoogleSignIn-iOS 9.x + GTMAppAuth 5.x + GTMSessionFetcher 5.x + `GoogleAPIClientForREST_Gmail` 5.x** — official Google libraries, all SPM-installable, Google handles the OAuth state machine + token refresh.
-- **Option B (zero-third-party-deps escape hatch): `ASWebAuthenticationSession` + raw `URLSession` calls + your own PKCE + Keychain helper** — ~150 lines, no Google SDK weight, no future Google-SDK-reshuffle risk. PITFALLS.md recommends this stance more strongly because it forces explicit PKCE and avoids embedded-webview pitfalls automatically.
-
-**Supporting libraries:**
-
-- **swift-snapshot-testing (pointfreeco)** — optional; add once a view stabilizes (charts, monthly summary). Not needed day one.
-- **Foundation `Regex` literals / `Regex { … }` builder** — for per-bank parsers. Never `NSRegularExpression` for new code.
-
-**Explicitly deferred in v1 (do not install):**
-
-- SwiftLint, swift-format, fastlane, CI of any kind, Firebase / Crashlytics / Sentry / any analytics. Defer to v1.1 if and only if friction shows up.
-
-**What NOT to use, ever (HIGH confidence):**
-
-UIKit-driven UI, Core Data as primary persistence, Realm, Firebase, Supabase, Plaid/TrueLayer, CocoaPods, Carthage, RxSwift / Combine for new code, `UserDefaults` for OAuth tokens, `NSRegularExpression` for parsers, `WKWebView` for OAuth (Google rejects it), `Timer`/silent-`URLSession` polling tricks for background, telemetry of any kind.
-
----
+| Source | Asset Type | Confidence | Notes |
+|--------|-----------|------------|-------|
+| `portal.amfiindia.com/spages/NAVAll.txt` | Mutual funds | HIGH | Official AMFI bulk file; stable multi-year URL; ~5 MB plain text; parse on background actor |
+| `api.mfapi.in/mf/{schemeCode}` | Mutual funds (fallback/onboarding) | MEDIUM-HIGH | Third-party JSON wrapper over AMFI; convenient but adds SPoF |
+| `npsnav.in/api/latest-min` | NPS | MEDIUM | Data from Protean CRA (official); single-maintainer open-source aggregator risk |
+| `query1.finance.yahoo.com/v8/finance/chart/{sym}` | Stocks | LOW | Undocumented, unofficial, historically fragile; ~360 req/hr cap; legally grey for personal use |
+| Manual entry | All types | N/A — mandatory | Primary path for NPS, FD, other; mandatory fallback for stocks |
 
 ### Expected Features
 
-The real competition is **Apple Notes + a Google Sheet**, not Walnut or CRED. Anything this app does worse than that combo will get it deleted within a month. The two things that combo cannot do — and therefore the only two differentiators worth fighting for — are **(a) zero-touch ingestion of bank transactions** and **(b) "₹X of ₹Y this month" budgeting without manual upkeep**. See `/Users/reo/My Projects/my-home/.planning/research/FEATURES.md` for the full landscape.
+All four areas constitute the v1.1 MVP. No area can be deferred without shipping a partial milestone.
 
-**Must have (P1 — table stakes for daily-use bar in v1):**
+**Must have (table stakes):**
+- **Accounts:** Add/edit/delete Account with name, type, last-4, opening balance; manual balance entry + timestamp; per-account monthly spend total; account list view; link expenses via `sourceAccount` string matching to `accountID` FK
+- **Self-Transfer:** 5-signal scorer (exact amount + both own accounts + opposite direction within 3 days + not categorised + not a reversal) surfaced to Transfer Inbox with three-state confirm (Mark as Transfer / Not a Transfer / Dismiss for now); `transferStateRaw` field on Expense; confirmed transfers excluded from ALL spend/budget queries
+- **Asset Tracker:** Add/edit/delete holding (name, type, units, cost basis); current value = `units × currentNAV`; total net worth = holdings value + account balances; asset allocation chart (pie/donut via Swift Charts); manual NAV override with staleness label; MF NAV refresh from AMFI/mfapi.in (best-effort, non-blocking)
+- **Notes/Daily Routine:** `Note.isRoutine` + `Note.routineTime` fields; `NoteBlock.lastCheckedDate` (the bug fix — replaces permanent `isChecked` bool for daily routines); per-day checkbox reset on `scenePhase .active` via `RoutineResetService`; daily notification via existing `NotificationScheduler`; calendar view shows routine as repeating event
 
-- Manual expense entry (4-tap-max: open → amount keypad → category → save) — works before Gmail, becomes fallback after
-- Predefined categories tuned to India (Groceries, Dining, Fuel, Utilities, Rent, Auto/Cab, Shopping, Health/Pharmacy, Entertainment, Recharge/DTH, Maid/Help, UPI to Person, ATM, Misc) + custom add/edit/rename
-- Per-category monthly budgets (calendar month default) with progress bar (₹ remaining + % + color shift at 80%/100%)
-- Month view of expenses grouped by category; tap-through to transaction list
-- Notes: title + free-form body + inline checklist items (one model, not two); list with pin + search
-- Home overview: spend-vs-budget bar, top 3 categories, pinned-note card
-- Face ID app lock (toggle in settings; passcode fallback non-negotiable — see Pitfall 11)
-- INR Indian-locale formatting everywhere (`₹1,00,000.00` not `₹100,000.00`) — instant trust kill if wrong
-- Dark mode + Dynamic Type from day one (free with SwiftUI semantic colors if you don't fight it)
-- Gmail OAuth + at least 2 bank parsers (start with whichever 2 cover Reo's primary cards — likely HDFC + ICICI)
-- Review Inbox for low-confidence / unknown parses — required because parsers WILL be wrong on day one
-- Duplicate detection on ingestion (dedup key: amount + merchant-substring + date within ±1 day; flag in inbox, don't auto-merge)
-- Merchant normalization seed table (~20–30 common Indian merchants: "AMAZON IN BLR" → "Amazon", "ZOMATO ONL BANGAL" → "Zomato", etc.)
-- Spend-by-category + spend-over-time charts (Swift Charts)
-- Settings: Face ID toggle, manage categories/budgets, Gmail sign-out, **always-visible "last synced" timestamp** (debugging lifeline)
+**Should have (differentiators — include in v1.1 if time permits):**
+- Color/SF Symbol per account for fast visual identification
+- "Unlinked expenses" indicator after initial account setup
+- Retroactive self-transfer detection over all historical expenses on first v1.1 launch
+- Net transfer flow summary on Overview (₹X moved between own accounts this month)
+- Holdings grouped by fund house; staleness badge per holding
+- Multiple daily routines (morning + evening) as independent Notes
 
-**Should have (P2 — v1.x differentiators, add after daily use proves which matter):**
-
-- Additional bank parsers (SBI, Axis, Kotak, + whichever cards wife uses)
-- **Per-merchant category memory** (auto-suggest after 2+ corrections) — highest-ROI P2; compounds Review Inbox value into a daily friction reduction; pure lookup table, no ML
-- Spotlight indexing for both transactions and notes (one shared `SpotlightIndexer` service)
-- Today's spend tile on overview
-- Vs-prior-month comparison delta
-- Share Sheet receive into notes
-- Notifications: budget threshold + Review-Inbox pending (opt-in; never per-transaction — Gmail itself already does that)
-- Haptics polish pass
-
-**Defer (P3 / v2+ — gated on the $99/yr decision or post-product-market-fit):**
-
-- CloudKit sharing with wife's Apple ID (the v2 trigger event by definition)
-- Home Screen + Lock Screen widgets (quick-add expense, pinned-note glance) — high-leverage but explicitly post-v1 per PROJECT.md
-- App Intents / Siri shortcut ("Hey Siri, add ₹500 cash expense") — pairs with widgets
-- watchOS app
-- "Convert checked items to expense" bridge action — uniquely-household feature; needs both sub-systems mature
-- Credit-card billing-cycle-aware view
-- Recurring expense detection, receipt OCR — only if data justifies it
-
-**Explicit anti-features (FEATURES.md re-litigates if a future phase suggests these — refuse):**
-
-Split transactions, recurring-subscription tracker, multiple accounts UI with balances, reconciliation workflow, rules engine, envelope/zero-based budgeting modes, onboarding wizard, per-transaction notifications, weekly/monthly PDF reports, savings goals, multi-user spend attribution, crypto/stocks, currency-conversion UI, receipt-photo attachment, voice-memo entry, gamification/streaks, in-app ads/paywalls/Pro tier, telemetry. Notes: rich text/markdown, folders, separate-from-expense tags, image/audio attachments, versioning, real-time collaboration, drawing, templates, per-note encryption, attached reminders.
-
----
+**Defer (v2+):**
+- CloudKit sync for account balances, holdings, routine completions across devices
+- Holding transaction log (purchase tranches) for XIRR calculation
+- CAS or broker import for holdings
+- Balance history snapshots → net-worth-over-time chart (NetWorthSnapshot model)
+- Routine completion history log (RoutineCompletion model)
 
 ### Architecture Approach
 
-Single app target + exactly two SPM packages. SwiftUI views consume SwiftData via `@Query` directly; small `actor` stores wrap `ModelContext` only when a write spans multiple models. Each domain concept gets its own `@Model` type — shared concerns are protocols, never inheritance. Bank parsers are a strategy-pattern plugin behind a `ParserRegistry`. The ingestion pipeline is one `actor` (`IngestionCoordinator`) orchestrating typed steps: fetch → parse → triage by confidence → persist → advance "last processed" marker. Widget (when it arrives) is a snapshot-JSON consumer, not a live SwiftData reader. See `/Users/reo/My Projects/my-home/.planning/research/ARCHITECTURE.md` for the full diagram and patterns.
+The existing layered architecture (SwiftUI Views → Service/Aggregator layer → SwiftData/Persistence) extends cleanly for all four feature areas. New services follow established patterns: `SelfTransferDetector` mirrors `DedupChecker` (pure static struct), `NetWorthAggregator` mirrors `BudgetCalculator` (pure static enum), `PriceFetchService` mirrors `GmailSyncController` (owned via `@State`, not singleton), `RoutineResetService` is called from `RootView.onChange(of: scenePhase)` at the same hook as `GmailSyncController.scenePhaseChanged()`. The UUID FK pattern (`accountID: UUID?` on Expense rather than `@Relationship`) is the established CloudKit-safe approach already used by `GmailAccountStore`.
 
-**Major components:**
+**Major components (new and modified):**
+1. **SchemaV6 + AppMigrationPlan** — one additive migration stage; two new @Model types (Account, Asset); new fields on Expense, Note, NoteBlock; `didMigrate` closure for account backfill
+2. **AccountsView + AccountLinkingService** — CRUD for accounts; post-creation backfill pass sets `accountID` on existing expenses by matching `sourceAccount` strings; `GmailSyncController` stamps `accountID` on new ingested expenses by looking up accounts by `gmailAddress`
+3. **SelfTransferDetector + TransferConfirmView** — pure static scorer called after each sync batch; confirm UI reuses `ReviewInboxRow` pattern; flagged pairs get `transferStateRaw = "pendingReview"`
+4. **PriceFetchService + NetWorthAggregator + AssetsView** — `@Observable` fetch service; `NetWorthAggregator.totalNetWorth(accounts:assets:)` is pure/synchronous; always renders from cached `lastKnownNav`
+5. **RoutineResetService** — pure struct; called on `scenePhase .active`; resets `block.isChecked = false` on all blocks of routine notes where `routineLastResetDate < startOfToday`; explicit `context.save()` at end
+6. **BudgetCalculator (modified)** — all spend queries gain `transferStateRaw != "confirmed"` predicate; confirmed transfers visible only in a dedicated Transfers section
 
-1. **App target (`MyHomeApp`)** — `@main App`, `ModelContainer` injection, BGTask registration, root `TabView` host with Face ID gate
-2. **Presentation layer (per-feature folders, vertical slices)** — `Features/Overview`, `Features/Expenses`, `Features/Notes`, `Features/Inbox`, `Features/Settings`; SwiftUI views with `@Query` + `@State` + `@Environment(\.modelContext)`; `@Observable` view models only when a screen has 3+ async sources of truth or duplicates across two views
-3. **Persistence layer (`Persistence/`)** — `ModelContainer+App.swift` factory; `Models/` folder of `@Model` types; `Stores/` folder of small `actor` wrappers (`ExpenseStore`, `NoteStore`) for multi-step writes
-4. **`BankParsers` SPM package (pure Swift, zero Apple-framework deps)** — `BankParser` protocol, `ParserRegistry`, `ExpenseCandidate` DTO, per-bank concrete parsers (`HDFCParser`, `ICICIParser`, …); golden tests against real anonymized email fixtures
-5. **`GmailClient` SPM package (network edge)** — `URLSession` + OAuth wrapper; `URLProtocol`-stub tests
-6. **`IngestionCoordinator` (in app target)** — single `actor` owning the pipeline; BGTask handler is 5 lines that call `coordinator.runOnce()`
-7. **Security helpers** — `FaceIDGate` (LocalAuthentication wrapper), `KeychainStore` (~30-line helper for OAuth refresh token)
-8. **Widget Extension (post-v1)** — snapshot-JSON consumer reading from shared App Group container
-9. **Watch App (post-v1)** — mirrors widget surface initially; read-only from shared store
-
-**The 8 CloudKit-readiness model rules — apply to EVERY `@Model` from Phase 1 (preserve verbatim through roadmap):**
-
-1. **Every model has a `id: UUID` you generate** — not just SwiftData's hidden persistent ID. CloudKit identifies records by name; your own UUID enables deterministic mapping.
-2. **All non-relationship properties are optional or have defaults.** CloudKit treats every field as optional. A non-optional, no-default field refuses to migrate.
-3. **No `@Attribute(.unique)` on anything you plan to sync.** CloudKit does not support uniqueness; SwiftData rejects unique attrs when CloudKit is enabled. Enforce uniqueness in code via lookup-then-insert. **VERIFY** at implementation time — this is one of the most common breakages.
-4. **All relationships are optional and have inverses declared.** CloudKit requires bidirectional modeling; SwiftData's `@Relationship(inverse: \...)` does this. To-many relationships default to empty arrays; never make a relationship `let`.
-5. **No `Codable`-only blob properties for things you might query later.** First-class fields only. Blobs (e.g. raw email HTML) only for genuinely opaque payloads, with `@Attribute(.externalStorage)` if > a few KB.
-6. **No enums stored directly; store the raw value.** Save `categoryKind: String` (or `Int`); reconstruct in Swift. CloudKit round-trips primitives cleanly; custom enum coding is fragile under sync.
-7. **Dates in UTC.** Never store local-time dates. Display layer formats with the user's locale.
-8. **Money as `Decimal`, never `Double`.** Currency stored alongside as `String` (`"INR"`).
-
-**Patterns to use (HIGH confidence):**
-
-- `@Query` in views + actor stores for multi-model writes — **NOT** a repository pattern over SwiftData
-- `@Observable` view models only when justified — default to stateful views with `@State` + `@Query`
-- Strategy-pattern bank parsers behind `ParserRegistry`
-- `IngestionCoordinator` as a single `actor` with typed steps
-- Per-feature `@Model` types with shared concern protocols (`Timestamped`, `Pinnable`) — **NOT** `HouseholdItem` superclass with `kind` enum + payload blob
-- App Group container URL from day one — even before any extension exists (zero cost, huge payoff)
-- Widget = snapshot-JSON consumer (carve out the `SnapshotPublisher.republish()` no-op call site inside `ExpenseStore.save()` in Phase 1; implement file-write in the widget phase)
-
-**Anti-patterns to refuse (verbatim — ARCHITECTURE.md lists 10):**
-
-Over-modularization on day one, repository pattern over SwiftData, coordinator pattern for navigation (use `NavigationStack` + typed routes), DI container framework (Swinject/Factory), Clean Architecture five-layer cake, Combine where `async/await` suffices, `HouseholdItem` superclass, premature parser abstractions (write 2 parsers concrete before extracting), hand-rolled OAuth/token storage, mocking `ModelContext` (use in-memory `ModelContainer` instead).
-
----
+**Key anti-patterns to avoid (all four agents agree):**
+- `@Relationship` between Account and Expense (fan-out + CloudKit incompatibility) — use UUID FK
+- Storing asset type as a Swift enum in @Model — use `assetTypeRaw: String?`
+- PriceFetchService as a singleton — own as `@State` in AssetsView
+- BGAppRefreshTask for routine reset — use `scenePhase .active` hook instead
+- Replacing `sourceAccount` with `accountID` FK — keep both; sourceAccount is the dedup key
 
 ### Critical Pitfalls
 
-PITFALLS.md catalogs 20 pitfalls with severity, prevention phase, and recovery cost. The five most-likely-to-bite (verbatim from PITFALLS.md "Top 5"):
+1. **DayAgendaView EXC_BAD_ACCESS on cascade-deleted NoteBlock** — Guard every model property access in CalendarView/DayAgendaView with `isDeleted`/`modelContext != nil` check before accessing `block.isChecked` or `note.blocks`. Fix before any schema work. (PITFALLS.md Pitfall 1, vector c)
 
-1. **SwiftData + CloudKit forces "everything optional, everything defaulted, no uniqueness, no `.deny` deletes"** — design schema this way from Phase 1 even though v1 is local-only. Retrofitting triggers destructive migration. Mitigation: the 8 model rules above; add a reflection-based test asserting every `@Model` property is optional/defaulted.
+2. **GmailSyncController cross-actor Category references across await suspension points** — Capture only `[String: PersistentIdentifier]` before the `for messageID` loop; re-fetch `Category` by ID inside the same context after each await. Move `ctx.save()` outside the per-message loop — batch all inserts, one save after the loop. (PITFALLS.md Pitfall 1, vectors b and e)
 
-2. **Bundle ID + iCloud container ID + App Group ID are forever** — changing any of them orphans every record. Pick `com.<your-domain>.myhome` and `iCloud.com.<your-domain>.myhome` on day zero. NOT `.dev`, `.test`, `.local` suffixes. The CloudKit container won't actually be provisioned until paid, but the *naming must be locked*.
+3. **SchemaV6 backfill: sourceAccount string → accountID FK** — This is the single highest-risk migration task. Must have a non-nil `didMigrate` closure that walks all existing Expenses and links `accountID` by matching `sourceAccount` strings to Account entities. Requires a V5 fixture migration test under Swift Testing before shipping. Silent failure leaves all existing expenses unlinked with no crash or error. (PITFALLS.md Pitfall 4)
 
-3. **`BGAppRefreshTask` will not run reliably enough to be the only path for new transactions** — iOS throttles aggressively; free-provisioned apps have effectively no usage signal at first. Mitigation: **on-launch fetch is the primary path; background is best-effort bonus**. Always expose a manual "Sync now" button and an always-visible "last synced" timestamp.
+4. **Self-transfer false positives hiding real spend** — Never auto-exclude. The confirm flow is mandatory. Gate "own account" signal strictly: both `sourceAccount` values must resolve to known Account entities. Exact Decimal match only — no fuzzy amount tolerance for Indian bank alerts. (PITFALLS.md Pitfall 5)
 
-4. **Free Apple Developer account: no CloudKit container, no APNs push, no Sign in with Apple, no Associated Domains, App Groups work unreliably (and the App Group ID needs a Team prefix that changes when going paid)** — defer every paid-only capability to a clearly-labeled post-v1 phase. 7-day rebuild ritual is the *least* problem; capability orphaning is the real one. Budget one full afternoon for the paid-account migration when it happens.
-
-5. **Gmail OAuth: no `client_secret` in the binary, use `ASWebAuthenticationSession` + PKCE, scope = `gmail.readonly` only, `gmail.readonly` is "restricted" so Google may show "unverified app" forever on a personal app (fine for two users), refresh tokens in Testing-mode OAuth clients expire every 7 days** — design the "reconnect Gmail" CTA from day one. Store refresh token with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (NOT `WhenUnlocked` — background tasks need it). NEVER `kSecAccessControlBiometryCurrentSet` on the Gmail token (re-enrolling Face ID would delete it).
-
-**The next five most-impactful** (PITFALLS.md 6–10, condensed):
-
-6. SwiftData migrations done badly silently wipe stores — scaffold `VersionedSchema` + `SchemaMigrationPlan` from v1.0 even with one version; bundle a v1 store file as a test resource and assert migration succeeds.
-7. Indian bank email template drift — never one regex per bank; build **per-(bank, template) parsers with whole-template fingerprint + confidence score**; hard-exclude OTP / promotional emails; store raw email body for parser replay when templates change; auto-save only above confidence threshold, else Review Inbox.
-8. SwiftUI state model confusion — all-in on `@Observable`, never mix with `ObservableObject`/`@StateObject`/`@Published`. `NavigationStack` paths are `Codable enum`s of UUIDs, never `@Model` objects.
-9. Face ID + Keychain edge cases lock users out — use `LAPolicy.deviceOwnerAuthentication` (passcode fallback), handle every `LAError` case explicitly, two-tier secret storage (Gmail token = `AfterFirstUnlockThisDeviceOnly` no-biometric; app lock = UI gate only, not encryption).
-10. Privacy Manifest (`PrivacyInfo.xcprivacy`) required-reason APIs (UserDefaults, FileTimestamp, SystemBootTime, DiskSpace) must be declared from Phase 0 — TestFlight rejects without it.
-
-**Additional pitfalls flagged in PITFALLS.md** (review during relevant phases): SwiftData mirroring eventual-consistency UX (#2), `#Predicate` runtime crashes on non-stored properties (#3), Watch/Widget App Group sharing (#13), CloudKit `CKShare` mechanics across Apple IDs requires parent-reference in Phase 1 schema (#14), Swift Charts reactive-data stutter + accessibility (#15), TDD test-container hygiene (#16), Decimal vs Double / en-IN locale (#17), Swift 6 strict concurrency landmines (#18), NavigationStack/sheet bugs (#19), sim-vs-device divergence (#20).
+5. **Stale asset prices presented without date context** — Every asset price shown must carry an "as-of date" label. Manual override must always be available. UI must never block on a network call; always render from `lastKnownNav` immediately, refresh in background. Amber stale badge when `navDate` is >1 trading day old. Parse NAV values as `String` → `Decimal(string:)`, never `Double`. (PITFALLS.md Pitfalls 6, 7, 8)
 
 ---
 
 ## Implications for Roadmap
 
-Research strongly suggests the following phase shape and ordering. The Architecture build-order and Pitfalls phase-mapping converge on this sequence — they do not conflict. Manual entry first, ingestion second is the single most important sequencing recommendation.
+### Suggested Build Order
 
-### Phase 0: Project Bootstrap & Foundational Lock-Ins
+```
+Phase 1: Stabilization (bugs + routine data model fix)
+    |
+    v  (gates everything — no schema work until crashes are fixed)
+Phase 2: SchemaV6 + Accounts Management
+    |
+    v  (gates self-transfer — needs Account entity for "own account" signal)
+Phase 3: Self-Transfer Detection
+    |
+    v  (independent of assets; completes spend-accuracy picture before net-worth view)
+Phase 4: Asset Tracker           (only needs Phase 2; can parallel Phase 3)
+    |
+Phase 5: Notes Enhancement       (only needs Phase 2; can parallel Phases 3 and 4)
+```
 
-**Rationale:** Decisions made here are one-way doors. Skipping any of them costs days-to-weeks later. Pitfalls 5, 6, 10, 12, 18 all map here.
-
-**Locks in (immutable for life of app):**
-
-- Bundle ID: `com.<your-domain>.myhome` — pick a domain you actually own or commit to forever
-- CloudKit container ID: `iCloud.com.<your-domain>.myhome` — add entitlement now even though container won't provision on free account
-- App Group ID: `group.com.<your-domain>.myhome` — entitlement added; SwiftData store URL points at it from day one (Pitfall 13)
-- Privacy Manifest (`PrivacyInfo.xcprivacy`) — declare `UserDefaults` (CA92.1), `FileTimestamp` (C617.1 for "last synced" display), `NSPrivacyTracking: false`, `NSPrivacyCollectedDataTypes: []` (Pitfall 12)
-- Swift 6 strict concurrency enabled at "complete" level (Approachable Concurrency mode on for learner-friendliness) (Pitfall 18)
-- Convention doc in README: `@Observable` only, never `ObservableObject`/`@StateObject`/`@Published`; SPM only; en-IN locale always; `Decimal` always for money; no `@Attribute(.unique)` ever
-- Test scaffolding: helper for `ModelConfiguration(isStoredInMemoryOnly: true)`; Swift Testing for unit, XCTest reserved for UI (Pitfall 16)
-- SwiftLint / fastlane / CI explicitly deferred to v1.1
-- Document deferred paid-account capabilities (no Push, no CloudKit container provisioning, no SIWA, no Associated Domains) and the 7-day Xcode rebuild ritual (Pitfall 5)
-
-**Avoids:** Pitfalls 5, 6, 10, 12, 18 by construction.
-
-### Phase 1: SwiftData Spine + Manual Expense Entry ("Hello, SwiftData")
-
-**Rationale:** ARCHITECTURE.md "Build Order" Phase 1 explicitly says this is the spine; until it works, nothing else can be tested visually. Manual entry is also the irreducible fallback that becomes the safety net when Gmail ingestion drifts. Phase 1 is also where every CloudKit-readiness rule is applied to every model.
-
-**Delivers:**
-
-- `Expense`, `Tag`, `Category`, `Account` `@Model` types — each obeys all 8 CloudKit-readiness rules verbatim
-- `ModelContainer+App.swift` with App Group URL (`cloudKitDatabase: .none` for v1)
-- `VersionedSchema` + `SchemaMigrationPlan` scaffolding from v1.0 (even with only one version) (Pitfall 7)
-- `ExpensesListView` with `@Query` results
-- `ExpenseEditView` for manual add/edit (Decimal everywhere; en-IN currency formatting)
-- `PreviewSampleData.swift` with in-memory `ModelContainer` and fixtures
-- Reflection-based test asserting every `@Model` property is optional/defaulted (Pitfall 1)
-- Integration test: load bundled v1 store, run migration plan, assert success (Pitfall 7)
-
-**Implements:** Architecture components 1, 2, 3 (App target, Presentation, Persistence). All 8 model rules. Parent-reference relationship pattern for future CloudKit sharing (Pitfall 14) — every shareable child has an optional `Household?` reference even though `Household` is a placeholder in v1.
-
-**Avoids:** Pitfalls 1, 3, 7, 13, 14, 17 by construction.
-
-### Phase 2: Categories, Tags, Budget Visualization
-
-**Rationale:** Closes the manual-expense loop. App is usable end-to-end without any backend.
-
-**Delivers:** Category-tag-picker UI; `BudgetProgressView`; pure-Swift `BudgetCalculator` (testable without SwiftData); India-tuned default category seed list; ₹X-of-₹Y bar with color shift at 80%/100%.
-
-**Avoids:** Premature parser abstractions (Architecture Anti-Pattern 8) by deferring all parser work.
-
-### Phase 3: Notes + Checklists
-
-**Rationale:** Independent of expenses; ships the second core feature without coupling. Cheap win that proves "schema additivity" — adding `Note` and `ChecklistItem` did not touch any `Expense` code.
-
-**Delivers:** `Note`, `ChecklistItem` `@Model` types (8 rules applied); list with auto-save (debounced 500ms), pin toggle, search via `.searchable`; inline checklist rows mixed with body text.
-
-**Avoids:** `HouseholdItem` superclass temptation (Architecture Anti-Pattern 7) — proves per-feature models are the right call.
-
-### Phase 4: Home Overview Screen + Charts
-
-**Rationale:** Sells the app to the user. High motivation payoff. Aggregate queries + Swift Charts.
-
-**Delivers:** Current-month spend-vs-budget bar; top 3 categories; pinned-note card; spend-by-category and spend-over-time charts (pre-aggregated to `Equatable` snapshots — see Pitfall 15); quick-add "+" actions.
-
-**Research flag:** Swift Charts performance with reactive data + accessibility (Pitfall 15) — pre-aggregate outside view; add `.accessibilityChartDescriptor`; test at Dynamic Type `accessibility5`.
-
-### Phase 5: Face ID Gate + Settings Shell
-
-**Rationale:** Must exist before financial data feels "trusted." Also forces scenePhase thinking before background tasks land. Doing this now de-risks the BGTask phase later.
-
-**Delivers:** `LocalAuthentication` wrapper using `LAPolicy.deviceOwnerAuthentication` (passcode fallback non-negotiable); `RootView` locked/unlocked switching; configurable grace period after backgrounding (default ~3–5 min); Settings tab scaffolded for upcoming Gmail account screen; explicit handling of every `LAError` case (`.biometryNotAvailable`, `.biometryNotEnrolled`, `.biometryLockout`, `.userFallback`, `.userCancel`, `.appCancel`, `.systemCancel`).
-
-**Avoids:** Pitfall 11 (Face ID/Keychain lockout) by construction.
-
-### Phase 6: `GmailClient` SPM Package (NO ingestion wiring yet)
-
-**Rationale:** Network + auth is the riskiest unknown. Prove it as a package in isolation with a debug surface (a "Fetch latest 10 emails" button in Settings) before wiring it to anything else.
-
-**Delivers:** `GmailClient` protocol + live implementation; `OAuthCoordinator` using `ASWebAuthenticationSession` + PKCE + custom-scheme redirect URI (NOT `localhost`, NOT `WKWebView`) (Pitfall 8); Keychain helper storing refresh token with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (NEVER `WhenUnlocked`, NEVER `biometryCurrentSet`) (Pitfall 11); `users.history.list` + `users.messages.get` against a real Gmail account; scope = `gmail.readonly` only (NOT `gmail.modify`); test target with `URLProtocol`-stubbed responses; initial-fetch query bounded by sender list + `newer_than:30d` (Pitfall 9).
-
-**Open decision (see Conflicts section):** Pick Option A (GoogleSignIn-iOS SDKs) vs Option B (raw `ASWebAuthenticationSession` + URLSession) before starting this phase.
-
-**Research flag (VERIFY at implementation time):**
-- Google's current iOS OAuth client guidance — Google reshuffles auth libraries periodically (Pitfall 8)
-- `gmail.readonly` scope verification rules — restricted scope; Testing-mode OAuth client refresh tokens expire every 7 days; design "reconnect Gmail" CTA accordingly
-- Whether the 7-day refresh-token expiry has changed — was true through 2025
-
-### Phase 7: `BankParsers` SPM Package + First Bank Parser
-
-**Rationale:** Per-bank parsers are the long-tail. One parser proves the shape; the rest are a steady drip. Parsers are pure Swift and the easiest piece to TDD.
-
-**Delivers:** `BankParser` protocol + `ParserRegistry` + `ExpenseCandidate` DTO (in pure-Swift SPM package, zero Apple-framework deps); one concrete parser (probably HDFC credit-card — pick whichever covers Reo's most-used card); golden-file tests with real anonymized email fixtures.
-
-**Critical pre-requisite — collect 50+ real bank emails per target bank BEFORE building parser** (Pitfall 9). Empirically, training-data assumptions about Indian bank email templates are stale within months. Collect fresh samples from Reo's own Gmail.
-
-**Parser must include from day one** (Pitfall 9):
-- Whole-template fingerprint check separate from extraction regex
-- Confidence score per parse (graded, not binary)
-- Hard exclusion of OTP / promotional / verification emails (sender + subject pre-filters)
-- Reversal/refund detection (`reversed`, `refund`, `credited back`, `reversal of` keywords)
-- Raw email body storage (or hash + first 500 chars) for parser replay when templates drift
-- `parserID + version` on every saved expense
-
-**Research flag (VERIFY at implementation time):** Each target bank's current email template — they drift. Collect samples first; build parser second.
-
-### Phase 8: `IngestionCoordinator` + Review Inbox
-
-**Rationale:** Wires GmailClient + ParserRegistry + ExpenseStore. Get the pipeline working in the FOREGROUND first with a manual "Run ingestion now" button — background scheduling adds nondeterminism, fight that battle separately with a known-good pipeline.
-
-**Delivers:** `IngestionCoordinator` actor; triage logic (confidence ≥ 0.85 → auto-save; else → Review Inbox); Review Inbox UI (one-tap accept, tap-to-edit, swipe-to-discard); duplicate-detection logic (dedup key: amount + merchant-substring + date ±1 day); merchant normalization seed table (~20–30 common Indian merchants); manual "Sync now" button in Settings.
-
-**Research flag:** Confidence threshold (default 0.85) is a guess — calibrate against real data after first week of use.
-
-### Phase 9: `BackgroundTasks` Registration
-
-**Rationale:** Trivial code, huge testing pain. Doing it last means everything it depends on already works. ARCHITECTURE.md and PITFALLS.md both say: design the UX assuming background is best-effort.
-
-**Delivers:** `BGAppRefreshTask` registered at launch with identifier in Info.plist `BGTaskSchedulerPermittedIdentifiers`; `setMinimumBeginDate: now + 30min`; handler calls `coordinator.runOnce()`; **always-visible "Last ingested at …" timestamp** in Settings (debugging lifeline); BGTask runs `@MainActor`-isolated to safely touch `ModelContext`.
-
-**Verification gate (Pitfall 4 + Pitfall 20):** On-device, unplugged-overnight test required. Simulator BGTask trigger is theatre.
-
-**Avoids:** Pitfall 4 by construction (UX already assumes on-launch is primary).
-
-### Phase 10: Additional Bank Parsers (Long-Tail)
-
-**Rationale:** Each parser is one file + one registry line + tests. Add ICICI, SBI, Axis, Kotak — whichever cards Reo and wife actually use. Build only the parsers needed; build the abstractions only after 2 concrete parsers exist (Anti-Pattern 8: premature parser abstractions).
-
-### Phase 11+ (Post-v1, post-$99-upgrade or product-validated): Future Layers
-
-**Phase 11a — Widget Extension:**
-- App Group is already in place from Phase 0
-- Snapshot-JSON pattern: app writes `overview-snapshot.json` to App Group container on every meaningful write; widget reads JSON in its timeline provider
-- `WidgetCenter.shared.reloadAllTimelines()` from app on writes (Pitfall 13)
-- **Research flag — VERIFY:** whether direct `@Model` access from widget extension is viable at the iOS target version; snapshot pattern is the safer assumption regardless
-
-**Phase 11b — CloudKit Mirroring (private DB):**
-- Strip every `@Attribute(.unique)` (Pitfall 1, 3); confirm with test that instantiates `ModelContainer(for:configurations:)` with `.cloudKitDatabase: .private("iCloud.com.<domain>.myhome")` and asserts it loads
-- Switch `ModelConfiguration` to `.automatic` or `.private(...)`
-- Add iCloud entitlement + CloudKit container provisioning in CloudKit Dashboard
-- Test private DB sync between two of Reo's own devices (iPhone + iPad simulator) before sharing phase
-
-**Phase 11c — CloudKit Sharing with wife's Apple ID:**
-- Implement `windowScene(_:userDidAcceptCloudKitShareWith:)` delegate (Pitfall 14)
-- One `Household` root record owning all shareable records via parent reference (already scaffolded in Phase 1 schema)
-- `CKShare.Participant.permission = .readWrite` explicitly set
-- Two-device + two-Apple-ID test required; expect 5–60s propagation
-- "Last synced" UX exists (Pitfall 2 mirroring eventual-consistency)
-
-**Phase 11d — watchOS app:** mirrors widget surface initially; read-only from shared store (writes only from iPhone in v1 of Watch) (Pitfall 13)
-
-**Phase 11e — App Intents / Siri shortcut** (post widgets)
-
-**Phase 11f — Per-merchant category memory** — triggered when 20+ manual corrections accumulate in Review Inbox
-
-### Phase Ordering Rationale
-
-- **Manual entry before ingestion** is the load-bearing sequencing call. Validates schema + UI + formatting + Face ID + budget loop on a closed end-to-end system before staking the project on the riskiest sub-system (Gmail OAuth + parser reliability + BGTask scheduling).
-- **`GmailClient` package before parsers before `IngestionCoordinator` before BGTasks** mirrors ARCHITECTURE.md's "Build first / Build last" guidance and the PITFALLS.md observation that each piece compounds nondeterminism. Foreground "Sync now" must work before background scheduling is even attempted.
-- **Phase 0 lock-ins (bundle ID, CloudKit container, App Group, Privacy Manifest, strict concurrency, model rules)** are placed first because they are one-way doors. Pitfalls 1, 5, 6, 12, 14, 18 all map here and all become catastrophic if discovered post-launch.
-- **CloudKit work is consolidated post-v1** because the free Apple Developer account cannot provision a CloudKit container at all. Doing schema rules in Phase 1 means CloudKit becomes a *configuration flip*, not a rewrite — which is the entire point of the schema discipline.
-- **Review Inbox is in the same phase as `IngestionCoordinator`**, not later. Parsers will be wrong on day one; the inbox makes failures one-tap fixes instead of trust-destroying silent garbage.
-- **Charts in Phase 4** (not earlier) because they need aggregate queries that need manual data in the system first.
-
-### Research Flags
-
-Phases likely needing deeper research at planning time:
-
-- **Phase 6 (GmailClient):** Google's current iOS OAuth + Gmail scope rules — Google reshuffles auth libraries periodically. Also: stack-choice decision (GoogleSignIn SDK vs raw `ASWebAuthenticationSession`) is genuinely open and should be resolved in the discuss-phase. **VERIFY** against Google's current installed-app OAuth guidance.
-- **Phase 7 (BankParsers):** Each target bank's *current* email template — empirical sample collection is a hard prerequisite. Cannot be planned in detail without 50+ real emails in hand per bank.
-- **Phase 11a (Widget):** **VERIFY** whether direct SwiftData `@Model` access from a widget extension is viable at the iOS target version, vs the safer snapshot-JSON pattern. Snapshot JSON is the recommended default regardless.
-- **Phase 11b (CloudKit Mirroring):** **VERIFY** current SwiftData CloudKit constraints — `.unique`, optionality, inverse-required relationships. This is one of the highest-iteration surfaces in Apple's docs.
-- **Phase 11c (CloudKit Sharing):** Two-device + two-Apple-ID testing is mandatory; cannot be validated single-device. Plan for empirical iteration.
-
-Phases with standard patterns (skip research-phase):
-
-- **Phases 1, 2, 3, 4, 5, 8, 9, 10** — well-documented SwiftUI/SwiftData/LocalAuthentication/Swift Charts/BGTasks patterns; the source research docs already provide concrete code shapes. Discuss-phase + plan-phase should suffice without additional research.
+Notes Enhancement and Asset Tracker can run in parallel or interleaved after SchemaV6 is complete; both only depend on the schema phase, not on each other or on Self-Transfer.
 
 ---
 
-## Conflicts and Open Questions
+### Phase 1: Stabilization
 
-Where the four researchers disagreed, or where guidance depends on user choice. Surface these at discuss-phase, do not bury them.
+**Rationale:** Two confirmed crash vectors and one data-model bug must be resolved before any schema or feature work. These fixes require no migration, no new models, and no new dependencies — they are pure logic/guard corrections. All four agents rank this as the unconditional gate.
 
-### Conflict 1 — Gmail OAuth library choice (Stack vs Pitfalls)
+**Delivers:**
+- Crash-free Notes + Calendar: `DayAgendaView`/`AgendaReminderItem` `isDeleted` guard before accessing `block.isChecked` or `note.blocks`
+- Crash-safe Gmail sync: `Category` PersistentIdentifier capture replaces live @Model reference across `await` suspension points; `ctx.save()` moved outside per-message loop
+- Category sort order fix: `max(existing.sortOrder) + 1` on insert
+- RoutineResetService skeleton wired to `scenePhase .active` (the `lastCheckedDate` field itself lands in SchemaV6 in Phase 2; Phase 1 ships the crash fixes and seeds the service structure)
 
-- **STACK.md recommends**: GoogleSignIn-iOS 9.x + GTMAppAuth + GTMSessionFetcher + GoogleAPIClientForREST_Gmail (official Google path, transitively handles OAuth state, ~1.5 MB binary, "MEDIUM confidence — Google has historically reshuffled iOS auth libraries").
-- **PITFALLS.md recommends more strongly**: raw `ASWebAuthenticationSession` + PKCE + URLSession (forces explicit no-`client_secret` PKCE, avoids the `disallowed_useragent` and embedded-webview classes of bugs, no third-party SDK volatility).
-- **Both agree**: never `WKWebView`, never `client_secret` in binary, always PKCE, always `gmail.readonly` only, always Keychain with `AfterFirstUnlockThisDeviceOnly`.
-- **Open decision for discuss-phase:** which path? Recommendation: start with raw `ASWebAuthenticationSession` (Option B). PITFALLS.md's case is stronger for a personal app where Google SDK volatility is uncontrollable and the OAuth flow is small. ~150 lines of code with explicit PKCE is more inspectable than an opaque SDK chain.
+**Addresses:** FEATURES.md "Stabilisation fixes: category ordering, sync/notes crash" (P1 must-have)
 
-### Conflict 2 — Repository pattern over SwiftData (Architecture vs Stack)
+**Avoids:** PITFALLS.md Pitfalls 1 (crash), 2 (stale routine completion), 3 (category sort), 10a (timezone routine reset)
 
-- **ARCHITECTURE.md says firmly**: no repository pattern; `@Query` in views; thin actor stores for multi-model writes only. Repository is Anti-Pattern 2.
-- **STACK.md says** (under "If TDD friction hits SwiftData"): "Wrap SwiftData behind a `protocol ExpenseRepository` and inject an in-memory fake in tests."
-- **Resolution:** ARCHITECTURE.md's "in-memory `ModelContainer(isStoredInMemoryOnly: true)` is faster than your mock" is the stronger argument. Use in-memory `ModelContainer` for tests; do not introduce a repository protocol layer. STACK.md's fallback is only relevant if SwiftData testing genuinely blocks shipping — empirically it doesn't at this scale.
+**Research flag:** Standard patterns; no research phase needed.
 
-### Conflict 3 — Approachable Concurrency mode vs strict concurrency
+**TENSION — routine fix phasing:** FEATURES.md and PITFALLS.md classify the routine data-model fix as Phase 1. ARCHITECTURE.md places the `lastCheckedDate` field addition in SchemaV6. **Resolution:** The RoutineResetService logic and the DayAgendaView guard ship in Phase 1 (no schema change required for the guard). The `lastCheckedDate` field is bundled into SchemaV6 in Phase 2 to avoid an intermediate migration stage. Phase 1 delivers the crash fixes and service skeleton; Phase 2 completes the data model and wires the full per-day reset.
 
-- **STACK.md recommends**: enable Approachable Concurrency (Swift 6.2's single-threaded-by-default opt-in) — friendlier for learner.
-- **PITFALLS.md recommends**: strict concurrency at "complete" level from day one — easier to start strict than retrofit (Pitfall 18 is silent and rare-reproducer).
-- **Resolution:** both are right at different time horizons. Recommendation: start with Approachable Concurrency on while building Phase 1–3 (UI + persistence), then turn strict concurrency to "complete" before Phase 6 (Gmail networking — first real cross-actor surface).
+---
 
-### Open Question 1 — Which 2 bank parsers in v1?
+### Phase 2: SchemaV6 + Accounts Management
 
-FEATURES.md says "probably HDFC + ICICI; pick whichever 2 cover Reo's primary cards." This is a user decision, not a research decision. Discuss-phase for Phase 7 should resolve this against Reo's actual card usage.
+**Rationale:** SchemaV6 is the foundation for all feature areas. All new models, fields, and migration stages must be in place before any feature that reads or writes them. Accounts is bundled here because Account is the first new @Model and its `didMigrate` backfill is the riskiest migration task — validating it early contains that risk before other features build on top.
 
-### Open Question 2 — Historical Gmail backfill depth
+**Delivers:**
+- SchemaV6 migration: `Account` and `Asset` @Model types; `Expense.accountID`, `isTransfer`, `transferPairID`, `transferConfirmed`, `transferStateRaw`; `Note.isRoutine`, `routineLastResetDate`; `NoteBlock.lastCheckedDate`
+- `v5ToV6` `didMigrate` closure: backfills `expense.accountID` from `sourceAccount` strings; covered by a migration test against a real V5 fixture store
+- `sourceAccount` field retained unchanged on `Expense` — it is the Gmail dedup key, must not be removed
+- AccountsView CRUD (add/edit/delete Account; manual balance; last-updated timestamp)
+- AccountLinkingService: post-creation backfill pass + GmailSyncController `accountID` stamping on new ingested expenses
+- Per-account monthly spend total (filtered @Query on Expense)
+- `NoteBlock.lastCheckedDate` wired into RoutineResetService; full per-day reset operational
 
-FEATURES.md flags: 30 days? 90 days? Trade-off between "instant value" (more backfill) and "parser failure visibility" (less). Cap to `newer_than:30d` for first OAuth grant (PITFALLS.md Pitfall 8 — avoids full-inbox-scan rate-limit pain) and offer "fetch older" as a Settings action later.
+**Addresses:** FEATURES.md Accounts table stakes (all five)
 
-### Open Question 3 — Default budget month boundary
+**Avoids:** PITFALLS.md Pitfall 4 (sourceAccount → Account migration data loss); Pitfall 1.6 (ModelContainer migration crash)
 
-FEATURES.md flags: calendar 1st-of-month vs credit-card billing cycle. Default to calendar; revisit if it bites. Per-card billing-cycle-aware view is explicitly P3.
+**Research flag:** The `didMigrate` closure pattern may benefit from a focused planning research pass. This is the codebase's first non-nil `didMigrate` closure — verify error-handling behavior (does a throwing closure roll back or leave the store partially migrated?) against the existing `FB13812722` workaround in `MigrationPlan.swift`. All other Accounts work is standard SwiftData CRUD.
 
-### Open Question 4 — Notification opt-in timing
+---
 
-FEATURES.md flags: first launch (annoying) / first budget-cross (smart) / never until asked (most respectful). Recommendation: never until asked, with a one-line Settings toggle.
+### Phase 3: Self-Transfer Detection
 
-### Open Question 5 — Manual entry FIRST vs ingestion FIRST
+**Rationale:** Requires the Account entity (Phase 2) to be complete — the "both accounts are own accounts" signal is the essential false-positive gate. The `transferStateRaw` and other Expense transfer fields are already in SchemaV6 from Phase 2.
 
-This is technically already resolved by ARCHITECTURE.md and PITFALLS.md (manual first, both for spine validation and for fallback availability). Surfaced here because it is the single most important sequencing call and must not be silently re-litigated by a future phase.
+**Delivers:**
+- `SelfTransferDetector` pure static struct: 5-signal scorer, 3-day calendar window, exact Decimal amount match, own-account gate
+- Transfer Inbox (TransferConfirmView): three-state confirm UI reusing `ReviewInboxRow` pattern; separate section from low-confidence parse inbox
+- `BudgetCalculator` and `SpendOverTimeAggregator` updated: `transferStateRaw != "confirmed"` predicate on all spend queries
+- Retroactive detection pass on v1.1 first launch over historical expenses
+- Net transfer flow summary on Overview
+
+**Addresses:** FEATURES.md Self-Transfer table stakes and differentiators
+
+**Avoids:** PITFALLS.md Pitfall 5 (false positives); UX pitfall of auto-exclusion without confirmation
+
+**Research flag:** Standard patterns — signal scorer logic and ReviewInboxRow reuse are well-understood. No research phase needed. During planning, spot-check a sample of the household's historical expenses to validate the 3-day window covers all actual self-transfers (the window is reasoned but unvalidated against real data).
+
+---
+
+### Phase 4: Asset Tracker
+
+**Rationale:** Depends only on SchemaV6 (Phase 2). Independent of Self-Transfer (Phase 3) and Notes Enhancement (Phase 5). Can be built in parallel with Phase 3 in a two-track workflow; in single-track serial order it comes after Self-Transfer to keep spend-accuracy complete before net-worth is built.
+
+**Delivers:**
+- `Asset` @Model CRUD (add/edit/delete holding; units, cost basis, manual NAV override)
+- PriceFetchService: AMFI NAVAll.txt bulk parse (primary MF source); mfapi.in (fallback/onboarding search); Yahoo Finance `v8/finance/chart` for stocks (best-effort, timeout < 3s); npsnav.in for NPS (best-effort)
+- NetWorthAggregator: pure static `totalNetWorth(accounts:assets:)`
+- NetWorthView: account balances + holdings; "as of [date]" label on every price; amber stale badge for NAVs older than 1 trading day; always renders from `lastKnownNav` (never blocks)
+- Asset allocation chart (pie/donut by type via Swift Charts)
+- Manual NAV override with "manual" badge
+
+**Addresses:** FEATURES.md Asset Tracker table stakes (all seven)
+
+**Avoids:** PITFALLS.md Pitfalls 6 (unofficial endpoint breaking), 7 (Decimal vs Double), 8 (stale price as live), 10b (timezone NAV date parsing with `TimeZone(identifier: "Asia/Kolkata")`)
+
+**Research flag:** AMFI NAVAll.txt field format and Yahoo Finance response structure are already verified in STACK.md. No additional research phase needed. If Yahoo Finance breaks during implementation: fall back to manual-only for stocks without delay; do not chase alternative endpoints.
+
+---
+
+### Phase 5: Notes Enhancement (Daily Routine Calendar Reminder)
+
+**Rationale:** Depends only on SchemaV6 (Phase 2). Independent of Phases 3 and 4. In single-track serial order it comes last; it can be parallelized with Phase 4 once Phase 2 is complete.
+
+**Delivers:**
+- `Note.isRoutine` toggle in EditNoteView; `Note.routineTime` time picker
+- RoutineResetService fully wired: resets `block.isChecked = false` where `routineLastResetDate < startOfToday(IST)`; explicit `context.save()`; called from `RootView.onChange(of: scenePhase)` on `.active`
+- Daily notification via existing `NotificationScheduler` with `.daily` recurrence; `schedule()` called only on enable/edit, never on every BGAppRefreshTask run
+- CalendarAggregator integration: `isRoutine = true` notes surface as repeating daily events in CalendarView (no changes to CalendarAggregator needed — existing `reminderEnabled = true` + `RecurrenceType.daily` path already handles this)
+- Multiple routines supported via independent Notes with `isRoutine = true`
+
+**Addresses:** FEATURES.md Notes Enhancement table stakes (all six)
+
+**Avoids:** PITFALLS.md Pitfall 9 (notification explosion from re-scheduling on every BGAppRefreshTask); Pitfall 10a (timezone routine reset must use `Calendar.current` with explicit `timeZone = TimeZone.current`, not UTC calendar)
+
+**Research flag:** All infrastructure exists. The only new code is thin wiring. No research phase needed. One unit test is critical and must be written: call `schedule()` N times for the same reminder ID and assert `pendingCount() == 1`.
+
+---
+
+### Phase Ordering Rationale
+
+- **Stabilization before schema:** Crash fixes are no-migration logic changes; doing schema work on a crashing app risks masking or compounding crash vectors and makes debugging harder.
+- **SchemaV6 + Accounts before Self-Transfer:** The "both accounts are own accounts" signal is the false-positive gate — Account entity must exist before the scorer is meaningful.
+- **SchemaV6 before Assets and Notes Enhancement:** Both depend on new @Model fields in SchemaV6.
+- **Assets and Notes Enhancement are parallel after SchemaV6:** Neither depends on the other; both depend only on the schema phase.
+- **Self-Transfer before Assets in serial order:** Self-Transfer completes the spend-accuracy picture (confirmed transfers excluded from totals) before the net-worth view is built, ensuring net-worth figures are correct from day one.
+
+### Research Flags
+
+Phases needing deeper research during planning:
+- **Phase 2 (`didMigrate` closure):** First non-nil `didMigrate` closure in this codebase. Recommend a focused research pass on SwiftData custom migration error-handling behavior before writing the migration stage.
+
+Phases with standard patterns (skip research phase):
+- **Phase 1 (Stabilization):** Root causes are confirmed; fixes are deterministic.
+- **Phase 3 (Self-Transfer):** Signal scorer and ReviewInboxRow reuse are well-understood. Spot-check historical data during planning to validate the 3-day window.
+- **Phase 4 (Asset Tracker):** AMFI and Yahoo Finance formats are verified. PriceFetchService mirrors existing GmailSyncController pattern.
+- **Phase 5 (Notes Enhancement):** All infrastructure exists; thin wiring only.
 
 ---
 
@@ -402,47 +246,45 @@ This is technically already resolved by ARCHITECTURE.md and PITFALLS.md (manual 
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack — Apple platform choices (Swift 6.2, SwiftUI, SwiftData, Swift Testing, Swift Charts, LocalAuthentication, BackgroundTasks, Keychain) | HIGH | Verified against developer.apple.com (training data through May 2026). Stable Apple-blessed APIs. |
-| Stack — Gmail SDK choice (Option A vs Option B) | MEDIUM | Both viable; Google has historically reshuffled iOS auth libraries (Pitfall 8 has examples). PKCE + `ASWebAuthenticationSession` is invariant either way. **VERIFY** Google's current installed-app OAuth guidance at implementation time. |
-| Features — table-stakes, anti-features, MVP cut | HIGH | Apple Notes + Sheet competitive framing is durable; India category list and ₹-formatting requirements are grounded in en-IN locale reality. |
-| Features — Indian bank email parsing specifics (subjects, body anchors, sender domains) | MEDIUM | Templates drift 1–3 times per year per bank; **VERIFY** empirically by collecting 50+ real samples per bank during Phase 7. Parser fingerprint + confidence gating mitigates the risk by design. |
-| Architecture — overall shape (one app + 2 packages, `@Query` + actor stores, strategy parsers, snapshot widget) | HIGH | Maps cleanly to Apple's blessed patterns through iOS 17/18/26 era. |
-| Architecture — 8 model rules + CloudKit-readiness | HIGH | Each rule prevents a documented `NSPersistentCloudKitContainer` constraint. **VERIFY** current SwiftData/CloudKit constraints at Phase 11b. |
-| Architecture — Widget snapshot pattern | MEDIUM | Recommendation marked **VERIFY** in ARCHITECTURE.md — whether direct `@Model` access from widget process is viable at iOS target version. Snapshot JSON is the safer default. |
-| Pitfalls — Top 5 (schema rules, ID locks, BGTask reliability, free-account limits, OAuth) | HIGH | Each pitfall is independently reproducible on any project of this shape; well-documented in Apple forums and WWDC content. |
-| Pitfalls — Indian bank email drift (Pitfall 9) | MEDIUM | Severity is HIGH but specifics need per-bank empirical confirmation. The defensive design (fingerprint + confidence + raw-email storage) is sound regardless. |
-| Pitfalls — Apple platform specifics (Pitfalls 1–8, 10–18, 20) | HIGH | Stable Apple-platform behaviors. |
+| Stack | HIGH | v1.0 stack unchanged; v1.1 data sources verified June 2026; Yahoo Finance is LOW for that specific source but overall stack is HIGH |
+| Features | HIGH | All four areas well-scoped; dependency graph is clear; anti-features explicitly called out |
+| Architecture | HIGH | Based on direct codebase reading (SchemaV5, MigrationPlan, GmailSyncController, CalendarView, NotificationScheduler); no speculation |
+| Pitfalls | HIGH | Root causes confirmed against codebase + Apple Developer Forums; crash vectors are identified, not inferred |
 
-**Overall confidence:** HIGH — the research converges across all four documents on the same shape of solution. The MEDIUM-confidence areas (Gmail SDK choice, bank-template drift, widget access pattern) are exactly the surfaces where Apple/Google iterate fastest, all are flagged **VERIFY**, and all have defensive defaults in the recommended approach.
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Gmail SDK decision (Option A vs Option B)** — resolve at discuss-phase for Phase 6. Recommendation: Option B (raw ASWebAuthenticationSession). **VERIFY** Google's current installed-app OAuth guidance.
-- **Real bank email samples for parser fingerprinting** — must be collected from Reo's Gmail before Phase 7 planning. Phase 7 plan-phase should include a "collect 50+ real emails per target bank" task as a hard prerequisite.
-- **Confidence-threshold calibration (default 0.85)** — needs real-data tuning after first week of Phase 8 usage. Plan a "calibrate threshold" task in Phase 8 retrospective.
-- **Widget snapshot vs direct SwiftData access at Phase 11a** — **VERIFY** at planning time; default to snapshot JSON.
-- **CloudKit schema constraint specifics at Phase 11b** — **VERIFY** current SwiftData/CloudKit docs immediately before stripping `.unique` and flipping mirroring on.
-- **Per-bank email templates** — **VERIFY** with live samples during every parser build/update.
+- **SchemaV6 `didMigrate` closure error handling:** The codebase has no prior example of a non-nil `didMigrate` closure. Before writing it, validate whether a throwing `didMigrate` rolls back the migration or leaves the store in a partial state — particularly in the context of the existing `FB13812722` workaround in `MigrationPlan.swift`.
+
+- **Self-transfer 3-day window validation:** The 3-day window is well-reasoned for Indian domestic settlement (NEFT/IMPS/UPI) but has not been validated against the household's actual transaction history. Spot-check historical expenses during Phase 3 planning to confirm 3 days is sufficient and does not miss weekend-lag transfers.
+
+- **Yahoo Finance rate-limit behavior for this household:** A 2-person household with ~10–20 stock holdings fetching once per day is far below the reported ~360 req/hr community cap. The accepted risk is that the endpoint can add auth requirements without notice. The implementation must fall back to manual immediately on any non-200 or decode error — do not retry.
+
+- **npsnav.in availability guarantee:** Single-maintainer hobby project. App must degrade gracefully to last-known NAV on any fetch failure. Manual override is the primary NPS entry path; treat the API as a convenience-only enhancement.
 
 ---
 
 ## Sources
 
-### Primary research outputs (HIGH-MEDIUM confidence across the board)
+### Primary (HIGH confidence)
+- Direct codebase reading — `SchemaV5.swift`, `MigrationPlan.swift`, `GmailSyncController.swift`, `CalendarView.swift`, `NotificationScheduler.swift`, `CalendarAggregator.swift`, `ReviewInboxRow.swift`, `GmailAccountStore.swift`
+- `portal.amfiindia.com/spages/NAVAll.txt` — Verified field format June 2026; semicolon-delimited; Scheme Code field 1, NAV field 5, Date field 6 in DD-MMM-YYYY format
+- developer.apple.com — Swift 6.2, Xcode 26, SwiftData iOS 17+, `@Observable`, `BGAppRefreshTask`
+- github.com/apple/swift-testing — Bundled in Swift 6 toolchain; parameterized + parallel + async-native
 
-- `/Users/reo/My Projects/my-home/.planning/research/STACK.md` — Apple platform stack, libraries, alternatives, what-not-to-use, version compatibility, confidence by recommendation
-- `/Users/reo/My Projects/my-home/.planning/research/FEATURES.md` — feature landscape (table-stakes / differentiators / anti-features) for expense tracker + notes + overview + India-specific; MVP definition; prioritization matrix; competitor analysis; open questions
-- `/Users/reo/My Projects/my-home/.planning/research/ARCHITECTURE.md` — system overview, project structure, 5 patterns, 8 model rules, data-flow diagrams, build order, CloudKit-readiness, watch/widget decisions, 10 anti-patterns
-- `/Users/reo/My Projects/my-home/.planning/research/PITFALLS.md` — 20 pitfalls with severity + phase + recovery; tech-debt patterns; integration gotchas; performance traps; security mistakes; UX pitfalls; "looks-done-but-isn't" checklist; pitfall-to-phase mapping
-- `/Users/reo/My Projects/my-home/.planning/PROJECT.md` — product charter, requirements, out-of-scope, key decisions, constraints
+### Secondary (MEDIUM confidence)
+- `api.mfapi.in/mf/{schemeCode}` — Verified June 2026; JSON; `data[0].nav` string decimal; community-maintained AMFI wrapper
+- `npsnav.in/api/latest-min` — Verified June 2026; JSON `[schemeCode, nav]` pairs; data from Protean CRA (official PFRDA-appointed CRA); single-maintainer open-source aggregator
+- YNAB transfer matching documentation — Exact-amount-match requirement and two-transaction rule; adapted to 3-day window for Indian settlement
+- Apple Developer Forums — SwiftData EXC_BAD_ACCESS, cross-actor ModelContext violations, migration relationship crashes (forums.developer.apple.com/forums/thread/745424, /757820)
+- fatbobman.com, simplykyra.com, delasign.com — SwiftData threading and deleted-object crash patterns
 
-### Verification surface (re-check at implementation time — three of four researchers had WebSearch denied)
-
-- developer.apple.com — SwiftData / NSPersistentCloudKitContainer / BackgroundTasks / LocalAuthentication / WidgetKit / Privacy Manifest / Observation
-- developers.google.com — Gmail API + OAuth 2.0 for Mobile & Desktop Apps (installed-app flow specifics, scope policy, refresh-token expiry rules in Testing mode)
-- Per-bank email templates — empirical collection from Reo's Gmail before Phase 7
+### Tertiary (LOW confidence)
+- `query1.finance.yahoo.com/v8/finance/chart/{sym}` — Verified working June 2026; `chart.result[0].meta.regularMarketPrice`; undocumented, no formal ToS coverage; `~360 req/hr` rate limit per community reports (github.com/ranaroussi/yfinance issue #2128)
+- 0xramm/Indian-Stock-Market-API, maanavshah/stock-market-india — Unofficial Yahoo Finance wrappers for India stocks; confirms fragility of the ecosystem
 
 ---
 
-*Research synthesis completed: 2026-05-28*
+*Research completed: 2026-06-08*
 *Ready for roadmap: yes*

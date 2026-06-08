@@ -1,754 +1,467 @@
 # Architecture Research
 
-**Domain:** Personal iOS household-ops app (SwiftUI + SwiftData, CloudKit-ready, Gmail-ingested expense tracker + notes, future watchOS/widgets/sharing)
-**Researched:** 2026-05-28
-**Confidence:** HIGH for the SwiftUI/SwiftData/CloudKit shape (stable Apple-blessed APIs since iOS 17 with iOS 18/26 polish). MEDIUM for the Gmail ingestion pipeline (BackgroundTasks is well-trod, but Gmail-on-iOS specifically has fewer canonical references — design borrows from generic background-refresh + REST-client patterns).
-
-> **Source caveat:** WebSearch was unavailable in this research run. Recommendations rely on Apple's published HIG / SwiftData / CloudKit / WidgetKit documentation patterns and conventional community guidance through iOS 18 / iOS 26 era (2024–2026). Anything marked **VERIFY** below should be re-checked against Apple's current docs before committing code.
+**Domain:** iOS SwiftData personal-finance + household-ops app (v1.1 additive milestone)
+**Researched:** 2026-06-08
+**Confidence:** HIGH — based on direct codebase reading; no external sources needed
 
 ---
 
-## Standard Architecture
+## Context: What Exists at SchemaV5
 
-### System Overview
+Four @Model types live in `SchemaV5` (the current schema):
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│  App Target (MyHomeApp)                                                  │
-│  ┌───────────────────────────────────────────────────────────────────┐   │
-│  │  Presentation Layer (SwiftUI)                                     │   │
-│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌────────┐   │   │
-│  │  │ Overview│  │Expenses │  │ Notes   │  │ Inbox   │  │Settings│   │   │
-│  │  │  Tab    │  │  Tab    │  │  Tab    │  │ (review)│  │  Tab   │   │   │
-│  │  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘  └────┬───┘   │   │
-│  │       └────────────┴────────────┴────────────┴────────────┘       │   │
-│  │                          @Query / @Environment                    │   │
-│  └────────────────────────────┬──────────────────────────────────────┘   │
-│                               │                                          │
-│  ┌────────────────────────────┴──────────────────────────────────────┐   │
-│  │  Domain Layer (pure Swift, no SwiftUI, no SwiftData imports)      │   │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────────┐ ┌─────────────────┐   │   │
-│  │  │ Budget   │ │ Tag      │ │ Parse        │ │ ExpenseCandidate│   │   │
-│  │  │ rules    │ │ suggest  │ │ confidence   │ │ (DTO)           │   │   │
-│  │  └──────────┘ └──────────┘ └──────────────┘ └─────────────────┘   │   │
-│  └────────────────────────────┬──────────────────────────────────────┘   │
-│                               │                                          │
-│  ┌────────────────────────────┴──────────────────────────────────────┐   │
-│  │  Data Layer (SwiftData ModelContainer + thin stores)              │   │
-│  │  ┌──────────────────────────────────────────────────────────────┐ │   │
-│  │  │  ModelContainer (CloudKit-ready schema, App Group URL)       │ │   │
-│  │  │  Expense · Category · Tag · Account · Note · ChecklistItem  │ │   │
-│  │  │  ParsedEmailRecord · ProcessedEmailMarker                    │ │   │
-│  │  └──────────────────────────────────────────────────────────────┘ │   │
-│  └───────────────────┬───────────────────────────────┬──────────────┘   │
-│                      │                               │                   │
-│  ┌───────────────────┴──────────────┐  ┌─────────────┴──────────────┐    │
-│  │  Ingestion Pipeline              │  │  Security / Platform       │    │
-│  │  ┌─────────────────────────────┐ │  │  ┌───────────────────────┐ │    │
-│  │  │ BackgroundTask scheduler    │ │  │  │ Face ID gate          │ │    │
-│  │  │   ↓                         │ │  │  │ Keychain (OAuth)      │ │    │
-│  │  │ GmailClient (REST + OAuth)  │ │  │  │ App Group container   │ │    │
-│  │  │   ↓                         │ │  │  └───────────────────────┘ │    │
-│  │  │ ParserRegistry → BankParser │ │  └────────────────────────────┘    │
-│  │  │   ↓                         │ │                                    │
-│  │  │ ExpenseCandidate            │ │                                    │
-│  │  │   ↓ (confidence ≥ thresh)   │ │                                    │
-│  │  │ ExpenseStore.save / Inbox   │ │                                    │
-│  │  └─────────────────────────────┘ │                                    │
-│  └──────────────────────────────────┘                                    │
-└──────────────────────────────────────────────────────────────────────────┘
-            │                                              │
-   ┌────────┴─────────┐                          ┌────────┴────────┐
-   │ Widget Extension │                          │ Watch App (post)│
-   │  (reads shared   │                          │  (reads shared  │
-   │   container)     │                          │   container)    │
-   └──────────────────┘                          └─────────────────┘
-```
+| Model | Key fields | Notes |
+|-------|-----------|-------|
+| `Expense` | amount, date, note, categories[], sourceAccount (String?), gmailMessageID, ingestionStateRaw, parseConfidence | sourceAccount = Gmail email address, not a real Account entity |
+| `Category` | name, symbolName, sortOrder, monthlyBudget, expenses[] | |
+| `Note` | title, blocks[], isPinned, reminder* fields (Data? encoded) | |
+| `NoteBlock` | kindRaw, text, isChecked, order, note, reminder* fields | |
 
-### Component Responsibilities
+`typealias Expense = SchemaV5.Expense` pattern is used throughout — all views bind to bare `Expense`, `Note`, etc. The typealias is flipped in `Persistence/Models/` at each schema bump; no view file needs touching.
 
-| Component | Owns | Implementation |
-|-----------|------|----------------|
-| **MyHomeApp (App target)** | Lifecycle, `ModelContainer` injection, BG task registration, root view | `@main App`, `.modelContainer(...)`, `.backgroundTask(.appRefresh)` |
-| **Presentation views** | Rendering, user input, navigation, simple local UI state | `View` + `@Query` + `@State` + `@Environment(\.modelContext)` |
-| **Domain services** | Business rules (budget math, tag suggestion, confidence scoring) — no UI, no persistence | Pure Swift `struct`/`enum` + free functions in a Swift Package |
-| **Data layer (`@Model` types)** | Persistence, schema, CloudKit-compatible shape | SwiftData `@Model` classes in the app target |
-| **Stores (thin)** | Imperative writes that span multiple models (e.g. "save expense + create tag if missing") | Small `actor` or `struct` wrappers over `ModelContext` |
-| **GmailClient** | OAuth token refresh, history list, message fetch | `URLSession` + `async/await`; isolated as a Swift Package |
-| **ParserRegistry** | Picks the right `BankParser` for a given email (sender + subject heuristic) | Plain Swift struct holding `[BankParser]` |
-| **BankParser (protocol)** | Turns one raw email into an `ExpenseCandidate` with a confidence score | Per-bank concrete types (`HDFCParser`, `ICICIParser`, …) |
-| **IngestionCoordinator** | Orchestrates: fetch → parse → triage → persist; tracks "last processed" marker | Single `actor` owned by the BG task entry point |
-| **Security** | Face ID gate, Keychain wrapper for OAuth refresh token | `LocalAuthentication` + small Keychain helper |
-| **WidgetExtension (later)** | Read-only snapshot views (current spend, top category, pinned note) | `WidgetKit` timeline; reads same SwiftData container via App Group |
-| **WatchApp (later)** | Quick-glance views; in v1 of watch, simply mirrors widget content | SwiftUI on watchOS; shared container if possible, else snapshot file |
+Migration strategy: `.custom(willMigrate: nil, didMigrate: nil)` for every stage (workaround for FB13812722). All migrations so far are purely additive — new optional fields or new models. This pattern must continue for CloudKit readiness.
 
 ---
 
-## Recommended Project Structure
+## SchemaV6 Migration Shape
 
+### New @Model Types to Add
+
+**Account** — represents a household bank account:
 ```
-MyHome/
-├── MyHome.xcodeproj
-├── MyHomeApp/                        # iOS app target
-│   ├── MyHomeApp.swift               # @main, ModelContainer, BG task registration
-│   ├── RootView.swift                # TabView host + Face ID gate
-│   ├── Features/                     # Vertical slices, one folder per tab
-│   │   ├── Overview/
-│   │   │   ├── OverviewView.swift
-│   │   │   └── OverviewViewModel.swift  # @Observable, only if logic > trivial
-│   │   ├── Expenses/
-│   │   │   ├── ExpensesListView.swift
-│   │   │   ├── ExpenseDetailView.swift
-│   │   │   ├── ExpenseEditView.swift
-│   │   │   ├── BudgetProgressView.swift
-│   │   │   └── ExpenseChartsView.swift
-│   │   ├── Notes/
-│   │   │   ├── NotesListView.swift
-│   │   │   ├── NoteEditorView.swift
-│   │   │   └── ChecklistRow.swift
-│   │   ├── Inbox/
-│   │   │   ├── ReviewInboxView.swift     # low-confidence parses to confirm
-│   │   │   └── CandidateReviewRow.swift
-│   │   └── Settings/
-│   │       ├── SettingsView.swift
-│   │       ├── GmailAccountView.swift
-│   │       └── FaceIDToggleView.swift
-│   ├── Persistence/                  # SwiftData layer
-│   │   ├── ModelContainer+App.swift  # Container factory (CloudKit-ready config)
-│   │   ├── Models/
-│   │   │   ├── Expense.swift
-│   │   │   ├── Category.swift
-│   │   │   ├── Tag.swift
-│   │   │   ├── Account.swift
-│   │   │   ├── Note.swift
-│   │   │   ├── ChecklistItem.swift
-│   │   │   ├── ParsedEmailRecord.swift
-│   │   │   └── ProcessedEmailMarker.swift
-│   │   └── Stores/
-│   │       ├── ExpenseStore.swift   # actor over ModelContext for multi-step writes
-│   │       └── NoteStore.swift
-│   ├── Ingestion/                    # Wires Gmail → Parser → Store
-│   │   ├── IngestionCoordinator.swift
-│   │   ├── ProcessedEmailTracker.swift
-│   │   └── BackgroundTaskScheduler.swift
-│   ├── Security/
-│   │   ├── FaceIDGate.swift
-│   │   └── KeychainStore.swift
-│   ├── Resources/
-│   │   ├── Assets.xcassets
-│   │   └── Localizable.xcstrings
-│   └── Previews/
-│       └── PreviewSampleData.swift   # In-memory ModelContainer with fixtures
-├── Packages/                         # Local Swift Packages (added only when boundary earns it)
-│   ├── BankParsers/                  # Pure Swift, depends only on Foundation
-│   │   ├── Package.swift
-│   │   ├── Sources/BankParsers/
-│   │   │   ├── BankParser.swift      # protocol
-│   │   │   ├── ParserRegistry.swift
-│   │   │   ├── ExpenseCandidate.swift
-│   │   │   ├── HDFC/HDFCParser.swift
-│   │   │   ├── ICICI/ICICIParser.swift
-│   │   │   └── SBI/SBIParser.swift
-│   │   └── Tests/BankParsersTests/   # Golden-file tests: real email → expected candidate
-│   └── GmailClient/                  # URLSession + OAuth wrapper
-│       ├── Package.swift
-│       ├── Sources/GmailClient/
-│       │   ├── GmailClient.swift     # protocol + live implementation
-│       │   ├── OAuthCoordinator.swift
-│       │   └── DTO/GmailMessage.swift
-│       └── Tests/GmailClientTests/   # URLProtocol stubs
-├── WidgetExtension/                  # Added at the widget phase
-└── WatchApp/                         # Added at the watch phase
+var id: UUID = UUID()
+var name: String? = nil               // "HDFC Savings", "ICICI CC"
+var institutionName: String? = nil    // "HDFC Bank"
+var accountTypeRaw: String? = nil     // "savings" | "credit" | "demat" | "nps" | "other"
+var last4: String? = nil              // last 4 digits of card/account — display only
+var balance: Decimal? = nil           // manually entered or API-refreshed current balance
+var balanceCurrencyCode: String = "INR"
+var balanceUpdatedAt: Date? = nil     // when balance was last set
+var gmailAddress: String? = nil       // link to GmailAccount.email for auto-linking ingested expenses
+var isActive: Bool = true             // soft-delete alternative; keeps history intact
+var sortOrder: Int = 0
+var createdAt: Date = Date()
+var updatedAt: Date = Date()
+// Relationship declared on Expense side (see below)
 ```
 
-### Structure Rationale
+**Asset** — a single holding (mutual fund, stock, NPS tier, or external balance entry):
+```
+var id: UUID = UUID()
+var name: String? = nil               // "Mirae Asset Large Cap", "HDFC NIFTY 50"
+var assetTypeRaw: String? = nil       // "mf" | "stock" | "nps" | "fd" | "other"
+var isinOrCode: String? = nil         // ISIN for MF/stock; scheme code for AMFI lookup
+var units: Decimal? = nil             // units held (MF/NPS); nil for stocks with qty=1
+var quantity: Decimal? = nil          // quantity for stocks
+var purchaseNav: Decimal? = nil       // purchase price / NAV
+var purchaseCurrencyCode: String = "INR"
+var lastKnownNav: Decimal? = nil      // cached last fetch
+var lastNavFetchedAt: Date? = nil     // when lastKnownNav was set
+var manualOverrideNav: Decimal? = nil // if set, use this instead of fetched NAV for net-worth
+var sortOrder: Int = 0
+var isActive: Bool = true
+var createdAt: Date = Date()
+var updatedAt: Date = Date()
+// accountID: UUID? — optional link to an Account (for MF folios in a demat, etc.)
+var accountID: UUID? = nil            // denormalised FK avoids cross-type @Relationship issues
+```
 
-- **Vertical feature folders (`Features/<Tab>/`)**, not horizontal "Views/", "ViewModels/", "Models/". Cuts navigation friction; matches how features actually evolve (you change one feature at a time, not "all view models").
-- **Persistence isolated in `Persistence/`** so the data layer stays auditable in one place. CloudKit migration only ever touches files inside this folder.
-- **`Packages/` contains exactly two SPM modules to start: `BankParsers` and `GmailClient`.** Both have crisp, real boundaries: `BankParsers` is pure Swift with zero Apple-framework deps (testable on Linux even), and `GmailClient` is the network edge. Splitting these out pays for itself immediately because parser tests run in milliseconds without booting an iOS simulator.
-- **Do NOT extract a `Persistence` package, a `DomainLogic` package, or a `UIComponents` package on day one.** SwiftData models live happily in the app target; the moment you put `@Model` types in a separate module you fight Xcode previews, schema migrations, and CloudKit entitlement scoping. Extract only if/when watch + widget + main app all need to share the same model code (and even then prefer App Group + same target source files via "Target Membership" first).
-- **`Previews/PreviewSampleData.swift`** with an in-memory `ModelContainer` makes every SwiftUI preview fast and deterministic. Set this up on day one; it pays for itself within a week.
+### Modified @Model: Expense (V5 -> V6)
 
----
+Add these optional fields:
+```
+var accountID: UUID? = nil            // FK to Account.id; nil = no account linked
+var isTransfer: Bool = false          // flagged as self-transfer
+var transferPairID: UUID? = nil       // ID of the paired expense (debit <-> credit)
+var transferConfirmed: Bool = false   // user confirmed this is a transfer
+var transferStateRaw: String? = nil   // "pendingReview" | "confirmed" | "rejected"
+```
 
-## Architectural Patterns
+`sourceAccount` (String = Gmail email) is RETAINED as-is. It serves the dedup/idempotency key (D-MA-03) and must not be replaced. `accountID` is the new FK to the real `Account` entity and can be set independently.
 
-### Pattern 1: SwiftData `@Query` + thin actor stores (NOT MVVM with repositories)
+**Rationale for UUID FK instead of @Relationship:** CloudKit does not support cross-entity relationships reliably when one side is optional and the other is a large fan-out. Using a UUID FK with application-side joins is the established CloudKit-safe pattern already used by GmailAccountStore (which stores email strings, not @Relationship references).
 
-**What:** Read paths use SwiftUI's `@Query` directly inside views. Write paths that touch more than one model go through a small `actor` "store" that wraps a `ModelContext`. No `Repository<Expense>` generic. No view model in between view and `@Query`.
+### Modified @Model: Note (V5 -> V6)
 
-**When to use:** Always, in this app. A two-user CRUD app does not benefit from a repository abstraction over SwiftData.
+Add daily-routine reset tracking fields:
+```
+var isRoutine: Bool = false                  // marks this note as a daily routine
+var routineLastResetDate: Date? = nil        // UTC start-of-day when completions last reset
+```
 
-**Trade-offs:**
-- **Pro:** Code is half the size; previews and `@Query` "just work"; less indirection to debug.
-- **Pro:** SwiftData already *is* the repository — wrapping it in another layer is duplicate work that breaks live updates.
-- **Con:** Views know about `@Model` types directly. That is the price of admission for SwiftData's reactivity; trying to hide it produces ceremony with no upside at this scale.
-- **Con:** If you ever swap SwiftData for something else, you rewrite views. At two users, that's acceptable. (CloudKit-backed SwiftData is the actual future, not a swap.)
+These two fields enable the per-day completion-state model (see Daily Routine section below).
 
-**Example:**
+### SchemaV6 Models List
 ```swift
-// Read path — directly in the view
-struct ExpensesListView: View {
-    @Query(sort: \Expense.occurredAt, order: .reverse) private var expenses: [Expense]
-
-    var body: some View {
-        List(expenses) { ExpenseRow(expense: $0) }
+enum SchemaV6: VersionedSchema {
+    static let versionIdentifier = Schema.Version(6, 0, 0)
+    static var models: [any PersistentModel.Type] {
+        [
+            SchemaV6.Expense.self,
+            SchemaV6.Category.self,
+            SchemaV6.Note.self,
+            SchemaV6.NoteBlock.self,
+            SchemaV6.Account.self,    // NEW
+            SchemaV6.Asset.self,      // NEW
+        ]
     }
-}
-
-// Write path — actor store, only when the write spans concerns
-actor ExpenseStore {
-    private let context: ModelContext
-    init(context: ModelContext) { self.context = context }
-
-    func save(_ candidate: ExpenseCandidate, suggesting tag: Tag?) throws -> Expense {
-        let expense = Expense(
-            id: UUID(),
-            amount: candidate.amount,
-            occurredAt: candidate.occurredAt,
-            merchant: candidate.merchant,
-            sourceEmailID: candidate.sourceEmailID
-        )
-        if let tag { expense.tags.append(tag) }
-        context.insert(expense)
-        try context.save()
-        return expense
-    }
+    // ... copies of V5 models verbatim with additive changes + new Account + Asset
 }
 ```
 
-### Pattern 2: `@Observable` view models — only when a view's state is genuinely complex
+### Migration Stage v5ToV6
+```swift
+static let v5ToV6 = MigrationStage.custom(
+    fromVersion: SchemaV5.self,
+    toVersion: SchemaV6.self,
+    willMigrate: nil,
+    didMigrate: nil
+)
+```
+Purely additive: two new models, five new optional fields on Expense, two new optional fields on Note. No data transformation needed. `willMigrate/didMigrate` stay nil.
 
-**What:** Default to "stateful views" (plain SwiftUI views with `@State`, `@Query`, `@Environment`). Promote to an `@Observable` view model only when (a) the view has 3+ pieces of derived state, (b) the logic is independently testable, or (c) the same logic feeds two views.
+### Typealias Updates (Persistence/Models/)
+- `Expense.swift`: flip to `SchemaV6.Expense`
+- `Note.swift`: flip to `SchemaV6.Note`
+- Add `Account.swift`: `typealias Account = SchemaV6.Account`
+- Add `Asset.swift`: `typealias Asset = SchemaV6.Asset`
 
-**When to use:** `ExpenseEditView` with confidence-driven tag suggestion + form validation: yes, view model. `NotesListView` showing a `@Query` result: no, no view model.
+---
 
-**Trade-offs:**
-- **Pro:** New-to-Swift developer learns SwiftUI idioms first, not architectural patterns.
-- **Pro:** `@Observable` (iOS 17+) removes the `@Published` boilerplate of the Combine era.
-- **Con:** "When is the view too big?" requires judgement. Heuristic: > 150 lines and > 3 `@State` fields = consider extracting.
+## System Architecture Overview
 
-**Example:**
+```
++--------------------------------------------------------------------------+
+|                          SwiftUI Views Layer                              |
++------------+---------------+-------------+--------------+----------------+
+|  Expenses  |   Accounts    |   Assets    |    Notes     |    Overview    |
+|  (exists)  |   (NEW)       |   (NEW)     |  (enhanced)  |  (+ net worth) |
++------------+---------------+-------------+--------------+----------------+
+|                         Service / Aggregator Layer                        |
+|  GmailSyncController   PriceFetchService    SelfTransferDetector          |
+|  NotificationScheduler  NetWorthAggregator  RoutineResetService           |
+|  BudgetCalculator       CalendarAggregator  AccountLinkingService         |
++--------------------------------------------------------------------------+
+|                        SwiftData / Persistence Layer                      |
+|  SchemaV6: Expense, Category, Note, NoteBlock, Account, Asset            |
+|  AppMigrationPlan: V1->V2->V3->V4->V5->V6                               |
+|  ModelContainer+App: App Group store URL, CloudKit=.none (v1.1)          |
++--------------------------------------------------------------------------+
+```
+
+---
+
+## Component Responsibilities
+
+| Component | Responsibility | Where It Lives | Status |
+|-----------|---------------|----------------|--------|
+| `Account` @Model | Household bank account entity | `SchemaV6` + `Persistence/Models/Account.swift` | NEW |
+| `Asset` @Model | Single investment holding | `SchemaV6` + `Persistence/Models/Asset.swift` | NEW |
+| `AccountsView` | CRUD for accounts; per-account spend | `Features/Accounts/` | NEW |
+| `AssetsView` | CRUD for assets; holdings list | `Features/Assets/` | NEW |
+| `NetWorthView` | Net worth = account balances + holding values | `Features/Assets/` | NEW |
+| `PriceFetchService` | Best-effort AMFI NAV / unofficial stock quote | `Features/Assets/PriceFetchService.swift` | NEW |
+| `NetWorthAggregator` | Pure static helper: sum balances + holdings value | `Support/NetWorthAggregator.swift` | NEW |
+| `SelfTransferDetector` | Post-ingestion pass: detect debit/credit pairs across accounts | `Features/Ingestion/SelfTransferDetector.swift` | NEW |
+| `TransferConfirmView` | Review Inbox-style confirm UI for transfer pairs | `Features/Expenses/TransferConfirmView.swift` | NEW |
+| `RoutineResetService` | Per-day reset of routine checklist state | `Support/RoutineResetService.swift` | NEW |
+| `GmailSyncController` | Add post-sync SelfTransferDetector call; stamp accountID | `Features/Gmail/` | MODIFIED |
+| `Note` @Model | Add `isRoutine`, `routineLastResetDate` fields | `SchemaV6` | MODIFIED |
+| `Expense` @Model | Add `accountID`, `isTransfer`, `transferPairID`, `transferConfirmed`, `transferStateRaw` | `SchemaV6` | MODIFIED |
+| `BudgetCalculator` | Filter out confirmed transfers from spend totals | `Support/BudgetCalculator.swift` | MODIFIED |
+
+---
+
+## Recommended Project Structure (New Folders)
+
+```
+MyHomeApp/Features/
++-- Accounts/               # NEW -- Account management feature
+|   +-- AccountsView.swift      # list + quick-edit of accounts
+|   +-- AddAccountView.swift    # add/edit sheet
+|   +-- AccountRow.swift        # row component
++-- Assets/                 # NEW -- Asset tracker + net worth
+|   +-- AssetsView.swift        # holdings list
+|   +-- AddAssetView.swift      # add/edit holding
+|   +-- NetWorthView.swift      # net worth breakdown card
+|   +-- AssetRow.swift          # holding row
+|   +-- PriceFetchService.swift # URLSession price fetch
++-- Expenses/               # EXISTING -- add TransferConfirmView
+|   +-- TransferConfirmView.swift   # NEW -- self-transfer confirm UI
+
+MyHomeApp/Support/
++-- NetWorthAggregator.swift    # NEW -- pure static sum helper
++-- RoutineResetService.swift   # NEW -- per-day reset logic
+
+MyHomeApp/Features/Ingestion/
++-- SelfTransferDetector.swift  # NEW -- debit/credit pair detection
+
+MyHomeApp/Persistence/Models/
++-- Account.swift               # NEW -- typealias Account = SchemaV6.Account
++-- Asset.swift                 # NEW -- typealias Asset = SchemaV6.Asset
+```
+
+---
+
+## Integration Points: New vs Existing
+
+### 1. Account @Model vs Expense.sourceAccount
+
+`Expense.sourceAccount` is a Gmail email string used for ingestion dedup -- do NOT replace it with a FK.
+`Expense.accountID` (UUID?) is the new FK to `Account.id` that links an expense to a household account entity.
+
+Linking strategy:
+- When a user creates an `Account`, they can set `gmailAddress` on it (matching GmailAccount.email).
+- An `AccountLinkingService` pass at Account creation time sets `accountID` on all existing Expenses where `expense.sourceAccount == account.gmailAddress`.
+- Going forward, `GmailSyncController.syncAccount()` stamps `accountID` on new ingested expenses by looking up accounts by `gmailAddress` before inserting. One extra fetch at sync start: `let accountsByGmail: [String: Account]`.
+- Manual expenses get `accountID` set via an optional picker in `AddExpenseView`.
+
+Account deletion: application-side nil-out of `accountID` on affected Expenses before deleting the Account model. No cascade needed in SwiftData.
+
+### 2. Self-Transfer Detection Seam
+
+`SelfTransferDetector` is a pure value-type struct (mirrors `DedupChecker`):
+```swift
+struct SelfTransferDetector {
+    /// Returns matched (debit, credit) pairs from the provided expense window.
+    static func detectPairs(in expenses: [Expense], windowHours: Int = 6) -> [(Expense, Expense)]
+}
+```
+
+Called from `GmailSyncController.syncAccount()` after the last `ctx.save()` in each sync batch:
+```swift
+// After all expenses written for this sync batch:
+let recentExpenses = (try? ctx.fetch(FetchDescriptor<Expense>())) ?? []
+let pairs = SelfTransferDetector.detectPairs(in: recentExpenses)
+for (debit, credit) in pairs {
+    debit.isTransfer = true
+    debit.transferPairID = credit.id
+    debit.transferStateRaw = "pendingReview"
+    credit.isTransfer = true
+    credit.transferPairID = debit.id
+    credit.transferStateRaw = "pendingReview"
+}
+try? ctx.save()
+```
+
+The `TransferConfirmView` reuses the `ReviewInboxRow` skeleton -- a section in `ExpenseListView` titled "Possible Transfers" above the existing "Needs Review" section. Swipe-to-confirm mirrors the accept/discard pattern. Confirmed transfers (`transferStateRaw = "confirmed"`) are excluded from spend aggregation by updating `BudgetCalculator` and `SpendOverTimeAggregator` to filter on `isTransfer && transferConfirmed`.
+
+### 3. Price-Fetch Service Seam
+
+`PriceFetchService` is an `@Observable` class owned by `AssetsView` (or a parent coordinator) via `@State`. Not a singleton. Matches how `GmailSyncController` is owned by `RootView` via `@State`.
+
 ```swift
 @Observable
-final class ExpenseEditViewModel {
-    var amount: Decimal = 0
-    var merchant: String = ""
-    var selectedTag: Tag?
-    var suggestedTags: [Tag] = []
+final class PriceFetchService {
+    var isFetching: Bool = false
+    var lastError: String? = nil
 
-    private let suggester: TagSuggester  // pure Swift, testable
-
-    init(suggester: TagSuggester) { self.suggester = suggester }
-
-    func merchantChanged() {
-        suggestedTags = suggester.suggest(forMerchant: merchant)
-    }
-
-    var canSave: Bool { amount > 0 && !merchant.isEmpty }
+    func fetchAll(assets: [Asset], modelContext: ModelContext) async
+    func fetchAMFI(schemeCode: String) async throws -> Decimal   // AMFI free API
+    func fetchStockQuote(symbol: String) async -> Decimal?       // best-effort, unofficial
 }
 ```
 
-### Pattern 3: Strategy-pattern bank parsers behind a `ParserRegistry`
+AMFI endpoint (HIGH confidence -- free, stable):
+`https://api.mfapi.in/mf/<schemeCode>` returns NAV JSON. Most reliable free Indian MF NAV source.
 
-**What:** Each bank gets one `BankParser` conformer. A `ParserRegistry` holds them all in priority order and picks the first whose `canHandle(_:)` returns true. Adding a new bank = add one file + register it in one line.
+Stock quotes (LOW confidence on free official sources):
+Yahoo Finance `v8/finance/chart/` is de-facto standard but unofficial. Always allow `manualOverrideNav` to take precedence. Show "approx" indicator when `lastNavFetchedAt` is stale (>24h).
 
-**When to use:** Always. This is exactly the kind of plugin shape email parsing wants.
+Caching: `lastKnownNav` + `lastNavFetchedAt` are persisted on `Asset` @Model. PriceFetchService reads these first -- if within 4h, skip the network call.
 
-**Trade-offs:**
-- **Pro:** Zero churn in the ingestion pipeline when adding HDFC v2 or a new bank.
-- **Pro:** Each parser is pure (`(email) -> ExpenseCandidate?`) and trivially golden-tested with stored fixture emails.
-- **Con:** Two parsers can claim the same email. Mitigation: order the registry; log when multiple match in development builds.
-
-**Example:**
+`NetWorthAggregator` (pure static, mirrors BudgetCalculator):
 ```swift
-public protocol BankParser: Sendable {
-    /// Stable identifier, e.g. "hdfc.cc.v1".
-    var id: String { get }
-    /// Cheap pre-check (sender domain, subject keyword) before regex.
-    func canHandle(_ email: RawEmail) -> Bool
-    /// Returns nil if the email doesn't look parseable, even if canHandle was true.
-    func parse(_ email: RawEmail) -> ExpenseCandidate?
-}
-
-public struct ExpenseCandidate: Sendable, Equatable {
-    public let parserID: String
-    public let amount: Decimal
-    public let currency: String        // "INR" in v1
-    public let occurredAt: Date
-    public let merchant: String?
-    public let accountHint: String?    // last 4 digits, "Credit Card", etc.
-    public let confidence: Double      // 0.0 ... 1.0
-    public let sourceEmailID: String
-    public let rawSnippet: String      // for the review UI
-}
-
-public struct ParserRegistry: Sendable {
-    public let parsers: [any BankParser]
-    public func parse(_ email: RawEmail) -> ExpenseCandidate? {
-        parsers.first(where: { $0.canHandle(email) })?.parse(email)
-    }
+enum NetWorthAggregator {
+    static func totalNetWorth(accounts: [Account], assets: [Asset]) -> Decimal
+    static func totalAccountBalance(accounts: [Account]) -> Decimal
+    static func totalHoldingsValue(assets: [Asset]) -> Decimal
+    // Per-asset current value:
+    // (manualOverrideNav ?? lastKnownNav ?? purchaseNav ?? 0) * (units ?? quantity ?? 1)
 }
 ```
 
-### Pattern 4: Ingestion as an `actor` orchestrating typed steps
+### 4. Daily Routine Per-Day Completion Reset
 
-**What:** `IngestionCoordinator` is one `actor` that owns the pipeline: fetch new emails since marker → parse → bucket (auto-save vs. review) → persist → advance marker. Each step is a function whose inputs/outputs are value types — directly unit-testable with a fake `GmailClient`.
+The bug: a note with daily-recurrence reminder has its checklist blocks (`NoteBlock.isChecked`) persist across days. The checklist should reset to unchecked when the user opens the app on a new day.
 
-**When to use:** Always. Background-task entry point is a single line that calls `coordinator.runOnce()`.
+Model approach -- date-keyed completion via routineLastResetDate (recommended):
+- `Note.isRoutine: Bool = false` -- marks this as a daily routine note
+- `Note.routineLastResetDate: Date? = nil` -- UTC start-of-day of the last reset
 
-**Trade-offs:**
-- **Pro:** One reentrancy-safe place to reason about "did I process this email yet?".
-- **Pro:** BGTask handler stays five lines; everything substantive is in the coordinator and is testable without `BGTaskScheduler`.
-- **Con:** Actor hops have a tiny perf cost. Irrelevant at this volume.
-
-### Pattern 5: Per-feature `@Model` types with shared protocols — NOT a generic `HouseholdItem` superclass
-
-**What:** Each domain concept gets its own `@Model` class (`Expense`, `Note`, `ChecklistItem`). Cross-cutting concerns (timestamps, soft delete, search) are expressed as Swift protocols that the models conform to, not as inheritance.
-
-**When to use:** Always, for this app. A `HouseholdItem` superclass with a `type` enum and a `payload: Data` blob is the seductively wrong design — it gives you "flexibility" today and a CloudKit migration nightmare tomorrow.
-
-**Trade-offs of doing it right (per-feature models):**
-- **Pro:** Strong types in queries, predicates, and views; no `if item.type == .expense` casting.
-- **Pro:** CloudKit gives each entity its own `CKRecord` type — clean private→shared zone migration.
-- **Pro:** Adding "chores" later = add `Chore.swift` + a tab. Zero blast radius on existing features.
-- **Con:** A bit more typing up front. Worth it.
-
-**Example shared concern as protocol:**
+`RoutineResetService` (pure struct, called on app foreground):
 ```swift
-protocol Timestamped {
-    var createdAt: Date { get set }
-    var updatedAt: Date { get set }
+struct RoutineResetService {
+    static func resetIfNeeded(notes: [Note], context: ModelContext) throws
+    // For each note where isRoutine == true && routineLastResetDate < startOfToday:
+    //   set all blocks.isChecked = false
+    //   note.routineLastResetDate = startOfToday (UTC)
+    // Explicit context.save() at end
 }
+```
 
-@Model final class Expense: Timestamped { /* … */ }
-@Model final class Note: Timestamped { /* … */ }
+Called from `RootView.onChange(of: scenePhase)` on `.active` transition -- the same hook used by `GmailSyncController.scenePhaseChanged()`. Deterministic; no background task needed.
+
+Calendar integration: a routine note with `isRoutine = true` and `reminderEnabled = true` (daily `RecurrenceType.daily`) already surfaces in `CalendarView` on every day via the existing `CalendarAggregator.perDayCounts()`. No changes to CalendarAggregator needed. The "daily reminder in calendar" feature is achieved by: set `isRoutine = true` in `EditNoteView`, auto-configure reminder to daily recurrence. The existing `NotificationScheduler` handles the rest.
+
+---
+
+## Key Data Flows
+
+### Expense Ingestion (V1.1 extended)
+```
+Gmail sync (GmailSyncController.syncAccount)
+    |
+    v
+Parse + ConfidenceScorer + DedupChecker  [existing]
+    |
+    v
+Write Expense with sourceAccount + accountID (lookup by gmailAddress)
+    |
+    v
+SelfTransferDetector.detectPairs(in: recentExpenses)   [NEW]
+    |
+    v
+Flag transfer pairs: isTransfer=true, transferStateRaw="pendingReview"
+    |
+    v
+TransferConfirmView shows pairs -> user confirms or rejects
+    |
+    v
+BudgetCalculator / SpendOverTimeAggregator filter out confirmed transfers
+```
+
+### Net Worth Computation
+```
+AssetsView appears
+    |
+    v
+PriceFetchService.fetchAll(assets:modelContext:)  [async, best-effort]
+    |
+    v
+Asset.lastKnownNav updated in SwiftData
+    |
+    v
+NetWorthView (@Query on Account + Asset, live)
+    |
+    v
+NetWorthAggregator.totalNetWorth(accounts:assets:)  [pure, synchronous]
+    |
+    v
+Account Balances + Holdings Value = Net Worth
+```
+
+### Daily Routine Reset
+```
+App transitions to foreground (ScenePhase .active)
+    |
+    v
+RootView.onChange(of: scenePhase)
+    |
+    v
+RoutineResetService.resetIfNeeded(notes:context:)
+    |
+    v
+For each Note where isRoutine && routineLastResetDate < startOfToday:
+    block.isChecked = false  (all blocks)
+    note.routineLastResetDate = startOfToday
+    |
+    v
+context.save()  [explicit -- no autosave reliance per CLAUDE.md]
 ```
 
 ---
 
-## Data Layer Detail
-
-### Model design rules (CloudKit-ready from day one)
-
-These rules apply to every `@Model` class you write, even though v1 is local-only. They are cheap upfront and remove the migration tax later.
-
-1. **Every model has a `id: UUID` you generate**, not just SwiftData's hidden persistent ID. CloudKit identifies records by name; using your own UUID lets you map deterministically.
-2. **All non-relationship properties are optional or have defaults.** When SwiftData adopts CloudKit, the underlying `CKRecord` model treats all fields as optional. A non-optional, no-default field will refuse to migrate. Use `String?`, `Decimal?` with sane defaults, or initialize in the designated init.
-3. **No `@Attribute(.unique)` on anything you plan to sync.** CloudKit does not support unique constraints on synced fields. Enforce uniqueness in code at write time (lookup-then-insert) instead. **VERIFY** against current SwiftData/CloudKit docs at implementation time — this is one of the most common breakages.
-4. **All relationships are optional and have inverses declared.** CloudKit requires both sides of the relationship to be modeled; SwiftData's `@Relationship(inverse: \...)` does this. To-many relationships default to empty arrays; never make a relationship `let`.
-5. **No `Codable`-only blob properties for things you might query later.** Store them as first-class fields. Use blobs only for genuinely opaque payloads (e.g. `rawEmailHTML`).
-6. **No enums stored directly; store the raw value.** Save `categoryKind: String` (or `Int`), reconstruct the enum in Swift. CloudKit will round-trip strings/ints cleanly; custom enum coding is fragile under sync.
-7. **Dates in UTC.** Never store local-time dates. The display layer formats with the user's locale.
-8. **Money as `Decimal`, never `Double`.** Currency stored alongside as `String` (`"INR"`).
-
-### Concrete schema sketch
-
-```swift
-@Model final class Expense {
-    @Attribute(.unique) var id: UUID = UUID()   // remove .unique before enabling CloudKit
-    var amount: Decimal = 0
-    var currency: String = "INR"
-    var occurredAt: Date = Date()
-    var merchant: String?
-    var note: String?
-    var sourceEmailID: String?              // Gmail message id, nil for manual entry
-    var parserID: String?                   // which BankParser produced it
-    var confidence: Double = 1.0            // 1.0 for manual
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
-
-    @Relationship var account: Account?
-    @Relationship(inverse: \Tag.expenses) var tags: [Tag] = []
-    @Relationship var category: Category?
-}
-
-@Model final class Tag {
-    @Attribute(.unique) var id: UUID = UUID()
-    var name: String = ""
-    var colorHex: String?
-    @Relationship var expenses: [Expense] = []
-}
-
-@Model final class Category {
-    @Attribute(.unique) var id: UUID = UUID()
-    var name: String = ""
-    var isUserCreated: Bool = false
-    var monthlyBudget: Decimal?
-    var currency: String = "INR"
-}
-
-@Model final class Note {
-    @Attribute(.unique) var id: UUID = UUID()
-    var title: String = ""
-    var body: String = ""
-    var isPinned: Bool = false
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
-    @Relationship(deleteRule: .cascade, inverse: \ChecklistItem.note)
-    var checklistItems: [ChecklistItem] = []
-}
-
-@Model final class ChecklistItem {
-    @Attribute(.unique) var id: UUID = UUID()
-    var text: String = ""
-    var isDone: Bool = false
-    var orderIndex: Int = 0
-    @Relationship var note: Note?
-}
-
-@Model final class ProcessedEmailMarker {
-    @Attribute(.unique) var gmailHistoryID: String = ""
-    var processedAt: Date = Date()
-}
-```
-
-> **Note on `.unique`:** Use it locally for v1 to catch duplicate-insert bugs early. Before enabling CloudKit, remove every `.unique` attribute and enforce uniqueness via a lookup-before-insert helper. Plan one phase line item: "strip `.unique` attributes."
-
-### ModelContainer setup
-
-```swift
-// Persistence/ModelContainer+App.swift
-extension ModelContainer {
-    static func appContainer() -> ModelContainer {
-        let schema = Schema([
-            Expense.self, Tag.self, Category.self, Account.self,
-            Note.self, ChecklistItem.self, ProcessedEmailMarker.self,
-        ])
-        let config = ModelConfiguration(
-            schema: schema,
-            // App Group URL from day one — even before widgets exist.
-            url: URL.appGroupContainer.appending(path: "MyHome.store"),
-            cloudKitDatabase: .none  // flip to .private("iCloud.com.reo.myhome") later
-        )
-        return try! ModelContainer(for: schema, configurations: [config])
-    }
-}
-```
-
----
-
-## Data Flow
-
-### Path A: Email becomes an Expense (the load-bearing flow)
+## Dependency-Ordered Build Sequence
 
 ```
-   ┌────────────────────────────┐
-   │  iOS triggers BG task      │  BGAppRefreshTask scheduled hourly-ish
-   └─────────────┬──────────────┘
-                 ↓
-   ┌────────────────────────────┐
-   │ BackgroundTaskScheduler    │  Hands control to IngestionCoordinator
-   └─────────────┬──────────────┘
-                 ↓
-   ┌────────────────────────────┐
-   │ IngestionCoordinator       │  Reads last gmailHistoryID marker
-   │  .runOnce()                │
-   └─────────────┬──────────────┘
-                 ↓
-   ┌────────────────────────────┐
-   │ GmailClient                │  history.list since marker → message.get
-   │  .fetchNew(since:)         │  Returns [RawEmail]
-   └─────────────┬──────────────┘
-                 ↓ [RawEmail]
-   ┌────────────────────────────┐
-   │ ParserRegistry             │  For each: canHandle? → parse
-   │  .parse(_)                 │  Returns ExpenseCandidate? per email
-   └─────────────┬──────────────┘
-                 ↓ [ExpenseCandidate]
-   ┌────────────────────────────┐
-   │ Triage (pure function)     │  if confidence ≥ 0.85 → auto-save
-   │                            │  else → review queue
-   └────────┬──────────┬────────┘
-            ↓          ↓
-   ┌─────────────┐ ┌─────────────────────┐
-   │ ExpenseStore│ │ ReviewQueueStore     │
-   │ .save(...)  │ │ .enqueue(candidate) │
-   └──────┬──────┘ └──────────┬──────────┘
-          ↓                   ↓
-   ┌────────────────────────────┐
-   │ ModelContext.save()        │
-   │ Advance ProcessedEmail-    │
-   │ Marker                     │
-   └─────────────┬──────────────┘
-                 ↓
-   ┌────────────────────────────┐
-   │ SwiftUI views auto-refresh │  Via @Query observing ModelContext
-   └────────────────────────────┘
+Phase 0: Stabilization         (no schema changes; fixes 3 bugs before V6 work)
+    |
+    v
+Phase 1: SchemaV6 + Migration  (Account + Asset models; all new fields on Expense + Note)
+    |
+    v
+Phase 2: Accounts Feature      (AccountsView, AccountLinkingService, per-account spend)
+    |
+    v
+Phase 3: Self-Transfer         (SelfTransferDetector, TransferConfirmView, aggregator filter)
+    |
+    v
+Phase 4: Asset Tracker         (AssetsView, PriceFetchService, NetWorthAggregator, NetWorthView)
+    |
+    v  (independent of 3; can swap with Phase 3)
+Phase 5: Notes Enhancement     (isRoutine toggle, RoutineResetService, calendar daily reminder)
 ```
 
-**Testability boundary:** every step from "fetch" downward is pure or actor-isolated and accepts injectable dependencies. The only piece you cannot unit-test cleanly is the BGTask handler itself; integration-test the rest by injecting a fake `GmailClient` that returns canned `RawEmail` fixtures.
+Phase 4 (Assets) only needs Phase 1 complete -- it is independent of Phases 2 and 3 and can be built in parallel with them if needed.
 
-### Path B: User creates a Note
-
-```
-NotesListView (@Query) ──► tap "+" ──► NoteEditorView (sheet)
-                                            │
-                                            │  @State: title, body, [ChecklistItem]
-                                            ↓
-                              ModelContext.insert(Note(...))
-                                            ↓
-                                  ModelContext.save()
-                                            ↓
-                       NotesListView re-queries automatically
-```
-
-No view model, no store. SwiftData + `@Query` is enough. Adding ceremony here is the anti-pattern.
-
-### State management
-
-There is no global state container. State lives where it is observed:
-- **Persistent shared state** → SwiftData (`@Query` reads, `ModelContext.save` writes).
-- **Per-screen UI state** → `@State` (or `@Observable` view model for complex screens).
-- **Cross-screen app state** (e.g. "is Face ID locked") → small `@Observable` injected via `.environment(...)`.
-- **No Redux, no TCA, no Combine pipelines.** All flow is `async/await` + SwiftUI observation.
+Phase 5 (Notes) only needs Phase 1 complete -- independent of Phases 2, 3, 4.
 
 ---
 
-## Build Order — What Unlocks What
+## Anti-Patterns to Avoid
 
-Order matters more than picking the perfect first feature. The point is to get an end-to-end thin slice working that exercises persistence + UI + tests, then layer everything else on top of a proven spine.
+### Anti-Pattern 1: @Relationship between Account and Expense
+**What people do:** Add `@Relationship var expenses: [Expense]` on Account.
+**Why it's wrong:** SchemaV5 documents this exact pattern as causing "Circular reference resolving attached macro 'Relationship'" on fan-out relationships. CloudKit also does not support large fan-out relationships reliably.
+**Do this instead:** UUID FK (`accountID: UUID?` on Expense). Join at query time in aggregators and filtered views.
 
-### Phase 1 — "Hello, SwiftData" (build this FIRST)
-1. Xcode project, single iOS target, iOS 17+ deployment.
-2. `Expense`, `Tag`, `Category` `@Model` types (CloudKit rules applied).
-3. `ModelContainer+App.swift` with App Group URL.
-4. `ExpensesListView` showing `@Query` results.
-5. `ExpenseEditView` allowing manual add/edit.
-6. `PreviewSampleData.swift` for fast previews.
-7. Unit test: insert + query + delete an `Expense` in an in-memory container.
+### Anti-Pattern 2: Storing asset type as a Swift enum in @Model
+**What people do:** `var assetType: AssetType` where AssetType is a Swift enum.
+**Why it's wrong:** CloudKit rule 8 (no stored enums). Same pitfall as `ingestionStateRaw` on Expense and `kindRaw` on NoteBlock.
+**Do this instead:** `var assetTypeRaw: String?` with a computed var for decoding.
 
-**Why first:** This is the spine. Until this works, nothing else can be tested visually. Manual expense entry is also the irreducible fallback if Gmail ingestion ever breaks — building it first makes it a real, used path, not a forgotten safety net.
+### Anti-Pattern 3: PriceFetchService as a singleton
+**What people do:** `static let shared = PriceFetchService()` injected via environment.
+**Why it's wrong:** The service holds network tasks; singletons can't be cleaned up cleanly. Tests become complex.
+**Do this instead:** Own as `@State private var priceFetcher = PriceFetchService()` in `AssetsView`, inject `modelContext` explicitly. Matches the GmailSyncController ownership pattern.
 
-### Phase 2 — Categories, tags, budget visualization
-- `Category`, `Tag`; tag-picker UI; `BudgetProgressView`.
-- Pure Swift `BudgetCalculator` (testable without SwiftData).
+### Anti-Pattern 4: Background rollover job for routine reset
+**What people do:** BGAppRefreshTask that resets routine checklists overnight.
+**Why it's wrong:** BGAppRefreshTask execution is not guaranteed and the slot is already used for Gmail sync.
+**Do this instead:** `RoutineResetService.resetIfNeeded()` on foreground activation -- deterministic and always runs before the user sees content.
 
-**Why:** Closes the manual-expense loop. App is now usable end-to-end without any backend dependency.
+### Anti-Pattern 5: Replacing sourceAccount with accountID FK
+**What people do:** Treating `Expense.sourceAccount` (Gmail email) as redundant once `accountID` exists.
+**Why it's wrong:** `sourceAccount` is the dedup idempotency key in `GmailSyncController.syncAccount()` (D-MA-03). Removing it breaks dedup for all existing and future ingested expenses.
+**Do this instead:** Keep both. `sourceAccount` = Gmail email for ingestion pipeline. `accountID` = FK to Account entity for spend/account views.
 
-### Phase 3 — Notes + checklists
-- `Note`, `ChecklistItem`; list, editor, pinned-toggle.
-
-**Why:** Independent of expenses; lets you ship the second core feature without coupling. Cheap win that proves "schema additivity" — adding Notes did not touch Expense code.
-
-### Phase 4 — Overview / Home
-- Aggregate queries (current month spend, top 3 categories, pinned notes).
-- Charts via Swift Charts.
-
-**Why:** Sells the app to the user (yourself + wife). High motivation payoff.
-
-### Phase 5 — Face ID gate + Settings shell
-- `LocalAuthentication` wrapper; `RootView` switches between locked/unlocked.
-- Settings tab scaffolded for upcoming Gmail account screen.
-
-**Why:** Must exist before any financial data feels "trusted." Doing it now also forces you to think about app lifecycle (scenePhase) before adding background tasks.
-
-### Phase 6 — `GmailClient` Swift Package (NO ingestion yet)
-- OAuth flow (web view or `ASWebAuthenticationSession`), token to Keychain.
-- `history.list` + `messages.get` against a real Gmail account.
-- Test target with `URLProtocol`-stubbed responses + a manual "fetch latest 10 emails" debug button in Settings.
-
-**Why:** Network + auth is the riskiest unknown. Prove it as a package in isolation, with a debug surface, before wiring it to anything.
-
-### Phase 7 — `BankParsers` Swift Package, first parser (the one bank you use most)
-- `BankParser` protocol + `ParserRegistry`.
-- One concrete parser (e.g. HDFC credit card).
-- Golden tests: real (anonymized) sample emails → expected `ExpenseCandidate`.
-
-**Why:** Per-bank parsers are the long-tail. One parser proves the shape; the rest are a steady drip. Parsers are pure Swift and the easiest piece to TDD.
-
-### Phase 8 — `IngestionCoordinator` + Review Inbox
-- Wires GmailClient + ParserRegistry + ExpenseStore.
-- Triage: confidence ≥ threshold auto-saves, else into Review Inbox UI.
-- Manual "Run ingestion now" button before BGTask.
-
-**Why:** Get the pipeline working in the foreground first. Background scheduling adds nondeterminism — fight that battle separately, with a known-good pipeline.
-
-### Phase 9 — `BackgroundTasks` registration
-- `BGAppRefreshTask` registered at launch; calls `coordinator.runOnce()`.
-- Settings shows "Last ingested at …"; that one timestamp is your debugging lifeline.
-
-**Why:** Trivial code, huge testing pain. Doing it last means everything it depends on already works.
-
-### Phase 10 — More bank parsers
-- Add ICICI, SBI, Axis, etc. as separate plan items. Each is one file + one registry line + tests.
-
-### Phase 11+ — Optional / future
-- **Widgets:** App Group is already in place; add `WidgetExtension` target reading the same `ModelContainer`. **VERIFY** whether your iOS target version allows direct `@Model` access from a widget process; if not, write a small "snapshot" JSON to the App Group container on each save and have the widget read that. (This snapshot pattern is the safer assumption — adopt it from day one for the widget timeline if direct sharing flakes.)
-- **CloudKit:** strip `.unique`, set `cloudKitDatabase: .private(...)`, add iCloud entitlement + container, test private DB sync.
-- **Sharing zone:** once private works, add a sharing flow for the wife's Apple ID.
-- **Watch app:** mirrors the widget surface initially; full app later.
-
-### Build-first vs. build-last summary
-
-| Build FIRST | Build LAST |
-|------|------|
-| Manual expense entry | Background scheduling |
-| SwiftData spine with one model | CloudKit migration |
-| Preview sample data | Sharing across Apple IDs |
-| App Group container path | Widgets / Watch |
-| Face ID gate | Multi-bank parser long-tail |
-| First bank parser as a Swift Package | A Settings screen with every knob |
+### Anti-Pattern 6: Separate RoutineCompletion @Model
+**What people do:** A `RoutineCompletion` @Model with `(noteID, date, isCompleted)` records.
+**Why it's wrong:** Creates a growing append-only table, CloudKit sync overhead, complex cleanup.
+**Do this instead:** Reset `NoteBlock.isChecked = false` directly on live blocks when day changes. Store only `routineLastResetDate` on Note for idempotency.
 
 ---
 
-## CloudKit-Readiness — Concrete Choices Today
+## CloudKit Readiness Checklist for New Models
 
-| Choice today | Why it matters for CloudKit later |
-|--------------|------------------------------------|
-| Own `id: UUID` on every model | Stable identity across local↔CloudKit |
-| All fields optional or defaulted | CloudKit treats every field as optional; non-defaulted required fields fail migration |
-| No `@Attribute(.unique)` on synced fields (or marked to strip later) | CloudKit doesn't enforce uniqueness; SwiftData rejects unique attrs when CloudKit is enabled |
-| Relationships always have inverses | CloudKit requires bidirectional modeling |
-| No relationship cycles you can't break | Avoids infinite-loop cascade-delete issues during sync |
-| Dates in UTC | Sync conflicts across time zones become trivial |
-| `Decimal` for money | `Double` would round-trip lossily through `CKRecord` (cf. NSNumber coercion) |
-| App Group container URL from v1 | Switching the container path later forces a one-time data dance you don't want |
-| No raw `Data` blobs for queryable info | CloudKit `CKAsset` is fine for opaque blobs but you can't predicate on them |
-| Enums stored as raw values | CloudKit serializes primitives cleanly; custom encoding strategies have bitten people |
-
-**What would force a rewrite (avoid these):**
-- A class-based inheritance hierarchy (`HouseholdItem` superclass with subclasses). SwiftData supports inheritance but CloudKit zone sharing + inherited entities is a known sharp edge — when one model gets shared, the entire inheritance tree is dragged in.
-- Storing JSON blobs as the canonical representation of structured data.
-- Using `@Attribute(.unique)` on properties you query by, then discovering CloudKit won't let you keep them.
-- Building a custom encryption layer on top of SwiftData. CloudKit private DB is already encrypted in transit + at rest; Face ID + iOS sandboxing covers local-at-rest.
-
----
-
-## Watch / Widget Architecture — Decide NOW, Implement LATER
-
-You don't build these in v1, but two architecture decisions today prevent pain.
-
-### Decision 1 — App Group container from day one (zero cost, huge payoff)
-
-Add the App Group entitlement (`group.com.reo.myhome`) to the app target on day one, even with no widget/watch yet. Point your `ModelContainer` URL at the App Group container. Cost: one Info.plist line + one entitlement. Payoff: when you add a widget or watch app later, they can share the *same* database without a data migration.
-
-### Decision 2 — Treat widget timelines as snapshot consumers, not live readers
-
-The cleanest widget architecture: on every meaningful write (`ExpenseStore.save`, budget update), the app writes a tiny JSON snapshot file (`overview-snapshot.json`) to the App Group container with exactly what the widget needs (this month's spend, top category name, top category amount). The widget timeline provider reads that JSON. Reasons:
-
-- Widgets run in a **different process** with strict memory/time limits. Opening a full `ModelContainer` from the widget process can work but is heavier and changes over iOS versions. **VERIFY** at implementation time.
-- The snapshot is also exactly the API the watch app and the Lock Screen widget will want.
-- It decouples widget render performance from your full schema's evolution.
-
-You do not write the snapshot file in v1 — but you carve out the function call site (`SnapshotPublisher.republish()`) inside `ExpenseStore.save()` and make it a no-op. Then in the widget phase you implement it. One line of plumbing now, zero refactor later.
-
----
-
-## Anti-Patterns — Refuse These if a Future Phase Suggests Them
-
-### Anti-Pattern 1: Over-modularization on day one
-**What people do:** Split the app into 6 Swift Packages (Core, Networking, Persistence, Domain, UI, Features) before writing any feature.
-**Why it's wrong:** SwiftData previews break across module boundaries, schema migration tooling gets harder, and you spend a week on `Package.swift` files before printing "hello world." Two-user app + new-to-Swift developer = highest possible cost, lowest possible benefit.
-**Do this instead:** App target + two packages (`BankParsers`, `GmailClient`) that have *real* boundaries (pure Swift, network edge). Extract more only when shared between targets (e.g. watch + iOS).
-
-### Anti-Pattern 2: Repository pattern over SwiftData
-**What people do:** Write `protocol ExpenseRepository { func all() async -> [Expense] }` and a `LiveExpenseRepository` wrapping `ModelContext`, "for testability."
-**Why it's wrong:** SwiftData *is* the repository. Wrapping it (a) breaks `@Query` live updates because your view sees stale snapshots, (b) doubles your write surface, and (c) the "testability" win is illusory — you can spin up an in-memory `ModelContainer` in tests faster than your protocol can be mocked.
-**Do this instead:** `@Query` in views for reads; small `actor` stores only when a write touches multiple models. Test against in-memory `ModelContainer`.
-
-### Anti-Pattern 3: Coordinator pattern for navigation
-**What people do:** Build a `RootCoordinator`, `ExpensesCoordinator`, `NoteCoordinator` to centralize navigation.
-**Why it's wrong:** Coordinator pattern was a UIKit workaround for storyboards. `NavigationStack` with `navigationDestination(for:)` and a typed `path: [Route]` covers every legitimate need in SwiftUI.
-**Do this instead:** Per-tab `NavigationStack` with typed routes. If you need deep-linking, add it as a single `OpenURL` handler that mutates the path.
-
-### Anti-Pattern 4: Dependency-injection container framework
-**What people do:** Pull in Swinject / Factory / Resolver and register every type.
-**Why it's wrong:** Two users. You have maybe 8 types worth injecting. SwiftUI's `@Environment` + initializer injection covers everything.
-**Do this instead:** Pass dependencies as init parameters or via `.environment(\.someKey, value)`. For tests, construct with fakes directly.
-
-### Anti-Pattern 5: Clean Architecture five-layer cake
-**What people do:** Entities / UseCases / Interactors / Presenters / Views, each in their own folder, with mappers between every boundary.
-**Why it's wrong:** You will write more mappers than features. The original Clean Architecture writeup was about decoupling from external frameworks in 100k-line enterprise systems. This app is 5k lines.
-**Do this instead:** Three layers — Data (`@Model` types), Domain (pure Swift for non-trivial rules), Presentation (SwiftUI). Skip Domain when the rule is one line.
-
-### Anti-Pattern 6: Combine where `async/await` suffices
-**What people do:** Build `AnyPublisher<[Expense], Error>` pipelines for everything.
-**Why it's wrong:** Combine is legacy in 2026. `async/await` + `AsyncSequence` + SwiftData's observation cover the same ground with less ceremony, better stack traces, and less Apple-API risk.
-**Do this instead:** `async` functions everywhere. Use `AsyncSequence` if you genuinely need streams (Gmail ingestion does not).
-
-### Anti-Pattern 7: `HouseholdItem` superclass with a `kind` enum and a payload blob
-**What people do:** "Future-proof" by making one model that holds anything — Expense, Note, Chore — distinguished by a `kind`.
-**Why it's wrong:** You lose type safety in every predicate; CloudKit migration becomes brittle; queries become slower because every read touches every kind; UI code grows giant `switch kind` statements. The supposed "additivity" win is illusory — adding a new feature already only takes one new `@Model` + one tab in the per-feature-models design.
-**Do this instead:** Per-feature `@Model` types. Share concerns via Swift protocols (`Timestamped`, `Pinnable`).
-
-### Anti-Pattern 8: Premature parser abstractions
-**What people do:** Build a `ParserConfiguration` DSL, a `ParserMiddleware` chain, a YAML loader for parser rules — before any second bank exists.
-**Why it's wrong:** You don't know what the abstractions should be until you've written three parsers. The shape of HDFC vs. ICICI vs. Axis emails will surprise you.
-**Do this instead:** Write one parser as concrete Swift. Write the second as concrete Swift. *Then* look for the duplication and extract.
-
-### Anti-Pattern 9: Hand-rolled OAuth / token storage
-**What people do:** Implement OAuth from scratch including PKCE, refresh, storage.
-**Why it's wrong:** Crypto/auth is the one place "it works on my machine" silently means "it leaks tokens." Google's published OAuth-for-installed-apps flow + `ASWebAuthenticationSession` + Keychain is the canonical path.
-**Do this instead:** Use `ASWebAuthenticationSession` for the auth web flow. Use Keychain with `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`. **VERIFY** Google's current iOS OAuth client-type rules; they tighten periodically.
-
-### Anti-Pattern 10: Mocking SwiftData
-**What people do:** Wrap `ModelContext` in a protocol so they can mock it.
-**Why it's wrong:** In-memory `ModelContainer(isStoredInMemoryOnly: true)` is faster than your mock and tests the real query semantics.
-**Do this instead:** Real `ModelContainer` in tests, pre-populated with fixtures.
-
----
-
-## Integration Points
-
-### External services
-
-| Service | Integration pattern | Notes |
-|---------|---------------------|-------|
-| Gmail REST API | `URLSession` + bearer token; `history.list` for delta polling | Use `historyId` watermark, not `internalDate` — far cheaper. Free quota is massive at this volume. **VERIFY** scopes: `gmail.readonly` should suffice. |
-| Google OAuth | `ASWebAuthenticationSession` for the user flow; refresh-token exchange via plain URLSession | Store refresh token in Keychain; access tokens are ephemeral and can stay in memory. **VERIFY** Google's installed-app OAuth client guidance hasn't changed. |
-| CloudKit (later) | SwiftData `ModelConfiguration(cloudKitDatabase: .private(...))` | Requires paid Apple Developer Program + iCloud entitlement + container. Test against a real CloudKit dashboard from day one of the migration phase. |
-| Face ID | `LAContext.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, ...)` | Wrap in a small class so previews can fake-bypass; gate `RootView` on success. |
-| BGTaskScheduler | `BGAppRefreshTaskRequest`; register identifier in Info.plist | iOS schedules opportunistically; never assume it runs on time. Always also expose a manual "Refresh now" button. |
-
-### Internal boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `GmailClient` → `IngestionCoordinator` | `async` calls; returns `[RawEmail]` | `GmailClient` knows nothing about parsers or storage |
-| `IngestionCoordinator` → `ParserRegistry` | Pure function call | Registry is `Sendable`, can be reused |
-| `ParserRegistry` → `BankParser` | Protocol dispatch | Parsers are stateless |
-| `IngestionCoordinator` → `ExpenseStore` | `async` actor call | Store owns the `ModelContext` for write transactions |
-| Views → `ModelContext` | `@Environment(\.modelContext)` for writes; `@Query` for reads | Direct — no view-model layer for simple cases |
-| App → Widget (later) | Shared SwiftData container via App Group + snapshot JSON | Decide on snapshot pattern now, implement later |
-| App → Watch (later) | Same App Group container; `WatchConnectivity` only for live commands | Reads from shared store; do not invent a sync protocol |
-
----
-
-## Scaling Considerations
-
-| Scale | Architecture adjustments |
-|-------|--------------------------|
-| 1–2 users (forever) | None. The app is fine as designed. |
-| Hypothetical "more users" | Not applicable — this is a personal-household app by charter. Refuse re-scoping. |
-
-### Realistic "what breaks first" at this scale
-
-1. **First "bottleneck": Gmail rate limits during initial backfill.** When you first turn on ingestion against a 5-year-old inbox, you'll hit Gmail quota. Fix: backfill in batches (e.g. 100 messages at a time, sleep between batches) and persist the marker after every batch.
-2. **Second "bottleneck": parser drift.** Banks change email formats without notice. Fix: every parser stores a `parserID + version`; failures get logged to the Review Inbox with the raw email available; tests pin the parser version against known-good fixtures.
-3. **Third "bottleneck": SwiftData migration.** When you add a new field, write a `VersionedSchema` and a `MigrationPlan` from day one. The CloudKit phase will be the first real migration; treat it as a phase, not a side-quest.
-
-Performance is not a constraint at two users with low-volume data. Do not optimize anything until something is measurably slow.
+Both Account and Asset must follow all SchemaV5 rules:
+- All stored properties have a default or are optional
+- No `@Attribute(.unique)` anywhere
+- Decimal for money (never Double)
+- UTC timestamps via `Date = Date()`
+- UUID primary key (`id: UUID = UUID()`)
+- No stored enums (use `*Raw: String?`)
+- No `@Relationship` fan-out from Account to Expense (use UUID FK instead)
+- Both added to `SchemaV6.models` list and to `AppMigrationPlan.schemas`
 
 ---
 
 ## Sources
 
-WebSearch was unavailable for this research run; the following are the canonical references the implementor should re-read before each relevant phase. Items marked **VERIFY** in the document above are the highest-priority confirmations.
-
-- Apple Developer — [SwiftData documentation](https://developer.apple.com/documentation/SwiftData) — model + container + migration APIs.
-- Apple Developer — [SwiftData with CloudKit](https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices) — current constraints on `.unique`, optionality, inverse relationships.
-- Apple Developer — [Observation framework / `@Observable`](https://developer.apple.com/documentation/observation) — replaces `ObservableObject`/`@Published` in iOS 17+.
-- Apple Developer — [BackgroundTasks framework](https://developer.apple.com/documentation/backgroundtasks) — `BGAppRefreshTask` registration and scheduling semantics.
-- Apple Developer — [WidgetKit timelines](https://developer.apple.com/documentation/widgetkit) — confirm current guidance on accessing SwiftData from widget extensions.
-- Apple Developer — [App Groups + shared container](https://developer.apple.com/documentation/xcode/configuring-app-groups) — entitlement setup; required for widget/watch data sharing.
-- Apple Developer — [`ASWebAuthenticationSession`](https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession) — OAuth web flow.
-- Apple Developer — [`LocalAuthentication` / Face ID](https://developer.apple.com/documentation/localauthentication) — biometric gate.
-- Google — [Gmail API: history.list](https://developers.google.com/gmail/api/reference/rest/v1/users.history/list) — delta polling pattern.
-- Google — [OAuth 2.0 for Mobile & Desktop Apps](https://developers.google.com/identity/protocols/oauth2/native-app) — installed-app flow.
-- Project files: `/Users/reo/My Projects/my-home/.planning/PROJECT.md`
+- Direct codebase reading (HIGH confidence, first-party source):
+  - `MyHomeApp/Persistence/Schema/SchemaV5.swift`
+  - `MyHomeApp/Persistence/Schema/MigrationPlan.swift`
+  - `MyHomeApp/Persistence/ModelContainer+App.swift`
+  - `MyHomeApp/Features/Gmail/GmailSyncController.swift`
+  - `MyHomeApp/Features/Gmail/GmailAccountStore.swift`
+  - `MyHomeApp/Support/NotificationScheduler.swift`
+  - `MyHomeApp/Support/CalendarAggregator.swift`
+  - `MyHomeApp/Features/Notes/CalendarView.swift`
+  - `MyHomeApp/Persistence/Models/ReminderValueTypes.swift`
+  - `MyHomeApp/Features/Expenses/ReviewInboxRow.swift`
+- AMFI MF NAV API (`api.mfapi.in`) -- free Indian MF NAV endpoint (MEDIUM confidence)
 
 ---
-
-*Architecture research for: personal iOS household-ops app (SwiftUI + SwiftData + CloudKit-ready, Gmail-ingested expense tracker + notes, future watchOS/widgets/sharing)*
-*Researched: 2026-05-28*
+*Architecture research for: MyHome v1.1 -- Accounts, Assets & Household Polish*
+*Researched: 2026-06-08*

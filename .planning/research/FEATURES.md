@@ -1,12 +1,498 @@
 # Feature Research
 
-**Domain:** Personal household ops iOS app — automated expense tracker (Gmail-ingested) + shared note keeper, two-person Indian household
-**Researched:** 2026-05-28
-**Confidence:** MEDIUM-HIGH (based on training-data knowledge of iOS finance apps, Indian bank email formats, and iOS 17/18 APIs; web validation was not available at research time)
+**Domain:** Personal household finance + ops hub (iOS, 2-person household, India)
+**Researched:** 2026-06-08 (v1.1 update; v1.0 research preserved below)
+**Confidence:** HIGH (self-transfer detection signals, daily-routine data model), MEDIUM (asset tracker scope and India stock API reliability)
 
 ---
 
-## Scoping Principle
+## v1.1 Scoping Principle
+
+v1.1 adds four feature areas to a shipped app. Every feature is judged against:
+"would a 2-person household actually use this within the first week of it shipping?"
+NOT against what fintech products offer.
+
+PROJECT.md already excludes: broker account linking, Open Banking, CAS import, XIRR, goal planning, multi-currency UI, CloudKit sync (v2), widgets (v2). This document does not re-litigate those.
+
+---
+
+## Feature Area 1: Accounts Management
+
+### What It Is
+
+A named registry of the household's bank accounts (HDFC Savings, ICICI CC,
+etc.) that the existing `Expense.sourceAccount: String?` field can reference as
+a real model, enabling per-account spend totals and a manual balance figure.
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Create / edit / delete BankAccount with name, type, last-4, and opening balance | Without this, sourceAccount strings are unstructured orphans | LOW | type: savings / current / credit-card / wallet as String raw value |
+| Manual balance entry + last-updated timestamp | Balance is known after each bank statement; manual update is the only reliable path | LOW | Store as `Decimal`, never `Double`; timestamp stored as UTC Date |
+| Link existing expenses to an account via sourceAccount string matching | Expenses already carry `sourceAccount: String?` — Account model makes that field meaningful | LOW | Linkage is by string equality; migration can backfill from `sourceLabel` |
+| Per-account expense total for the current month | "How much did we spend on the ICICI card this month?" | LOW | @Query on Expense filtered by sourceAccount; computed, not stored |
+| Account list view showing name, type, balance, and monthly spend | Single screen to see all accounts at a glance | LOW | |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Color / icon (SF Symbol) per account | Fast visual identification on expense list and transfer inbox | LOW | Store symbolName and colorHex on BankAccount |
+| "Unlinked expenses" indicator | Surfaces expenses whose sourceAccount string matches no known account | LOW | Simple @Query predicate; helps after initial account setup |
+| Account balance history (store a snapshot per manual update) | See how a savings balance trends over time; feeds net-worth history | MEDIUM | Separate BalanceSnapshot model; defer until net worth chart is built |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Automatic balance sync via Open Banking / bank API | Sounds convenient | Paid APIs, unstable India coverage, OAuth complexity per bank — no free path | Manual entry after checking the bank app; takes 30 seconds |
+| CSV / PDF bank statement import for batch balance update | Auto-populate balances | Parsing is fragile across all Indian banks; adds file picker + parser surface | Manual balance update; email ingestion already handles transactions |
+| Credit limit + utilisation % | Looks useful | Adds fields (limit, due date, minimum payment) that require regular upkeep | Show the balance; that is enough |
+
+### User Stories (testable)
+
+- User can add a bank account with name, type, last-4 digits, and opening balance.
+- User can edit any account field; last-updated timestamp updates automatically.
+- User can delete an account; linked expenses lose the FK reference (nullify) but are not deleted.
+- User can see total expenses for the current month for each account.
+- The account list shows name, type, balance (with last-updated date), and this-month spend.
+
+---
+
+## Feature Area 2: Self-Transfer Detection
+
+### What It Is
+
+When a bank sends a debit alert (money left Account A) and a credit alert
+(money arrived at Account B) for the same amount on or near the same day, and
+both accounts are the user's own accounts, this is a fund transfer — not spend.
+It must be excluded from budget totals. Decision: **auto-detect then surface a
+confirm prompt; never silent exclusion**.
+
+### Detection Signals (in priority order)
+
+Research findings from YNAB matching documentation and USPTO transaction
+matching patent literature (7-day window for exact-amount match in opposite
+directions) — adapted to Indian bank patterns.
+
+**Signal 1 — Exact amount match (strongest)**
+The debit and credit Decimal amounts are identical to the paisa. Indian bank
+alerts always show exact amounts (no rounding). Fuzzy matching is NOT used;
+it would introduce false positives.
+
+**Signal 2 — Both accounts are known own accounts**
+Both `Expense.sourceAccount` values resolve to accounts that exist in the
+BankAccount registry. A debit to an unknown account (third-party payee) must
+NOT be auto-flagged. This is the gate that prevents false positives.
+
+**Signal 3 — Opposite direction within a 3-day calendar window**
+One transaction is a debit (negative direction) and the other a credit
+(positive direction). The pair must fall within 3 calendar days of each other.
+Rationale: Indian NEFT and IMPS typically settle same-day; UPI is instant;
+3 days covers weekend lag without being so wide it produces false positives.
+(The 7-day window from research literature is appropriate for multi-bank
+international contexts; 3 days is the right tightening for domestic Indian
+transfers.)
+
+**Signal 4 — Neither transaction is already categorised or confirmed as spend**
+If the user manually set a category on the debit, do not second-guess it. Only
+flag pairs where both transactions are uncategorised or auto-ingested without
+user correction. This prevents the detector from overriding intentional
+categorisation.
+
+**Signal 5 — Neither transaction is already flagged as reversal/refund**
+The existing ingestion pipeline handles reversals. Do not double-flag.
+
+**Scoring rule**: A pair scoring 4+ signals → surface in Transfer Inbox
+automatically. A pair scoring exactly 3 (e.g. no category check possible on a
+manual entry) → surface with a lower-priority flag. A pair scoring 2 or fewer
+→ leave alone; too ambiguous.
+
+### Confirm Flow
+
+```
+[Detection runs after each Gmail sync and on first v1.1 launch for historical data]
+    └──> Pair scores ≥ 3 signals
+             └──> Both expenses move to "Possible Transfer" inbox
+                  UI shows: "₹50,000 moved from HDFC Savings → ICICI CC on 7 Jun.
+                             Mark as transfer? This excludes both from spend totals."
+
+[Mark as Transfer]
+    → Both expenses get transferStateRaw = "confirmed"
+    → Excluded from all spend / budget calculations immediately
+    → Shown in a separate "Transfers" section in expense list (not deleted)
+
+[Not a Transfer]
+    → Both expenses get transferStateRaw = "dismissed"
+    → Treated as normal spend; appear normally in all views
+
+[Dismiss for now]
+    → Pair stays in inbox; neither expense is excluded
+    → Badge count persists; user can return and decide later
+```
+
+Critical constraint: The confirm step is mandatory. The system never silently
+removes spend. A false-positive silent exclusion in a finance tool is worse
+than a false-negative (missing a transfer).
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Detect debit+credit pairs meeting ≥ 3 signals | Core feature; transfers inflate spend totals without it | MEDIUM | Run scorer after each sync; also retroactively on v1.1 first launch |
+| `Expense.transferStateRaw: String?` field | Persists the confirm decision | LOW | Values: nil / "pending" / "confirmed" / "dismissed" |
+| "Possible Transfer" inbox (mirrors Review Inbox UX) | User must confirm before exclusion | LOW | Same triage pattern already exists in the ingestion inbox |
+| Mark as Transfer / Not a Transfer / Dismiss for now | Full three-state confirm | LOW | |
+| Confirmed transfers excluded from all @Query spend predicates | This is the entire purpose | MEDIUM | Every spend query needs `transferStateRaw != "confirmed"` filter |
+| Badge on Transfer inbox (pending count) | User needs to know there are unreviewed pairs | LOW | Same badge pattern as ingestion inbox |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Retroactive detection over all historical expenses on v1.1 first launch | Catch transfers that predate the feature | LOW | One-time scorer pass; surface in inbox for review |
+| Net transfer flow summary on Overview (₹X moved between own accounts this month) | Gives a sense of cash movement separate from spend | LOW | Sum of confirmed-transfer amounts; single line on overview |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Silent auto-exclusion without confirm | Faster UX | A false positive silently removes real spend — unacceptable in a finance tool | Always show the confirm inbox; one-tap confirm is fast enough |
+| ML-based transfer detection | "More intelligent" | 5 deterministic signals capture all real Indian domestic transfer patterns; ML adds a training-data burden with no accuracy gain for a household with ~20 accounts max | Use the signal scorer |
+| Fuzzy amount matching (±1%) | Might catch rounding | Indian bank alerts are always exact rupees+paise; fuzzy matching introduces false positives with near-identical amounts | Exact Decimal match only |
+
+### User Stories (testable)
+
+- Given expense A (debit ₹25,000 from HDFC Savings on 5 Jun) and expense B (credit ₹25,000 to ICICI CC on 5 Jun), both accounts are in the BankAccount registry: the pair appears in the Transfer Inbox automatically after the next sync.
+- User confirms the pair as a transfer; both expenses disappear from spend/budget views but remain visible in a "Transfers" section.
+- User marks a pair as "Not a Transfer"; both expenses remain in spend/budget views as normal.
+- The monthly spend total on Overview does not include any expense with `transferStateRaw == "confirmed"`.
+- A debit+credit pair where one account is not in the BankAccount registry does NOT appear in the Transfer Inbox.
+- On first v1.1 launch, the scorer runs over all historical expenses and surfaces any matching historical pairs.
+
+---
+
+## Feature Area 3: Asset Tracker
+
+### What It Is
+
+A lightweight net-worth view covering mutual funds (NAV-priced via free API),
+stocks (quote-priced, best-effort), NPS (manual), and bank account balances
+(from BankAccount) — summing to a net-worth figure. Holdings are entered
+manually; prices refresh from free public APIs; manual override always
+available. This is NOT a trading or portfolio-analytics app.
+
+### Minimum Viable Holding Model
+
+```
+Holding
+  id: UUID
+  name: String                — "Parag Parikh Flexi Cap Fund"
+  assetTypeRaw: String        — "mutualFund" | "stock" | "nps" | "fd" | "other"
+  units: Decimal              — number of units / shares / notional
+  costBasis: Decimal          — total amount invested (Decimal, not per-unit)
+  currentNAV: Decimal         — last fetched or manually overridden price per unit
+  navLastUpdated: Date?       — when price was last refreshed; nil = never fetched
+  navIsManual: Bool           — true if user overrode the fetched price
+  amfiSchemeCode: String?     — for mutualFund type; used to fetch from mfapi.in
+  tickerSymbol: String?       — for stock type; NSE/BSE symbol
+  notes: String?
+  createdAt: Date
+```
+
+Derived at query time, never stored:
+- `currentValue = units × currentNAV`
+- `gainLoss = currentValue - costBasis`
+- `gainLossPct = gainLoss / costBasis × 100`
+- `netWorth = sum(all holding currentValues) + sum(BankAccount.balance)`
+
+### Free Public Data Sources
+
+**Mutual funds — HIGH confidence (reliable, official data)**
+mfapi.in: no authentication, no API key, no rate limits published, pure JSON.
+- Latest NAV: `GET https://api.mfapi.in/mf/{schemeCode}/latest` → `{ "data": [{ "nav": "87.23", "date": "08-06-2026" }] }`
+- Search by name: `GET https://api.mfapi.in/mf/search?q={name}`
+- Scheme codes are AMFI codes (unique per scheme, stable).
+- Source: mfapi.in docs verified 2026-06-08.
+
+**Stocks — MEDIUM confidence (unofficial, fragile)**
+No official free NSE/BSE API exists for third-party iOS apps. Unofficial
+wrappers (Yahoo Finance-backed) exist on GitHub (0xramm/Indian-Stock-Market-API,
+maanavshah/stock-market-india) but have no uptime guarantee and no ToS clarity.
+Recommended approach: attempt a best-effort fetch; if it fails, show the last
+known price with a "stale — as of [date]" label; never block the UI or show an
+error modal. Manual override is always available.
+
+**NPS, FD, gold, other — manual only**
+No public API. `navIsManual = true` permanently for these types. User enters
+current value / units manually when they check their NPS statement.
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Add / edit / delete a holding (name, type, units, cost basis) | Without this there is nothing to track | LOW | |
+| Current value, gain/loss, and gain/loss% per holding | Every portfolio tracker shows these; missing = useless | LOW | Computed from `units × currentNAV` |
+| Total net worth = sum of all holding current values + sum of BankAccount balances | The headline number the user wants | LOW | BankAccount.balance feeds in automatically if Accounts is built first |
+| Asset allocation chart (% by type: MF / stocks / NPS / cash / other) | Instant visual of where money lives | MEDIUM | Pie or donut chart via Swift Charts |
+| Manual NAV / price override | API will sometimes be stale or unavailable | LOW | `navIsManual` flag; show a "manual" badge next to the value |
+| "Refresh prices" button — pulls latest NAV for all MF holdings from mfapi.in | User expects an on-demand refresh | MEDIUM | URLSession; best-effort; never blocking; update `currentNAV` and `navLastUpdated` |
+| Staleness label per holding ("as of DD Mon") | User needs to know how old the price is | LOW | Show `navLastUpdated` formatted; highlight if > 2 business days stale |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Account balances included in net worth total | Cash in bank is part of net worth | LOW | Direct from BankAccount.balance; requires Accounts feature |
+| Net-worth-over-time chart (monthly snapshots) | See wealth trajectory, not just today's number | MEDIUM | Store a `NetWorthSnapshot` (date, totalValue: Decimal) on first-of-month or on-demand tap; render with LineMark in Swift Charts |
+| Holdings grouped by fund house / broker | Easier to scan when there are 6–10 holdings | LOW | Section headers keyed on the first word of the name, or an explicit groupKey field |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| CAS import (PDF / email from CAMS or KFintech) | Auto-populates all MF holdings | PDF parsing is fragile across registrar formats; adds file picker + parser surface for marginal gain when manual entry takes 5 minutes | Manual entry; typical household portfolio is 3–8 funds |
+| Broker account linking (Zerodha / Groww / Kuvera API) | Automatic sync | OAuth per broker, API key, fragile on policy change, no free tier for personal use | Manual unit updates when buying or selling |
+| XIRR / IRR calculation | "True" return metric | Requires full per-lot transaction history (purchase date + amount per tranche); heavy model; non-trivial numerics | Show absolute gain% which is sufficient for a casual tracker |
+| F&O, derivatives, options tracking | Some users trade these | Reo and his wife are SIP + buy-and-hold; adds model complexity with no use | Hard out of scope |
+| Goal-based planning ("retire at 55", "college fund") | Aspirational and popular in Indian apps | Requires long-term projection models, inflation assumptions, SWR calculations | Net-worth trend chart is the simple proxy |
+| Portfolio overlap analysis | Nice to know for MF investors | Requires full holdings-in-each-fund data (not available from NAV-only API) | Manual awareness; if two funds hold Reliance, they both show up in the list |
+| SIP / lump-sum transaction log per holding for cost-basis tracking | Accurate cost basis when buying in tranches | New `HoldingTransaction` model, UI for purchase history, cost-basis recalculation — heavy for v1.1 | Single costBasis field manually maintained; revisit if needed |
+
+### User Stories (testable)
+
+- User can add a mutual fund holding with name, AMFI scheme code, units, and cost basis; current value appears immediately using the last cached NAV.
+- User taps "Refresh Prices"; the app fetches the latest NAV from mfapi.in for all mutual fund holdings and updates `currentNAV` and `navLastUpdated`.
+- If a price fetch fails (no network), the holding shows the last known NAV with a "stale — as of [date]" label; the UI does not block or show an error modal.
+- User can manually override any holding's price; the override is shown with a "manual" badge until the next successful API fetch.
+- Net worth total = sum of (holding.units × holding.currentNAV) + sum of BankAccount.balance.
+- User can see a pie/donut chart of allocation by asset type.
+- User can delete a holding; net worth total updates immediately.
+- For NPS / FD holdings, `navIsManual` is always true and there is no "refresh" option shown.
+
+---
+
+## Feature Area 4: Notes Enhancement — Daily Routine
+
+### What It Is
+
+A special Note variant that is a "daily routine" — an ordered checklist that:
+1. Has its checkbox completion state reset each day so it can be re-ticked.
+2. Fires a local notification at a configured time each day.
+3. Appears in the calendar view as a repeating daily event.
+
+This also directly addresses the v1.1 stabilisation bug: `NoteBlock.isChecked`
+persists forever today. Tuesday's ticked vitamins remain ticked on Wednesday.
+
+### Per-Day Completion State: The Core Data Model Decision
+
+**Root cause of the existing bug**: `NoteBlock.isChecked: Bool` is a stored,
+permanent boolean. It has no concept of "which day was this checked on?"
+
+**Option A — lastCheckedDate on NoteBlock (recommended for v1.1)**
+
+Add a single field to NoteBlock:
+```
+var lastCheckedDate: Date? = nil    // UTC; nil = never checked / was unchecked
+```
+
+"Is this block checked today?" =
+`Calendar.current.isDateInToday(lastCheckedDate ?? .distantPast)`
+
+Check: set `lastCheckedDate = Date()`
+Uncheck: set `lastCheckedDate = nil`
+
+Pros: pure schema-additive change on existing NoteBlock; no new model; no join;
+trivial query. Cons: no completion history (you cannot ask "how often did I do
+this routine last week?").
+
+**Option B — RoutineCompletion log model (for v2 if history is wanted)**
+
+```
+RoutineCompletion
+  id: UUID
+  noteBlock: NoteBlock         — FK to the checkbox block
+  completedOnDate: Date        — Calendar.current.startOfDay(for: Date())
+  createdAt: Date
+```
+
+"Is this block checked today?" = fetch `RoutineCompletion` where
+`noteBlock == block && completedOnDate == today`.
+
+Pros: full history; enables "did I do my routine this week?" view.
+Cons: new @Model, new @Relationship, new schema version, more complex queries.
+
+**Recommendation**: Use Option A for v1.1. The household wants the checklist
+to reset; they are not tracking habit streaks. Option B is the natural upgrade
+path if completion history is requested post-v1.1.
+
+**Schema changes needed on Note** (both options):
+```
+var isDailyRoutine: Bool = false    // marks this note as a daily routine
+var routineTime: Date? = nil        // time-of-day for the daily notification
+```
+
+The existing `NoteBlock.isChecked` boolean MUST be left in the schema for
+CloudKit compatibility (no removals); for daily-routine notes it is ignored and
+replaced by the `lastCheckedDate`-based derived state.
+
+### Calendar and Notification Integration
+
+The `isDailyRoutine` flag on a Note is all the calendar view needs to render a
+repeating daily event. The `NotificationScheduler` already exists and supports
+`.daily` recurrence — wire `routineTime` into it.
+
+No new infrastructure is needed. The existing recurrence system is sufficient
+for a daily-at-fixed-time schedule.
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Per-day reset of checkbox completion state (the bug fix) | Without this the checklist is useless after day 1 | MEDIUM | Add `lastCheckedDate: Date?` to NoteBlock (SchemaV6 migration) |
+| `isDailyRoutine: Bool` flag on Note | Distinguishes a routine note from a regular checklist note | LOW | Schema-additive; new field on Note in SchemaV6 |
+| `routineTime: Date?` on Note | The time for the daily notification | LOW | Schema-additive; store UTC; display in device local time |
+| Daily notification at the configured time | Surfaces the routine in the morning or evening | LOW | Reuse NotificationScheduler with `.daily` recurrence |
+| Calendar view shows daily routine as a repeating event | User expects to see "Morning Routine" as a daily calendar block | LOW | CalendarAggregator already exists; add isDailyRoutine notes as all-day or timed events |
+| Checkboxes appear unchecked on a new day | Core UX; user opens app Tuesday and sees a fresh list | LOW | Derived from `lastCheckedDate` comparison; no new logic beyond the date check |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Multiple routines (morning + evening) | The household plausibly has both | LOW | Already supported by having two separate `isDailyRoutine` Notes; just needs a filter |
+| Reorder routine items via drag-and-drop | Lets user arrange items in execution order | LOW | `NoteBlock.order` already exists; drag-and-drop reorder UI using SwiftUI `.onMove` |
+| Completion history (RoutineCompletion log model) | "Did I do my routine 5 out of 7 days this week?" | MEDIUM | Option B model above; defer to post-v1.1 unless the household explicitly asks |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Habit streak counter (don't break the chain) | Popular in habit apps | Gamification that distracts from the actual goal; the household wants a routine checklist, not a streak | Completion history view if ever requested |
+| Routine template library | Quick-start for common routines | Endless curation; two specific users know exactly what they want | Build from scratch; it takes 2 minutes |
+| "Skip today" with reason tracking | Habit apps do this for accountability | Unnecessary overhead for a private household tool | Just don't tick items; the day's log stays empty |
+| Time tracking per routine item | How long did you spend brushing your teeth? | Overkill | Out of scope |
+| Cross-device sync of daily completion state | Wife sees if Reo did his routine | No CloudKit in v1.1; requires sync infrastructure | Deferred to v2.0 |
+
+### User Stories (testable)
+
+- User marks a Note as "daily routine" and sets a reminder time (e.g. 07:00).
+- On the next calendar day, all checkboxes in that routine appear unchecked regardless of what was ticked the previous day.
+- User ticks items during the day; ticked items show as checked for today only.
+- If the user re-opens the app after midnight, the routine is fresh again — no manual reset needed.
+- The calendar view shows the daily routine as a repeating event at the configured time.
+- A local notification fires at the configured time each day with the routine title.
+- User can have two separate daily routines ("Morning" and "Evening") as two independent Notes; both appear in the calendar.
+
+---
+
+## Feature Dependencies
+
+```
+BankAccount (new @Model)
+    ├──requires──> Expense.sourceAccount (exists in SchemaV5)
+    └──enables──>  SelfTransferDetection
+                       └──requires──> BankAccount (own-account signal)
+                       └──requires──> Expense.transferStateRaw (new field, SchemaV6)
+                       └──enables──>  transfer exclusion in all spend @Query predicates
+
+AssetTracker (new @Model: Holding)
+    ├──uses──>     BankAccount.balance (cash component of net worth)
+    ├──requires──> Holding (new model, SchemaV6)
+    ├──best-effort──> mfapi.in (network; mutual funds only)
+    └──optionally──> NetWorthSnapshot (new model; needed for net-worth chart)
+
+DailyRoutine
+    ├──requires──> Note.isDailyRoutine, Note.routineTime (new fields, SchemaV6)
+    ├──requires──> NoteBlock.lastCheckedDate (new field, SchemaV6)
+    └──uses──>     NotificationScheduler (exists), CalendarAggregator (exists)
+```
+
+### Dependency Notes
+
+- **SelfTransferDetection requires BankAccount**: The "both accounts are own accounts" signal is essential to limit false positives. Build Accounts first or build both in the same phase.
+- **AssetTracker uses BankAccount.balance**: Cash component of net worth comes from BankAccount.balance automatically once Accounts is built. If Accounts is in the same phase, both feed the net-worth total together.
+- **All new fields and models go in SchemaV6**: Accounts, Holding, transferStateRaw on Expense, isDailyRoutine + routineTime on Note, lastCheckedDate on NoteBlock — all additive, all optional/defaulted, all CloudKit-compatible.
+- **DailyRoutine is independent**: No dependency on Accounts or Assets. Can be built in any order within v1.1. It is the stabilisation fix and could ship first.
+
+---
+
+## v1.1 MVP Definition
+
+### Must Have (all four areas constitute the milestone)
+
+- [ ] BankAccount model: add/edit/delete, manual balance, per-account monthly spend — Accounts
+- [ ] Expense ↔ BankAccount linkage via sourceAccount — Accounts
+- [ ] Self-transfer detection (signal scorer) + Transfer Inbox + confirm/dismiss — Self-Transfer
+- [ ] `Expense.transferStateRaw` field; confirmed transfers excluded from all spend queries — Self-Transfer
+- [ ] Holding model: add/edit/delete; current value = units × currentNAV; total net worth — Assets
+- [ ] mfapi.in NAV fetch for mutual fund holdings (best-effort, never blocking) — Assets
+- [ ] Manual price override with staleness label — Assets
+- [ ] Asset allocation chart (pie/donut by type) — Assets
+- [ ] Note.isDailyRoutine + routineTime; daily notification at configured time — Daily Routine
+- [ ] NoteBlock.lastCheckedDate; per-day checkbox reset — Daily Routine (bug fix)
+- [ ] Calendar view shows daily routine as repeating event — Daily Routine
+- [ ] Stabilisation fixes: category ordering, sync/notes crash — Stability
+
+### Add After v1.1 Validation
+
+- [ ] Balance history snapshots → net-worth-over-time chart
+- [ ] Routine completion history log (RoutineCompletion model)
+- [ ] Retroactive transfer detection over all historical expenses (runs once on first v1.1 launch; display-only until user confirms)
+
+### Future (v2+)
+
+- [ ] CloudKit sync — account balances, holdings, routine completions across devices
+- [ ] Holding transaction log (purchase tranches) for XIRR calculation
+- [ ] CAS or broker import for holdings
+
+---
+
+## Feature Prioritization Matrix (v1.1)
+
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Daily routine per-day reset (bug fix) | HIGH | MEDIUM | P1 |
+| BankAccount model + list view | HIGH | LOW | P1 |
+| Self-transfer detection + confirm inbox | HIGH | MEDIUM | P1 |
+| Expense.transferStateRaw + spend exclusion | HIGH | MEDIUM | P1 |
+| Holding model + net worth total | HIGH | LOW | P1 |
+| mfapi.in NAV refresh | MEDIUM | MEDIUM | P1 |
+| Asset allocation chart | MEDIUM | MEDIUM | P1 |
+| Calendar shows daily routine | MEDIUM | LOW | P1 |
+| Daily routine notification | MEDIUM | LOW | P1 |
+| Manual price override + staleness label | MEDIUM | LOW | P1 |
+| Net-worth-over-time chart (monthly snapshots) | MEDIUM | MEDIUM | P2 |
+| Retroactive transfer detection | LOW | LOW | P2 |
+| Routine completion history (RoutineCompletion model) | LOW | MEDIUM | P3 |
+
+---
+
+## Sources
+
+- YNAB transfer matching: [Manually Match Transactions](https://www.ynab.com/blog/matchmaker-matchmaker-make-me-a-match) — confirmed exact-amount-match requirement and the two-transaction rule for matching
+- Self-transfer 7-day window: USPTO patent literature (financial transaction matching system, US6247000) — adapted to 3-day window for Indian NEFT/IMPS/UPI same-day-to-next-business-day settlement
+- [mfapi.in documentation](https://www.mfapi.in/docs/) — confirmed no-auth, no-key, JSON, scheme search and latest NAV endpoints (verified 2026-06-08)
+- India stock API fragility: [0xramm/Indian-Stock-Market-API](https://github.com/0xramm/Indian-Stock-Market-API) and [maanavshah/stock-market-india](https://github.com/maanavshah/stock-market-india) — both unofficial Yahoo Finance wrappers; no uptime guarantee
+- Indian portfolio trackers surveyed for minimum viable features: [arthavi.com](https://arthavi.com), [INDmoney](https://www.indmoney.com/features/track-all-investments), [MProfit](https://www.mprofit.in)
+- Per-day reset model: [Habitica](https://habitica.com) Habits / Dailies / To-Dos separation as the canonical pattern (corroborated by App Store app descriptions for Habitify, Routinery, Daily); adapted to SwiftData
+- Existing codebase: SchemaV5.swift (Expense.sourceAccount, NoteBlock.isChecked structure), SchemaV4.swift (Note, NoteBlock model fields)
+
+---
+
+---
+
+## v1.0 Feature Research (archived — do not re-litigate)
+
+The section below is the original v1.0 research (2026-05-28). It is preserved
+for reference because some sections (India-specific features, anti-features,
+competitor analysis) remain relevant. v1.0 features are all shipped and
+validated; see PROJECT.md Validated section.
+
+---
+
+## Scoping Principle (v1.0)
 
 This is a 2-person household tool, not a market product. Every feature is judged against one question: **"would this make Reo + wife reach for the app instead of Apple Notes + a spreadsheet on day 30?"** Anything that doesn't pass that bar — no matter how standard in YNAB/Mint/Walnut — is an anti-feature here.
 
@@ -14,9 +500,9 @@ PROJECT.md already excludes: Android, SMS reading, cross-Apple-ID sharing in v1,
 
 ---
 
-## Feature Landscape — Expense Tracker
+## Feature Landscape — Expense Tracker (v1.0, all shipped)
 
-### Table Stakes (Users Expect These)
+### Table Stakes (shipped)
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
@@ -25,427 +511,40 @@ PROJECT.md already excludes: Android, SMS reading, cross-Apple-ID sharing in v1,
 | Manual expense entry (amount, date, category, note) | SMS-only banks, cash, parser failures all need a fallback | LOW | Must be 4-tap-max: open → amount keypad → category → save. |
 | Review/inbox for low-confidence parses | Auto-ingestion is never 100% — user must confirm ambiguous ones | MEDIUM | One-tap accept; tap-to-edit fields; swipe-to-discard. Drives parser improvements over time. |
 | Predefined category list at first launch | Empty-category onboarding is friction; Indian users have predictable categories | LOW | Ship with: Groceries, Dining, Fuel, Utilities, Rent, Transport, Shopping, Health, Entertainment, UPI Transfer, ATM, Misc. |
-| Custom tags (single tag default, multi-tag schema) | Categories alone don't capture "Trip to Goa" or "Diwali shopping" | LOW (schema)<br>MEDIUM (UI for multi-tag) | Schema as future-proof per PROJECT.md decisions. UI starts single-tag. |
+| Custom tags (single tag default, multi-tag schema) | Categories alone don't capture "Trip to Goa" or "Diwali shopping" | LOW (schema) / MEDIUM (UI for multi-tag) | Schema as future-proof per PROJECT.md decisions. UI starts single-tag. |
 | Per-category monthly budget | Stated requirement; without it, expenses are just a log not a tool | MEDIUM | Default month = calendar month. Resets on 1st. |
 | Budget progress visualization (per-category bar) | The "are we OK this month?" glance | LOW | Bar + percentage + ₹ remaining. Color shift at 80% / 100%. |
 | Month view grouped by category | The primary "how did we do this month?" surface | MEDIUM | Sectioned list. Tap category → drilldown to transactions. |
-| Edit / delete an expense | Auto-ingested transactions are sometimes wrong (refunds, duplicates, wife's card) | LOW | Hard delete in v1 (no audit trail needed — 2 users, mutual trust). |
-| Duplicate detection on ingestion | Same transaction can arrive via email twice (alert + statement); also bank sometimes resends | MEDIUM | Dedup key: amount + merchant-substring + date within ±1 day. Mark suspected duplicates in inbox, don't auto-merge. |
-| ₹ display with Indian comma grouping (1,00,000 not 100,000) | Wrong formatting screams "not built for India" — instant trust kill | LOW | `NumberFormatter` with `Locale(identifier: "en_IN")`. Test against ₹1, ₹999, ₹1,000, ₹1,00,000, ₹1,00,00,000. |
-| Face ID app lock (toggle in settings) | Financial data; PROJECT.md mandates | LOW | `LocalAuthentication` framework. Lock on background, unlock on foreground (configurable grace period optional). |
-| Empty state on first launch | A blank app screams "broken" — needs to teach the user what to do | LOW | Hero card explaining email connect + sample entries; "Connect Gmail" CTA. |
-| Pull-to-refresh on transaction list | iOS convention for "go check now" | LOW | Triggers manual Gmail poll independent of background schedule. |
-
-### Differentiators (Competitive Advantage vs Apple Notes + Spreadsheet)
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Zero-touch ingestion with named-merchant cleanup | Walnut/CRED have it on Android via SMS — being the first to do this *reliably on iPhone for Indian banks* is the entire reason this app exists | HIGH | Per-bank parser + merchant normalizer ("AMAZON IN BLR" → "Amazon", "ZOMATO ONL BANGAL" → "Zomato"). Maintained as a small lookup table. |
-| Tag/category suggestion from merchant history | Once you tag "Zomato → Dining" twice, the third one is pre-suggested | MEDIUM | Plain lookup table (merchant → most-frequent category) seeded from prior user actions. No ML needed. Huge daily-use lever. |
-| "Quick add" widget on Lock Screen / Home Screen | One-tap to open the app pre-filled to manual entry (for cash expenses while paying the auto-rickshaw) | MEDIUM | iOS 17+ interactive widget. **NOTE: PROJECT.md lists widgets as post-v1.** Recommend revisiting this AFTER ingestion is solid — it's a high-leverage post-v1 win for daily use. |
-| Siri / App Intents shortcut: "Hey Siri, add ₹500 cash expense" | Cash + on-the-go entry without unlocking | MEDIUM | iOS 17 `AppIntent`. Pairs with widget. Same post-v1 timing as widget. |
-| Spotlight search of transactions by merchant/note | Search "swiggy" globally on iPhone → app surfaces matches | MEDIUM | `CoreSpotlight` indexing on transaction insert. Low effort given SwiftData; high "wow this is well-built" payoff. |
-| Inbox-driven parser learning | When user corrects a parsed merchant or category in the review inbox, save that mapping forever | MEDIUM | Persistent merchant-rename and merchant→category maps. Compounds: review inbox shrinks over weeks. |
-| Single shared truth in the home overview | Both spouses see the same monthly bar — no "where did the money go?" arguments | LOW (post-CloudKit) | Real value lands when CloudKit sharing arrives. In v1, single-user already wins over spreadsheet because it's auto-updated. |
-| Comparison vs prior month at a glance | "This month vs last month, ±X%" in the overview | LOW | Trivial once month aggregates exist. Big perceived intelligence for tiny cost. |
-| Charts that respect Indian comma grouping AND short month labels | Generic chart libraries get this wrong | LOW | Swift Charts (iOS 16+) with custom AxisValueFormatter. |
-| Haptic feedback on save / budget threshold cross | Modern iOS apps feel "alive" with subtle haptics; finance apps mostly don't bother | LOW | `UIImpactFeedbackGenerator`. Cheap polish, large delight. |
-| Dynamic Type + Dark Mode from day one | Wife may prefer larger text or dark; default-good accessibility separates "real iOS app" from "RN port" | LOW | SwiftUI gives this nearly free if you don't fight it. Test at XXL. |
-
-### Anti-Features (Deliberately Avoid)
-
-| Feature | Why Requested | Why Problematic for 2-User Household | Alternative |
-|---------|---------------|--------------------------------------|-------------|
-| Split transactions (one expense across multiple categories) | YNAB / Splitwise standard | Adds UI complexity (sub-rows, residual rounding, edit cascades) for a case that occurs <5% of the time in a 2-person household | Tag the whole expense with the dominant category; add a note for context. Or split into two manual entries. |
-| Recurring transaction detection / "subscription tracker" | Mint / Rocket Money flagship | Schema, UI, notifications all balloon. 2 users can recall their own Netflix sub. | Defer until manual data shows >10 repeat merchants/month. PROJECT.md already defers this. |
-| Multiple "accounts" UI with balances | Mint / Monarch standard | We are NOT tracking balances (PROJECT.md says so) — only outflows from email alerts. Per-card view is a "nice-to-have" that bloats schema. | Capture source-card as a tag on each transaction. If "spend by card" is wanted later, it's a filter, not a schema rewrite. |
-| Reconciliation / "mark as cleared" workflow | Banking-app standard | We're not balancing a checkbook. Email alerts ARE the source of truth; there's nothing to reconcile against. | Skip entirely. |
-| Dispute / refund linking | Bank app feature | 2 users will remember disputes themselves; refunds will arrive as new email alerts (negative or "credit" alerts) and can be entered as negative expenses or simply tagged "Refund". | Allow negative-amount entries; nothing more. |
-| Rules engine ("IF merchant contains X THEN category = Y, tag = Z, budget = W") | Power-user finance apps | Editor UI is huge; configuration debt is huge; 2 users have <50 merchants total | Just remember the last category per merchant (suggestion lookup table). 90% of the value at 5% of the cost. |
-| Envelope / zero-based budgeting modes | YNAB philosophy | Wrong mental model for a household that wants observability, not behavioral coaching | Single mode: per-category monthly cap with warnings. Don't expose a "method picker". |
-| Onboarding wizard with category customization upfront | Most apps do this | Pre-launch category creation is decision fatigue when user hasn't seen a single transaction yet | Ship sensible defaults; let user rename/add categories later from a settings screen. |
-| Notification for *every* parsed transaction | "Real-time feel" | Each bank email already pushes a notification — duplicating it is noise that gets the app silenced inside a week | Only notify on (a) budget threshold crossings, (b) low-confidence parses awaiting review, and only if user opts in. |
-| Weekly/monthly email/PDF reports | "Engagement" features | Both users open the app daily; reports are for absent stakeholders | Skip. Charts inside the app are the report. |
-| Goal tracking ("save ₹50,000 for vacation") | Mint / Monarch staple | Out of charter — this is a *spend* tracker, not a *savings* planner. | Track savings goals in a Note with a checklist. The Note keeper already covers it informally. |
-| Multi-user spending attribution ("this was Reo's spend vs wife's spend") | Couples-finance feature | Adds a "payer" field, filters, charts — all to surface info the household doesn't actually argue about | Each transaction's source-card-tag already implies the spender. Don't formalize it. |
-| Cryptocurrency, stocks, investment, net worth | Common upsell in finance apps | Explicitly out of charter per PROJECT.md | Hard no. |
-| Currency conversion UI | Travel feature | PROJECT.md says schema-ready, UI-not. Showing a USD/AED → INR converter is creep. | Schema field exists; UI shows INR always. |
-| Receipt photo attachment | "Just in case" feature | Storage, thumbnail UI, full-screen viewer, share-sheet handling — all for a use case that hasn't been measured | Defer. PROJECT.md already defers. A note can hold a photo if absolutely needed in v1. |
-| Voice memo entry | iOS-native flex | Requires speech-to-text, parsing of "five hundred rupees on groceries today", error handling. High effort, low daily-use payoff for a 2-person household. | Siri + App Intent (post-v1) gives 90% of the value with Apple doing the STT. |
-| Gamification / streaks / achievements | Mainstream consumer apps | Patronizing for a household tool. Wife will hate it. | None. |
-| In-app ads / paywalls / Pro tier | SaaS norm | This is not a SaaS. | None. |
-| Telemetry / analytics SDK | Industry default | PROJECT.md forbids; financial data privacy + 2-user feedback loop is direct conversation | None. |
+| Edit / delete an expense | Auto-ingested transactions are sometimes wrong | LOW | Hard delete in v1. |
+| Duplicate detection on ingestion | Same transaction can arrive via email twice | MEDIUM | Dedup key: amount + merchant-substring + date within ±1 day. |
+| ₹ display with Indian comma grouping (1,00,000 not 100,000) | Wrong formatting screams "not built for India" | LOW | `NumberFormatter` with `Locale(identifier: "en_IN")`. |
+| Face ID app lock (toggle in settings) | Financial data; PROJECT.md mandates | LOW | `LocalAuthentication` framework. |
 
 ---
 
-## Feature Landscape — Note Keeper
-
-### Table Stakes
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Note = title + free-form body | PROJECT.md requirement | LOW | Plain text body is enough for v1. |
-| Optional checklist items inside any note | PROJECT.md requirement; the "grocery list" use case | MEDIUM | Inline checkable rows mixed with text. Tap to toggle, drag to reorder. |
-| Recent-first list of all notes | PROJECT.md requirement | LOW | Sort by `updatedAt` desc. |
-| Create / edit / delete a note | Basic CRUD | LOW | Swipe-to-delete with confirmation. |
-| Auto-save on every keystroke (or on background) | Apple Notes set the expectation; explicit Save buttons feel dated | LOW | Debounce 500ms; persist via SwiftData. |
-| Search across note title + body | A 50-note pile is unmanageable without search | LOW | `.searchable` modifier — built into SwiftUI lists. |
-| Pin a note | PROJECT.md home overview surfaces pinned notes | LOW | Boolean flag; pinned section at top of list. |
-
-### Differentiators
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Checklist progress shown in note list ("3 of 8") | At-a-glance "what's left on the grocery list?" without opening | LOW | Compute on the fly from checklist items. |
-| "Convert checked items to expense" action | Grocery checklist → multi-line expense with one tap (post-v1, but a uniquely-household feature) | MEDIUM | Bridges the two features in a way no off-the-shelf app does. Consider for v1.x. |
-| Lock Screen widget for a specific pinned note | Wife adds "milk" while at the store without opening anything | MEDIUM | iOS 17+ interactive widget. Post-v1 per PROJECT.md, but flag as high-leverage. |
-| Share Sheet receive (text/URL from Safari → new note) | Capture recipes, addresses, links without typing | LOW | `Share Extension` target. Modest setup cost, high "this is my real notes app" payoff. |
-| Spotlight search of notes by title + body | Find notes from iPhone home screen | LOW | `CoreSpotlight`. Same plumbing as expense search. |
-
-### Anti-Features
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Rich text / markdown formatting (bold, headings, lists) | Apple Notes / Bear standard | Editor toolbar, render layer, paste handling, edge-case bugs. 2 users writing grocery lists don't need it. | Plain text body. If it ever matters, add later. |
-| Folders / nested folders | Notes app standard | UI tree, drag-and-drop, "where did I put it?" cognitive load — for a 2-user note pile that will plateau at <100 notes | Skip. Search + pin handles discovery. Tags are also overkill at this volume. |
-| Tags on notes (separate from expense tags) | Power-user note app convention | Two tag systems (expense tags + note tags) doubles vocabulary maintenance for no benefit | Skip. Use the note title to convey type ("Grocery — May 28"). |
-| Image / audio attachments in notes | Apple Notes standard | File storage, thumbnails, sharing pipeline. Apple Notes already exists for this. | Skip. Differentiation isn't here. |
-| Note versioning / history | "Undo when wife edits" anxiety | Storage cost; UI for version diffing | Skip. Trust + verbal coordination handles 2-user editing. |
-| Collaborative real-time cursors | Google Docs feature | Hard with CloudKit; not needed for grocery lists | Skip permanently. Last-writer-wins is fine. |
-| Drawing / sketch / handwriting | iPad / Apple Pencil feature | Both users use iPhone, not iPad | Skip. |
-| Note templates | Productivity-app feature | YAGNI at 2 users | Skip. Duplicate-a-note is enough. |
-| Encryption per-note | "Lock my journal" feature | Face ID on the whole app is already the security boundary | Skip; the app lock IS the protection. |
-| Reminders attached to notes | Apple Reminders crossover | Apple Reminders exists; don't compete | Skip; if a checklist item is time-sensitive, the user can use Reminders. |
-
----
-
-## Feature Landscape — Home Overview Screen
-
-### Table Stakes
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Current-month spend vs budget bar | PROJECT.md requirement | LOW | Single bar, summed across all categories' budgets. ₹X of ₹Y spent. |
-| Top 3 categories this month | PROJECT.md requirement | LOW | Sorted desc by amount; show category, amount, % of total. |
-| Pinned notes / most recent checklist | PROJECT.md requirement | LOW | Card showing first 1–3 pinned notes, tappable. |
-| "Add expense" + "Add note" quick actions | Without these, the overview is a dead-end screen | LOW | Floating action button or top-right `+` menu. |
-
-### Differentiators
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Today's spend (running total) | "Did we already overspend today?" — the most useful daily glance | LOW | Sum of today's transactions on the overview card. |
-| Inbox count badge ("2 transactions to review") | Surfaces pending action without going hunting | LOW | Small pill on the overview that taps into the review inbox. |
-| Vs-last-month delta on the spend bar | Context that "₹38,000 spent" needs ("up 12% from April") | LOW | Single stored aggregate per closed month. |
-| "Streak" of days with at-least-one-expense logged | Reassures the user that ingestion is working — silence is scary in a finance app | LOW | Implicit health indicator without being gamified. |
-
-### Anti-Features
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Customizable dashboard cards | Power-app feature | Drag-handles, hidden states, "where's my widget?" support burden | Fixed layout. If it's not useful, redesign — don't make the user redesign. |
-| Multiple "views" / tabbed dashboards | Mint-style | YAGNI; one well-designed overview > three half-designed ones | One screen. |
-| News feed / spending tips / personalized advice | Engagement features | Patronizing; nobody asked | None. |
-
----
-
-## Cross-Cutting Features
-
-### Table Stakes
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Dark mode | iOS user expectation since 2019 | LOW | Free with SwiftUI semantic colors. Don't hard-code hex. |
-| Dynamic Type support | Accessibility expectation; wife may want larger text | LOW | Use `.font(.body)` not `.system(size: 14)`. Test at XXL. |
-| Locale `en_IN` formatting throughout | Trust signal | LOW | Centralize a `Formatters` namespace; use Locale `en_IN` for currency and `dd MMM yyyy` for dates. |
-| Empty states with guidance | "No expenses yet" should teach, not just show a void | LOW | One illustration + one CTA per empty screen. |
-| Error states for Gmail auth / network | OAuth tokens expire; network drops happen | MEDIUM | Inline banner in the inbox/overview when Gmail sync is broken. Don't fail silently. |
-| Background-fetch failure recovery | iOS may throttle BackgroundTasks | MEDIUM | Manual "sync now" + last-synced timestamp visible. |
-| Settings screen | Toggle Face ID, manage categories, manage budgets, sign out of Gmail | LOW | Standard SwiftUI `Form`. |
-
-### Differentiators
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Haptic feedback (save success, budget cross, swipe) | Polish; signals quality | LOW | `UIImpactFeedbackGenerator`. Cheap. |
-| First-run experience tuned to "connect Gmail, see your first parsed transaction within 60 seconds" | Sets the bar that the app actually works | MEDIUM | The most important UX moment — the wow that earns daily use. Worth designing carefully. |
-| Consistent ₹ formatting (no rogue NSDecimalNumber rounding bugs) | Money apps must not be wrong about money | LOW (with discipline) | Use `Decimal` everywhere; never `Double`. One arithmetic helper module. |
-
-### Anti-Features
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Light/dark/auto theme picker | "User preference" | iOS already has system-wide dark mode toggle — don't duplicate | Honor the system setting. |
-| Custom color theme picker | Personalization | Maintenance burden; sets wrong expectation for app polish | Skip. One well-chosen palette. |
-| Onboarding tour with 5+ screens | "Educational" | Users skip it; valuable info gets buried | Inline empty-state guidance only. |
-
----
-
-## India-Specific Features
-
-This is where generic templates fail and the app earns trust.
+## India-Specific Features (v1.0 context, remains relevant)
 
 ### Table Stakes (India)
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Indian numbering: ₹1,00,000 (lakh) not ₹100,000 | Wrong format = "this app isn't built for me" | LOW | `NumberFormatter` with `Locale(identifier: "en_IN")` handles it. Verify ₹ symbol prefix (not suffix). |
-| Per-bank email templates: HDFC, ICICI, SBI, Axis, Kotak | These 5 cover ~80% of urban Indian households' cards | HIGH | See parsing notes below. Each has 2–3 alert subtypes (debit card / credit card / UPI / NEFT). |
-| UPI transaction parsing | UPI is now the dominant transaction type in India (>14B txns/month nationally as of late 2025) | HIGH | UPI alerts have format like "INR 250.00 debited from A/c XX1234 to VPA merchant@upi on 28-May-26". Extract VPA as merchant. |
-| Recognize "credit" / "refund" / "reversal" emails | Refunds arrive as the same format with opposite verb; treating them as expenses doubles the spend | MEDIUM | Parser must flag direction. Store as negative or with a `direction` enum. |
-| Date parsing: `DD-MMM-YY`, `DD/MM/YYYY`, `DD MMM YYYY` | Indian banks use varied formats; all DD-first | LOW | Try multiple DateFormatters with `Locale(identifier: "en_IN")` and `posix` for parsing. |
-| Indian category defaults | Generic lists miss UPI, ATM, Recharge, Maid, Auto/Cab | LOW | Defaults: Groceries, Dining, Fuel, Utilities, Rent, Auto/Cab, Shopping (Amazon/Flipkart), Health/Pharmacy, Entertainment, Recharge/DTH, Maid/Help, UPI to Person, ATM, Misc. |
-| Merchant normalization for Indian aggregators | Raw bank text is "AMAZON IN BLR 7AB", "ZOMATO ONL BANGAL", "SWIGGY BANGALORE" — useless without cleanup | MEDIUM | Lookup table of ~30 common merchants to clean names. |
+| Indian numbering: ₹1,00,000 (lakh) not ₹100,000 | Wrong format = "this app isn't built for me" | LOW | `NumberFormatter` with `Locale(identifier: "en_IN")` handles it. |
+| Per-bank email templates: HDFC, ICICI, SBI, Axis, Kotak | These 5 cover ~80% of urban Indian households' cards | HIGH | Templated extractors with confidence score. |
+| UPI transaction parsing | UPI is the dominant transaction type in India | HIGH | Extract VPA as merchant. |
+| Recognize "credit" / "refund" / "reversal" emails | Refunds treated as expenses doubles the spend figure | MEDIUM | Parser flags direction; store as negative or with a direction field. |
+| Indian category defaults | Generic lists miss UPI, ATM, Recharge, Maid, Auto/Cab | LOW | Shipped defaults cover these. |
 
-### Differentiators (India)
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Separate "UPI to person" vs "UPI to merchant" detection | Sending ₹500 to friend ≠ spending ₹500 at restaurant; conflating breaks budgets | MEDIUM | Heuristic: VPA contains `@paytm`, `@ybl`, `@oksbi`, `@ibl` → likely person; VPA contains brand name or merchant category code → merchant. Imperfect; let user correct in review inbox. |
-| Auto-tag spends from common Indian merchants | "Swiggy → Dining", "BPCL → Fuel", "Tata Power → Utilities" out of the box | LOW (seed table) | Bundled seed data; user corrections compound on top. |
-| Festive-month awareness (optional) | Diwali / wedding-season spike is real; surfacing "October usually higher" prevents budget panic | LOW | Just an annotation on the comparison-vs-prior-month indicator. Don't over-engineer. |
-| Credit card statement-cycle awareness | Indian credit cards have non-calendar billing cycles (e.g. 16th–15th); calendar-month budgets misalign | MEDIUM | Per-card "billing cycle start day" setting; optional alternate view. Probably v1.x, not v1. |
-
-### Anti-Features (India)
+### Anti-Features (India, v1.0)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Multi-currency UI (USD, AED, etc. for travel) | International travel common from India | PROJECT.md says no for v1; schema-ready is enough | Note travel expenses with a tag; mental conversion is fine for 1–2 trips/year. |
-| Investment / mutual-fund / SIP tracking | Indian users often want this in one place | Out of charter; complex; KFintech/CAMS scraping is a separate beast | Skip permanently. |
-| Tax-section labeling (80C, 80D, etc.) | Indian-tax appeal | Annual not daily; spreadsheet does this fine once a year | Skip. Tag with "Tax" if needed. |
-| Direct UPI app integration ("pay from inside this app") | Convenience | Massive PCI/RBI compliance burden; unrelated to "tracking" | Skip permanently. |
-
-### Indian Bank Email Format — Parsing Notes
-
-Based on standard templates these banks have used for years (no recent indication of major format changes; verify against live samples during the parser-build phase):
-
-- **HDFC Bank**
-  - Common subjects: `Update on your HDFC Bank Credit Card`, `Alert : You have done a UPI transaction`, `Debit card transaction alert`
-  - Body anchors: `Rs.` or `INR` followed by amount; `at ` or `to VPA ` for merchant; `on DD-MM-YY`; `Info: <merchant code>`
-  - Quirks: HTML-only emails; amount may have decimals or not; sometimes both `Rs.` and `INR` appear
-
-- **ICICI Bank**
-  - Common subjects: `Transaction alert for your ICICI Bank Credit Card`, `UPI transaction alert`
-  - Body anchors: `INR ` amount; `Info: <merchant>`; `at <merchant>`; date in `DD-Mon-YY` format
-  - Quirks: Reference numbers (`Ref no XXXXXXXXX`) useful for dedup
-
-- **SBI**
-  - Common subjects: `Transaction Alert`, `INB Transaction`
-  - Body anchors: `Rs.` amount; `at <merchant>` or `transferred to <name>`; date `DDMonYY` (no separators sometimes)
-  - Quirks: Long, verbose body; lots of disclaimer text — anchor extraction must be tight
-
-- **Axis Bank**
-  - Common subjects: `Thank you for using your Axis Bank Credit Card`, `UPI alert`
-  - Body anchors: `INR ` amount; `at <merchant>`; `on DD-MM-YYYY`
-  - Quirks: Cleaner HTML; predictable structure
-
-- **Kotak**
-  - Common subjects: `Transaction alert`, `Kotak UPI alert`
-  - Body anchors: `Rs.` or `INR `; `at <merchant>` or `to <VPA>`
-  - Quirks: Sometimes plain-text only; sometimes both HTML and plain-text
-
-- **Common parsing strategy**
-  - Per-bank Sender-domain match (`@hdfcbank.net`, `@icicibank.com`, `@sbi.co.in`, `@axisbank.com`, `@kotak.com`) routes to that bank's parser.
-  - Each parser returns `(amount, merchantRaw, dateUTC, last4OfCard?, direction, confidence)`.
-  - Confidence < 0.8 → review inbox, don't auto-save.
-  - **Empirical truth**: parsers will break when banks tweak templates. Build the inbox flow such that broken parses are a small annoyance (one tap to fix) rather than a silent loss.
+| Multi-currency UI (USD, AED, etc. for travel) | International travel common from India | PROJECT.md says no for v1; schema-ready is enough | Note travel expenses with a tag. |
+| Investment / mutual-fund / SIP tracking | Indian users often want this in one place | **Reversed in v1.1 — now in scope** | See Asset Tracker above. |
+| Tax-section labeling (80C, 80D, etc.) | Indian-tax appeal | Annual not daily; spreadsheet fine once a year | Skip. |
+| Direct UPI app integration ("pay from inside this app") | Convenience | Massive PCI/RBI compliance burden | Skip permanently. |
 
 ---
 
-## Feature Dependencies
-
-```
-Gmail OAuth
-    └──enables──> Bank email ingestion
-                       └──requires──> Per-bank parsers
-                       │                  └──requires──> Merchant normalizer
-                       │                  └──feeds────> Review inbox
-                       │                                     └──improves──> Per-merchant category memory
-                       └──requires──> BackgroundTasks scheduling
-                       └──requires──> Duplicate detection
-
-Categories (predefined + custom)
-    └──required-by──> Per-category budgets
-                            └──required-by──> Budget progress bars
-                            └──required-by──> Home overview "top 3 categories"
-    └──required-by──> Month view grouping
-    └──required-by──> Category breakdown chart
-
-Decimal money type
-    └──required-by──> All amount arithmetic (sums, budgets, deltas, charts)
-
-INR Indian-locale formatter
-    └──required-by──> Every screen that shows money
-
-Transaction model with date
-    └──required-by──> Month view
-    └──required-by──> Spend-over-time chart
-    └──required-by──> Comparison vs prior month
-    └──required-by──> "Today's spend" overview tile
-
-Note model (title + body + checklist items)
-    └──required-by──> Note list
-    └──required-by──> Pinned notes on overview
-    └──required-by──> Note search
-    └──required-by──> Checklist progress indicator
-
-Face ID lock
-    └──depends-on──> nothing (foundational, can ship first)
-
-Spotlight indexing
-    └──depends-on──> Transaction model AND Note model
-    └──enhances──> Search experience for both
-
-Widgets / App Intents (post-v1)
-    └──depends-on──> Transaction model + manual-entry flow being stable
-```
-
-### Dependency Notes
-
-- **Per-bank parsers require per-bank email samples** — can't build them without sample emails in hand. The parser-build phase must start with a "collect 50 historical bank emails from each user's Gmail" step.
-- **Budgets require categories which require the transaction model** — the natural build order is: schema → manual entry → categories → budgets → overview cards, then layer email ingestion on top.
-- **Review inbox sits between parsers and the category-memory feature** — it's the human-in-the-loop that makes the suggestion table good. Build the inbox before optimizing the parser.
-- **Charts depend on time-bucketed aggregates** — pre-compute monthly category sums; don't scan the transaction table on every chart render.
-- **Spotlight indexing on note + expense should be one shared mechanism** — pulled out into a `SpotlightIndexer` service to avoid duplicate code.
-- **CloudKit-readiness is a schema concern, not a feature** — every model has a UUID PK and avoids fan-out FKs from day one (per PROJECT.md). This isn't a feature to plan; it's a discipline.
-
----
-
-## MVP Definition
-
-### Launch With (v1)
-
-The "this is usable daily within a week" cut.
-
-- [ ] **Face ID app lock** — financial app prerequisite (small, foundational)
-- [ ] **Manual expense entry** — works before Gmail, becomes fallback after (small)
-- [ ] **Predefined categories + custom add/edit/rename** — required for everything downstream (small)
-- [ ] **Per-category monthly budgets** — core requirement (medium)
-- [ ] **Month view grouped by category** — primary review surface (medium)
-- [ ] **Note: title + body + inline checklist** — full note feature (medium)
-- [ ] **Note list, pin, search** — basic note management (small)
-- [ ] **Home overview: spend-vs-budget bar, top 3 categories, pinned note card** — required (small once data exists)
-- [ ] **₹ Indian-locale formatting everywhere** — non-negotiable trust signal (small with discipline)
-- [ ] **Dark mode + Dynamic Type** — modern iOS baseline (small if not fought)
-- [ ] **Gmail OAuth + at least 2 bank parsers (HDFC + ICICI; pick whichever covers Reo's daily cards first)** — the core value prop, gated on having sample emails (large)
-- [ ] **Review inbox for low-confidence / unknown parses** — required because parsers will be wrong on day one (medium)
-- [ ] **Duplicate detection on ingestion** — required to keep auto-ingest trustworthy (medium)
-- [ ] **Merchant normalization seed table (~20 common merchants)** — required for "this app is built for India" feel (small)
-- [ ] **Spend-by-category + spend-over-time charts** — required per PROJECT.md (medium with Swift Charts)
-- [ ] **Settings: Face ID toggle, manage categories/budgets, Gmail sign out, last sync timestamp** — required (small)
-
-### Add After Validation (v1.x)
-
-Triggered when daily use is established.
-
-- [ ] **Additional bank parsers (SBI, Axis, Kotak, + any card Reo/wife use)** — trigger: a transaction landed in inbox and parser was missing (medium each)
-- [ ] **Per-merchant category memory (auto-suggest)** — trigger: 20+ manual category corrections logged (medium)
-- [ ] **Spotlight indexing for transactions + notes** — trigger: search feels too local; user searches from home screen (medium)
-- [ ] **Share Sheet receive for notes** — trigger: user copy-pastes URLs into notes more than 5 times (small)
-- [ ] **Comparison vs prior month on overview** — trigger: month-end retrospectives happen (small)
-- [ ] **Today's spend tile** — trigger: user asks "what did we spend today?" verbally (small)
-- [ ] **Notifications: budget threshold + review-inbox pending** — trigger: user misses budget overages (small)
-- [ ] **Haptics polish pass** — trigger: any time before showing it to wife (small)
-- [ ] **Merchant rename memory** — trigger: same correction made twice (small)
-
-### Future Consideration (v2+)
-
-Defer until product-market fit is established (post-CloudKit, post-$99/yr decision).
-
-- [ ] **CloudKit sharing with wife's Apple ID** — the v2 trigger event by definition
-- [ ] **Home Screen + Lock Screen widgets** (quick-add expense, pinned-note glance) — high-leverage but post-v1 per PROJECT.md
-- [ ] **App Intents / Siri shortcut** ("Hey Siri, add ₹500 cash expense") — pairs with widgets
-- [ ] **Watch app** — explicitly post-v1
-- [ ] **"Convert checked items to expense"** bridge action — household-unique feature; needs both expense and note features mature
-- [ ] **Credit-card billing-cycle aware view** — only if budgets misaligning to calendar months becomes a real complaint
-- [ ] **Recurring / scheduled expenses** — only if manual data shows >10 repeat merchants
-- [ ] **Receipt OCR** — only if manual-entry friction data justifies it
-- [ ] **Chores / calendar / grocery as separate household features** — proves the "schema absorbs new features" claim from PROJECT.md
-
----
-
-## Feature Prioritization Matrix
-
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Gmail OAuth + bank ingestion (HDFC + ICICI) | HIGH | HIGH | P1 |
-| Manual expense entry | HIGH | LOW | P1 |
-| Review inbox for low-confidence parses | HIGH | MEDIUM | P1 |
-| Duplicate detection | HIGH | MEDIUM | P1 |
-| Categories (predefined + custom) | HIGH | LOW | P1 |
-| Per-category monthly budgets | HIGH | MEDIUM | P1 |
-| Month view + budget bars | HIGH | MEDIUM | P1 |
-| Notes (title/body/checklist) | HIGH | MEDIUM | P1 |
-| Note list / pin / search | HIGH | LOW | P1 |
-| Home overview screen | HIGH | LOW (given data) | P1 |
-| INR Indian-locale formatting | HIGH | LOW | P1 |
-| Face ID app lock | HIGH | LOW | P1 |
-| Dark mode + Dynamic Type | MEDIUM | LOW | P1 |
-| Merchant normalization seed table | HIGH | LOW | P1 |
-| Spend-by-category + spend-over-time charts | MEDIUM | MEDIUM | P1 |
-| Additional bank parsers (SBI/Axis/Kotak) | HIGH (when needed) | MEDIUM each | P2 |
-| Per-merchant category memory | HIGH | MEDIUM | P2 |
-| Spotlight indexing | MEDIUM | MEDIUM | P2 |
-| Today's spend overview tile | MEDIUM | LOW | P2 |
-| Vs-prior-month comparison | MEDIUM | LOW | P2 |
-| Share Sheet receive for notes | MEDIUM | LOW | P2 |
-| Notifications (budget threshold, inbox pending) | MEDIUM | LOW | P2 |
-| Haptics polish | LOW | LOW | P2 |
-| CloudKit sharing | HIGH (when v2) | HIGH | P3 |
-| Widgets + App Intents | HIGH (when v2) | MEDIUM | P3 |
-| Checklist → expense bridge | MEDIUM | MEDIUM | P3 |
-| Credit-card billing-cycle view | LOW | MEDIUM | P3 |
-| Receipt OCR | LOW (deferred) | HIGH | P3 |
-| Recurring expense detection | LOW (deferred) | HIGH | P3 |
-
-**Priority key:**
-- P1: Must have for v1 launch — the daily-use bar
-- P2: Add after v1.x once daily-use proves which P2s matter most
-- P3: Future / CloudKit / post-$99-decision
-
----
-
-## Competitor Feature Analysis
-
-| Feature | Walnut (defunct on iOS, was Android SMS) | CRED / Money Manager India | Apple Notes + Spreadsheet (the actual competition) | Our Approach |
-|---------|------------------------------------------|----------------------------|---------------------------------------------------|--------------|
-| Auto-ingestion | SMS (Android only) | Manual + statement upload | None | Gmail-based, iOS-native, zero-touch |
-| Categories | Auto-tagged from SMS heuristics | Predefined + custom | Manual in spreadsheet columns | Predefined + custom + per-merchant memory (P2) |
-| Budgets | Per-category | Per-category | Manual formulas | Per-category monthly, with progress bar |
-| Notes | None | None | Yes (separate app) | Integrated — same home overview |
-| Sharing | None | None | iCloud-shared notes work, spreadsheet via shared file | CloudKit shared in v2 |
-| ₹ formatting | Yes | Yes | Yes (locale) | Yes (locale `en_IN`) |
-| iOS native polish (widgets, Spotlight, haptics, Dynamic Type) | N/A | Mediocre | Excellent (Apple) | Match Apple-Notes-tier polish — the actual bar |
-| Privacy | Sent SMS to servers (controversial) | Server-stored | On-device | On-device (v1), CloudKit private (v2) — never leaves Apple ecosystem |
-| Cost | Free + ads | Free + cross-sells loans | Free | Free (and never any of that) |
-
-**The real bar isn't Walnut. It's Apple Notes + a Google Sheet.** Anything this app does worse than that combo will get the app deleted within a month. The two things this combo cannot do are (a) automatically ingest bank transactions and (b) show "₹X of ₹Y this month" without manual upkeep. Those are the differentiators worth fighting for; everything else is "be at least as good as Apple Notes."
-
----
-
-## Sources
-
-- **PROJECT.md** — `/Users/reo/My Projects/my-home/.planning/PROJECT.md` (scope, out-of-scope, key decisions)
-- **iOS API knowledge** (training data): SwiftUI iOS 17+, SwiftData, BackgroundTasks, LocalAuthentication, Swift Charts, CoreSpotlight, App Intents (iOS 16+), interactive widgets (iOS 17+), Live Activities (iOS 16.1+ — not used in v1)
-- **Indian bank email formats** (training data, plus Reo's own inbox as the empirical source during the parser-build phase) — HDFC, ICICI, SBI, Axis, Kotak templates
-- **UPI ecosystem context** (training data) — NPCI UPI alerts, VPA conventions (`@oksbi`, `@ybl`, `@paytm`, `@ibl`)
-- **Indian numbering** — `Locale(identifier: "en_IN")` for ₹1,00,000 (lakh) format
-- **Competitor reference** — Walnut (Android-only, iOS unsupported), CRED Money Manager, Money Manager / Money Lover (App Store category leaders in India)
-- **Web search was not available at research time** — Reo should validate (a) iOS 18+ App Intents and widget guidance and (b) live samples of each bank's current email template during the parser-build phase, as templates do change.
-
----
-
-## Open Questions for the Roadmap Phase
-
-These are deliberately unresolved here — the roadmapper or discuss-phase should decide:
-
-1. **Which bank parsers ship in v1?** Probably whichever 2 cover Reo's primary cards. Wife's cards can ship in v1.1.
-2. **Manual entry first or email ingestion first?** Both are needed; manual is the safer first phase because it validates schema + UI before staking the project on parser reliability.
-3. **Default starting month for budgets** — calendar 1st-of-month, or align to credit-card cycle? Default to calendar; revisit if it bites.
-4. **How long to keep historical Gmail polling history** — backfill 30 days on first connect? 90? Trade-off between "instant value" and parser failure visibility.
-5. **Where exactly to draw the "review confidence threshold"** — calibration question that needs real data; ship at 0.8 and adjust.
-6. **Notification opt-in flow timing** — at first launch (annoying), at first budget threshold cross (smart), or never until user asks (most respectful)?
-
----
-*Feature research for: Personal household-ops iOS app (expense tracker + note keeper) for a two-person Indian household*
-*Researched: 2026-05-28*
+*Feature research for: My Home iOS app*
+*v1.0 original research: 2026-05-28*
+*v1.1 update: 2026-06-08*
