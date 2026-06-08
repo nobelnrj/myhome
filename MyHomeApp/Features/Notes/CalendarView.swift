@@ -292,10 +292,16 @@ struct DayAgendaView: View {
     }
 
     /// All reminders (note + block level) due on this day, bound to live model targets.
+    ///
+    /// STAB-01: Both loops guard against tombstoned @Model objects using the established
+    /// `modelContext != nil` idiom (mirrors EditNoteView.swift:332). A Note or NoteBlock
+    /// can be deleted (tombstoned) from another view while this sheet is open; accessing any
+    /// stored property on a tombstoned object causes a SwiftData fault / EXC_BAD_ACCESS crash.
     private var remindersOnDay: [AgendaReminderItem] {
         var items: [AgendaReminderItem] = []
         let cal = Calendar.current
         for note in notes {
+            guard note.modelContext != nil else { continue }  // STAB-01: skip tombstoned notes
             if note.reminderEnabled,
                let date = note.reminderDate,
                cal.isDate(date, inSameDayAs: day) {
@@ -305,6 +311,7 @@ struct DayAgendaView: View {
                 ))
             }
             for block in note.blocks ?? [] {
+                guard block.modelContext != nil else { continue }  // STAB-01: skip tombstoned blocks
                 if block.reminderEnabled,
                    let date = block.reminderDate,
                    cal.isDate(date, inSameDayAs: day) {
@@ -408,6 +415,7 @@ struct DayAgendaView: View {
         switch item.target {
 
         case .block(let block):
+            guard block.modelContext != nil else { return }  // STAB-01: defensive guard
             let newChecked = !block.isChecked
             block.isChecked = newChecked
             if newChecked {
@@ -416,6 +424,7 @@ struct DayAgendaView: View {
             }
 
         case .note(let note):
+            guard note.modelContext != nil else { return }  // STAB-01: defensive guard
             let blocks = note.blocks ?? []
             if !blocks.isEmpty {
                 // Determine new state: if all are already checked, uncheck all; else check all
