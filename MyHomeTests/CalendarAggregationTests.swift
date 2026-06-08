@@ -130,4 +130,81 @@ struct CalendarAggregationTests {
         #expect(emptyProgress.done == 0, "Day with no reminders should have done 0")
         #expect(emptyProgress.fraction == 0.0, "Day with no reminders should have fraction 0.0")
     }
+
+    // MARK: - STAB-01: Tombstone-guard regression tests
+
+    /// STAB-01 — Test A: a tombstoned Note must not appear in aggregation counts.
+    ///
+    /// Pre-fix: CalendarAggregator.events(from:) accesses note.reminderEnabled on a deleted
+    /// Note, causing a SwiftData fault / EXC_BAD_ACCESS crash.
+    /// Post-fix: the `modelContext != nil` guard skips tombstoned notes silently.
+    @Test("tombstonedNoteIsFilteredFromAggregation — STAB-01")
+    func tombstonedNoteIsFilteredFromAggregation() throws {
+        let container = try ModelContainer(for: Note.self, NoteBlock.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let ctx = container.mainContext
+
+        var cal = Calendar.current
+        cal.timeZone = TimeZone.current
+        let today = cal.startOfDay(for: Date())
+        let nineAM = cal.date(byAdding: .hour, value: 9, to: today)!
+
+        // Insert a note with a reminder today, then delete it (tombstone it).
+        let note = Note(title: "Tombstoned note")
+        note.reminderEnabled = true
+        note.reminderDate = nineAM
+        ctx.insert(note)
+        try ctx.save()
+
+        ctx.delete(note)
+        try ctx.save()
+
+        // Fetch surviving notes — the deleted note should be absent from SwiftData results.
+        let surviving = try ctx.fetch(FetchDescriptor<Note>())
+
+        // Aggregator must return empty counts — tombstoned note absent.
+        let counts = CalendarAggregator.perDayCounts(for: surviving)
+        #expect(counts.isEmpty,
+                "STAB-01: perDayCounts must return empty dict when the only note is tombstoned")
+    }
+
+    /// STAB-01 — Test B: a tombstoned NoteBlock must not appear in aggregation counts.
+    ///
+    /// Pre-fix: CalendarAggregator.events(from:) iterates note.blocks and accesses
+    /// block.reminderEnabled on a deleted NoteBlock — fault / crash.
+    /// Post-fix: the `modelContext != nil` guard on the block loop skips tombstoned blocks.
+    @Test("tombstonedBlockIsFilteredFromAggregation — STAB-01")
+    func tombstonedBlockIsFilteredFromAggregation() throws {
+        let container = try ModelContainer(for: Note.self, NoteBlock.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let ctx = container.mainContext
+
+        var cal = Calendar.current
+        cal.timeZone = TimeZone.current
+        let today = cal.startOfDay(for: Date())
+        let nineAM = cal.date(byAdding: .hour, value: 9, to: today)!
+
+        // Insert a note with a block-level reminder, then delete the block only (keep parent).
+        let note = Note(title: "Parent note")
+        ctx.insert(note)
+
+        let block = NoteBlock(kindRaw: "checkbox", text: "Deleted task", order: 0)
+        block.reminderEnabled = true
+        block.reminderDate = nineAM
+        block.note = note
+        ctx.insert(block)
+        note.blocks = [block]
+        try ctx.save()
+
+        ctx.delete(block)
+        try ctx.save()
+
+        // Fetch surviving notes (parent note survives; its block was deleted).
+        let surviving = try ctx.fetch(FetchDescriptor<Note>())
+
+        // Aggregator must return empty counts — tombstoned block absent.
+        let counts = CalendarAggregator.perDayCounts(for: surviving)
+        #expect(counts.isEmpty,
+                "STAB-01: perDayCounts must return empty dict when the only block is tombstoned")
+    }
 }
