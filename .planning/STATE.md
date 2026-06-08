@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
-status: roadmapped
-last_updated: "2026-06-08"
-last_activity: 2026-06-08
+status: Roadmapped; awaiting /gsd-plan-phase 8
+last_updated: "2026-06-08T16:44:03.508Z"
+last_activity: 2026-06-08 — Roadmap written for v1.1 (Phases 8-12, 32 requirements)
 progress:
   total_phases: 5
   completed_phases: 0
@@ -129,6 +129,7 @@ Carried from v1.1 research/SUMMARY.md, to resolve at the relevant phase:
 - [Phase 11]: npsnav.in availability — single-maintainer hobby project; app must degrade gracefully to last-known NAV on any failure; manual override is the primary NPS entry path
 
 Carried from v1.0 (pre-existing, still outstanding):
+
 - [Phase 6]: Gmail OAuth library choice (raw ASWebAuthenticationSession vs GoogleSignIn SDK) — RESOLVED (shipped Phase 6); retained for reference
 - [Phase 7]: Collect 50+ real anonymized bank emails per target bank BEFORE building parsers; confirm final 2 banks (likely HDFC + ICICI); confidence threshold (0.85) needs real-data calibration after first week
 - [Phase 7]: BGAppRefreshTask must be verified on-device unplugged-overnight; simulator triggering is not representative
@@ -161,9 +162,9 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-08
-Stopped at: v1.1 roadmap created (Phases 8-12)
-Resume file: None
+Last session: 2026-06-08T16:44:03.503Z
+Stopped at: Phase 8 context gathered
+Resume file: .planning/phases/08-stabilization/08-CONTEXT.md
 
 ## Operator Next Steps
 
