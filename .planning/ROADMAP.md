@@ -47,7 +47,11 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
   2. Gmail sync runs to completion without crashing or stalling regardless of inbox size — Category references are re-fetched by PersistentIdentifier after each await; ctx.save() is called once after the full batch, not inside the per-message loop
   3. Adding a new custom category places it at the bottom of the category list, not the top — insertion uses max(existing.sortOrder) + 1
   4. RoutineResetService skeleton exists, is wired to RootView.onChange(of: scenePhase) on .active, and is ready to accept the lastCheckedDate field from Phase 9 (no schema change in this phase; service is a no-op stub until Phase 9 completes it)
-**Plans**: TBD
+**Plans**: 4 plans
+  - [ ] 08-01-PLAN.md — STAB-01: tombstone-guard Notes calendar / day-agenda against deleted @Model refs
+  - [ ] 08-02-PLAN.md — STAB-02: re-resolve Category by PersistentIdentifier + single batched save in both Gmail sync paths
+  - [ ] 08-03-PLAN.md — STAB-03: lock in max(sortOrder)+1 category insertion (regression test + defensive comment + live-app confirm)
+  - [ ] 08-04-PLAN.md — STAB-04: RoutineResetService scaffold wired to RootView scenePhase .active (logged no-op)
 
 ---
 
