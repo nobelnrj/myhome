@@ -39,15 +39,16 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 ## Phase Details
 
 ### Phase 8: Stabilization
+
 **Goal**: The live app is crash-free and category ordering works correctly; the daily-routine reset service is seeded and ready for the SchemaV6 field it will consume in Phase 9
 **Depends on**: Nothing (first phase of v1.1; no schema changes required)
 **Requirements**: STAB-01, STAB-02, STAB-03
 **Success Criteria** (what must be TRUE):
+
   1. Opening Notes calendar or deleting a note/block no longer crashes the app — DayAgendaView and AgendaReminderItem guard all @Model property accesses against deleted/tombstoned objects
   2. Gmail sync runs to completion without crashing or stalling regardless of inbox size — Category references are re-fetched by PersistentIdentifier after each await; ctx.save() is called once after the full batch, not inside the per-message loop
   3. Adding a new custom category places it at the bottom of the category list, not the top — insertion uses max(existing.sortOrder) + 1
-  4. RoutineResetService skeleton exists, is wired to RootView.onChange(of: scenePhase) on .active, and is ready to accept the lastCheckedDate field from Phase 9 (no schema change in this phase; service is a no-op stub until Phase 9 completes it)
-**Plans**: 4 plans
+  4. RoutineResetService skeleton exists, is wired to RootView.onChange(of: scenePhase) on .active, and is ready to accept the lastCheckedDate field from Phase 9 (no schema change in this phase; service is a no-op stub until Phase 9 completes it)**Plans**: 4 plans
   - [ ] 08-01-PLAN.md — STAB-01: tombstone-guard Notes calendar / day-agenda against deleted @Model refs
   - [ ] 08-02-PLAN.md — STAB-02: re-resolve Category by PersistentIdentifier + single batched save in both Gmail sync paths
   - [ ] 08-03-PLAN.md — STAB-03: lock in max(sortOrder)+1 category insertion (regression test + defensive comment + live-app confirm)
@@ -56,58 +57,70 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 ---
 
 ### Phase 9: SchemaV6 & Accounts Management
+
 **Goal**: One additive migration creates the Account and Asset models plus all new fields across Expense, Note, and NoteBlock; users can create and manage bank accounts with manual balances; existing expenses are correctly attributed to accounts; the daily-routine per-day reset is fully operational
 **Depends on**: Phase 8
 **Requirements**: STAB-04, ACCT-01, ACCT-02, ACCT-03, ACCT-04, ACCT-05, ACCT-06, ACCT-07, ACCT-08, NOTE-02
 **Success Criteria** (what must be TRUE):
+
   1. User can add, edit, delete, and archive a bank account with a name, type (savings/current/credit card), color/icon, and a manual opening balance — the archived account disappears from pickers but its transactions remain visible in history
   2. Account balance displayed in AccountsView equals the manually set baseline ± debits and credits from attributed transactions since the baseline date; the figure updates without any manual refresh
   3. User can view per-account monthly spend — tapping an account shows only expenses attributed to that account
   4. All existing expenses attributed to a sourceAccount string are backfilled with the correct accountID UUID during the V5→V6 migration; a Swift Testing fixture test against a real V5 store passes before the phase ships (sourceAccount field is retained unchanged as the Gmail dedup key)
   5. A daily routine's checklist items start unchecked every morning — lastCheckedDate date-keys the per-block completion state; RoutineResetService resets all blocks on scenePhase .active when routineLastResetDate < startOfToday in IST
+
 **Plans**: TBD
 **UI hint**: yes
 
 ---
 
 ### Phase 10: Self-Transfer Detection
+
 **Goal**: The app automatically identifies likely self-transfers between own accounts and routes them to an explicit confirm flow; confirmed transfers are excluded from all spend and budget totals; account balances reflect confirmed transfer balance-moves
 **Depends on**: Phase 9
 **Requirements**: XFER-01, XFER-02, XFER-03, XFER-04, XFER-05
 **Success Criteria** (what must be TRUE):
+
   1. A debit and credit of the same Decimal amount, opposite direction, both from known own accounts, within a 3-day calendar window, neither already flagged as a reversal, surfaces in a Transfer Inbox — nothing is silently excluded
   2. User can confirm a detected pair as a transfer (both expenses marked as confirmed transfers and linked) or reject it (pair is dismissed and scored as normal expenses); a manual mark/unmark action is available on any expense detail view
   3. Confirmed self-transfers are absent from all spend totals, budget progress bars, and charts; they appear only in a dedicated Transfers section
   4. Account balances for both accounts in a confirmed transfer reflect the balance-move — debit account decreases, credit account increases, total net worth is unchanged (completing the ACCT-05 transfer semantics from Phase 9)
+
 **Plans**: TBD
 **UI hint**: yes
 
 ---
 
 ### Phase 11: Asset Tracker
+
 **Goal**: Users can record all household holdings (mutual funds, stocks, NPS) and see total net worth as the sum of holding values and account balances; MF NAVs refresh best-effort from AMFI; every price carries its as-of date and a staleness indicator
 **Depends on**: Phase 9
 **Requirements**: ASSET-01, ASSET-02, ASSET-03, ASSET-04, ASSET-05, ASSET-06, ASSET-07, ASSET-08, ASSET-09
 **Success Criteria** (what must be TRUE):
+
   1. User can add, edit, and delete holdings for mutual funds, stocks, and NPS — each holding records units, cost basis, and a current NAV/price (auto-fetched for MFs; manual-entry for stocks and NPS)
   2. Mutual fund NAVs auto-refresh from AMFI NAVAll.txt in the background; the net-worth view renders immediately from the last cached value and never blocks on a network call; a staleness badge appears when the stored NAV date is older than one trading day
   3. Total net worth (holdings value + account balances) is shown with a per-holding breakdown including absolute and percentage gain/loss against cost basis
   4. An asset-allocation chart (donut/pie via Swift Charts) shows the portfolio split by asset class — mutual funds, stocks, NPS, cash
   5. The app records net-worth snapshots over time and displays a trend chart; every displayed NAV or price carries an explicit as-of date label; user can always override any price manually
+
 **Plans**: TBD
 **UI hint**: yes
 
 ---
 
 ### Phase 12: Notes & Daily Routine Enhancement
+
 **Goal**: Users can designate any note as a daily routine that appears on every calendar day, receives an optional timed notification, supports drag-to-reorder checklist items, and tracks a completion streak
 **Depends on**: Phase 9
 **Requirements**: NOTE-01, NOTE-03, NOTE-04, NOTE-05
 **Success Criteria** (what must be TRUE):
+
   1. A note marked as a daily routine appears as a repeating event on every day in CalendarView without requiring any recurring reminder to be separately configured
   2. User can set an optional reminder time on a routine note; the notification fires once per day at that time — exactly one pending notification exists per routine note at any time (re-scheduling does not stack duplicates)
   3. User can drag-reorder checklist items within a routine note and the new order persists after the view is dismissed
   4. The app shows a streak count (current consecutive days where all checklist items were marked complete) and a scrollable history of past per-day completions per routine note
+
 **Plans**: TBD
 **UI hint**: yes
 
