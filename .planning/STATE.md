@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
 status: executing
-last_updated: "2026-06-08T17:24:15.101Z"
-last_activity: 2026-06-08 -- Phase 08 planning complete
+last_updated: "2026-06-08T17:32:04.377Z"
+last_activity: 2026-06-08
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** v1.1 roadmap complete — ready to plan Phase 8 (Stabilization)
+**Current focus:** Phase 08 — stabilization
 
 ## Current Position
 
-Phase: 8 — Stabilization (not started)
-Plan: —
+Phase: 08 (stabilization) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-06-08 -- Phase 08 planning complete
+Last activity: 2026-06-08
 
-Progress: [░░░░░░░░░░] 0% (0/5 phases)
+Progress: [███░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [░░░░░░░░░░] 0% (0/5 phases)
 | Phase 06-gmail-sign-in-client P03 | 20 | 2 tasks | 1 files |
 | Phase 06-gmail-sign-in-client P04 | 25 | 2 tasks | 7 files |
 | Phase 07 P05 | 95 | 2 tasks | 12 files |
+| Phase 08-stabilization P01 | 15 | 3 tasks | 3 files |
 
 ## Quick Tasks Completed
 
@@ -114,6 +115,7 @@ Recent decisions affecting current work:
 - [Phase ?]: LockController @MainActor for Swift 6 strict concurrency when scenePhase onChange mutates @Observable state
 - [Phase ?]: canEvaluate called before evaluate in authenticate() — passcodeNotSet only detectable from canEvaluatePolicy path (D5-05)
 - [Phase ?]: shouldRefresh in sync() uses (accessToken==nil || (expiry!=nil && needsProactiveRefresh))
+- [Phase ?]: STAB-01 tombstone guard: modelContext != nil applied to all Note/NoteBlock iteration sites in CalendarView and CalendarAggregator
 
 ### Pending Todos
 
@@ -162,9 +164,9 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-08T16:44:03.503Z
+Last session: 2026-06-08T17:31:55.004Z
 Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-stabilization/08-CONTEXT.md
+Resume file: None
 
 ## Operator Next Steps
 
