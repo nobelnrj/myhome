@@ -1,5 +1,22 @@
 # My Home
 
+## Current Milestone: v1.1 Accounts, Assets & Household Polish
+
+**Goal:** Grow My Home from an automated expense tracker into a light household finance + ops hub — account-aware spend with self-transfer detection, a net-worth asset tracker, smarter daily-routine reminders, and a stability/UX cleanup pass.
+
+**Target features:**
+- Stabilization — fix 3 known bugs (add-category appends to bottom; sync/notes crash; daily-routine completion resets at end of day)
+- Accounts management — model & manage the household's bank accounts (balances, per-account spend), building on the existing `Expense.sourceAccount` + multi-Gmail work
+- Self-transfer detection — auto-flag debit/credit pairs between own accounts into a confirm step; excluded transfers don't count as spend
+- Asset tracker — mutual funds, stocks, NPS & account balances → net-worth view, with free public NAV/quote APIs (AMFI etc.) and manual override
+- Notes enhancement — daily routine surfaces in the calendar as a daily reminder; better day-to-day note features
+
+**Key context:**
+- v1.1 is additive and still local-only (no CloudKit/sharing — that remains the v2.0 trigger gated on the $99/yr upgrade).
+- Asset prices come from **free public APIs** (AMFI MF NAV is reliable; India stock-quote endpoints are fragile/unofficial — manual override always available). Network fetch is best-effort, never blocking.
+- Self-transfer is **auto-detect + confirm**, never silent exclusion.
+- Charter note: v1.0 explicitly excluded investments/net-worth tracking. v1.1 intentionally reverses that exclusion (see Out of Scope).
+
 ## What This Is
 
 A personal iOS app for a two-person household (Reo and his wife) that consolidates day-to-day "home ops" into one place. v1.0 shipped (2026-06-03): an automated expense tracker fed by bank email alerts (Gmail) with manual fallback, categories/tags/per-category budgets, a notes + reminders hub (inline checklists, recurrence, local notifications, calendar), an overview dashboard with Swift Charts, and a Face ID gate. It is deliberately built for two specific users, not for distribution, on a CloudKit-ready SwiftData schema that can absorb new household features (chores, calendar, grocery, etc.) and post-v1 sync without rework.
@@ -34,7 +51,12 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 
 <!-- Next milestone (v1.1) scope — to be defined via /gsd-new-milestone. -->
 
-(None — v1.0 shipped. Run `/gsd-new-milestone` to scope v1.1.)
+v1.1 scope — to be assigned REQ-IDs in REQUIREMENTS.md:
+- Accounts management (bank accounts, balances, per-account spend)
+- Self-transfer auto-detection + confirm (exclude from spend)
+- Asset tracker (MF / stocks / NPS / account balances → net worth) with free public NAV/quote APIs
+- Notes enhancement (daily routine → calendar daily reminder; day-to-day features)
+- Stabilization fixes (add-category ordering, sync/notes crash, daily-routine end-of-day reset)
 
 ### Out of Scope
 
@@ -49,7 +71,7 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 - **Multi-household / sharing with people other than wife** — App is built for one specific household forever.
 - **Receipt OCR / camera capture** — Not in v1. Reconsider after manual-entry friction data exists.
 - **Recurring / scheduled expenses, bill reminders** — Defer; revisit once tag/budget loop is proven.
-- **Investments, net worth, account-balance tracking** — This is an expense tracker, not personal-finance suite. Out of charter.
+- ~~**Investments, net worth, account-balance tracking** — out of charter.~~ **Reversed in v1.1** — the app is intentionally growing into a light household-finance hub. Asset tracking (MF/stocks/NPS/balances), net worth, and accounts management are now in scope. Constraint retained: free data sources only, manual override always available.
 - **Web or macOS clients** — iOS-only is a deliberate constraint to keep scope small.
 
 ## Context
@@ -128,4 +150,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-03 after v1.0 MVP milestone (Phases 1-7 shipped)*
+*Last updated: 2026-06-08 — started milestone v1.1 (Accounts, Assets & Household Polish)*
