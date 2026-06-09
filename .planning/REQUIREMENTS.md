@@ -13,8 +13,8 @@
 <!-- Bug fixes + safety. Ships first; gates all schema/feature work. -->
 
 - [x] **STAB-01**: App no longer crashes when the Notes calendar / day-agenda is open and a note or block is deleted (guard `DayAgendaView` / `AgendaReminderItem` against tombstoned `@Model` references).
-- [ ] **STAB-02**: Gmail sync no longer crashes or stalls (re-fetch `Category` references after `await` suspension points; move `ctx.save()` out of the per-message loop into a single batched save).
-- [ ] **STAB-03**: Adding a new category surfaces it at the top of the list (stable insertion order via `min(sortOrder)-1`). [Reversed from "bottom" during Phase 8 execution per user direction — supersedes decision D-05.]
+- [x] **STAB-02**: Gmail sync no longer crashes or stalls (re-fetch `Category` references after `await` suspension points; move `ctx.save()` out of the per-message loop into a single batched save).
+- [x] **STAB-03**: Adding a new category surfaces it at the top of the list (stable insertion order via `min(sortOrder)-1`). [Reversed from "bottom" during Phase 8 execution per user direction — supersedes decision D-05.]
 - [ ] **STAB-04**: A daily routine's completed/checked state automatically resets when the day ends, so each new day starts uncompleted.
 
 ### Accounts Management (ACCT)
@@ -88,8 +88,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | STAB-01 | Phase 8 | Complete |
-| STAB-02 | Phase 8 | Pending |
-| STAB-03 | Phase 8 | Pending |
+| STAB-02 | Phase 8 | Complete |
+| STAB-03 | Phase 8 | Complete |
 | STAB-04 | Phase 9 | Pending |
 | ACCT-01 | Phase 9 | Pending |
 | ACCT-02 | Phase 9 | Pending |

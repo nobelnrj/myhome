@@ -137,7 +137,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 | 5. Face ID Gate & Settings | v1.0 | 2/2 | Complete | 2026-06-01 |
 | 6. Gmail Sign-In & Client | v1.0 | 4/4 | Complete | 2026-06-02 |
 | 7. Bank Parsers & Ingestion Pipeline | v1.0 | 6/6 | Complete | 2026-06-03 |
-| 8. Stabilization | v1.1 | 4/4 | Complete   | 2026-06-09 |
+| 8. Stabilization | v1.1 | 4/4 | Complete    | 2026-06-09 |
 | 9. SchemaV6 & Accounts Management | v1.1 | 0/? | Not started | - |
 | 10. Self-Transfer Detection | v1.1 | 0/? | Not started | - |
 | 11. Asset Tracker | v1.1 | 0/? | Not started | - |
