@@ -171,6 +171,69 @@ struct MigrationTests {
         // 7. Assert V5 sourceAccount field defaults to nil (additive migration, D-MA-03).
         #expect(migratedExpense?.sourceAccount == nil, "sourceAccount must be nil after V3→V5 migration (D-MA-03)")
     }
+
+    // MARK: - V4 → V5 migration with NOTE data (STAB-08 / real-device upgrade path)
+
+    /// STAB-08 — proves an existing V4 store that already contains notes (the real on-device
+    /// situation: a phone running shipped v1.0/V4 with notes) upgrades to V5 WITHOUT data loss
+    /// and WITHOUT the notes-save crash. Mirrors the production path exactly:
+    /// `Schema(versionedSchema: SchemaV5.self)` + `AppMigrationPlan`.
+    ///
+    /// Before the typealias fix, the app wrote/read `SchemaV4.Note` under a V5 container and
+    /// crashed. This test seeds a genuine V4 store with a note + block, migrates it to V5, and
+    /// asserts (a) the old note survives and is readable as the app's `Note`, and (b) a brand-new
+    /// note saves cleanly on the migrated store.
+    @Test("v4 store WITH notes migrates to V5; old notes survive and new notes save (STAB-08)")
+    func v4StoreWithNotesMigratesToV5() throws {
+        let seedURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("migration-v4noteseed-\(UUID()).store")
+        let migrateURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("migration-v4tov5-note-\(UUID()).store")
+        defer {
+            try? FileManager.default.removeItem(at: seedURL)
+            try? FileManager.default.removeItem(at: migrateURL)
+        }
+
+        // 1. Build a genuine V4 store (canonical V4 schema, no plan) and seed one Note + NoteBlock.
+        try {
+            let v4Schema = Schema(versionedSchema: SchemaV4.self)
+            let seedConfig = ModelConfiguration(schema: v4Schema, url: seedURL)
+            let seedContainer = try ModelContainer(for: v4Schema, configurations: [seedConfig])
+            let ctx = seedContainer.mainContext
+            let note = SchemaV4.Note(title: "OldPhoneNote")
+            ctx.insert(note)
+            let block = SchemaV4.NoteBlock(kindRaw: "checkbox", text: "old task", order: 0)
+            ctx.insert(block)
+            block.note = note
+            try ctx.save()
+            try ctx.save()  // flush WAL to the main store file
+        }()
+
+        // 2. Copy the V4 seed to a second URL (avoids container lock contention).
+        try FileManager.default.copyItem(at: seedURL, to: migrateURL)
+
+        // 3. Re-open EXACTLY like appContainer(): versionedSchema V5 + AppMigrationPlan (runs v4ToV5).
+        let v5Schema = Schema(versionedSchema: SchemaV5.self)
+        let migrateConfig = ModelConfiguration(schema: v5Schema, url: migrateURL)
+        let container = try ModelContainer(
+            for: v5Schema,
+            migrationPlan: AppMigrationPlan.self,
+            configurations: [migrateConfig]
+        )
+        let ctx = container.mainContext
+
+        // 4. The pre-existing note survived migration and reads back as the app's Note (V5).
+        let migrated = try ctx.fetch(FetchDescriptor<Note>())
+        #expect(migrated.count == 1, "STAB-08: the pre-existing V4 note must survive the V4→V5 upgrade")
+        #expect(migrated.first?.title == "OldPhoneNote", "STAB-08: migrated note title must be preserved")
+
+        // 5. A brand-new note saves cleanly on the migrated store (the path that crashed pre-fix).
+        let newNote = Note(title: "AddedAfterUpgrade")
+        ctx.insert(newNote)
+        try ctx.save()
+        #expect(try ctx.fetch(FetchDescriptor<Note>()).count == 2,
+                "STAB-08: adding a note after upgrade must not crash and must persist")
+    }
 }
 
 // ---------------------------------------------------------------------------
