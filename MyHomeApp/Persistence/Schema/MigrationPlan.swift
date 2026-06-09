@@ -109,13 +109,6 @@ enum AppMigrationPlan: SchemaMigrationPlan {
         }
     )
 
-    /// D-03: Infer account type from sourceLabel string (case-insensitive keyword match).
-    /// Returns "credit_card" if the label contains "cc", "credit", or "card"; "savings" otherwise.
-    private static func inferAccountType(from label: String) -> String {
-        let lower = label.lowercased()
-        if lower.contains("cc") || lower.contains("credit") || lower.contains("card") {
-            return "credit_card"
-        }
-        return "savings"
-    }
+    // Note: inferAccountType(from:) is now the module-level free function in
+    // MyHomeApp/Support/AccountBalance.swift — reused here by reference (D-03).
 }

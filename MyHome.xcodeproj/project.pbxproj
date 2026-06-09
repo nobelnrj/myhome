@@ -89,6 +89,10 @@
 		A504 /* LockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F504 /* LockController.swift */; };
 		A601 /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F601 /* UnlockView.swift */; };
 		A602 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602 /* SettingsView.swift */; };
+		A910ALV /* AccountsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F910ALV /* AccountsListView.swift */; };
+		A911EAV /* EditAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911EAV /* EditAccountView.swift */; };
+		A912ADV /* AccountDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F912ADV /* AccountDetailView.swift */; };
+		A913MRS /* MigrationReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F913MRS /* MigrationReviewSheet.swift */; };
 		A603 /* LockSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F603 /* LockSettingsTests.swift */; };
 		A610GAP /* GmailAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F610GAP /* GmailAuthPort.swift */; };
 		A611KP /* KeychainPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F611KP /* KeychainPort.swift */; };
@@ -111,6 +115,8 @@
 		A901ACC /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = F901ACC /* Account.swift */; };
 		A902AST /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F902AST /* Asset.swift */; };
 		A903SV6MT /* SchemaV6MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903SV6MT /* SchemaV6MigrationTests.swift */; };
+		A907ABS /* AccountBalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F907ABS /* AccountBalance.swift */; };
+		A908CHX /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F908CHX /* Color+Hex.swift */; };
 		A904ABT /* AccountBalanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F904ABT /* AccountBalanceTests.swift */; };
 		A905ATIT /* AccountTypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F905ATIT /* AccountTypeInferenceTests.swift */; };
 		A906ACCT /* AccountCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F906ACCT /* AccountCRUDTests.swift */; };
@@ -227,6 +233,10 @@
 		F504 /* LockController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockController.swift; sourceTree = "<group>"; };
 		F601 /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
 		F602 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F910ALV /* AccountsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsListView.swift; sourceTree = "<group>"; };
+		F911EAV /* EditAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccountView.swift; sourceTree = "<group>"; };
+		F912ADV /* AccountDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailView.swift; sourceTree = "<group>"; };
+		F913MRS /* MigrationReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationReviewSheet.swift; sourceTree = "<group>"; };
 		F603 /* LockSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockSettingsTests.swift; sourceTree = "<group>"; };
 		F610GAP /* GmailAuthPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAuthPort.swift; sourceTree = "<group>"; };
 		F611KP /* KeychainPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPort.swift; sourceTree = "<group>"; };
@@ -249,6 +259,8 @@
 		F901ACC /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 		F902AST /* Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
 		F903SV6MT /* SchemaV6MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6MigrationTests.swift; sourceTree = "<group>"; };
+		F907ABS /* AccountBalance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountBalance.swift"; sourceTree = "<group>"; };
+		F908CHX /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		F904ABT /* AccountBalanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTests.swift; sourceTree = "<group>"; };
 		F905ATIT /* AccountTypeInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeInferenceTests.swift; sourceTree = "<group>"; };
 		F906ACCT /* AccountCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCRUDTests.swift; sourceTree = "<group>"; };
@@ -406,6 +418,10 @@
 			children = (
 				F601 /* UnlockView.swift */,
 				F602 /* SettingsView.swift */,
+				F910ALV /* AccountsListView.swift */,
+				F911EAV /* EditAccountView.swift */,
+				F912ADV /* AccountDetailView.swift */,
+				F913MRS /* MigrationReviewSheet.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -498,6 +514,8 @@
 				F145NA /* NotificationActions.swift */,
 				F404 /* SpendOverTimeAggregator.swift */,
 				F405 /* OverviewAggregation.swift */,
+				F907ABS /* AccountBalance.swift */,
+				F908CHX /* Color+Hex.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -723,6 +741,8 @@
 				A114 /* ModelContainer+App.swift in Sources */,
 				A115 /* Decimal+INR.swift in Sources */,
 				A116 /* Date+Display.swift in Sources */,
+				A907ABS /* AccountBalance.swift in Sources */,
+				A908CHX /* Color+Hex.swift in Sources */,
 				A121 /* DecimalKeypadView.swift in Sources */,
 				A122 /* AddExpenseView.swift in Sources */,
 				A123 /* ExpenseListView.swift in Sources */,
@@ -766,6 +786,10 @@
 				A132 /* BudgetsView.swift in Sources */,
 				A601 /* UnlockView.swift in Sources */,
 				A602 /* SettingsView.swift in Sources */,
+				A910ALV /* AccountsListView.swift in Sources */,
+				A911EAV /* EditAccountView.swift in Sources */,
+				A912ADV /* AccountDetailView.swift in Sources */,
+				A913MRS /* MigrationReviewSheet.swift in Sources */,
 				A501 /* BiometricAuthPort.swift in Sources */,
 				A504 /* LockController.swift in Sources */,
 				A610GAP /* GmailAuthPort.swift in Sources */,
