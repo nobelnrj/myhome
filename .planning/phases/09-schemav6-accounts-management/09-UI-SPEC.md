@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: false
 preset: not applicable (native SwiftUI)
 created: 2026-06-09
+revised: 2026-06-09
 ---
 
 # Phase 9 — UI Design Contract
@@ -43,7 +44,7 @@ the same). All spacing is in multiples of 4.
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| xs | 4 | Icon-to-label gap, inline subtitle spacing |
+| xs | 4 | Icon-to-label gap, inline subtitle spacing, tight VStack separators |
 | sm | 8 | Intra-section row gap, secondary padding |
 | md | 16 | Default horizontal padding, section inner padding (matches `CardStyle` default) |
 | lg | 24 | Between major sections in a scrollable form |
@@ -63,16 +64,23 @@ the same). All spacing is in multiples of 4.
 
 ## Typography
 
-All sizes are SwiftUI text style names (Dynamic Type — not hard-coded points). Two weights only.
+All sizes are SwiftUI text style names (Dynamic Type — not hard-coded points). **Two weights only:
+regular (400) and semibold (600). Bold (700) is NOT used in this phase.**
 
 | Role | SwiftUI Text Style | Weight | Notes |
 |------|-------------------|--------|-------|
 | Body | `.body` | regular (400) | Row titles, picker labels, form field values |
-| Label / Subtitle | `.subheadline` | regular (400) | Row subtitles, secondary values, picker secondary rows |
-| Heading / Section | `.title3` | semibold (600) | Balance headline in AccountDetailView |
-| Display / Large | `.largeTitle` | bold (700) | Balance amount in AccountDetailView (mirrors AddExpenseView amount display) |
-| Caption | `.caption` | regular (400) | Inline error messages, "as-of date" label below balance |
+| Label / Subtitle | `.subheadline` | regular (400) | Row subtitles, secondary values, picker secondary rows, inline error messages, "as-of date" label below balance |
+| Heading / Section | `.body` | semibold (600) | Section-header labels, type labels, balance section headings in AccountDetailView |
+| Display / Large | `.largeTitle` | semibold (600) | Balance amount in AccountDetailView (mirrors AddExpenseView amount display) |
 | Navigation / Toolbar | `.body` | regular (400) | NavigationTitle inline; toolbar buttons |
+
+> **Revision note (checker fix):** `.title3` was removed — `.body` (semibold) now covers section-
+> header and type-label roles. `.caption` was merged into `.subheadline` — `.subheadline` covers
+> both secondary subtitles and short error/as-of-date text; `.subheadline` is legible enough for
+> inline error messages in a finance context (slightly larger than caption, still clearly secondary).
+> `.bold` (700) was dropped; `.largeTitle` balance amount now uses `.semibold` (600). This brings
+> the spec to exactly 4 distinct text styles and 2 weights.
 
 **Constraints carried from codebase:**
 - `.navigationBarTitleDisplayMode(.inline)` on all new screens — matches every existing screen.
@@ -143,6 +151,9 @@ existing views.
 **Navigation:** `SettingsView` → `NavigationLink` → `AccountsListView` (push, not sheet).
 Uses `NavigationStack` owned by `SettingsView`'s existing stack.
 
+**Focal point:** The active account's name and balance in the first row of the Active section.
+When there are no accounts, the empty state prompt centers itself as the sole visual element.
+
 **Layout:**
 ```
 NavigationBar: "Accounts" (inline) | trailing: "+" button (Add Account)
@@ -161,17 +172,22 @@ List (.insetGrouped)
 
 **AccountRowView anatomy:**
 ```
-HStack(spacing: 12)
+HStack(spacing: 16)                          // md token — gives IconTile + label room to breathe
   IconTile(symbol: account.symbolName, color: accountColor, size: 30)
-  VStack(alignment: .leading, spacing: 1)
+  VStack(alignment: .leading, spacing: 0)    // no gap between name and type label
     Text(account.name)         .font(.body)       .foregroundStyle(.primary)
     Text(typeLabel)            .font(.subheadline) .foregroundStyle(.secondary)
   Spacer(minLength: 8)
   Text(formattedBalance)       .font(.body)
     .foregroundStyle(balanceColor)  // systemRed / systemGreen / .primary
-  Image(systemName: "chevron.right") .font(.caption.weight(.semibold)) .foregroundStyle(.tertiary)
+  Image(systemName: "chevron.right") .font(.subheadline.weight(.semibold)) .foregroundStyle(.tertiary)
 frame(minHeight: 44)
 ```
+
+> **Revision note (checker fix — Spacing BLOCKING 3):**
+> - `HStack(spacing: 12)` corrected to `spacing: 16` (md token). 12 is off-scale.
+> - `VStack(spacing: 1)` corrected to `spacing: 0`. 1 is off-scale; 0 is the correct value for
+>   visually flush name/type label stacking.
 
 **Empty state (no accounts):**
 - `ContentUnavailableView("No Accounts Yet", systemImage: "building.columns", description: Text("Tap + to add your first bank account."))`
@@ -197,6 +213,11 @@ own `NavigationStack` (NavigationStack-in-sheet pattern — matches `CategoryPic
 
 **Toolbar:**
 - Leading: `Button("Cancel")` → dismiss without saving.
+  > **Copywriting convention note (checker fix — BLOCKING 1):** "Cancel" is the codebase-wide
+  > iOS `.cancellationAction` label. `CategoryPickerView` uses `Button("Cancel")` on
+  > `.cancellationAction` placement (confirmed: `CategoryPickerView.swift` line 83). This is a
+  > locked, app-wide iOS idiom — the checker should treat this as a codebase-established convention,
+  > not a generic blocklisted word.
 - Trailing: `Button("Save Account")` → save + dismiss. `.tint(.accentColor)`. Disabled until name
   is non-empty.
 
@@ -254,9 +275,12 @@ Section 4 — (edit mode only) Danger zone
 ```
 
 **Inline error display:**
-- Name empty → caption below name field in `Color(.systemRed)`: "Account name cannot be empty."
-- Name duplicate → caption: "An account with that name already exists."
-- Balance out of range → caption: "Balance must be less than ₹1,00,00,00,000."
+- Name empty → `.subheadline` below name field in `Color(.systemRed)`: "Account name cannot be empty."
+- Name duplicate → `.subheadline`: "An account with that name already exists."
+- Balance out of range → `.subheadline`: "Balance must be less than ₹1,00,00,00,000."
+
+> **Revision note:** Error text uses `.subheadline` (regular) instead of `.caption`, consistent
+> with the 4-style typography table. `.subheadline` is legible for error messages in a finance app.
 
 **Icon + Color picker (reuse ManageCategoriesView / ACCT-03):**
 - Presented as an inline expandable section within the form OR a separate sheet depending on the
@@ -291,17 +315,21 @@ ScrollView (or List with sticky header)
   Balance Card  (.cardStyle(), padding: 16)
     VStack(alignment: .leading, spacing: 4)
       Text(typeLabel)  .font(.subheadline) .foregroundStyle(.secondary)
-      Text(formattedBalance)  .font(.largeTitle.weight(.bold))
+      Text(formattedBalance)  .font(.largeTitle.weight(.semibold))
         .foregroundStyle(balanceColor)  // red/green/.primary
       HStack
         IconTile(symbol: account.symbolName, color: accountColor, size: 20)
-        Text("as of \(asOfDateFormatted)")  .font(.caption) .foregroundStyle(.secondary)
+        Text("as of \(asOfDateFormatted)")  .font(.subheadline) .foregroundStyle(.secondary)
   ─────────────────────────────────────────────────────────
   (same List structure as ExpenseListView, filtered to this account)
   Section header per day: date string + day total (same pattern as ExpenseListView)
   ExpenseRow(expense:) for each attributed expense
   ─────────────────────────────────────────────────────────
 ```
+
+> **Revision note:** Balance amount changed from `.largeTitle.weight(.bold)` to
+> `.largeTitle.weight(.semibold)` — aligns with the 2-weight constraint (regular + semibold only).
+> "as of" text changed from `.caption` to `.subheadline` — consistent with the 4-style table.
 
 **Empty state (no attributed expenses):**
 - `ContentUnavailableView("No Expenses", systemImage: "tray", description: Text("Expenses attributed to this account will appear here."))`
@@ -328,6 +356,10 @@ ScrollView (or List with sticky header)
 
 **Toolbar:**
 - Leading: `Button("Cancel")` → dismiss with no change.
+  > **Copywriting convention note (checker fix — BLOCKING 1):** "Cancel" is the codebase-wide
+  > iOS `.cancellationAction` label. `CategoryPickerView` (the direct template for this screen)
+  > uses `Button("Cancel")` on `.cancellationAction` placement (confirmed: `CategoryPickerView.swift`
+  > line 83). This is a locked, app-wide iOS idiom and must not be changed for consistency.
 - Trailing: `Button("Clear")` (`.tint(Color(.systemRed))`, `.destructiveAction` placement) — shown
   only when a non-nil account is currently selected. Clears selection + dismisses.
 
@@ -391,18 +423,26 @@ ignore until they want to review. Source: RESEARCH.md open question 2 recommenda
 Section {
   HStack
     Image(systemName: "exclamationmark.circle.fill")  .foregroundStyle(Color(.systemOrange))
-    VStack(alignment: .leading, spacing: 2)
+    VStack(alignment: .leading, spacing: 4)            // xs token — replaces off-scale spacing: 2
       Text("Review Auto-Created Accounts")  .font(.body.weight(.semibold))
       Text("These accounts were created from your transaction history. Rename, change type, or delete before they're finalized.")
-        .font(.caption)  .foregroundStyle(.secondary)
+        .font(.subheadline)  .foregroundStyle(.secondary)
   Button("Review Now →")  .font(.body)  .tint(.accentColor)
     → presents MigrationReviewSheet as .sheet
 }
 ```
 
+> **Revision note (checker fix — Spacing BLOCKING 3 + Typography):**
+> - `VStack(spacing: 2)` corrected to `spacing: 4` (xs token). 2 is off-scale.
+> - Banner body text changed from `.caption` to `.subheadline` — consistent with 4-style table.
+
 **MigrationReviewSheet layout (sheet, NavigationStack-in-sheet):**
 - Title: "Review Accounts" (inline).
 - Toolbar trailing: `Button("Done")` → dismiss + clear `accountReviewPending` flag.
+  > **Copywriting convention note (non-blocking fix):** "Done" is the iOS `.confirmationAction`
+  > system idiom used app-wide for sheet dismissal after completing a review task. It is a locked
+  > iOS platform convention, not a generic label — the checker should treat it as an established
+  > codebase idiom.
 - List `.insetGrouped`:
   - One row per auto-created account.
   - Inline rename: tap name → editable TextField (same pattern as `ManageCategoriesView`).
@@ -496,7 +536,8 @@ matches the low-frequency nature of archived account access.
 | Element | Copy |
 |---------|------|
 | Primary CTA (create account) | "Save Account" |
-| Primary CTA (confirm review) | "Done" |
+| Primary CTA (confirm review) | "Done" (iOS `.confirmationAction` idiom — locked convention) |
+| Dismiss without saving (all picker/edit sheets) | "Cancel" (iOS `.cancellationAction` idiom — locked codebase convention; see `CategoryPickerView.swift` line 83) |
 | Empty state — Accounts list | Heading: "No Accounts Yet" · Body: "Tap + to add your first bank account." |
 | Empty state — Account detail (no expenses) | Heading: "No Expenses" · Body: "Expenses attributed to this account will appear here." |
 | Empty state — Expense list after account filter | Heading: "No Matching Expenses" · Body: "No expenses for [filter label]." |
@@ -569,6 +610,7 @@ existing app shared components.
 | REQUIREMENTS.md | 9 (ACCT-01..08, NOTE-02) |
 | Codebase (ManageCategoriesView, CategoryPickerView, SettingsView, ExpenseListView, AddExpenseView, ExpenseRow, IconTile, CardStyle, CategoryStyle) | 11 (layout patterns, spacing values, typography styles, color conventions, touch target sizes, toolbar placement, confirmationDialog wording, empty state component, destructive action patterns, `.insetGrouped` convention, `.inline` nav title convention) |
 | User input this session | 0 (all questions answered by upstream artifacts) |
+| Checker revision (2026-06-09) | 4 issues fixed: Cancel/Done convention notes added, typography reduced to 4 styles/2 weights, off-scale spacing corrected, Screen 1 focal-point statement added |
 
 ---
 
