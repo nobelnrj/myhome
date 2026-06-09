@@ -69,7 +69,11 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
   4. All existing expenses attributed to a sourceAccount string are backfilled with the correct accountID UUID during the V5→V6 migration; a Swift Testing fixture test against a real V5 store passes before the phase ships (sourceAccount field is retained unchanged as the Gmail dedup key)
   5. A daily routine's checklist items start unchecked every morning — lastCheckedDate date-keys the per-block completion state; RoutineResetService resets all blocks on scenePhase .active when routineLastResetDate < startOfToday in IST
 
-**Plans**: TBD
+**Plans**: 4 plans (1 wave of schema foundation, then 3 parallel feature plans)
+  - [ ] 09-01-PLAN.md — SchemaV6 atomic commit (Account + Asset models, additive Expense/Note fields, all typealias flips, v5ToV6 didMigrate backfill) + BLOCKING migration fixture test [ACCT-08]
+  - [ ] 09-02-PLAN.md — Accounts CRUD under Settings: list/edit/detail with live balance, archive, migration review sheet [ACCT-01/02/03/04/05/07]
+  - [ ] 09-03-PLAN.md — Expense attribution: account picker, main-list account filter, Gmail auto-attribution by sourceLabel [ACCT-06]
+  - [ ] 09-04-PLAN.md — RoutineResetService body + RootView ModelContext injection (per-day IST reset) [STAB-04, NOTE-02]
 **UI hint**: yes
 
 ---
@@ -138,7 +142,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 | 6. Gmail Sign-In & Client | v1.0 | 4/4 | Complete | 2026-06-02 |
 | 7. Bank Parsers & Ingestion Pipeline | v1.0 | 6/6 | Complete | 2026-06-03 |
 | 8. Stabilization | v1.1 | 4/4 | Complete    | 2026-06-09 |
-| 9. SchemaV6 & Accounts Management | v1.1 | 0/? | Not started | - |
+| 9. SchemaV6 & Accounts Management | v1.1 | 0/4 | Planned | - |
 | 10. Self-Transfer Detection | v1.1 | 0/? | Not started | - |
 | 11. Asset Tracker | v1.1 | 0/? | Not started | - |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
@@ -192,3 +196,4 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 - **NOTE-02 in Phase 9:** `NoteBlock.lastCheckedDate` is bundled into SchemaV6 to avoid an extra intermediate migration stage. The observable per-day reset behavior is Phase 9 success criterion 5.
 - **Phase 11 and Phase 12 are independent after Phase 9:** Both depend only on SchemaV6. In single-track serial order Phase 11 (Asset Tracker) precedes Phase 12 (Notes Enhancement) so spend accuracy is confirmed complete before net-worth figures are presented — though Phase 12 has no logical dependency on Phase 11.
 - **Phase 9 research flag:** The V5→V6 `didMigrate` closure is the first non-nil `didMigrate` in this codebase. Verify error-handling behavior (throwing closure: rollback vs. partial state) against the existing FB13812722 workaround in MigrationPlan.swift before writing the migration stage.
+- **Phase 9 reset-mechanism reconciliation (planning decision):** Success criterion 5 mentions both a per-block `lastCheckedDate` and a note-level `routineLastResetDate`. Per CONTEXT.md D-12, Phase 9 implements the **note-level `routineLastResetDate`** marker on `Note` (with `isDailyRoutine: Bool`), which fully satisfies the observable per-day reset. Per-block `lastCheckedDate` is deferred to Phase 12 (needed only for streak/history, NOTE-05). No `NoteBlock` schema change in Phase 9.
