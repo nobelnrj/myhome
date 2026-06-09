@@ -40,6 +40,13 @@ struct ExpenseListView: View {
     /// Active category filter for the main list. Defaults to showing everything.
     @State private var categoryFilter: CategoryFilter = .all
 
+    /// Active account filter for the main list. Defaults to showing all accounts (ACCT-06/D-07).
+    @State private var accountFilter: AccountFilter = .all
+
+    /// Active accounts for the account filter menu (archived excluded — D-08).
+    @Query(filter: #Predicate<Account> { !$0.isArchived }, sort: \Account.sortOrder)
+    private var activeAccounts: [Account]
+
     /// Bound to RootView so it can drive the Expenses tab badge (D7-04).
     @Binding var reviewBadgeCount: Int
 
@@ -48,6 +55,13 @@ struct ExpenseListView: View {
         case all
         case uncategorized
         case category(UUID)
+    }
+
+    /// Single-selection account filter for the main expense list (ACCT-06/D-07).
+    private enum AccountFilter: Hashable {
+        case all
+        case unassigned       // accountID == nil
+        case account(UUID)    // accountID == specific UUID
     }
 
     /// One day's worth of expenses, used as a List section (design groups by day).
@@ -153,7 +167,8 @@ struct ExpenseListView: View {
 
     private var filterMenu: some View {
         Menu {
-            Picker("Filter", selection: $categoryFilter) {
+            // Category filter section
+            Picker("Category", selection: $categoryFilter) {
                 Label("All Categories", systemImage: "tray.full").tag(CategoryFilter.all)
                 ForEach(categories) { category in
                     Label(category.name ?? "Untitled", systemImage: category.symbolName ?? "tag")
@@ -161,9 +176,21 @@ struct ExpenseListView: View {
                 }
                 Label("Uncategorized", systemImage: "questionmark.circle").tag(CategoryFilter.uncategorized)
             }
+
+            Divider()
+
+            // Account filter section (ACCT-06/D-07; archived accounts excluded)
+            Picker("Account", selection: $accountFilter) {
+                Label("All Accounts", systemImage: "building.columns").tag(AccountFilter.all)
+                Label("Unassigned", systemImage: "questionmark.circle").tag(AccountFilter.unassigned)
+                ForEach(activeAccounts) { account in
+                    Label(account.name ?? "Untitled", systemImage: account.symbolName ?? "creditcard")
+                        .tag(AccountFilter.account(account.id))
+                }
+            }
         } label: {
-            // Filled icon signals an active (non-"All") filter.
-            Image(systemName: categoryFilter == .all
+            // Filled icon signals any active (non-"All") filter — category or account.
+            Image(systemName: (categoryFilter == .all && accountFilter == .all)
                   ? "line.3.horizontal.decrease.circle"
                   : "line.3.horizontal.decrease.circle.fill")
         }
@@ -174,15 +201,26 @@ struct ExpenseListView: View {
 
     /// Expenses after applying the active category filter, preserving @Query date order.
     private var filteredExpenses: [Expense] {
+        // 1. Category filter (existing)
+        let categoryFiltered: [Expense]
         switch categoryFilter {
         case .all:
-            return expenses
+            categoryFiltered = expenses
         case .uncategorized:
-            return expenses.filter { $0.categories.isEmpty }
+            categoryFiltered = expenses.filter { $0.categories.isEmpty }
         case .category(let id):
-            return expenses.filter { expense in
+            categoryFiltered = expenses.filter { expense in
                 expense.categories.contains { $0.id == id }
             }
+        }
+        // 2. Account filter chained after category filter (ACCT-06/D-07)
+        switch accountFilter {
+        case .all:
+            return categoryFiltered
+        case .unassigned:
+            return categoryFiltered.filter { $0.accountID == nil }
+        case .account(let id):
+            return categoryFiltered.filter { $0.accountID == id }
         }
     }
 
@@ -206,6 +244,18 @@ struct ExpenseListView: View {
 
     /// Human-readable label for the active filter (used in the empty state).
     private var filterLabel: String {
+        // Account filter takes precedence in the label if both are active
+        if accountFilter != .all {
+            switch accountFilter {
+            case .all:
+                break
+            case .unassigned:
+                return "unassigned expenses"
+            case .account(let id):
+                let name = activeAccounts.first { $0.id == id }?.name ?? "this account"
+                return name
+            }
+        }
         switch categoryFilter {
         case .all:
             return "this filter"
