@@ -28,18 +28,9 @@ struct ManageCategoriesView: View {
     var body: some View {
         NavigationStack {
             List {
-                // Existing categories
-                ForEach(categories) { category in
-                    categoryRow(category)
-                }
-                .onDelete { offsets in
-                    if let index = offsets.first {
-                        categoryToDelete = categories[index]
-                        showDeleteConfirmation = true
-                    }
-                }
-
-                // Add new category row (shown when + is tapped)
+                // Add new category row (shown when + is tapped) — rendered at the TOP
+                // so the input field appears above the existing categories, matching the
+                // top-insertion contract for newly added categories (STAB-03 / user direction).
                 if showAddField {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
@@ -66,6 +57,17 @@ struct ManageCategoriesView: View {
                                 .font(.caption)
                                 .foregroundStyle(Color(.systemRed))
                         }
+                    }
+                }
+
+                // Existing categories
+                ForEach(categories) { category in
+                    categoryRow(category)
+                }
+                .onDelete { offsets in
+                    if let index = offsets.first {
+                        categoryToDelete = categories[index]
+                        showDeleteConfirmation = true
                     }
                 }
             }
