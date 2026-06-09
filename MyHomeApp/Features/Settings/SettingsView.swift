@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// Settings tab (tag 4) — Face ID toggle, Manage Categories sheet, Budgets deep-link, About footer.
 ///
@@ -22,6 +23,12 @@ struct SettingsView: View {
     @State private var pendingDisconnectEmail: String? = nil
     @State private var accountReviewPending: Bool =
         UserDefaults.standard.bool(forKey: "accountReviewPending")
+
+    /// All accounts — used only to confirm auto-created accounts actually exist before
+    /// showing the review badge, so a stale `accountReviewPending` flag never shows a badge
+    /// that leads to an empty review sheet.
+    @Query private var accounts: [Account]
+    private var hasAutoCreatedAccounts: Bool { accounts.contains { $0.sourceLabel != nil } }
 
     var body: some View {
         NavigationStack {
@@ -163,8 +170,9 @@ struct SettingsView: View {
                         HStack {
                             rowLabel("Accounts", symbol: "creditcard", color: Color(.systemBlue))
                             Spacer()
-                            // D-02: badge when accountReviewPending is true
-                            if accountReviewPending {
+                            // D-02: badge when review is pending AND auto-created accounts
+                            // actually exist (guards against a stale flag — see hasAutoCreatedAccounts)
+                            if accountReviewPending && hasAutoCreatedAccounts {
                                 Image(systemName: "exclamationmark.circle.fill")
                                     .foregroundStyle(Color(.systemOrange))
                                     .font(.subheadline)

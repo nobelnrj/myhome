@@ -25,6 +25,11 @@ struct AccountsListView: View {
     private var activeAccounts: [Account] { allAccounts.filter { !$0.isArchived } }
     private var archivedAccounts: [Account] { allAccounts.filter { $0.isArchived } }
 
+    /// Auto-created accounts still awaiting review (sourceLabel non-nil). Used to gate the
+    /// migration-review banner so it never shows when there is nothing to review (e.g. a
+    /// stale `accountReviewPending` flag left over from a reset store).
+    private var hasAutoCreatedAccounts: Bool { allAccounts.contains { $0.sourceLabel != nil } }
+
     // MARK: - State
 
     @State private var showAddSheet = false
@@ -48,7 +53,8 @@ struct AccountsListView: View {
             } else {
                 List {
                     // MARK: Migration Review Banner (D-02)
-                    if accountReviewPending {
+                    // Gated on hasAutoCreatedAccounts so a stale flag never shows an empty banner.
+                    if accountReviewPending && hasAutoCreatedAccounts {
                         Section {
                             HStack(alignment: .top, spacing: 12) {
                                 Image(systemName: "exclamationmark.circle.fill")
@@ -126,6 +132,15 @@ struct AccountsListView: View {
             }
         }
         .navigationTitle("Accounts")
+        .onAppear {
+            // Self-heal a stale review flag: if it's set but no auto-created accounts exist
+            // (e.g. the store was reset while UserDefaults persisted), clear it so the badge
+            // and banner stop showing with nothing to review.
+            if accountReviewPending && !hasAutoCreatedAccounts {
+                UserDefaults.standard.set(false, forKey: "accountReviewPending")
+                accountReviewPending = false
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
