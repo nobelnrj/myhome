@@ -14,7 +14,7 @@
 
 - [x] **STAB-01**: App no longer crashes when the Notes calendar / day-agenda is open and a note or block is deleted (guard `DayAgendaView` / `AgendaReminderItem` against tombstoned `@Model` references).
 - [ ] **STAB-02**: Gmail sync no longer crashes or stalls (re-fetch `Category` references after `await` suspension points; move `ctx.save()` out of the per-message loop into a single batched save).
-- [ ] **STAB-03**: Adding a new category appends it to the bottom of the list (stable insertion order), not the top.
+- [ ] **STAB-03**: Adding a new category surfaces it at the top of the list (stable insertion order via `min(sortOrder)-1`). [Reversed from "bottom" during Phase 8 execution per user direction — supersedes decision D-05.]
 - [ ] **STAB-04**: A daily routine's completed/checked state automatically resets when the day ends, so each new day starts uncompleted.
 
 ### Accounts Management (ACCT)
