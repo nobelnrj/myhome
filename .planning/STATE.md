@@ -2,16 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
-status: ready_to_plan
-last_updated: 2026-06-09T13:22:33.912Z
-last_activity: 2026-06-09 -- Phase 08 execution started
+status: planning
+last_updated: "2026-06-09T13:59:22.852Z"
+last_activity: 2026-06-09
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
   completed_plans: 4
-  percent: 0
-stopped_at: Phase 08 complete (4/4) — ready to discuss Phase 9
+  percent: 20
 ---
 
 # Project State
@@ -166,9 +165,9 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-08T17:31:55.004Z
-Stopped at: Phase 8 context gathered
-Resume file: None
+Last session: 2026-06-09T13:59:22.847Z
+Stopped at: Phase 9 context gathered
+Resume file: .planning/phases/09-schemav6-accounts-management/09-CONTEXT.md
 
 ## Operator Next Steps
 
