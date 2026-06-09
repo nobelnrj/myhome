@@ -35,22 +35,31 @@ blocked: 0
 
 ## Gaps
 
-### G-1 — Launch crash: ModelContainer fails on stale store ("unknown model version") [ROOT-CAUSED, dev-unblocked]
-status: diagnosed
-- **Symptom (user):** Opening the app crashes; crash log shows `_assertionFailure` in `NotesListView.notes` `@Query` materialization (SwiftData).
-- **Actual root cause:** `ModelContainer` creation fatal-errors at `MyHomeApp.swift:14`:
-  `CoreData: error: Cannot use staged migration with an unknown model version.` The on-disk store
-  was created at a model version the current `AppMigrationPlan` no longer recognizes. The
-  `NotesListView` `@Query` crash in the user's log is a downstream symptom of the same broken store.
-- **Why:** `SchemaV5` was mutated in place — `Expense.sourceAccount` (commit `cc77f1a`, pre-Phase-8)
-  was added to an already-persisted `SchemaV5`, changing its model hash so existing V5 stores became
-  an "unknown version" with no migration stage to reach the current V5.
-- **Verification:** Deleting the stale dev store (`MyHome.store*` in the AppGroup container) and
-  relaunching → app launches and stays running, store recreated + seeded. Confirms the code is sound;
-  the crash is purely the persisted store.
-- **Immediate action taken:** Wiped the stale store on simulator `2F09365E…`; app now runs.
-- **Proper fix (Phase 9 — SchemaV6 & migrations):** Introduce `SchemaV6` (do NOT mutate shipped
-  schemas in place), add a real `v5ToV6` stage, and migrate `Expense.sourceAccount` there. Phase 9
-  owns schema/migration, so this defect is routed to Phase 9 rather than back-patched in Phase 8.
-- **Scope note:** This is a schema-versioning defect introduced before Phase 8 — NOT a STAB-01 gap.
-  STAB-01 (calendar deletion crash) remains separately testable on the now-working app.
+### G-1 — Notes crash: Note/NoteBlock typealias pinned to SchemaV4 under a V5 container (STAB-08) [FIXED]
+status: resolved
+- **Symptom (user):** After adding notes, opening Notes crashes; also crashes when saving a new note.
+- **Root cause (confirmed by reproduction):** `typealias Note = SchemaV4.Note` and
+  `typealias NoteBlock = SchemaV4.NoteBlock` while the production container is built from
+  `Schema(versionedSchema: SchemaV5.self)`. Every note the app created was a `SchemaV4.Note` entity
+  absent from the V5 store schema → `context.save()` crashed with an internal SwiftData assertion
+  (`AddNoteView.createNote`), and the notes `@Query` crashed once any note existed (`NotesListView`).
+  `Expense`/`Category` were already on V5; only `Note`/`NoteBlock` were missed when V5 was introduced.
+- **Reproduction:** A test container built from `Schema(versionedSchema: SchemaV5.self)` + insert/save
+  a `Note` crashes pre-fix; `ModelContainer(for: Note.self, …)` does NOT (it registers whatever `Note`
+  aliases) — which is why the existing Note tests never caught it.
+- **Fix (commit `7ac77b5`):** Flip both typealiases to `SchemaV5`. `SchemaV5.Note`/`NoteBlock` are
+  copied verbatim from V4, so it is a no-op migration. Added regression test
+  `NoteModelTests.noteSavesUnderProductionVersionedSchema` (production-schema save). Full suite green.
+- **Verification:** App reinstalled on simulator `2F09365E…`; launches and stays running.
+  Awaiting user re-test of add-note / open-notes in the UI.
+
+### G-2 — Stale dev store: "unknown model version" at container creation [one-time, dev-unblocked]
+status: resolved (dev)
+- **Symptom:** On first launch this session, `ModelContainer` creation fatal-errored at
+  `MyHomeApp.swift:14`: `Cannot use staged migration with an unknown model version` — a stale on-disk
+  store at a version the current `AppMigrationPlan` did not recognize.
+- **Action:** Deleted `MyHome.store*` from the simulator AppGroup container; app then launched and
+  seeded. No production data (household app). Phase 9 (SchemaV6 & migrations) should ensure additive
+  versions and never mutate a shipped schema in place.
+- **Scope note:** Neither G-1 nor G-2 is a STAB-01 gap; STAB-01 (calendar deletion crash) is still
+  separately testable on the now-working app.
