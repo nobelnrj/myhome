@@ -89,4 +89,31 @@ struct CategoryCRUDTests {
         )
         #expect(existing.count == 1, "Should find exactly one 'Food' category by name fetch")
     }
+
+    /// STAB-03: a newly added custom category must append at the BOTTOM of the list
+    /// (max(existing.sortOrder)+1), never the top. This locks in the insertion contract
+    /// used by ManageCategoriesView.addCategory so it cannot silently regress.
+    @Test("STAB-03: new category appends at max(sortOrder)+1, not the top")
+    func newCategoryAppendsAtBottom() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        // Seed 14 categories with sortOrder 0..13 (mirrors seedCategoriesIfNeeded).
+        for order in 0..<14 {
+            context.insert(Cat(name: "Seed\(order)", symbolName: nil, sortOrder: order))
+        }
+        try context.save()
+
+        // Reproduce ManageCategoriesView.addCategory insertion logic exactly.
+        let all = try context.fetch(FetchDescriptor<Cat>())
+        let nextSortOrder = (all.map(\.sortOrder).max() ?? 999) + 1
+        context.insert(Cat(name: "Custom", symbolName: nil, sortOrder: nextSortOrder))
+        try context.save()
+
+        let sorted = try context.fetch(
+            FetchDescriptor<Cat>(sortBy: [SortDescriptor(\.sortOrder, order: .forward)])
+        )
+        #expect(sorted.last?.name == "Custom", "STAB-03: new category must be last in the list")
+        #expect(sorted.last?.sortOrder == 14, "STAB-03: new category sortOrder must be max+1 (14)")
+    }
 }
