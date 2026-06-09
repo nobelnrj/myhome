@@ -8,10 +8,16 @@ import SwiftData
 /// the production `Schema(versionedSchema: SchemaV5.self)` container, alongside Note. See
 /// Note.swift for the full rationale (V4 typealias crashed note save/query under the V5 store).
 /// SchemaV5.NoteBlock is copied verbatim from SchemaV4.NoteBlock — no-op migration.
+/// Flipped from SchemaV5.NoteBlock → SchemaV6.NoteBlock in Phase 9 (plan 09-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV6.self)`. SchemaV6.NoteBlock is
+/// copied verbatim from SchemaV5.NoteBlock — no V6 changes to NoteBlock.
 /// All views and tests that use `NoteBlock` continue to compile unchanged if the schema version
 /// is bumped later — only this file needs updating.
+///
+/// STAB-08 lesson: this typealias was flipped atomically with Expense/Note/Category/Account/Asset
+/// and MigrationPlan.swift (schemas + stages) in one commit — see Account.swift for full rationale.
 ///
 /// Usage:
 ///   let block = NoteBlock(kindRaw: "checkbox", text: "Buy milk", order: 0)
 ///   @Query var blocks: [NoteBlock]
-typealias NoteBlock = SchemaV5.NoteBlock
+typealias NoteBlock = SchemaV6.NoteBlock

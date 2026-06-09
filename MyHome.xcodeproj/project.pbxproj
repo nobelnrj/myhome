@@ -107,6 +107,10 @@
 		A622GOC /* GmailOAuthConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F622GOC /* GmailOAuthConfig.swift */; };
 		A701SV4 /* SchemaV4.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV4 /* SchemaV4.swift */; };
 		A701SV5 /* SchemaV5.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV5 /* SchemaV5.swift */; };
+		A701SV6 /* SchemaV6.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV6 /* SchemaV6.swift */; };
+		A901ACC /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = F901ACC /* Account.swift */; };
+		A902AST /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F902AST /* Asset.swift */; };
+		A903SV6MT /* SchemaV6MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903SV6MT /* SchemaV6MigrationTests.swift */; };
 		A702GFP /* GmailFetchPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F702GFP /* GmailFetchPort.swift */; };
 		A703BEP /* BankEmailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703BEP /* BankEmailParser.swift */; };
 		A703CS /* ConfidenceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CS /* ConfidenceScorer.swift */; };
@@ -238,6 +242,10 @@
 		F622GOC /* GmailOAuthConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailOAuthConfig.swift; sourceTree = "<group>"; };
 		F701SV4 /* SchemaV4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV4.swift; sourceTree = "<group>"; };
 		F701SV5 /* SchemaV5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV5.swift; sourceTree = "<group>"; };
+		F701SV6 /* SchemaV6.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6.swift; sourceTree = "<group>"; };
+		F901ACC /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
+		F902AST /* Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
+		F903SV6MT /* SchemaV6MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6MigrationTests.swift; sourceTree = "<group>"; };
 		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
 		F703BEP /* BankEmailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankEmailParser.swift; sourceTree = "<group>"; };
 		F703CS /* ConfidenceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorer.swift; sourceTree = "<group>"; };
@@ -451,6 +459,7 @@
 				F119V3 /* SchemaV3.swift */,
 				F701SV4 /* SchemaV4.swift */,
 				F701SV5 /* SchemaV5.swift */,
+				F701SV6 /* SchemaV6.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -463,6 +472,8 @@
 				F120RV /* ReminderValueTypes.swift */,
 				F133N /* Note.swift */,
 				F134NB /* NoteBlock.swift */,
+				F901ACC /* Account.swift */,
+				F902AST /* Asset.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -542,6 +553,7 @@
 				F709MN /* MerchantNormalizerTests.swift */,
 				F710IP /* IngestionPipelineTests.swift */,
 				F619MAGT /* MultiAccountGmailTests.swift */,
+				F903SV6MT /* SchemaV6MigrationTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -757,6 +769,9 @@
 				A622GOC /* GmailOAuthConfig.swift in Sources */,
 				A701SV4 /* SchemaV4.swift in Sources */,
 				A701SV5 /* SchemaV5.swift in Sources */,
+				A701SV6 /* SchemaV6.swift in Sources */,
+				A901ACC /* Account.swift in Sources */,
+				A902AST /* Asset.swift in Sources */,
 				A703BEP /* BankEmailParser.swift in Sources */,
 				A703MN /* MerchantNormalizer.swift in Sources */,
 				A703CS /* ConfidenceScorer.swift in Sources */,
@@ -809,6 +824,7 @@
 				A709MN /* MerchantNormalizerTests.swift in Sources */,
 				A710IP /* IngestionPipelineTests.swift in Sources */,
 				A619MAGT /* MultiAccountGmailTests.swift in Sources */,
+				A903SV6MT /* SchemaV6MigrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

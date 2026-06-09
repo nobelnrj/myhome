@@ -1,4 +1,5 @@
 import SwiftData
+import Foundation
 
 /// SchemaMigrationPlan for MyHome.
 ///
@@ -7,11 +8,11 @@ import SwiftData
 /// existing schema versions from this list).
 enum AppMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self]   // append V5 — never remove V1–V4
+        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self]   // append V6 — never remove V1–V5
     }
 
     static var stages: [MigrationStage] {
-        [v1ToV2, v2ToV3, v3ToV4, v4ToV5]
+        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6]   // append v5ToV6
     }
 
     // Use .custom(willMigrate: nil, didMigrate: nil) rather than .lightweight
@@ -50,4 +51,71 @@ enum AppMigrationPlan: SchemaMigrationPlan {
         willMigrate: nil,
         didMigrate: nil
     )
+
+    // V6 adds Account + Asset models and backfills accountID on existing expenses (ACCT-08).
+    //
+    // FIRST non-nil didMigrate in this codebase. .custom over .lightweight: FB13812722 workaround preserved.
+    // didMigrate is SYNCHRONOUS (throws, NOT async throws). Never attempt await inside it.
+    //
+    // Idempotency design (RESEARCH Pitfall 2 + T-09-01):
+    //   - Step 2: fetch existing Account rows before inserting — prevents duplicates on retry.
+    //   - Step 4: guard expense.accountID == nil — skips already-attributed expenses on retry.
+    //   - Step 5: explicit try context.save() — REQUIRED; migration context does NOT auto-commit (Pitfall 3).
+    //   - If this closure throws, SwiftData re-runs the stage on next launch (no documented rollback).
+    //     The idempotency guards above make it safe to re-run.
+    static let v5ToV6 = MigrationStage.custom(
+        fromVersion: SchemaV5.self,
+        toVersion: SchemaV6.self,
+        willMigrate: nil,
+        didMigrate: { context in
+            // 1. Fetch all V6 expenses (sourceLabel field is retained verbatim from V5; ACCT-08)
+            let expenses = try context.fetch(FetchDescriptor<SchemaV6.Expense>())
+
+            // 2. Build idempotency map: existing accounts keyed by sourceLabel
+            //    MUST fetch before inserting — prevents duplicate rows on retry (Pitfall 2, T-09-01)
+            let existingAccounts = try context.fetch(FetchDescriptor<SchemaV6.Account>())
+            var accountByLabel: [String: SchemaV6.Account] = [:]
+            for account in existingAccounts {
+                if let label = account.sourceLabel { accountByLabel[label] = account }
+            }
+
+            // 3. Create missing Account rows for each distinct non-nil sourceLabel (D-01, D-03)
+            var didCreateAny = false
+            let labels = Set(expenses.compactMap(\.sourceLabel))
+            for label in labels {
+                if accountByLabel[label] == nil {
+                    let typeRaw = inferAccountType(from: label)   // "credit_card" or "savings" (D-03)
+                    let account = SchemaV6.Account(name: label, typeRaw: typeRaw, sourceLabel: label)
+                    context.insert(account)
+                    accountByLabel[label] = account
+                    didCreateAny = true
+                }
+            }
+
+            // 4. Backfill Expense.accountID (idempotent: skip expenses already attributed — Pitfall 2)
+            //    sourceAccount is NEVER touched here — it is the Gmail dedup key (ACCT-08 / T-09-02)
+            for expense in expenses {
+                guard expense.accountID == nil, let label = expense.sourceLabel else { continue }
+                expense.accountID = accountByLabel[label]?.id
+            }
+
+            // 5. Explicit save — REQUIRED; migration context does NOT auto-commit (Pitfall 3, T-09-01)
+            try context.save()
+
+            // 6. Flag first-launch review if accounts were auto-created (D-02)
+            if didCreateAny {
+                UserDefaults.standard.set(true, forKey: "accountReviewPending")
+            }
+        }
+    )
+
+    /// D-03: Infer account type from sourceLabel string (case-insensitive keyword match).
+    /// Returns "credit_card" if the label contains "cc", "credit", or "card"; "savings" otherwise.
+    private static func inferAccountType(from label: String) -> String {
+        let lower = label.lowercased()
+        if lower.contains("cc") || lower.contains("credit") || lower.contains("card") {
+            return "credit_card"
+        }
+        return "savings"
+    }
 }

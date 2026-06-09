@@ -15,7 +15,7 @@ extension ModelContainer {
     /// TODO: migrate to App Group URL when paid account active (group.com.reojacob.myhome).
     @MainActor
     static func appContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV5.self)
+        let schema = Schema(versionedSchema: SchemaV6.self)
 
         // Resolve the App Group container URL; fall back to Application Support if unavailable.
         let storeURL: URL

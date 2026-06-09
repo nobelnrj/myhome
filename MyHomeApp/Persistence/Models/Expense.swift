@@ -6,9 +6,16 @@ import SwiftData
 /// Flipped from SchemaV2.Expense → SchemaV3.Expense in Phase 3.
 /// Flipped from SchemaV3.Expense → SchemaV4.Expense in Phase 7 (plan 07-02).
 /// Flipped from SchemaV4.Expense → SchemaV5.Expense in multi-account plan (260603-lvt).
+/// Flipped from SchemaV5.Expense → SchemaV6.Expense in Phase 9 (plan 09-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV6.self)`, so the app MUST use
+/// SchemaV6.Expense. SchemaV6.Expense is an additive superset of SchemaV5.Expense — new
+/// fields only (accountID, isTransfer, transferPairID), no removals or reorders.
 /// All views and tests that use `Expense` continue to compile unchanged.
+///
+/// STAB-08 lesson: this typealias was flipped atomically with Note/NoteBlock/Category/Account/Asset
+/// and MigrationPlan.swift (schemas + stages) in one commit — see Account.swift for full rationale.
 ///
 /// Usage:
 ///   let expense = Expense(amount: Decimal(500), note: "Lunch")
 ///   @Query var expenses: [Expense]
-typealias Expense = SchemaV5.Expense
+typealias Expense = SchemaV6.Expense
