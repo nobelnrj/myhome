@@ -28,7 +28,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 
 ### v1.1: Accounts, Assets & Household Polish
 
-- [ ] **Phase 8: Stabilization** — Fix two crash vectors, category sort order, and seed the daily-routine reset service
+- [x] **Phase 8: Stabilization** — Fix two crash vectors, category sort order, and seed the daily-routine reset service (completed 2026-06-09)
 - [ ] **Phase 9: SchemaV6 & Accounts Management** — Additive migration (Account + Asset models, transfer fields, routine fields) + full Accounts CRUD and per-account spend
 - [ ] **Phase 10: Self-Transfer Detection** — 5-signal scorer, Transfer Inbox confirm flow, spend/budget exclusion, retroactive detection
 - [ ] **Phase 11: Asset Tracker** — Holdings CRUD, AMFI MF NAV fetch, net-worth aggregation, allocation chart, staleness indicators
@@ -51,7 +51,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
   4. RoutineResetService skeleton exists, is wired to RootView.onChange(of: scenePhase) on .active, and is ready to accept the lastCheckedDate field from Phase 9 (no schema change in this phase; service is a no-op stub until Phase 9 completes it)**Plans**: 4 plans
   - [x] 08-01-PLAN.md — STAB-01: tombstone-guard Notes calendar / day-agenda against deleted @Model refs
   - [x] 08-02-PLAN.md — STAB-02: re-resolve Category by PersistentIdentifier + single batched save in both Gmail sync paths
-  - [ ] 08-03-PLAN.md — STAB-03: lock in max(sortOrder)+1 category insertion (regression test + defensive comment + live-app confirm)
+  - [x] 08-03-PLAN.md — STAB-03: lock in max(sortOrder)+1 category insertion (regression test + defensive comment + live-app confirm)
   - [x] 08-04-PLAN.md — STAB-04: RoutineResetService scaffold wired to RootView scenePhase .active (logged no-op)
 
 ---
@@ -137,7 +137,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 | 5. Face ID Gate & Settings | v1.0 | 2/2 | Complete | 2026-06-01 |
 | 6. Gmail Sign-In & Client | v1.0 | 4/4 | Complete | 2026-06-02 |
 | 7. Bank Parsers & Ingestion Pipeline | v1.0 | 6/6 | Complete | 2026-06-03 |
-| 8. Stabilization | v1.1 | 3/4 | In Progress|  |
+| 8. Stabilization | v1.1 | 4/4 | Complete   | 2026-06-09 |
 | 9. SchemaV6 & Accounts Management | v1.1 | 0/? | Not started | - |
 | 10. Self-Transfer Detection | v1.1 | 0/? | Not started | - |
 | 11. Asset Tracker | v1.1 | 0/? | Not started | - |
