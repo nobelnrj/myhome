@@ -188,8 +188,9 @@ struct ManageCategoriesView: View {
                 nameError = "A category with that name already exists."
                 return
             }
-            // Append after the highest existing sortOrder so deletions don't cause collisions.
-            let nextSortOrder = (all.map(\.sortOrder).max() ?? 999) + 1
+            // Prepend before the lowest existing sortOrder so new categories surface at the
+            // TOP of the @Query(sort: \Category.sortOrder) ascending list (STAB-03 / user direction).
+            let nextSortOrder = (all.map(\.sortOrder).min() ?? 0) - 1
             let category = Category(name: trimmed, symbolName: "tag", sortOrder: nextSortOrder)
             context.insert(category)
             try context.save()  // CR-01: explicit save

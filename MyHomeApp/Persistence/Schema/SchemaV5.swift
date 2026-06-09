@@ -53,10 +53,11 @@ enum SchemaV5: VersionedSchema {
         var expenses: [SchemaV5.Expense] = []
 
         // STAB-03 footgun: sortOrder defaults to 0. Any caller that OMITS sortOrder
-        // sorts to the TOP of the @Query(sort: \Category.sortOrder) list. New custom
-        // categories MUST pass max(existing.sortOrder)+1 (see ManageCategoriesView.addCategory)
-        // to append at the bottom. Default left at 0 (changing it would break the seed path
-        // and SchemaV5 identity) — pass sortOrder explicitly at every call site.
+        // lands among the seeded 0..13 rows in the @Query(sort: \Category.sortOrder) list,
+        // not at a predictable edge. New custom categories MUST pass min(existing.sortOrder)-1
+        // (see ManageCategoriesView.addCategory) to surface at the TOP of the list. Default
+        // left at 0 (changing it would break the seed path and SchemaV5 identity) — pass
+        // sortOrder explicitly at every call site.
         init(name: String, symbolName: String?, sortOrder: Int = 0) {
             self.id = UUID()
             self.name = name
