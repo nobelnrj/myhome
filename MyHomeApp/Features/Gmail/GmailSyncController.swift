@@ -476,11 +476,12 @@ final class GmailSyncController {
                 }
             })
 
-            // Step 4: Fetch categories once
-            var categoriesByName: [String: Category] = [:]
+            // Step 4: Capture category PersistentIdentifiers once (D-04: Sendable value types,
+            // safe across await suspension — replaces captured [String: Category] @Model refs).
+            var categoryIDsByName: [String: PersistentIdentifier] = [:]
             if let ctx = modelContext {
                 for cat in (try? ctx.fetch(FetchDescriptor<Category>())) ?? [] {
-                    if let name = cat.name { categoriesByName[name] = cat }
+                    if let name = cat.name { categoryIDsByName[name] = cat.persistentModelID }
                 }
             }
 
@@ -524,14 +525,23 @@ final class GmailSyncController {
                 expense.ingestionStateRaw = ingestionState
                 expense.sourceAccount = confirmedEmail    // D-MA-03: stamp owning account
 
-                if let hint = parsed.categoryHint, let cat = categoriesByName[hint] {
+                // D-04: Re-resolve Category by PersistentIdentifier after the await suspension.
+                // On failed re-fetch (nil, deleted), skip category assignment and continue (D-03).
+                if let hint = parsed.categoryHint,
+                   let catID = categoryIDsByName[hint],
+                   let ctx = modelContext,
+                   let cat = ctx.model(for: catID) as? Category {
                     expense.categories = [cat]
                 }
 
                 if let ctx = modelContext {
                     ctx.insert(expense)
-                    try ctx.save()
                 }
+            }
+
+            // D-04: Single batched save after the loop (not inside the per-message loop).
+            if let ctx = modelContext {
+                try ctx.save()
             }
             return true
 
@@ -613,10 +623,12 @@ final class GmailSyncController {
             // Legacy single-account dedup (messageID only — no sourceAccount context)
             let ingestedMessageIDs = Set(existingExpenses.compactMap { $0.gmailMessageID })
 
-            var categoriesByName: [String: Category] = [:]
+            // D-04: Capture category PersistentIdentifiers once (Sendable value types,
+            // safe across the await suspension — replaces captured [String: Category] @Model refs).
+            var categoryIDsByName: [String: PersistentIdentifier] = [:]
             if let ctx = modelContext {
                 for cat in (try? ctx.fetch(FetchDescriptor<Category>())) ?? [] {
-                    if let name = cat.name { categoriesByName[name] = cat }
+                    if let name = cat.name { categoryIDsByName[name] = cat.persistentModelID }
                 }
             }
 
@@ -659,14 +671,23 @@ final class GmailSyncController {
                 expense.ingestionStateRaw = ingestionState
                 expense.sourceAccount = email    // stamp account even in legacy path
 
-                if let hint = parsed.categoryHint, let cat = categoriesByName[hint] {
+                // D-04: Re-resolve Category by PersistentIdentifier after the await suspension.
+                // On failed re-fetch (nil, deleted), skip category assignment and continue (D-03).
+                if let hint = parsed.categoryHint,
+                   let catID = categoryIDsByName[hint],
+                   let ctx = modelContext,
+                   let cat = ctx.model(for: catID) as? Category {
                     expense.categories = [cat]
                 }
 
                 if let ctx = modelContext {
                     ctx.insert(expense)
-                    try ctx.save()
                 }
+            }
+
+            // D-04: Single batched save after the loop (not inside the per-message loop).
+            if let ctx = modelContext {
+                try ctx.save()
             }
         } catch {
             let errMsg = error.localizedDescription.lowercased()
