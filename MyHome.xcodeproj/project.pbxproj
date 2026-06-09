@@ -121,6 +121,7 @@
 		A904ABT /* AccountBalanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F904ABT /* AccountBalanceTests.swift */; };
 		A905ATIT /* AccountTypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F905ATIT /* AccountTypeInferenceTests.swift */; };
 		A906ACCT /* AccountCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F906ACCT /* AccountCRUDTests.swift */; };
+		A903GAAT /* GmailAccountAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903GAAT /* GmailAccountAttributionTests.swift */; };
 		A702GFP /* GmailFetchPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F702GFP /* GmailFetchPort.swift */; };
 		A703BEP /* BankEmailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703BEP /* BankEmailParser.swift */; };
 		A703CS /* ConfidenceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CS /* ConfidenceScorer.swift */; };
@@ -266,6 +267,7 @@
 		F904ABT /* AccountBalanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTests.swift; sourceTree = "<group>"; };
 		F905ATIT /* AccountTypeInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeInferenceTests.swift; sourceTree = "<group>"; };
 		F906ACCT /* AccountCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCRUDTests.swift; sourceTree = "<group>"; };
+		F903GAAT /* GmailAccountAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountAttributionTests.swift; sourceTree = "<group>"; };
 		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
 		F703BEP /* BankEmailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankEmailParser.swift; sourceTree = "<group>"; };
 		F703CS /* ConfidenceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorer.swift; sourceTree = "<group>"; };
@@ -584,6 +586,7 @@
 				F904ABT /* AccountBalanceTests.swift */,
 				F905ATIT /* AccountTypeInferenceTests.swift */,
 				F906ACCT /* AccountCRUDTests.swift */,
+				F903GAAT /* GmailAccountAttributionTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -865,6 +868,7 @@
 				A904ABT /* AccountBalanceTests.swift in Sources */,
 				A905ATIT /* AccountTypeInferenceTests.swift in Sources */,
 				A906ACCT /* AccountCRUDTests.swift in Sources */,
+				A903GAAT /* GmailAccountAttributionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
