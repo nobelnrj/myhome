@@ -28,6 +28,12 @@ struct AddExpenseView: View {
     @State private var showDatePicker: Bool = false
     @State private var selectedCategory: Category? = nil
     @State private var showCategoryPicker: Bool = false
+    @State private var selectedAccount: Account? = nil
+    @State private var showAccountPicker: Bool = false
+
+    // Active accounts for resolving lastUsedAccountID on appear (D-04)
+    @Query(filter: #Predicate<Account> { !$0.isArchived }, sort: \Account.sortOrder)
+    private var activeAccounts: [Account]
 
     // MARK: - Computed
 
@@ -64,6 +70,14 @@ struct AddExpenseView: View {
             }
             .navigationTitle("New Expense")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                // D-04: Default to last-used account (active, non-archived only)
+                if let idString = UserDefaults.standard.string(forKey: "lastUsedAccountID"),
+                   let uuid = UUID(uuidString: idString) {
+                    selectedAccount = activeAccounts.first { $0.id == uuid }
+                    // If the stored account is not in activeAccounts (archived or deleted), leave nil
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -191,6 +205,43 @@ struct AddExpenseView: View {
                 CategoryPickerView(selectedCategory: $selectedCategory)
             }
 
+            // Account row (D-04: optional account picker, defaults to last-used active account)
+            Button(action: { showAccountPicker = true }) {
+                HStack {
+                    Text("Account")
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    if let acc = selectedAccount, let name = acc.name {
+                        if let symbol = acc.symbolName {
+                            Image(systemName: symbol)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        // T-02-15: plain Text — never AttributedString(markdown:)
+                        Text(name)
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                    } else {
+                        Text("Unassigned")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                    }
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .frame(minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.top, 8)
+            .sheet(isPresented: $showAccountPicker) {
+                AccountPickerView(selectedAccount: $selectedAccount)
+            }
+
             // Note field (T-01-06: plain TextField — never AttributedString(markdown:))
             HStack {
                 Text("Note")
@@ -228,6 +279,12 @@ struct AddExpenseView: View {
         context.insert(expense)
         // Wire optional category (v1 UI: single-select; schema supports multiple — D2-02)
         expense.categories = selectedCategory.map { [$0] } ?? []
+        // D-04: Wire optional account; guard against archived selection (T-09-09 / Pitfall 6)
+        if let acc = selectedAccount, !acc.isArchived {
+            expense.accountID = acc.id
+        } else {
+            expense.accountID = nil   // Unassigned (archived account treated as nil)
+        }
         // CR-01: persist explicitly — do not rely on implicit autosave (financial write).
         do {
             try context.save()
@@ -237,6 +294,10 @@ struct AddExpenseView: View {
             print("Failed to save new expense: \(error)")
             shakeAmount()
             return
+        }
+        // D-04: Persist last-used account for next add (only if non-nil and not archived)
+        if let acc = selectedAccount, !acc.isArchived {
+            UserDefaults.standard.set(acc.id.uuidString, forKey: "lastUsedAccountID")
         }
         // T-01-07: dismiss cleanly after insert (Pitfall 19 — no same-tick navigation race)
         dismiss()

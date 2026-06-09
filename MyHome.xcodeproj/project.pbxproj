@@ -28,6 +28,7 @@
 		A124 /* ExpenseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F124 /* ExpenseRow.swift */; };
 		A125 /* EditExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F125 /* EditExpenseView.swift */; };
 		A126 /* CategoryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F126 /* CategoryPickerView.swift */; };
+		A903APV /* AccountPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903APV /* AccountPickerView.swift */; };
 		A127 /* BudgetProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F127 /* BudgetProgressView.swift */; };
 		A128 /* BudgetCategoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F128 /* BudgetCategoryCard.swift */; };
 		A129 /* EditBudgetSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F129 /* EditBudgetSheet.swift */; };
@@ -177,6 +178,7 @@
 		F124 /* ExpenseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseRow.swift; sourceTree = "<group>"; };
 		F125 /* EditExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseView.swift; sourceTree = "<group>"; };
 		F126 /* CategoryPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPickerView.swift; sourceTree = "<group>"; };
+		F903APV /* AccountPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPickerView.swift; sourceTree = "<group>"; };
 		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
 		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
 		F129 /* EditBudgetSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBudgetSheet.swift; sourceTree = "<group>"; };
@@ -368,6 +370,7 @@
 				F706RIR /* ReviewInboxRow.swift */,
 				F125 /* EditExpenseView.swift */,
 				F126 /* CategoryPickerView.swift */,
+				F903APV /* AccountPickerView.swift */,
 			);
 			path = Expenses;
 			sourceTree = "<group>";
@@ -750,6 +753,7 @@
 				A706RIR /* ReviewInboxRow.swift in Sources */,
 				A125 /* EditExpenseView.swift in Sources */,
 				A126 /* CategoryPickerView.swift in Sources */,
+				A903APV /* AccountPickerView.swift in Sources */,
 				A119 /* BudgetCalculator.swift in Sources */,
 				A140NCP /* NotificationCenterPort.swift in Sources */,
 				A141NS /* NotificationScheduler.swift in Sources */,

@@ -28,6 +28,12 @@ struct EditExpenseView: View {
     @State private var amountIsError: Bool = false
     @State private var selectedCategory: Category? = nil
     @State private var showCategoryPicker: Bool = false
+    @State private var selectedAccount: Account? = nil
+    @State private var showAccountPicker: Bool = false
+
+    // Active accounts for resolving expense.accountID on appear (D-04)
+    @Query(filter: #Predicate<Account> { !$0.isArchived }, sort: \Account.sortOrder)
+    private var activeAccounts: [Account]
 
     // MARK: - Computed
 
@@ -42,6 +48,7 @@ struct EditExpenseView: View {
             || date != expense.date
             || (note.trimmingCharacters(in: .whitespaces).isEmpty ? nil : note.trimmingCharacters(in: .whitespaces)) != expense.note
             || selectedCategory?.persistentModelID != expense.categories.first?.persistentModelID
+            || selectedAccount?.id != expense.accountID
     }
 
     private var isSaveEnabled: Bool {
@@ -218,6 +225,43 @@ struct EditExpenseView: View {
                 CategoryPickerView(selectedCategory: $selectedCategory)
             }
 
+            // Account row (D-04: optional account picker, seeded from expense.accountID)
+            Button(action: { showAccountPicker = true }) {
+                HStack {
+                    Text("Account")
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    if let acc = selectedAccount, let name = acc.name {
+                        if let symbol = acc.symbolName {
+                            Image(systemName: symbol)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        // T-02-15: plain Text — never AttributedString(markdown:)
+                        Text(name)
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                    } else {
+                        Text("Unassigned")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                    }
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .frame(minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.top, 8)
+            .sheet(isPresented: $showAccountPicker) {
+                AccountPickerView(selectedAccount: $selectedAccount)
+            }
+
             // Note field (T-01-06: plain TextField — never AttributedString(markdown:))
             HStack {
                 Text("Note")
@@ -272,6 +316,11 @@ struct EditExpenseView: View {
         date = expense.date
         note = expense.note ?? ""
         selectedCategory = expense.categories.first   // v1 UI: single-select (D2-02)
+        // D-04: Seed selectedAccount from expense.accountID (active accounts only — T-09-09)
+        if let accountID = expense.accountID {
+            selectedAccount = activeAccounts.first { $0.id == accountID }
+            // If accountID resolves to nil (deleted or archived account), leave nil = Unassigned
+        }
     }
 
     private func saveExpense() {
@@ -291,6 +340,13 @@ struct EditExpenseView: View {
             : note.trimmingCharacters(in: .whitespaces)
         // Wire optional category (v1 UI: single-select; schema supports multiple — D2-02)
         expense.categories = selectedCategory.map { [$0] } ?? []
+        // D-04: Write account attribution; guard against archived (T-09-09 / Pitfall 6)
+        // Do NOT touch sourceAccount (Gmail dedup key, ACCT-08) or sourceLabel
+        if let acc = selectedAccount, !acc.isArchived {
+            expense.accountID = acc.id
+        } else {
+            expense.accountID = nil   // Unassigned (archived account treated as nil)
+        }
         expense.updatedAt = Date()
         // CR-01: persist explicitly — do not rely on implicit autosave (financial write).
         do {
