@@ -38,6 +38,7 @@ struct RootView: View {
     @State private var deepLinkBlockID: UUID? = nil
     /// Face ID gate state — @Observable owned via @State, never @StateObject (PITFALLS.md Pitfall 10)
     @State private var lockController = LockController()
+    @State private var routineResetService = RoutineResetService()
 
     /// Gmail sync controller — owned by MyHomeApp, passed in here (Phase 7: BGTask ownership).
     let gmailSyncController: GmailSyncController
@@ -106,6 +107,9 @@ struct RootView: View {
          .onChange(of: scenePhase) { _, newPhase in
              lockController.scenePhaseChanged(newPhase)
              gmailSyncController.scenePhaseChanged(newPhase)
+             if newPhase == .active {
+                 routineResetService.resetIfNeeded()   // synchronous — no Task needed (D-07)
+             }
              // Auto-trigger auth on foreground when locked (banking-app feel — D5-02, D5-01)
              // Pitfall: never call async directly in onChange; always wrap in Task
              if newPhase == .active && lockController.isLocked && lockController.lockEnabled {

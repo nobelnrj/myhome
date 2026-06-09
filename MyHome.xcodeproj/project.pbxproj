@@ -49,6 +49,7 @@
 		A155ENV /* EditNoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F155ENV /* EditNoteView.swift */; };
 		A156REV /* ReminderEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F156REV /* ReminderEditView.swift */; };
 		A157CV /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F157CV /* CalendarView.swift */; };
+		A158RRS /* RoutineResetService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F158RRS /* RoutineResetService.swift */; };
 		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
 		A202 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F202 /* MigrationTests.swift */; };
 		A203 /* MyHomeV1Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F203 /* MyHomeV1Seed.store */; };
@@ -184,6 +185,7 @@
 		F155ENV /* EditNoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNoteView.swift; sourceTree = "<group>"; };
 		F156REV /* ReminderEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEditView.swift; sourceTree = "<group>"; };
 		F157CV /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		F158RRS /* RoutineResetService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineResetService.swift; sourceTree = "<group>"; };
 		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
 		F202 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
 		F203 /* MyHomeV1Seed.store */ = {isa = PBXFileReference; lastKnownFileType = file; path = MyHomeV1Seed.store; sourceTree = "<group>"; };
@@ -367,6 +369,7 @@
 				F155ENV /* EditNoteView.swift */,
 				F156REV /* ReminderEditView.swift */,
 				F157CV /* CalendarView.swift */,
+				F158RRS /* RoutineResetService.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -719,6 +722,7 @@
 				A155ENV /* EditNoteView.swift in Sources */,
 				A156REV /* ReminderEditView.swift in Sources */,
 				A157CV /* CalendarView.swift in Sources */,
+				A158RRS /* RoutineResetService.swift in Sources */,
 				A145NA /* NotificationActions.swift in Sources */,
 				A404 /* SpendOverTimeAggregator.swift in Sources */,
 				A405 /* OverviewAggregation.swift in Sources */,
