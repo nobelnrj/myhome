@@ -70,10 +70,16 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
   5. A daily routine's checklist items start unchecked every morning — lastCheckedDate date-keys the per-block completion state; RoutineResetService resets all blocks on scenePhase .active when routineLastResetDate < startOfToday in IST
 
 **Plans**: 4 plans (1 wave of schema foundation, then 3 parallel feature plans)
+**Wave 1**
+
   - [ ] 09-01-PLAN.md — SchemaV6 atomic commit (Account + Asset models, additive Expense/Note fields, all typealias flips, v5ToV6 didMigrate backfill) + BLOCKING migration fixture test [ACCT-08]
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
   - [ ] 09-02-PLAN.md — Accounts CRUD under Settings: list/edit/detail with live balance, archive, migration review sheet [ACCT-01/02/03/04/05/07]
   - [ ] 09-03-PLAN.md — Expense attribution: account picker, main-list account filter, Gmail auto-attribution by sourceLabel [ACCT-06]
   - [ ] 09-04-PLAN.md — RoutineResetService body + RootView ModelContext injection (per-day IST reset) [STAB-04, NOTE-02]
+
 **UI hint**: yes
 
 ---
