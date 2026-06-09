@@ -52,6 +52,11 @@ enum SchemaV5: VersionedSchema {
         @Relationship(deleteRule: .nullify)
         var expenses: [SchemaV5.Expense] = []
 
+        // STAB-03 footgun: sortOrder defaults to 0. Any caller that OMITS sortOrder
+        // sorts to the TOP of the @Query(sort: \Category.sortOrder) list. New custom
+        // categories MUST pass max(existing.sortOrder)+1 (see ManageCategoriesView.addCategory)
+        // to append at the bottom. Default left at 0 (changing it would break the seed path
+        // and SchemaV5 identity) — pass sortOrder explicitly at every call site.
         init(name: String, symbolName: String?, sortOrder: Int = 0) {
             self.id = UUID()
             self.name = name
