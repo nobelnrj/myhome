@@ -133,4 +133,39 @@ struct NoteModelTests {
             "NoteBlock must have no @Attribute(.unique) — CloudKit does not support it"
         )
     }
+
+    // MARK: - STAB-08: Note typealias must match the production versionedSchema
+
+    /// STAB-08 regression — the app's `Note`/`NoteBlock` typealiases MUST resolve to the same
+    /// schema version the production container is built from (`Schema(versionedSchema: SchemaV5.self)`).
+    ///
+    /// Pre-fix: `typealias Note = SchemaV4.Note` while the container registered `SchemaV5.Note`,
+    /// so saving a note inserted an entity absent from the store's schema → SwiftData `save()`
+    /// crashed with an internal assertion (and the notes `@Query` crashed once any note existed).
+    /// The other Note tests use `ModelContainer(for: Note.self, ...)`, which registers whatever
+    /// `Note` aliases, so they could not catch the mismatch. This test pins the production schema.
+    @Test("noteSavesUnderProductionVersionedSchema — STAB-08")
+    func noteSavesUnderProductionVersionedSchema() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let storeURL = dir.appendingPathComponent("MyHome.store")
+
+        // Build the container the same way appContainer() does: from the versioned schema.
+        let schema = Schema(versionedSchema: SchemaV5.self)
+        let config = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: schema, configurations: [config])
+        let context = container.mainContext
+
+        // Save a note with a block — this is what AddNoteView.createNote / EditNoteView do.
+        let note = Note(title: "STAB-08")
+        context.insert(note)
+        let block = NoteBlock(kindRaw: "checkbox", text: "task", order: 0)
+        context.insert(block)
+        block.note = note
+        try context.save()  // pre-fix: SwiftData assertion crash here
+
+        let fetched = try context.fetch(FetchDescriptor<Note>())
+        #expect(fetched.count == 1, "STAB-08: note must persist under the production versionedSchema")
+        #expect(fetched.first?.title == "STAB-08", "STAB-08: title must round-trip")
+    }
 }
