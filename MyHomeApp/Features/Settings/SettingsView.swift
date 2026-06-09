@@ -20,6 +20,8 @@ struct SettingsView: View {
     @State private var showManageCategories = false
     @State private var showSignOutAllConfirmation = false
     @State private var pendingDisconnectEmail: String? = nil
+    @State private var accountReviewPending: Bool =
+        UserDefaults.standard.bool(forKey: "accountReviewPending")
 
     var body: some View {
         NavigationStack {
@@ -156,6 +158,24 @@ struct SettingsView: View {
                 // MARK: Data Section
 
                 Section("Data") {
+                    // Accounts management row (D-06) with optional review badge (D-02)
+                    NavigationLink(destination: AccountsListView()) {
+                        HStack {
+                            rowLabel("Accounts", symbol: "creditcard", color: Color(.systemBlue))
+                            Spacer()
+                            // D-02: badge when accountReviewPending is true
+                            if accountReviewPending {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .foregroundStyle(Color(.systemOrange))
+                                    .font(.subheadline)
+                            }
+                            Image(systemName: "chevron.right")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .foregroundStyle(.primary)
+
                     Button {
                         showManageCategories = true
                     } label: {
