@@ -28,7 +28,7 @@
 - [ ] **ACCT-05**: Account balance auto-updates from attributed transactions — debits decrease and credits increase the balance from the baseline; confirmed self-transfers move balance between accounts without changing total net worth. Displayed balance = baseline ± transactions since the baseline date.
 - [ ] **ACCT-06**: User can view spend filtered to a single account (per-account spend view).
 - [ ] **ACCT-07**: User can archive/hide a closed account so it stays out of pickers without losing its transaction history.
-- [ ] **ACCT-08**: Existing expenses are attributed to accounts via an additive `accountID` without disturbing `sourceAccount` (the Gmail dedup idempotency key); legacy data is backfilled in the V5→V6 migration without loss.
+- [x] **ACCT-08**: Existing expenses are attributed to accounts via an additive `accountID` without disturbing `sourceAccount` (the Gmail dedup idempotency key); legacy data is backfilled in the V5→V6 migration without loss.
 
 ### Self-Transfer Detection (XFER)
 
@@ -98,7 +98,7 @@
 | ACCT-05 | Phase 9 | Pending |
 | ACCT-06 | Phase 9 | Pending |
 | ACCT-07 | Phase 9 | Pending |
-| ACCT-08 | Phase 9 | Pending |
+| ACCT-08 | Phase 9 | Complete |
 | XFER-01 | Phase 10 | Pending |
 | XFER-02 | Phase 10 | Pending |
 | XFER-03 | Phase 10 | Pending |

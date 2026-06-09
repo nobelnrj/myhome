@@ -72,7 +72,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 **Plans**: 4 plans (1 wave of schema foundation, then 3 parallel feature plans)
 **Wave 1**
 
-  - [ ] 09-01-PLAN.md — SchemaV6 atomic commit (Account + Asset models, additive Expense/Note fields, all typealias flips, v5ToV6 didMigrate backfill) + BLOCKING migration fixture test [ACCT-08]
+  - [x] 09-01-PLAN.md — SchemaV6 atomic commit (Account + Asset models, additive Expense/Note fields, all typealias flips, v5ToV6 didMigrate backfill) + BLOCKING migration fixture test [ACCT-08]
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -148,7 +148,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 | 6. Gmail Sign-In & Client | v1.0 | 4/4 | Complete | 2026-06-02 |
 | 7. Bank Parsers & Ingestion Pipeline | v1.0 | 6/6 | Complete | 2026-06-03 |
 | 8. Stabilization | v1.1 | 4/4 | Complete    | 2026-06-09 |
-| 9. SchemaV6 & Accounts Management | v1.1 | 0/4 | Planned | - |
+| 9. SchemaV6 & Accounts Management | v1.1 | 1/4 | In Progress|  |
 | 10. Self-Transfer Detection | v1.1 | 0/? | Not started | - |
 | 11. Asset Tracker | v1.1 | 0/? | Not started | - |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
