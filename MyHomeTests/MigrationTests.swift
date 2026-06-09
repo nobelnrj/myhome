@@ -35,10 +35,10 @@ struct MigrationTests {
 
         try FileManager.default.copyItem(at: bundledStoreURL, to: tempURL)
 
-        // 3. Open with the full migration plan targeting SchemaV5 (live schema post 260603-lvt).
-        //    V1 → V2 → V3 → V4 → V5 chain via AppMigrationPlan.
+        // 3. Open with the full migration plan targeting SchemaV6 (live schema post Phase 9).
+        //    V1 → V2 → V3 → V4 → V5 → V6 chain via AppMigrationPlan.
         //    If migration fails, ModelContainer.init throws — the test fails with a clear error.
-        let schema = Schema(versionedSchema: SchemaV5.self)
+        let schema = Schema(versionedSchema: SchemaV6.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
@@ -78,8 +78,8 @@ struct MigrationTests {
 
         try FileManager.default.copyItem(at: bundledStoreURL, to: tempURL)
 
-        // 3. Open with the full migration plan targeting SchemaV5 (V2 → V3 → V4 → V5 via AppMigrationPlan).
-        let schema = Schema(versionedSchema: SchemaV5.self)
+        // 3. Open with the full migration plan targeting SchemaV6 (V2 → V3 → V4 → V5 → V6 via AppMigrationPlan).
+        let schema = Schema(versionedSchema: SchemaV6.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
@@ -90,7 +90,7 @@ struct MigrationTests {
         // 4. Verify the seeded expense is readable (store was pre-seeded with one Expense row).
         let context = container.mainContext
         let expenses = try context.fetch(FetchDescriptor<Expense>())
-        #expect(!expenses.isEmpty, "At least one Expense must survive the V2→V3→V4→V5 migration (T-03-02)")
+        #expect(!expenses.isEmpty, "At least one Expense must survive the V2→V3→V4→V5→V6 migration (T-03-02)")
 
         // 5. Verify the seeded data is intact (generator seeded amount=100, note="Seed").
         let seedExpense = expenses.first
@@ -139,11 +139,11 @@ struct MigrationTests {
         // 2. Copy the seed file to a second temp URL (no container lock contention).
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
-        // 3. Re-open under AppMigrationPlan targeting SchemaV5 — triggers v3ToV4 + v4ToV5 stages.
-        let v5Schema = Schema(versionedSchema: SchemaV5.self)
-        let migrateConfig = ModelConfiguration(schema: v5Schema, url: migrateURL)
+        // 3. Re-open under AppMigrationPlan targeting SchemaV6 — triggers v3ToV4 + v4ToV5 + v5ToV6 stages.
+        let v6Schema = Schema(versionedSchema: SchemaV6.self)
+        let migrateConfig = ModelConfiguration(schema: v6Schema, url: migrateURL)
         let migratedContainer = try ModelContainer(
-            for: v5Schema,
+            for: v6Schema,
             migrationPlan: AppMigrationPlan.self,
             configurations: [migrateConfig]
         )
@@ -151,7 +151,7 @@ struct MigrationTests {
         // 4. Assert the row survived migration.
         let ctx = migratedContainer.mainContext
         let expenses = try ctx.fetch(FetchDescriptor<Expense>())
-        #expect(!expenses.isEmpty, "Expense row must survive V3→V4→V5 migration (T-07-04)")
+        #expect(!expenses.isEmpty, "Expense row must survive V3→V4→V5→V6 migration (T-07-04)")
 
         // 5. Verify original fields are intact.
         let migratedExpense = expenses.first
@@ -212,11 +212,11 @@ struct MigrationTests {
         // 2. Copy the V4 seed to a second URL (avoids container lock contention).
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
-        // 3. Re-open EXACTLY like appContainer(): versionedSchema V5 + AppMigrationPlan (runs v4ToV5).
-        let v5Schema = Schema(versionedSchema: SchemaV5.self)
-        let migrateConfig = ModelConfiguration(schema: v5Schema, url: migrateURL)
+        // 3. Re-open EXACTLY like appContainer(): versionedSchema V6 + AppMigrationPlan (runs v4ToV5 + v5ToV6).
+        let v6Schema = Schema(versionedSchema: SchemaV6.self)
+        let migrateConfig = ModelConfiguration(schema: v6Schema, url: migrateURL)
         let container = try ModelContainer(
-            for: v5Schema,
+            for: v6Schema,
             migrationPlan: AppMigrationPlan.self,
             configurations: [migrateConfig]
         )
