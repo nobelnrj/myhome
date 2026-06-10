@@ -38,7 +38,7 @@
 - [ ] **XFER-02**: Detected self-transfer pairs surface in a Transfer Inbox for explicit user confirmation (reusing the Review Inbox accept/reject pattern); nothing is excluded silently.
 - [ ] **XFER-03**: User can confirm or reject a detected pair; confirmed transfers are marked as transfers and linked as a pair.
 - [x] **XFER-04**: Confirmed self-transfers are excluded from spend totals and budgets (BudgetCalculator filters them out).
-- [ ] **XFER-05**: User can manually mark/unmark any expense as a self-transfer when auto-detection misses or misfires.
+- [x] **XFER-05**: User can manually mark/unmark any expense as a self-transfer when auto-detection misses or misfires.
 
 ### Asset Tracker (ASSET)
 
@@ -103,7 +103,7 @@
 | XFER-02 | Phase 10 | Pending |
 | XFER-03 | Phase 10 | Pending |
 | XFER-04 | Phase 10 | Complete |
-| XFER-05 | Phase 10 | Pending |
+| XFER-05 | Phase 10 | Complete |
 | ASSET-01 | Phase 11 | Pending |
 | ASSET-02 | Phase 11 | Pending |
 | ASSET-03 | Phase 11 | Pending |

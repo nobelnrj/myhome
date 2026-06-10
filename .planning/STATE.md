@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
 status: executing
-last_updated: "2026-06-10T14:59:16.676Z"
+last_updated: "2026-06-10T15:28:23.477Z"
 last_activity: 2026-06-10
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 12
-  completed_plans: 9
+  completed_plans: 11
   percent: 40
 ---
 
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 10 (self-transfer-detection) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-06-10
 
@@ -77,6 +77,7 @@ Progress: [████████░░] 75%
 | Phase 09 P02 | — | 4 tasks | 12 files |
 | Phase 09 P03 | — | 3 tasks + 1 verify | 6 files |
 | Phase 10-self-transfer-detection P02 | 25 | 2 tasks | 4 files |
+| Phase 10 P04 | 25 | 2 tasks | 3 files |
 
 ## Quick Tasks Completed
 
@@ -122,6 +123,8 @@ Recent decisions affecting current work:
 - [Phase ?]: canEvaluate called before evaluate in authenticate() — passcodeNotSet only detectable from canEvaluatePolicy path (D5-05)
 - [Phase ?]: shouldRefresh in sync() uses (accessToken==nil || (expiry!=nil && needsProactiveRefresh))
 - [Phase ?]: STAB-01 tombstone guard: modelContext != nil applied to all Note/NoteBlock iteration sites in CalendarView and CalendarAggregator
+- [Phase ?]: applyTransferMark extracted as static func on EditExpenseView for testability without SwiftUI
+- [Phase ?]: nil chosen over false on unmark so scorer can re-evaluate (D-14)
 
 ### Pending Todos
 
@@ -170,7 +173,7 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-10T14:58:55.790Z
+Last session: 2026-06-10T15:28:18.936Z
 Stopped at: Phase 10 context gathered
 Resume file: None
 
