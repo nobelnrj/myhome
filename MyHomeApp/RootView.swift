@@ -39,6 +39,9 @@ struct RootView: View {
     /// Face ID gate state — @Observable owned via @State, never @StateObject (PITFALLS.md Pitfall 10)
     @State private var lockController = LockController()
     @State private var routineResetService = RoutineResetService()
+    /// Transfer scan service — owned by RootView, injected into both GmailSyncController (post-sync)
+    /// and SettingsView (on-demand "Scan for Transfers" action). Mirrors RoutineResetService pattern.
+    @State private var transferScanService = TransferScanService()
 
     /// Gmail sync controller — owned by MyHomeApp, passed in here (Phase 7: BGTask ownership).
     let gmailSyncController: GmailSyncController
@@ -73,7 +76,7 @@ struct RootView: View {
                 }
                 .tag(3)
 
-            SettingsView(selectedTab: $selectedTab, lockController: lockController, gmailSyncController: gmailSyncController)
+            SettingsView(selectedTab: $selectedTab, lockController: lockController, gmailSyncController: gmailSyncController, transferScanService: transferScanService)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
@@ -85,6 +88,9 @@ struct RootView: View {
             gmailSyncController.setContext(modelContext)
             // Inject context into routine reset service (same pattern — D-07, STAB-04)
             routineResetService.modelContext = modelContext
+            // Inject context into transfer scan service; wire into gmail sync for post-sync detection (D-08)
+            transferScanService.modelContext = modelContext
+            gmailSyncController.transferScanService = transferScanService
         }
         // Deep-link observer: notification banner tap → switch to Notes tab + open note
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in

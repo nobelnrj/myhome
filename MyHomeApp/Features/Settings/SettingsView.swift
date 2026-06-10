@@ -17,6 +17,7 @@ struct SettingsView: View {
     @Binding var selectedTab: Int
     let lockController: LockController
     let gmailSyncController: GmailSyncController
+    let transferScanService: TransferScanService
 
     @State private var showManageCategories = false
     @State private var showSignOutAllConfirmation = false
@@ -165,6 +166,23 @@ struct SettingsView: View {
                 // MARK: Data Section
 
                 Section("Data") {
+                    // Scan for Transfers — on-demand transfer pair detection (D-08, XFER-01)
+                    Button {
+                        transferScanService.scan()
+                    } label: {
+                        HStack {
+                            rowLabel("Scan for Transfers", symbol: "arrow.left.arrow.right", color: Color.purple)
+                            Spacer()
+                            // First-run hint: surface when the initial full scan hasn't been done yet
+                            if !UserDefaults.standard.bool(forKey: "transferScanFirstRunDone") {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .foregroundStyle(Color(.systemOrange))
+                                    .font(.subheadline)
+                            }
+                        }
+                    }
+                    .foregroundStyle(.primary)
+
                     // Accounts management row (D-06) with optional review badge (D-02)
                     NavigationLink(destination: AccountsListView()) {
                         HStack {

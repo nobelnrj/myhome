@@ -140,6 +140,10 @@ final class GmailSyncController {
     /// ModelContext for persisting ingested expenses.
     var modelContext: ModelContext? = nil
 
+    /// Transfer scan service injected by RootView — called after each sync to score new pairs (D-08).
+    /// Optional so tests that don't need transfer detection stay unaffected.
+    var transferScanService: TransferScanService? = nil
+
     /// App Group UserDefaults backing all persistent metadata.
     private let defaults: UserDefaults
 
@@ -562,6 +566,8 @@ final class GmailSyncController {
             if let ctx = modelContext {
                 try ctx.save()
             }
+            // D-08: run transfer scorer after each sync (synchronous @MainActor call — no STAB-02 risk)
+            transferScanService?.scan()
             return true
 
         } catch {
