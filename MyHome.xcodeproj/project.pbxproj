@@ -143,6 +143,7 @@
 		A706ICICI /* ICICIParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706ICICI /* ICICIParserTests.swift */; };
 		A706CUB /* CUBParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706CUB /* CUBParserTests.swift */; };
 		A706RIR /* ReviewInboxRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706RIR /* ReviewInboxRow.swift */; };
+		A1030TPR /* TransferPairRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1030TPR /* TransferPairRow.swift */; };
 		A707CS /* ConfidenceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F707CS /* ConfidenceScorerTests.swift */; };
 		A708DC /* DedupCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F708DC /* DedupCheckerTests.swift */; };
 		A709MN /* MerchantNormalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709MN /* MerchantNormalizerTests.swift */; };
@@ -296,6 +297,7 @@
 		F706ICICI /* ICICIParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParserTests.swift; sourceTree = "<group>"; };
 		F706CUB /* CUBParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CUBParserTests.swift; sourceTree = "<group>"; };
 		F706RIR /* ReviewInboxRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewInboxRow.swift; sourceTree = "<group>"; };
+		F1030TPR /* TransferPairRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferPairRow.swift; sourceTree = "<group>"; };
 		F707CS /* ConfidenceScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorerTests.swift; sourceTree = "<group>"; };
 		F708DC /* DedupCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupCheckerTests.swift; sourceTree = "<group>"; };
 		F709MN /* MerchantNormalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizerTests.swift; sourceTree = "<group>"; };
@@ -384,6 +386,7 @@
 				F123 /* ExpenseListView.swift */,
 				F124 /* ExpenseRow.swift */,
 				F706RIR /* ReviewInboxRow.swift */,
+				F1030TPR /* TransferPairRow.swift */,
 				F125 /* EditExpenseView.swift */,
 				F126 /* CategoryPickerView.swift */,
 				F903APV /* AccountPickerView.swift */,
@@ -775,6 +778,7 @@
 				A123 /* ExpenseListView.swift in Sources */,
 				A124 /* ExpenseRow.swift in Sources */,
 				A706RIR /* ReviewInboxRow.swift in Sources */,
+				A1030TPR /* TransferPairRow.swift in Sources */,
 				A125 /* EditExpenseView.swift in Sources */,
 				A126 /* CategoryPickerView.swift in Sources */,
 				A903APV /* AccountPickerView.swift in Sources */,

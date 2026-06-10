@@ -32,6 +32,17 @@ struct ExpenseListView: View {
         order: .reverse
     ) private var reviewItems: [Expense]
 
+    /// Pending transfer debit legs: transferPairID set + amount > 0 + isTransfer still nil (D-07).
+    ///
+    /// STAB-08-safe: predicate uses UUID? and Decimal comparisons — NOT Bool? (#Predicate on
+    /// optional Bool is unreliable in SwiftData; the nil-check is done in-view instead — A2).
+    /// The `isTransfer == nil` guard is applied defensively in the ForEach, not in the @Query.
+    @Query(
+        filter: #Predicate<Expense> { $0.transferPairID != nil && $0.amount > 0 },
+        sort: \Expense.date,
+        order: .reverse
+    ) private var pendingDebitLegs: [Expense]
+
     @Environment(\.modelContext) private var context
 
     @State private var showingAddSheet: Bool = false
@@ -42,6 +53,9 @@ struct ExpenseListView: View {
 
     /// Active account filter for the main list. Defaults to showing all accounts (ACCT-06/D-07).
     @State private var accountFilter: AccountFilter = .all
+
+    /// Active transfer filter — .normal hides confirmed transfers; .transfers shows only them (D-12).
+    @State private var transferFilter: TransferFilter = .normal
 
     /// Active accounts for the account filter menu (archived excluded — D-08).
     @Query(filter: #Predicate<Account> { !$0.isArchived }, sort: \Account.sortOrder)
@@ -64,6 +78,15 @@ struct ExpenseListView: View {
         case account(UUID)    // accountID == specific UUID
     }
 
+    /// Transfer visibility filter (D-12).
+    ///
+    /// - `.normal`: default view — excludes confirmed transfers (isTransfer == true) from main list.
+    /// - `.transfers`: shows ONLY confirmed transfers.
+    private enum TransferFilter: Hashable {
+        case normal
+        case transfers
+    }
+
     /// One day's worth of expenses, used as a List section (design groups by day).
     private struct DaySection: Identifiable {
         let id: Date            // start-of-day (stable section identity)
@@ -75,7 +98,7 @@ struct ExpenseListView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if expenses.isEmpty && reviewItems.isEmpty {
+                if expenses.isEmpty && reviewItems.isEmpty && pendingDebitLegs.isEmpty {
                     ContentUnavailableView(
                         "No Expenses Yet",
                         systemImage: "tray",
@@ -92,6 +115,26 @@ struct ExpenseListView: View {
                                         .onTapGesture {
                                             editingExpense = expense
                                         }
+                                }
+                            }
+                        }
+
+                        // "Possible Transfers" section — pending scorer-detected pairs (D-11, XFER-02)
+                        // Defensive: only render a row when the credit leg is still present and the
+                        // debit leg is still pending (isTransfer == nil). This guards against a race
+                        // where one leg was already confirmed/rejected before the view re-evaluated.
+                        let pendingPairs: [(debit: Expense, credit: Expense)] = pendingDebitLegs.compactMap { debit in
+                            guard debit.isTransfer == nil,
+                                  let pairID = debit.transferPairID,
+                                  let credit = expenses.first(where: { $0.id == pairID }),
+                                  credit.isTransfer == nil
+                            else { return nil }
+                            return (debit: debit, credit: credit)
+                        }
+                        if !pendingPairs.isEmpty {
+                            Section("Possible Transfers") {
+                                ForEach(pendingPairs, id: \.debit.id) { pair in
+                                    TransferPairRow(debit: pair.debit, credit: pair.credit)
                                 }
                             }
                         }
@@ -154,12 +197,15 @@ struct ExpenseListView: View {
                 EditExpenseView(expense: expense)
             }
         }
-        // Keep the badge count in sync whenever reviewItems changes (D7-04)
-        .onChange(of: reviewItems.count) { _, newCount in
-            reviewBadgeCount = newCount
+        // Keep the badge count in sync whenever reviewItems or pending pairs change (D7-04, XFER-03)
+        .onChange(of: reviewItems.count) { _, _ in
+            reviewBadgeCount = reviewItems.count + pendingDebitLegs.count
+        }
+        .onChange(of: pendingDebitLegs.count) { _, _ in
+            reviewBadgeCount = reviewItems.count + pendingDebitLegs.count
         }
         .onAppear {
-            reviewBadgeCount = reviewItems.count
+            reviewBadgeCount = reviewItems.count + pendingDebitLegs.count
         }
     }
 
@@ -188,9 +234,19 @@ struct ExpenseListView: View {
                         .tag(AccountFilter.account(account.id))
                 }
             }
+
+            Divider()
+
+            // Transfer filter section (D-12)
+            Picker("Transfers", selection: $transferFilter) {
+                Label("Normal Expenses", systemImage: "dollarsign.circle")
+                    .tag(TransferFilter.normal)
+                Label("Transfers", systemImage: "arrow.left.arrow.right")
+                    .tag(TransferFilter.transfers)
+            }
         } label: {
-            // Filled icon signals any active (non-"All") filter — category or account.
-            Image(systemName: (categoryFilter == .all && accountFilter == .all)
+            // Filled icon signals any active (non-default) filter — category, account, or transfer.
+            Image(systemName: (categoryFilter == .all && accountFilter == .all && transferFilter == .normal)
                   ? "line.3.horizontal.decrease.circle"
                   : "line.3.horizontal.decrease.circle.fill")
         }
@@ -214,13 +270,23 @@ struct ExpenseListView: View {
             }
         }
         // 2. Account filter chained after category filter (ACCT-06/D-07)
+        let accountFiltered: [Expense]
         switch accountFilter {
         case .all:
-            return categoryFiltered
+            accountFiltered = categoryFiltered
         case .unassigned:
-            return categoryFiltered.filter { $0.accountID == nil }
+            accountFiltered = categoryFiltered.filter { $0.accountID == nil }
         case .account(let id):
-            return categoryFiltered.filter { $0.accountID == id }
+            accountFiltered = categoryFiltered.filter { $0.accountID == id }
+        }
+        // 3. Transfer filter chained after account filter (D-12).
+        //    .normal: default — excludes confirmed transfers so they don't pollute spend totals.
+        //    .transfers: shows ONLY confirmed transfers (both legs).
+        switch transferFilter {
+        case .normal:
+            return accountFiltered.filter { $0.isTransfer != true }
+        case .transfers:
+            return accountFiltered.filter { $0.isTransfer == true }
         }
     }
 
