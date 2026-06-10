@@ -201,10 +201,11 @@ enum SpendOverTimeAggregator {
         range: SpendRange,
         calendar: Calendar = .current
     ) -> [SpendBucket] {
+        let spendable = expenses.filter { $0.isTransfer != true } // D-15: exclude confirmed self-transfers from spend chart
         switch range {
-        case .week:  return weekBuckets(expenses: expenses, calendar: calendar)
-        case .month: return monthBuckets(expenses: expenses, calendar: calendar)
-        case .year:  return yearBuckets(expenses: expenses, calendar: calendar)
+        case .week:  return weekBuckets(expenses: spendable, calendar: calendar)
+        case .month: return monthBuckets(expenses: spendable, calendar: calendar)
+        case .year:  return yearBuckets(expenses: spendable, calendar: calendar)
         }
     }
 }
