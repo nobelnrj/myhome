@@ -185,6 +185,112 @@ struct BudgetCalculatorTests {
                 "Uncategorized spend must be 150, got \(uncategorizedTotal)")
     }
 
+    // MARK: - BudgetCalculator transfer exclusion (D-15, XFER-04)
+
+    @Test("confirmedTransferExcludedFromBudget: categorized expense with isTransfer == true is NOT counted in monthlySpend")
+    func confirmedTransferExcludedFromBudget() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        let cat = Cat(name: "Groceries", symbolName: "cart")
+        context.insert(cat)
+        try context.save()
+
+        let normalExpense = Expense(amount: Decimal(500))
+        normalExpense.categories = [cat]
+        normalExpense.isTransfer = false
+
+        let transferExpense = Expense(amount: Decimal(50_000))
+        transferExpense.categories = [cat]
+        transferExpense.isTransfer = true   // confirmed transfer — must be excluded
+
+        context.insert(normalExpense)
+        context.insert(transferExpense)
+        try context.save()
+
+        let totals = BudgetCalculator.monthlySpend(for: [normalExpense, transferExpense], categories: [cat])
+
+        let catTotal = totals[cat.persistentModelID]
+        #expect(catTotal == Decimal(500),
+                "Confirmed transfer must be excluded; only normal expense (500) should count, got \(String(describing: catTotal))")
+    }
+
+    @Test("soloTransferExcludedFromBudget: isTransfer == true with transferPairID == nil is also excluded (D-15)")
+    func soloTransferExcludedFromBudget() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        let cat = Cat(name: "Transfers", symbolName: "arrow.left.arrow.right")
+        context.insert(cat)
+        try context.save()
+
+        let soloTransfer = Expense(amount: Decimal(25_000))
+        soloTransfer.categories = [cat]
+        soloTransfer.isTransfer = true
+        // transferPairID remains nil — solo manual transfer
+
+        let normalExpense = Expense(amount: Decimal(200))
+        normalExpense.categories = [cat]
+
+        context.insert(soloTransfer)
+        context.insert(normalExpense)
+        try context.save()
+
+        let totals = BudgetCalculator.monthlySpend(for: [soloTransfer, normalExpense], categories: [cat])
+
+        let catTotal = totals[cat.persistentModelID]
+        #expect(catTotal == Decimal(200),
+                "Solo manual transfer (isTransfer true, pairID nil) must be excluded; only 200 should count, got \(String(describing: catTotal))")
+    }
+
+    @Test("normalAndNilTransferStillCounted: expenses with isTransfer == nil or false ARE counted in monthlySpend")
+    func normalAndNilTransferStillCounted() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        let cat = Cat(name: "Dining", symbolName: "fork.knife")
+        context.insert(cat)
+        try context.save()
+
+        let nilTransfer = Expense(amount: Decimal(100))
+        nilTransfer.categories = [cat]
+        nilTransfer.isTransfer = nil    // not evaluated — must count
+
+        let falseTransfer = Expense(amount: Decimal(200))
+        falseTransfer.categories = [cat]
+        falseTransfer.isTransfer = false   // rejected transfer — must count
+
+        context.insert(nilTransfer)
+        context.insert(falseTransfer)
+        try context.save()
+
+        let totals = BudgetCalculator.monthlySpend(for: [nilTransfer, falseTransfer], categories: [cat])
+
+        let catTotal = totals[cat.persistentModelID]
+        #expect(catTotal == Decimal(300),
+                "nil and false transfers must still be counted; expected 300, got \(String(describing: catTotal))")
+    }
+
+    @Test("confirmedTransferExcludedFromUncategorized: uncategorized expense with isTransfer == true is NOT counted in uncategorizedSpend")
+    func confirmedTransferExcludedFromUncategorized() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        let normalUncategorized = Expense(amount: Decimal(300))
+        // no categories, isTransfer nil — must count
+
+        let transferUncategorized = Expense(amount: Decimal(50_000))
+        transferUncategorized.isTransfer = true   // confirmed transfer, no category — must be excluded
+
+        context.insert(normalUncategorized)
+        context.insert(transferUncategorized)
+        try context.save()
+
+        let total = BudgetCalculator.uncategorizedSpend(for: [normalUncategorized, transferUncategorized])
+        #expect(total == Decimal(300),
+                "Confirmed uncategorized transfer must be excluded; only 300 should count, got \(total)")
+    }
+
     // MARK: - BudgetCalculator.monthBoundaries (P2-05)
 
     @Test("monthBoundaries: start is first instant of month, end is last second — timezone-correct")
