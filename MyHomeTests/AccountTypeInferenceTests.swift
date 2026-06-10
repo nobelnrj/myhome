@@ -23,5 +23,14 @@ struct AccountTypeInferenceTests {
                 "\"ICICI Savings\" should infer savings")
         #expect(inferAccountType(from: "Salary") == "savings",
                 "\"Salary\" should infer savings (no CC/credit/card keyword)")
+
+        // CR-01 regression: "cc" must match only as a standalone word, not inside
+        // "a-cc-ount". These labels previously mis-inferred as credit_card.
+        #expect(inferAccountType(from: "ICICI Account") == "savings",
+                "\"ICICI Account\" should infer savings — the \"cc\" in \"account\" must not match (CR-01)")
+        #expect(inferAccountType(from: "Savings Account") == "savings",
+                "\"Savings Account\" should infer savings (CR-01)")
+        #expect(inferAccountType(from: "hdfc cc") == "credit_card",
+                "lowercase \"hdfc cc\" should still infer credit_card (cc as a word)")
     }
 }

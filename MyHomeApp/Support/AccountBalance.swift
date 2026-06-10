@@ -44,7 +44,11 @@ enum AccountBalance {
 ///            `"savings"` otherwise.
 func inferAccountType(from label: String) -> String {
     let lower = label.lowercased()
-    if lower.contains("cc") || lower.contains("credit") || lower.contains("card") {
+    // Match "cc" only as a standalone word — a plain `contains("cc")` also matches the
+    // "cc" inside "a-cc-ount", mis-typing "ICICI Account" / "Savings Account" as
+    // credit_card (CR-01). Tokenize on non-alphanumerics so "cc" is a whole-word match.
+    let tokens = lower.split { !$0.isLetter && !$0.isNumber }.map(String.init)
+    if tokens.contains("cc") || lower.contains("credit") || lower.contains("card") {
         return "credit_card"
     }
     return "savings"
