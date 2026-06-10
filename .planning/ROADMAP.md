@@ -96,7 +96,14 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
   3. Confirmed self-transfers are absent from all spend totals, budget progress bars, and charts; they appear only in a dedicated Transfers section
   4. Account balances for both accounts in a confirmed transfer reflect the balance-move — debit account decreases, credit account increases, total net worth is unchanged (completing the ACCT-05 transfer semantics from Phase 9)
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Detection scorer + scan service + AccountBalance sign verification (XFER-01, XFER-04)
+- [ ] 10-02-PLAN.md — Confirmed-transfer spend/budget/chart exclusion (XFER-04)
+- [ ] 10-03-PLAN.md — Review-Inbox confirm/reject + Transfers filter + post-sync scan hook (XFER-02, XFER-03)
+- [ ] 10-04-PLAN.md — Manual mark/unmark transfer on expense edit view (XFER-05)
+
 **UI hint**: yes
 
 ---
