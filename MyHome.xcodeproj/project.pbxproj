@@ -101,6 +101,11 @@
 		A613GSC /* GmailSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GSC /* GmailSyncController.swift */; };
 		A613GAS /* GmailAccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GAS /* GmailAccountStore.swift */; };
 		A903AAH /* AccountAttributionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903AAH /* AccountAttributionHelper.swift */; };
+		A1001TDS /* TransferDetectionScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1001TDS /* TransferDetectionScorer.swift */; };
+		A1002TSS /* TransferScanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1002TSS /* TransferScanService.swift */; };
+		A1003TDST /* TransferDetectionScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1003TDST /* TransferDetectionScorerTests.swift */; };
+		A1004TSST /* TransferScanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1004TSST /* TransferScanServiceTests.swift */; };
+		A1005ABTT /* AccountBalanceTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1005ABTT /* AccountBalanceTransferTests.swift */; };
 		A619MAGT /* MultiAccountGmailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619MAGT /* MultiAccountGmailTests.swift */; };
 		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
 		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
@@ -268,6 +273,11 @@
 		F908CHX /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		F904ABT /* AccountBalanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTests.swift; sourceTree = "<group>"; };
 		F905ATIT /* AccountTypeInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeInferenceTests.swift; sourceTree = "<group>"; };
+		F1001TDS /* TransferDetectionScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorer.swift; sourceTree = "<group>"; };
+		F1002TSS /* TransferScanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanService.swift; sourceTree = "<group>"; };
+		F1003TDST /* TransferDetectionScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorerTests.swift; sourceTree = "<group>"; };
+		F1004TSST /* TransferScanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanServiceTests.swift; sourceTree = "<group>"; };
+		F1005ABTT /* AccountBalanceTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTransferTests.swift; sourceTree = "<group>"; };
 		F906ACCT /* AccountCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCRUDTests.swift; sourceTree = "<group>"; };
 		F903GAAT /* GmailAccountAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountAttributionTests.swift; sourceTree = "<group>"; };
 		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
@@ -439,6 +449,8 @@
 				F613GSC /* GmailSyncController.swift */,
 				F613GAS /* GmailAccountStore.swift */,
 				F903AAH /* AccountAttributionHelper.swift */,
+				F1001TDS /* TransferDetectionScorer.swift */,
+				F1002TSS /* TransferScanService.swift */,
 			);
 			path = Gmail;
 			sourceTree = "<group>";
@@ -590,6 +602,9 @@
 				F905ATIT /* AccountTypeInferenceTests.swift */,
 				F906ACCT /* AccountCRUDTests.swift */,
 				F903GAAT /* GmailAccountAttributionTests.swift */,
+				F1003TDST /* TransferDetectionScorerTests.swift */,
+				F1004TSST /* TransferScanServiceTests.swift */,
+				F1005ABTT /* AccountBalanceTransferTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -809,6 +824,8 @@
 				A613GSC /* GmailSyncController.swift in Sources */,
 				A613GAS /* GmailAccountStore.swift in Sources */,
 				A903AAH /* AccountAttributionHelper.swift in Sources */,
+				A1001TDS /* TransferDetectionScorer.swift in Sources */,
+				A1002TSS /* TransferScanService.swift in Sources */,
 				A621RT /* RelativeTimestamp.swift in Sources */,
 				A622GOC /* GmailOAuthConfig.swift in Sources */,
 				A701SV4 /* SchemaV4.swift in Sources */,
@@ -873,6 +890,9 @@
 				A905ATIT /* AccountTypeInferenceTests.swift in Sources */,
 				A906ACCT /* AccountCRUDTests.swift in Sources */,
 				A903GAAT /* GmailAccountAttributionTests.swift in Sources */,
+				A1003TDST /* TransferDetectionScorerTests.swift in Sources */,
+				A1004TSST /* TransferScanServiceTests.swift in Sources */,
+				A1005ABTT /* AccountBalanceTransferTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
