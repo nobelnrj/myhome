@@ -34,9 +34,9 @@
 
 <!-- Deterministic 5-signal scorer; auto-detect + mandatory confirm; never silent. -->
 
-- [ ] **XFER-01**: The app auto-detects likely self-transfers — a debit and credit of the same amount between two of the user's own accounts, opposite direction, within a 3-day window, neither already categorized nor flagged as a reversal.
-- [ ] **XFER-02**: Detected self-transfer pairs surface in a Transfer Inbox for explicit user confirmation (reusing the Review Inbox accept/reject pattern); nothing is excluded silently.
-- [ ] **XFER-03**: User can confirm or reject a detected pair; confirmed transfers are marked as transfers and linked as a pair.
+- [x] **XFER-01**: The app auto-detects likely self-transfers — a debit and credit of the same amount between two of the user's own accounts, opposite direction, within a 3-day window, neither already categorized nor flagged as a reversal.
+- [x] **XFER-02**: Detected self-transfer pairs surface in a Transfer Inbox for explicit user confirmation (reusing the Review Inbox accept/reject pattern); nothing is excluded silently.
+- [x] **XFER-03**: User can confirm or reject a detected pair; confirmed transfers are marked as transfers and linked as a pair.
 - [x] **XFER-04**: Confirmed self-transfers are excluded from spend totals and budgets (BudgetCalculator filters them out).
 - [x] **XFER-05**: User can manually mark/unmark any expense as a self-transfer when auto-detection misses or misfires.
 
@@ -99,9 +99,9 @@
 | ACCT-06 | Phase 9 | Complete |
 | ACCT-07 | Phase 9 | Complete |
 | ACCT-08 | Phase 9 | Complete |
-| XFER-01 | Phase 10 | Pending |
-| XFER-02 | Phase 10 | Pending |
-| XFER-03 | Phase 10 | Pending |
+| XFER-01 | Phase 10 | Complete |
+| XFER-02 | Phase 10 | Complete |
+| XFER-03 | Phase 10 | Complete |
 | XFER-04 | Phase 10 | Complete |
 | XFER-05 | Phase 10 | Complete |
 | ASSET-01 | Phase 11 | Pending |

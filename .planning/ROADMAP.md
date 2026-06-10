@@ -30,7 +30,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 
 - [x] **Phase 8: Stabilization** — Fix two crash vectors, category sort order, and seed the daily-routine reset service (completed 2026-06-09)
 - [x] **Phase 9: SchemaV6 & Accounts Management** — Additive migration (Account + Asset models, transfer fields, routine fields) + full Accounts CRUD and per-account spend (completed 2026-06-10)
-- [ ] **Phase 10: Self-Transfer Detection** — 5-signal scorer, Transfer Inbox confirm flow, spend/budget exclusion, retroactive detection
+- [x] **Phase 10: Self-Transfer Detection** — 5-signal scorer, Transfer Inbox confirm flow, spend/budget exclusion, retroactive detection (completed 2026-06-10)
 - [ ] **Phase 11: Asset Tracker** — Holdings CRUD, AMFI MF NAV fetch, net-worth aggregation, allocation chart, staleness indicators
 - [ ] **Phase 12: Notes & Daily Routine Enhancement** — Routine toggle, per-day completion reset, optional reminder time, drag-reorder, streak/history
 
@@ -101,7 +101,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 Plans:
 - [x] 10-01-PLAN.md — Detection scorer + scan service + AccountBalance sign verification (XFER-01, XFER-04)
 - [x] 10-02-PLAN.md — Confirmed-transfer spend/budget/chart exclusion (XFER-04)
-- [ ] 10-03-PLAN.md — Review-Inbox confirm/reject + Transfers filter + post-sync scan hook (XFER-02, XFER-03)
+- [x] 10-03-PLAN.md — Review-Inbox confirm/reject + Transfers filter + post-sync scan hook (XFER-02, XFER-03)
 - [x] 10-04-PLAN.md — Manual mark/unmark transfer on expense edit view (XFER-05)
 
 **UI hint**: yes
@@ -156,7 +156,7 @@ Plans:
 | 7. Bank Parsers & Ingestion Pipeline | v1.0 | 6/6 | Complete | 2026-06-03 |
 | 8. Stabilization | v1.1 | 4/4 | Complete    | 2026-06-09 |
 | 9. SchemaV6 & Accounts Management | v1.1 | 4/4 | Complete    | 2026-06-10 |
-| 10. Self-Transfer Detection | v1.1 | 3/4 | In Progress|  |
+| 10. Self-Transfer Detection | v1.1 | 4/4 | Complete   | 2026-06-10 |
 | 11. Asset Tracker | v1.1 | 0/? | Not started | - |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
 
