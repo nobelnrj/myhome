@@ -177,9 +177,6 @@ struct SettingsView: View {
                                     .foregroundStyle(Color(.systemOrange))
                                     .font(.subheadline)
                             }
-                            Image(systemName: "chevron.right")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.tertiary)
                         }
                     }
                     .foregroundStyle(.primary)
