@@ -485,6 +485,17 @@ final class GmailSyncController {
                 }
             }
 
+            // D-05 / STAB-02: Capture account UUID map once before the per-message loop.
+            // Plain [String: UUID] — no @Model refs held across await (mirrors categoryIDsByName).
+            // Archived accounts excluded (T-09-09 / Pitfall 6).
+            let accountIDsByLabel: [String: UUID]
+            if let ctx = modelContext {
+                let allAccounts = (try? ctx.fetch(FetchDescriptor<Account>())) ?? []
+                accountIDsByLabel = AccountAttributionHelper.buildAccountIDsByLabel(from: allAccounts)
+            } else {
+                accountIDsByLabel = [:]
+            }
+
             // Step 5: Process each message
             for messageID in messageIDs {
                 if DismissedMessageStore.isDismissed(messageID) { continue }
@@ -524,6 +535,14 @@ final class GmailSyncController {
                 expense.parseConfidence = confidence
                 expense.ingestionStateRaw = ingestionState
                 expense.sourceAccount = confirmedEmail    // D-MA-03: stamp owning account
+
+                // D-05: Auto-attribute to matching active account by sourceLabel.
+                // Uses pre-loop UUID map — no @Model refs across await (STAB-02).
+                // No match → accountID stays nil (Unassigned).
+                expense.accountID = AccountAttributionHelper.accountID(
+                    forSourceLabel: parsed.rawSourceLabel,
+                    in: accountIDsByLabel
+                )
 
                 // D-04: Re-resolve Category by PersistentIdentifier after the await suspension.
                 // On failed re-fetch (nil, deleted), skip category assignment and continue (D-03).

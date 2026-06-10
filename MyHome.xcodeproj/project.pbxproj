@@ -100,6 +100,7 @@
 		A612PKCE /* PKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = F612PKCE /* PKCE.swift */; };
 		A613GSC /* GmailSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GSC /* GmailSyncController.swift */; };
 		A613GAS /* GmailAccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GAS /* GmailAccountStore.swift */; };
+		A903AAH /* AccountAttributionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903AAH /* AccountAttributionHelper.swift */; };
 		A619MAGT /* MultiAccountGmailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619MAGT /* MultiAccountGmailTests.swift */; };
 		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
 		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
@@ -246,6 +247,7 @@
 		F612PKCE /* PKCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCE.swift; sourceTree = "<group>"; };
 		F613GSC /* GmailSyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailSyncController.swift; sourceTree = "<group>"; };
 		F613GAS /* GmailAccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountStore.swift; sourceTree = "<group>"; };
+		F903AAH /* AccountAttributionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAttributionHelper.swift; sourceTree = "<group>"; };
 		F619MAGT /* MultiAccountGmailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAccountGmailTests.swift; sourceTree = "<group>"; };
 		F614SGA /* SpyGmailAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailAuth.swift; sourceTree = "<group>"; };
 		F615SKS /* SpyKeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyKeychainStore.swift; sourceTree = "<group>"; };
@@ -436,6 +438,7 @@
 			children = (
 				F613GSC /* GmailSyncController.swift */,
 				F613GAS /* GmailAccountStore.swift */,
+				F903AAH /* AccountAttributionHelper.swift */,
 			);
 			path = Gmail;
 			sourceTree = "<group>";
@@ -805,6 +808,7 @@
 				A612PKCE /* PKCE.swift in Sources */,
 				A613GSC /* GmailSyncController.swift in Sources */,
 				A613GAS /* GmailAccountStore.swift in Sources */,
+				A903AAH /* AccountAttributionHelper.swift in Sources */,
 				A621RT /* RelativeTimestamp.swift in Sources */,
 				A622GOC /* GmailOAuthConfig.swift in Sources */,
 				A701SV4 /* SchemaV4.swift in Sources */,
