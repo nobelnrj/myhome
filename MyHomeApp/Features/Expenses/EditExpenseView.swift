@@ -400,7 +400,20 @@ struct EditExpenseView: View {
     ///     T-10-12: cascade prevents a dangling half-transfer pair.
     static func applyTransferMark(_ mark: Bool, expense: Expense, context: ModelContext) {
         if mark {
-            // Solo mark — leave transferPairID as-is (D-14: solo flag allowed)
+            // Solo mark. If the expense is currently in a PENDING pair
+            // (isTransfer == nil with a back-pointer), release the counterpart first so
+            // it does not become an inbox ghost — a half-pair the user can't dismiss (CR-01).
+            // Only a pending (nil) partner is released; a confirmed (true) partner is left
+            // untouched. A solo transfer has no partner, so drop our own link too.
+            if let pairID = expense.transferPairID {
+                let descriptor = FetchDescriptor<Expense>()
+                if let all = try? context.fetch(descriptor),
+                   let partner = all.first(where: { $0.id == pairID }),
+                   partner.isTransfer == nil {
+                    partner.transferPairID = nil
+                }
+            }
+            expense.transferPairID = nil
             expense.isTransfer = true
         } else if expense.isTransfer == true {
             // Unmark — cascade-unlink any paired counterpart first (T-10-12)

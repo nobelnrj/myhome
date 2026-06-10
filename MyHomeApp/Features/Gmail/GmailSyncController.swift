@@ -213,7 +213,7 @@ final class GmailSyncController {
         // If already migrated but backfill wasn't run (context was nil at init), do it now.
         // The backfill is idempotent (only affects expenses with nil sourceAccount).
         if let firstAccount = store.accounts.first,
-           !defaults.bool(forKey: GmailAccountStore.migrationDoneKey) == false {
+           defaults.bool(forKey: GmailAccountStore.migrationDoneKey) {
             // Migration already ran — check if backfill needs to run (deferred case)
             store.backfillSourceAccount(email: firstAccount.email, modelContext: context)
         }
@@ -714,6 +714,9 @@ final class GmailSyncController {
             if let ctx = modelContext {
                 try ctx.save()
             }
+            // D-08: run transfer scorer after the legacy sync too (CR-02 — the legacy path
+            // previously skipped this hook, silently non-detecting for pre-migration users).
+            transferScanService?.scan()
         } catch {
             let errMsg = error.localizedDescription.lowercased()
             if errMsg.contains("401") || errMsg.contains("unauthorized") || errMsg.contains("invalid_grant") {

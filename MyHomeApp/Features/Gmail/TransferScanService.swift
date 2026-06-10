@@ -60,6 +60,15 @@ final class TransferScanService {
             // D-09/D-10 skip rule: only isTransfer == nil expenses are candidates
             let candidates = all.filter { $0.isTransfer == nil }
 
+            // WR-01: clear any prior pending-pair links on candidates before re-pairing.
+            // Pending legs are re-scored every run; if the optimal pairing changes, a stale
+            // back-pointer would otherwise dangle (old partner left pointing at a debit that
+            // no longer points back). Confirmed (true) / rejected (false) legs are excluded
+            // from `candidates`, so their links are never disturbed.
+            for candidate in candidates {
+                candidate.transferPairID = nil
+            }
+
             // Pure scoring — returns UUID pairs only (STAB-02 value-type safety)
             let pairs = TransferDetectionScorer.findCandidatePairs(
                 from: candidates,

@@ -177,18 +177,26 @@ struct TransferDetectionScorerTests {
         let accountA = UUID(); let accountB = UUID()
         let day = istDate(year: 2026, month: 1, day: 15)
 
-        let debit           = makeExpense(amount: Decimal(500),  date: day, accountID: accountA, isTransfer: nil)
-        let _confirmedCredit = makeExpense(amount: Decimal(-500), date: day, accountID: accountB, isTransfer: true)
+        let debit          = makeExpense(amount: Decimal(500),  date: day, accountID: accountA, isTransfer: nil)
+        let confirmedCredit = makeExpense(amount: Decimal(-500), date: day, accountID: accountB, isTransfer: true)
 
-        // If the scorer is called with a confirmed credit it still matches (scorer doesn't re-filter).
-        // The service-layer filter guards against this in production.
-        // This test documents that when the pre-filter IS applied, 0 pairs result.
+        // Sanity: WITHOUT the pre-filter the scorer WOULD pair them (it does not re-filter on
+        // isTransfer) — so this set is a real positive that the service-layer filter must suppress.
+        let unfiltered = TransferDetectionScorer.findCandidatePairs(
+            from: [debit, confirmedCredit],
+            calendar: istCalendar
+        )
+        #expect(unfiltered.count == 1,
+                "Scorer does not re-filter isTransfer; an exact opposite-sign pair should match when unfiltered, got \(unfiltered.count)")
+
+        // With the service pre-filter applied to a set that CONTAINS the confirmed leg,
+        // the confirmed credit is removed and no pair survives (D-10).
         let pairs = TransferDetectionScorer.findCandidatePairs(
-            from: [debit].filter { $0.isTransfer == nil },  // simulate service pre-filter
+            from: [debit, confirmedCredit].filter { $0.isTransfer == nil },
             calendar: istCalendar
         )
         #expect(pairs.count == 0,
-                "Expected 0 pairs — confirmedCredit excluded by pre-filter before scorer, got \(pairs.count)")
+                "Expected 0 pairs — confirmedCredit excluded by the service pre-filter, got \(pairs.count)")
     }
 
     @Test("rejectedLegSkipped: credit with isTransfer == false is never selected as a candidate (D-10)")

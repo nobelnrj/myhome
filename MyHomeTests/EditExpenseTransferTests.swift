@@ -93,21 +93,31 @@ struct EditExpenseTransferTests {
 
     // MARK: - markDoesNotClearTransferPairID
 
-    @Test("Marking an already-paired expense sets isTransfer = true without touching transferPairID")
-    func markDoesNotClearTransferPairID() throws {
+    @Test("Marking a PENDING-paired expense goes solo (own pairID cleared) and releases the partner (CR-01)")
+    func markReleasesPendingPartnerAndGoesSolo() throws {
         let container = try makeContainer()
         let ctx = container.mainContext
 
-        let partnerID = UUID()
-        let expense = Expense(amount: Decimal(750))
-        expense.transferPairID = partnerID
-        ctx.insert(expense)
+        // A pending pair: both legs isTransfer == nil, cross-linked by transferPairID.
+        let debit = Expense(amount: Decimal(750))
+        let credit = Expense(amount: Decimal(-750))
+        debit.transferPairID = credit.id
+        credit.transferPairID = debit.id
+        ctx.insert(debit)
+        ctx.insert(credit)
         try ctx.save()
 
-        EditExpenseView.applyTransferMark(true, expense: expense, context: ctx)
+        // Mark the debit leg as a solo transfer.
+        EditExpenseView.applyTransferMark(true, expense: debit, context: ctx)
         try ctx.save()
 
-        #expect(expense.isTransfer == true)
-        #expect(expense.transferPairID == partnerID)  // unchanged
+        // The marked leg becomes a proper solo transfer: isTransfer == true, no dangling pair.
+        #expect(debit.isTransfer == true)
+        #expect(debit.transferPairID == nil)
+
+        // The partner is released so it cannot become an inbox ghost: link cleared, still
+        // unevaluated (nil) so the scorer can re-pair it later.
+        #expect(credit.transferPairID == nil)
+        #expect(credit.isTransfer == nil)
     }
 }
