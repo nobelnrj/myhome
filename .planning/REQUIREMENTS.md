@@ -15,19 +15,19 @@
 - [x] **STAB-01**: App no longer crashes when the Notes calendar / day-agenda is open and a note or block is deleted (guard `DayAgendaView` / `AgendaReminderItem` against tombstoned `@Model` references).
 - [x] **STAB-02**: Gmail sync no longer crashes or stalls (re-fetch `Category` references after `await` suspension points; move `ctx.save()` out of the per-message loop into a single batched save).
 - [x] **STAB-03**: Adding a new category surfaces it at the top of the list (stable insertion order via `min(sortOrder)-1`). [Reversed from "bottom" during Phase 8 execution per user direction — supersedes decision D-05.]
-- [ ] **STAB-04**: A daily routine's completed/checked state automatically resets when the day ends, so each new day starts uncompleted.
+- [x] **STAB-04**: A daily routine's completed/checked state automatically resets when the day ends, so each new day starts uncompleted.
 
 ### Accounts Management (ACCT)
 
 <!-- New Account entity; builds on existing Expense.sourceAccount (retained as Gmail dedup key). -->
 
-- [ ] **ACCT-01**: User can create, edit, and delete a bank account (name, last-4 optional).
-- [ ] **ACCT-02**: User can set an account type (savings / current / credit card).
-- [ ] **ACCT-03**: User can assign a color/icon to an account for visual identification.
-- [ ] **ACCT-04**: User can manually set an account's balance as a reconciliation baseline (an opening/anchor balance with an as-of date).
-- [ ] **ACCT-05**: Account balance auto-updates from attributed transactions — debits decrease and credits increase the balance from the baseline; confirmed self-transfers move balance between accounts without changing total net worth. Displayed balance = baseline ± transactions since the baseline date.
-- [ ] **ACCT-06**: User can view spend filtered to a single account (per-account spend view).
-- [ ] **ACCT-07**: User can archive/hide a closed account so it stays out of pickers without losing its transaction history.
+- [x] **ACCT-01**: User can create, edit, and delete a bank account (name, last-4 optional).
+- [x] **ACCT-02**: User can set an account type (savings / current / credit card).
+- [x] **ACCT-03**: User can assign a color/icon to an account for visual identification.
+- [x] **ACCT-04**: User can manually set an account's balance as a reconciliation baseline (an opening/anchor balance with an as-of date).
+- [x] **ACCT-05**: Account balance auto-updates from attributed transactions — debits decrease and credits increase the balance from the baseline; confirmed self-transfers move balance between accounts without changing total net worth. Displayed balance = baseline ± transactions since the baseline date.
+- [x] **ACCT-06**: User can view spend filtered to a single account (per-account spend view).
+- [x] **ACCT-07**: User can archive/hide a closed account so it stays out of pickers without losing its transaction history.
 - [x] **ACCT-08**: Existing expenses are attributed to accounts via an additive `accountID` without disturbing `sourceAccount` (the Gmail dedup idempotency key); legacy data is backfilled in the V5→V6 migration without loss.
 
 ### Self-Transfer Detection (XFER)
@@ -59,7 +59,7 @@
 <!-- Date-keyed routine completion; reuses existing recurrence/calendar/notification machinery. -->
 
 - [ ] **NOTE-01**: User can mark a note as a daily routine; it surfaces on every day in the calendar view automatically.
-- [ ] **NOTE-02**: A daily routine's checklist completion is tracked per-day (date-keyed `lastCheckedDate`), so it resets cleanly each day (satisfies STAB-04 at the data-model level).
+- [x] **NOTE-02**: A daily routine's checklist completion is tracked per-day (date-keyed `lastCheckedDate`), so it resets cleanly each day (satisfies STAB-04 at the data-model level).
 - [ ] **NOTE-03**: User can set an optional reminder time for a daily routine, delivering a local notification (reuses existing NotificationScheduler).
 - [ ] **NOTE-04**: User can reorder checklist items within a routine note (drag-to-reorder).
 - [ ] **NOTE-05**: The app logs per-day routine completions and shows a streak/history view.
@@ -90,14 +90,14 @@
 | STAB-01 | Phase 8 | Complete |
 | STAB-02 | Phase 8 | Complete |
 | STAB-03 | Phase 8 | Complete |
-| STAB-04 | Phase 9 | Pending |
-| ACCT-01 | Phase 9 | Pending |
-| ACCT-02 | Phase 9 | Pending |
-| ACCT-03 | Phase 9 | Pending |
-| ACCT-04 | Phase 9 | Pending |
-| ACCT-05 | Phase 9 | Pending |
-| ACCT-06 | Phase 9 | Pending |
-| ACCT-07 | Phase 9 | Pending |
+| STAB-04 | Phase 9 | Complete |
+| ACCT-01 | Phase 9 | Complete |
+| ACCT-02 | Phase 9 | Complete |
+| ACCT-03 | Phase 9 | Complete |
+| ACCT-04 | Phase 9 | Complete |
+| ACCT-05 | Phase 9 | Complete |
+| ACCT-06 | Phase 9 | Complete |
+| ACCT-07 | Phase 9 | Complete |
 | ACCT-08 | Phase 9 | Complete |
 | XFER-01 | Phase 10 | Pending |
 | XFER-02 | Phase 10 | Pending |
@@ -114,7 +114,7 @@
 | ASSET-08 | Phase 11 | Pending |
 | ASSET-09 | Phase 11 | Pending |
 | NOTE-01 | Phase 12 | Pending |
-| NOTE-02 | Phase 9 | Pending |
+| NOTE-02 | Phase 9 | Complete |
 | NOTE-03 | Phase 12 | Pending |
 | NOTE-04 | Phase 12 | Pending |
 | NOTE-05 | Phase 12 | Pending |
