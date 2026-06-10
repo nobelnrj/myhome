@@ -106,6 +106,7 @@
 		A1003TDST /* TransferDetectionScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1003TDST /* TransferDetectionScorerTests.swift */; };
 		A1004TSST /* TransferScanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1004TSST /* TransferScanServiceTests.swift */; };
 		A1005ABTT /* AccountBalanceTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1005ABTT /* AccountBalanceTransferTests.swift */; };
+		A1006EETT /* EditExpenseTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1006EETT /* EditExpenseTransferTests.swift */; };
 		A619MAGT /* MultiAccountGmailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619MAGT /* MultiAccountGmailTests.swift */; };
 		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
 		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
@@ -278,6 +279,7 @@
 		F1003TDST /* TransferDetectionScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorerTests.swift; sourceTree = "<group>"; };
 		F1004TSST /* TransferScanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanServiceTests.swift; sourceTree = "<group>"; };
 		F1005ABTT /* AccountBalanceTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTransferTests.swift; sourceTree = "<group>"; };
+		F1006EETT /* EditExpenseTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseTransferTests.swift; sourceTree = "<group>"; };
 		F906ACCT /* AccountCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCRUDTests.swift; sourceTree = "<group>"; };
 		F903GAAT /* GmailAccountAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountAttributionTests.swift; sourceTree = "<group>"; };
 		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
@@ -605,6 +607,7 @@
 				F1003TDST /* TransferDetectionScorerTests.swift */,
 				F1004TSST /* TransferScanServiceTests.swift */,
 				F1005ABTT /* AccountBalanceTransferTests.swift */,
+				F1006EETT /* EditExpenseTransferTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -893,6 +896,7 @@
 				A1003TDST /* TransferDetectionScorerTests.swift in Sources */,
 				A1004TSST /* TransferScanServiceTests.swift in Sources */,
 				A1005ABTT /* AccountBalanceTransferTests.swift in Sources */,
+				A1006EETT /* EditExpenseTransferTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
