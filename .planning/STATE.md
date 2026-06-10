@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
 status: executing
-last_updated: "2026-06-09T18:14:04.349Z"
-last_activity: 2026-06-09
+last_updated: "2026-06-10T04:35:48.877Z"
+last_activity: 2026-06-10 -- Phase 09 execution started
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 8
-  completed_plans: 5
+  completed_plans: 7
   percent: 20
 ---
 
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 09 (schemav6-accounts-management) — EXECUTING
-Plan: 2 of 4
-Status: Ready to execute
-Last activity: 2026-06-09
+Plan: 4 of 4 (09-04 next)
+Status: Executing Phase 09
+Last activity: 2026-06-10 -- 09-03 complete (account picker, list filter, Gmail auto-attribution)
 
 Progress: [██████░░░░] 63%
 
@@ -73,6 +73,8 @@ Progress: [██████░░░░] 63%
 | Phase 07 P05 | 95 | 2 tasks | 12 files |
 | Phase 08-stabilization P01 | 15 | 3 tasks | 3 files |
 | Phase 09 P01 | 21 | 3 tasks | 9 files |
+| Phase 09 P02 | — | 4 tasks | 12 files |
+| Phase 09 P03 | — | 3 tasks + 1 verify | 6 files |
 
 ## Quick Tasks Completed
 
@@ -166,8 +168,8 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-09T18:14:04.344Z
-Stopped at: Phase 9 UI-SPEC approved
+Last session: 2026-06-10T00:00:00Z
+Stopped at: Phase 09 Plan 03 complete — 09-04 (RoutineResetService) is next
 Resume file: None
 
 ## Operator Next Steps
