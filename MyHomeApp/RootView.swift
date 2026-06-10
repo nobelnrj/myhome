@@ -83,6 +83,8 @@ struct RootView: View {
             // Inject the SwiftData context into the sync controller so sync() can persist
             // ingested expenses. Called here (not in init) so the @Environment is populated.
             gmailSyncController.setContext(modelContext)
+            // Inject context into routine reset service (same pattern — D-07, STAB-04)
+            routineResetService.modelContext = modelContext
         }
         // Deep-link observer: notification banner tap → switch to Notes tab + open note
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in

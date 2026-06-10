@@ -1,27 +1,59 @@
 import Foundation
+import SwiftData
 
 // MARK: - RoutineResetService
 
 /// Routine-reset coordinator: resets routine NoteBlock completion state on each new IST day.
 ///
-/// Phase 8 scaffold: no model writes this phase (NoteBlock.lastCheckedDate does not exist
-/// until SchemaV6 / Phase 9). The call path is fully wired; Phase 9 fills the body.
+/// On `scenePhase .active`, fetches every Note flagged `isDailyRoutine == true` whose
+/// `routineLastResetDate` is before IST start-of-today, unchecks all its checkbox blocks,
+/// and stamps the new reset date (STAB-04, NOTE-02, D-11, D-12).
+///
+/// Non-routine notes are never touched (D-11).
+/// Same-day reactivations are no-ops — idempotent by design (D-12).
 ///
 /// Owned by RootView via `@State private var routineResetService = RoutineResetService()`
 /// and called synchronously from `.onChange(of: scenePhase)` on `.active`.
+/// `modelContext` is injected from RootView.onAppear (same pattern as gmailSyncController.setContext).
 @MainActor
 @Observable
 final class RoutineResetService {
 
+    // Injected by RootView.onAppear (same pattern as gmailSyncController.setContext — RootView line 86)
+    var modelContext: ModelContext?
+
     func resetIfNeeded() {
-        // STAB-04: logged scaffold only. Phase 9 adds NoteBlock.lastCheckedDate comparison
-        // once SchemaV6 lands.
+        guard let context = modelContext else { return }
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Kolkata")!   // IST — household timezone
-        let todayIST = cal.startOfDay(for: Date())
-        // Phase 9 implementation:
-        //   fetch all NoteBlocks where note.isRoutine == true
-        //   for each block where lastCheckedDate < todayIST: reset isChecked = false, update lastCheckedDate
-        print("[RoutineResetService] resetIfNeeded: startOfToday IST = \(todayIST). No-op (Phase 8 scaffold).")
+        let startOfTodayIST = cal.startOfDay(for: Date())
+
+        do {
+            // D-11: fetch only isDailyRoutine notes (non-routine notes never auto-reset)
+            let notes = try context.fetch(
+                FetchDescriptor<Note>(predicate: #Predicate { $0.isDailyRoutine == true })
+            )
+            var didChange = false
+            for note in notes {
+                // D-12: compare note-level routineLastResetDate (nil = distantPast = never reset)
+                let lastReset = note.routineLastResetDate ?? .distantPast
+                guard lastReset < startOfTodayIST else { continue }   // same-day no-op
+
+                // Uncheck all checkbox blocks on this note
+                for block in note.blocks ?? [] {
+                    if block.kindRaw == "checkbox" && block.isChecked {
+                        block.isChecked = false
+                        didChange = true
+                    }
+                }
+                // Stamp the reset date even if no blocks were checked (note-level tracking)
+                note.routineLastResetDate = startOfTodayIST
+                didChange = true
+            }
+            if didChange { try context.save() }   // CR-01: explicit save
+        } catch {
+            // Non-fatal: log and return — never crash the app on scene activation (T-09-14)
+            print("[RoutineResetService] reset failed: \(error)")
+        }
     }
 }
