@@ -30,6 +30,7 @@ struct EditExpenseView: View {
     @State private var showCategoryPicker: Bool = false
     @State private var selectedAccount: Account? = nil
     @State private var showAccountPicker: Bool = false
+    @State private var isMarkedTransfer: Bool = false
 
     // Active accounts for resolving expense.accountID on appear (D-04)
     @Query(filter: #Predicate<Account> { !$0.isArchived }, sort: \Account.sortOrder)
@@ -49,6 +50,7 @@ struct EditExpenseView: View {
             || (note.trimmingCharacters(in: .whitespaces).isEmpty ? nil : note.trimmingCharacters(in: .whitespaces)) != expense.note
             || selectedCategory?.persistentModelID != expense.categories.first?.persistentModelID
             || selectedAccount?.id != expense.accountID
+            || isMarkedTransfer != (expense.isTransfer == true)
     }
 
     private var isSaveEnabled: Bool {
@@ -277,6 +279,19 @@ struct EditExpenseView: View {
             .background(Color(.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.top, 8)
+
+            // Transfer toggle (XFER-05, D-14): marks a solo transfer or unmarks with cascade-unlink
+            Toggle(isOn: $isMarkedTransfer) {
+                Text("Mark as Transfer")
+                    .foregroundStyle(.primary)
+            }
+            .toggleStyle(.switch)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .frame(minHeight: 44)
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.top, 8)
         }
     }
 
@@ -321,6 +336,8 @@ struct EditExpenseView: View {
             selectedAccount = activeAccounts.first { $0.id == accountID }
             // If accountID resolves to nil (deleted or archived account), leave nil = Unassigned
         }
+        // XFER-05 / D-14: Seed transfer toggle from persisted state
+        isMarkedTransfer = expense.isTransfer == true
     }
 
     private func saveExpense() {
@@ -347,6 +364,8 @@ struct EditExpenseView: View {
         } else {
             expense.accountID = nil   // Unassigned (archived account treated as nil)
         }
+        // XFER-05 / D-14: apply transfer mark/unmark (uses static helper for testability)
+        EditExpenseView.applyTransferMark(isMarkedTransfer, expense: expense, context: context)
         expense.updatedAt = Date()
         // CR-01: persist explicitly — do not rely on implicit autosave (financial write).
         do {
@@ -360,6 +379,43 @@ struct EditExpenseView: View {
         }
         // T-01-07: dismiss cleanly after save (Pitfall 19)
         dismiss()
+    }
+
+    /// Applies the manual transfer mark or unmark to `expense`.
+    ///
+    /// Exposed as a `static` helper so unit tests can exercise the mutation logic
+    /// without instantiating the full SwiftUI view.
+    ///
+    /// - Parameters:
+    ///   - mark: `true` to flag as a solo transfer; `false` to unmark and cascade-unlink.
+    ///   - expense: The expense to mutate.
+    ///   - context: The model context used to fetch a linked counterpart on unmark.
+    ///
+    /// D-14 rules:
+    ///   - Mark: set `isTransfer = true`; leave `transferPairID` as-is (solo flag allowed,
+    ///     per-plan may already carry a pairID from the confirm flow).
+    ///   - Unmark: reset `isTransfer = nil` and `transferPairID = nil`; if a counterpart
+    ///     exists (fetched by the current `transferPairID`), cascade-reset it too.
+    ///     `nil` chosen over `false` so the scorer can re-evaluate the expense (D-14).
+    ///     T-10-12: cascade prevents a dangling half-transfer pair.
+    static func applyTransferMark(_ mark: Bool, expense: Expense, context: ModelContext) {
+        if mark {
+            // Solo mark — leave transferPairID as-is (D-14: solo flag allowed)
+            expense.isTransfer = true
+        } else if expense.isTransfer == true {
+            // Unmark — cascade-unlink any paired counterpart first (T-10-12)
+            if let pairID = expense.transferPairID {
+                let descriptor = FetchDescriptor<Expense>()
+                if let all = try? context.fetch(descriptor),
+                   let partner = all.first(where: { $0.id == pairID }) {
+                    partner.isTransfer = nil
+                    partner.transferPairID = nil
+                }
+            }
+            expense.isTransfer = nil
+            expense.transferPairID = nil
+        }
+        // If expense.isTransfer was nil and mark is false, nothing to do (already unevaluated)
     }
 
     private func deleteExpense() {
