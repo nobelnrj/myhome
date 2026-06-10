@@ -76,6 +76,7 @@ struct BudgetCalculator {
         for expenses: [Expense],
         categories: [Category]
     ) -> [PersistentIdentifier: Decimal] {
+        let expenses = expenses.filter { $0.isTransfer != true } // D-15: exclude confirmed self-transfers
         var totals: [PersistentIdentifier: Decimal] = [:]
         for expense in expenses {
             guard let category = expense.categories.first else { continue }
@@ -90,7 +91,7 @@ struct BudgetCalculator {
     /// excluded from per-category budget math.
     static func uncategorizedSpend(for expenses: [Expense]) -> Decimal {
         expenses
-            .filter { $0.categories.isEmpty }
+            .filter { $0.categories.isEmpty && $0.isTransfer != true } // D-15: exclude confirmed self-transfers
             .reduce(.zero) { $0 + $1.amount }
     }
 
