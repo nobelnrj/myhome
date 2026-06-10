@@ -187,6 +187,79 @@ struct SpendOverTimeAggregatorTests {
 
     // MARK: - EXP-11 Refund handling: negative expense reduces the day's bucket
 
+    // MARK: - D-15 Transfer exclusion (XFER-04)
+
+    @Test("confirmedTransferExcludedFromChart: expense with isTransfer == true is absent from every bucket total")
+    func confirmedTransferExcludedFromChart() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        var cal = Calendar.current
+        cal.timeZone = TimeZone.current
+        let today = cal.startOfDay(for: Date())
+
+        let normalExpense = try insertExpense(amount: Decimal(500), on: today, context: context)
+        normalExpense.isTransfer = false
+
+        let transferExpense = try insertExpense(amount: Decimal(50_000), on: today, context: context)
+        transferExpense.isTransfer = true   // confirmed transfer — must NOT appear in any bucket
+
+        try context.save()
+
+        let buckets = SpendOverTimeAggregator.bucket(
+            expenses: [normalExpense, transferExpense],
+            range: SpendRange.week,
+            calendar: cal
+        )
+
+        guard let todayBucket = buckets.first(where: { cal.isDate($0.date, inSameDayAs: today) }) else {
+            Issue.record("Today's bucket must be present")
+            return
+        }
+
+        // Only the normal expense (500) should appear; the 50,000 transfer must be excluded
+        let tolerance = 0.01
+        #expect(
+            abs(todayBucket.spent - 500.0) < tolerance,
+            "Confirmed transfer (50,000) must be excluded; only normal expense (500) should appear in bucket, got \(todayBucket.spent)"
+        )
+    }
+
+    @Test("normalExpensesStillBucketed: nil/false isTransfer expenses still appear in their buckets")
+    func normalExpensesStillBucketed() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+
+        var cal = Calendar.current
+        cal.timeZone = TimeZone.current
+        let today = cal.startOfDay(for: Date())
+
+        let nilTransfer = try insertExpense(amount: Decimal(200), on: today, context: context)
+        nilTransfer.isTransfer = nil      // not evaluated — must count
+
+        let falseTransfer = try insertExpense(amount: Decimal(300), on: today, context: context)
+        falseTransfer.isTransfer = false  // rejected transfer — must count
+
+        try context.save()
+
+        let buckets = SpendOverTimeAggregator.bucket(
+            expenses: [nilTransfer, falseTransfer],
+            range: SpendRange.week,
+            calendar: cal
+        )
+
+        guard let todayBucket = buckets.first(where: { cal.isDate($0.date, inSameDayAs: today) }) else {
+            Issue.record("Today's bucket must be present")
+            return
+        }
+
+        let tolerance = 0.01
+        #expect(
+            abs(todayBucket.spent - 500.0) < tolerance,
+            "nil and false transfers must still be bucketed; expected 500, got \(todayBucket.spent)"
+        )
+    }
+
     @Test("refundReducesBucket: negative-amount expense reduces the bucket for that day")
     func refundReducesBucket() throws {
         let container = try makeContainer()
