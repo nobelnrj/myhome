@@ -5,6 +5,13 @@ import Foundation
 /// Extracted from views so it can be unit-tested without SwiftUI dependencies.
 /// Sign convention lives in the data (D-09): credit-card baseline is stored negative
 /// (amount owed); savings/current baseline is positive. One formula serves all account types.
+///
+/// Expense amount convention (app-wide): a SPEND/outflow is stored POSITIVE (AddExpenseView
+/// default; BudgetCalculator treats positive as spend, "negative amounts = refunds"); a
+/// REFUND/inflow is stored negative. The live balance therefore SUBTRACTS the net of attributed
+/// amounts: a spend reduces a savings balance and increases a credit-card amount-owed.
+/// (Fixed in Phase 10 — RESEARCH-A3 / human-verify gate: the prior `baseline + net` inverted
+/// the sign and was masked by Phase 9 tests that fed negative amounts for spends.)
 enum AccountBalance {
 
     /// Compute the live balance for an account.
@@ -15,8 +22,9 @@ enum AccountBalance {
     ///   - expenses: All expenses to filter. Only those with accountID == accountID and
     ///               date >= asOf are included (D-10).
     ///   - accountID: The account's UUID used to filter attributed expenses.
-    /// - Returns: baseline + sum(amounts of attributed expenses dated on/after asOf),
-    ///            or 0 when baseline or asOf is nil (ACCT-05).
+    /// - Returns: baseline − sum(amounts of attributed expenses dated on/after asOf),
+    ///            or 0 when baseline or asOf is nil (ACCT-05). Spends (positive amounts)
+    ///            reduce a positive savings baseline; refunds (negative) raise it.
     static func compute(
         baseline: Decimal?,
         asOf: Date?,
@@ -30,7 +38,8 @@ enum AccountBalance {
             .filter { $0.accountID == accountID && $0.date >= asOf }
             .reduce(Decimal(0)) { $0 + $1.amount }
 
-        return baseline + net
+        // Subtract: a spend (positive amount) lowers a savings balance; a refund (negative) raises it.
+        return baseline - net
     }
 }
 

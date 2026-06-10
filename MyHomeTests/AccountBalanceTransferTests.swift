@@ -5,24 +5,17 @@ import Foundation
 
 /// Tests verifying AccountBalance.compute behavior for confirmed transfer pairs (XFER-04/ACCT-05).
 ///
-/// These tests lock the EXISTING AccountBalance.compute formula behavior for transfer legs.
-/// AccountBalance.swift is NOT modified — this is a verification-only task.
+/// Resolution of Research open question A3 / RESEARCH.md Critical Finding 4:
+/// The Task 4 human-verify gate confirmed the prior `baseline + net` formula was INVERTED —
+/// a spend (positive amount) made a savings balance go UP. AccountBalance.compute was corrected
+/// to `baseline − net` (spends, stored positive, reduce a savings balance). These tests now lock
+/// the corrected, app-consistent behavior for transfer legs:
+/// - Debit leg (amount > 0 = outflow) attributed to source account A: A = baseline − positive
+///   → A's balance DECREASES by the transfer amount (money LEFT A).
+/// - Credit leg (amount < 0 = inflow) attributed to destination account B: B = baseline − negative
+///   → B's balance INCREASES by the transfer amount (money ARRIVED in B).
 ///
-/// Key finding (Research open question A3 / RESEARCH.md Critical Finding 4):
-/// The existing formula adds `expense.amount` to `baseline`. For a confirmed linked transfer pair:
-/// - Debit leg (amount > 0, attributed to account A): balance of A = baseline + positive_amount
-///   → A's balance INCREASES by the transfer amount (formula treats positive = inflow to account).
-/// - Credit leg (amount < 0, attributed to account B): balance of B = baseline + negative_amount
-///   → B's balance DECREASES by the transfer amount.
-///
-/// This means: for the current formula, a confirmed debit (`amount > 0`) FROM account A
-/// increases A's displayed balance, and a confirmed credit (`amount < 0`) RECEIVED BY account B
-/// decreases B's displayed balance. This is the "D-16 implicit balance-move" described in
-/// Critical Finding 4 — the pair nets to zero, so total net worth is unchanged.
-///
-/// Task 4 (human-verify checkpoint) resolves whether this sign convention is correct for
-/// savings accounts with real data (Research A3). The verdict from Task 4 will determine
-/// whether Plan 03 needs a formula correction before wiring D-16.
+/// The pair nets to zero across the two accounts, so total net worth is unchanged (D-16).
 @MainActor
 struct AccountBalanceTransferTests {
 
@@ -150,7 +143,7 @@ struct AccountBalanceTransferTests {
                 "Net worth must be unchanged by a confirmed transfer pair: computeA(\(computeA)) + computeB(\(computeB)) = \(totalBalance), expected \(totalBaseline)")
     }
 
-    @Test("balanceMoveDirection: documents the sign convention — debit leg (amount > 0) increases its account balance; credit leg (amount < 0) decreases its account balance")
+    @Test("balanceMoveDirection: debit leg (amount > 0) DECREASES its source account; credit leg (amount < 0) INCREASES its destination account")
     func balanceMoveDirection() throws {
         let container = try makeContainer()
         let ctx = container.mainContext
@@ -196,24 +189,15 @@ struct AccountBalanceTransferTests {
             accountID: accountB.id
         )
 
-        // D-16 direction documentation (existing formula behavior):
-        // Debit leg (amount > 0) attributed to account A → A's balance INCREASES by transferAmount.
-        // Credit leg (amount < 0) attributed to account B → B's balance DECREASES by transferAmount.
-        // This is the "implicit balance-move" via sign convention in AccountBalance.compute.
-        //
-        // NOTE: Task 4 (human-verify) must confirm whether this sign behavior is correct for
-        // savings accounts with real data. If debit (+5000) correctly represents money LEAVING
-        // account A (reducing its balance), then the formula has an inversion that D-16 wiring
-        // in Plan 03 must correct. If debit (+5000) represents an INFLOW (which would increase
-        // balance correctly), then the formula is already correct.
-        //
-        // For now, we lock the ACTUAL formula behavior:
-        let expectedComputeA = baselineA + transferAmount    // 10000 + 3000 = 13000
-        let expectedComputeB = baselineB + (-transferAmount)  // 20000 - 3000 = 17000
+        // D-16 direction (corrected `baseline − net` formula):
+        // Debit leg (amount > 0 = outflow) attributed to source A → A's balance DECREASES (money left A).
+        // Credit leg (amount < 0 = inflow) attributed to destination B → B's balance INCREASES (money arrived).
+        let expectedComputeA = baselineA - transferAmount     // 10000 − 3000 = 7000  (money left A)
+        let expectedComputeB = baselineB - (-transferAmount)  // 20000 + 3000 = 23000 (money arrived in B)
 
         #expect(computeA == expectedComputeA,
-                "Account A (debit leg, amount > 0): balance should be \(expectedComputeA), got \(computeA). Formula: baseline + positive_amount = balance increases.")
+                "Account A (debit leg, amount > 0 = outflow): balance should be \(expectedComputeA), got \(computeA). Formula: baseline − positive_amount = balance decreases.")
         #expect(computeB == expectedComputeB,
-                "Account B (credit leg, amount < 0): balance should be \(expectedComputeB), got \(computeB). Formula: baseline + negative_amount = balance decreases.")
+                "Account B (credit leg, amount < 0 = inflow): balance should be \(expectedComputeB), got \(computeB). Formula: baseline − negative_amount = balance increases.")
     }
 }
