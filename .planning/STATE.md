@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
-status: executing
-last_updated: "2026-06-10T15:36:10.562Z"
+status: ready_to_plan
+last_updated: 2026-06-10T16:03:57.873Z
 last_activity: 2026-06-10
 progress:
   total_phases: 5
@@ -11,6 +11,7 @@ progress:
   total_plans: 12
   completed_plans: 12
   percent: 60
+stopped_at: Phase 10 complete (4/4) — ready to discuss Phase 11
 ---
 
 # Project State
@@ -20,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 10 — self-transfer-detection
+**Current focus:** Phase 11 — asset tracker
 
 ## Current Position
 
-Phase: 10 (self-transfer-detection) — EXECUTING
-Plan: 4 of 4
-Status: Ready to execute
+Phase: 11
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-06-10
 
 Progress: [██████████] 100%
@@ -35,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 17
+- Total plans completed: 21
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -47,6 +48,7 @@ Progress: [██████████] 100%
 | 04 | 5 | - | - |
 | 08 | 4 | - | - |
 | 09 | 4 | - | - |
+| 10 | 4 | - | - |
 
 **Recent Trend:**
 
