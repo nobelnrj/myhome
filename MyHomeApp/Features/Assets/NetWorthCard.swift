@@ -57,8 +57,13 @@ struct NetWorthCard: View {
                 legend(breakdown: breakdown)
             }
 
-            // Trend chart below the donut+legend row
-            NetWorthTrendChart(snapshots: snapshots)
+            // Trend chart below the donut+legend row — only once there are ≥2 days
+            // of history. A single snapshot (e.g. the day the first holding is added)
+            // draws a blank plot with no line, so the whole trend row is hidden until
+            // a real trend exists.
+            if snapshots.count >= 2 {
+                NetWorthTrendChart(snapshots: snapshots)
+            }
         }
         .cardStyle(cornerRadius: 16, padding: 18)
     }

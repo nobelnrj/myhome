@@ -17,7 +17,9 @@ struct NetWorthTrendChart: View {
     let snapshots: [NetWorthSnapshot]
 
     var body: some View {
-        if snapshots.isEmpty {
+        // A trend needs at least two points; a single snapshot renders a blank
+        // plot (no line). Show the empty state until there are ≥2 data points.
+        if snapshots.count < 2 {
             emptyStateView
         } else {
             chartView
