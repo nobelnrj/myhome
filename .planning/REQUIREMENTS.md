@@ -44,15 +44,15 @@
 
 <!-- New Asset/Holding entity; manual holdings + free MF NAV; net worth = holdings + account balances. -->
 
-- [ ] **ASSET-01**: User can add, edit, and delete holdings across asset classes: mutual funds, stocks, NPS, and (via Accounts) cash balances.
-- [ ] **ASSET-02**: User can record units and cost basis per holding, with current value derived.
-- [ ] **ASSET-03**: Mutual fund NAV auto-refreshes from the free AMFI source (best-effort, cached last-known value, never blocks the UI); user can always override NAV manually.
-- [ ] **ASSET-04**: Stock and NPS holdings are valued by manual current-value/NAV entry (no fragile auto-fetch for stocks in v1.1).
-- [ ] **ASSET-05**: User sees total net worth = sum of holding values + account balances.
-- [ ] **ASSET-06**: User sees per-holding gain/loss (absolute and %) against cost basis.
-- [ ] **ASSET-07**: User sees an asset-allocation chart (net worth split by asset class).
-- [ ] **ASSET-08**: The app snapshots net worth over time and charts the trend.
-- [ ] **ASSET-09**: Price/NAV values display their as-of date and a stale indicator when data is older than the freshness threshold.
+- [x] **ASSET-01**: User can add, edit, and delete holdings across asset classes: mutual funds, stocks, NPS, and (via Accounts) cash balances.
+- [x] **ASSET-02**: User can record units and cost basis per holding, with current value derived.
+- [x] **ASSET-03**: Mutual fund NAV auto-refreshes from the free AMFI source (best-effort, cached last-known value, never blocks the UI); user can always override NAV manually.
+- [x] **ASSET-04**: Stock and NPS holdings are valued by manual current-value/NAV entry (no fragile auto-fetch for stocks in v1.1).
+- [x] **ASSET-05**: User sees total net worth = sum of holding values + account balances.
+- [x] **ASSET-06**: User sees per-holding gain/loss (absolute and %) against cost basis.
+- [x] **ASSET-07**: User sees an asset-allocation chart (net worth split by asset class).
+- [x] **ASSET-08**: The app snapshots net worth over time and charts the trend.
+- [x] **ASSET-09**: Price/NAV values display their as-of date and a stale indicator when data is older than the freshness threshold.
 
 ### Notes & Daily Routine Enhancement (NOTE)
 
@@ -104,15 +104,15 @@
 | XFER-03 | Phase 10 | Complete |
 | XFER-04 | Phase 10 | Complete |
 | XFER-05 | Phase 10 | Complete |
-| ASSET-01 | Phase 11 | Pending |
-| ASSET-02 | Phase 11 | Pending |
-| ASSET-03 | Phase 11 | Pending |
-| ASSET-04 | Phase 11 | Pending |
-| ASSET-05 | Phase 11 | Pending |
-| ASSET-06 | Phase 11 | Pending |
-| ASSET-07 | Phase 11 | Pending |
-| ASSET-08 | Phase 11 | Pending |
-| ASSET-09 | Phase 11 | Pending |
+| ASSET-01 | Phase 11 | Complete |
+| ASSET-02 | Phase 11 | Complete |
+| ASSET-03 | Phase 11 | Complete |
+| ASSET-04 | Phase 11 | Complete |
+| ASSET-05 | Phase 11 | Complete |
+| ASSET-06 | Phase 11 | Complete |
+| ASSET-07 | Phase 11 | Complete |
+| ASSET-08 | Phase 11 | Complete |
+| ASSET-09 | Phase 11 | Complete |
 | NOTE-01 | Phase 12 | Pending |
 | NOTE-02 | Phase 9 | Complete |
 | NOTE-03 | Phase 12 | Pending |
