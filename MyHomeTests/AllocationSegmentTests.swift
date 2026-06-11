@@ -1,5 +1,5 @@
 import XCTest
-@testable import MyHomeApp
+@testable import MyHome
 
 /// Tests for the allocationSegments builder in NetWorthCard.
 ///
