@@ -31,7 +31,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 - [x] **Phase 8: Stabilization** — Fix two crash vectors, category sort order, and seed the daily-routine reset service (completed 2026-06-09)
 - [x] **Phase 9: SchemaV6 & Accounts Management** — Additive migration (Account + Asset models, transfer fields, routine fields) + full Accounts CRUD and per-account spend (completed 2026-06-10)
 - [x] **Phase 10: Self-Transfer Detection** — 5-signal scorer, Transfer Inbox confirm flow, spend/budget exclusion, retroactive detection (completed 2026-06-10)
-- [ ] **Phase 11: Asset Tracker** — Holdings CRUD, AMFI MF NAV fetch, net-worth aggregation, allocation chart, staleness indicators
+- [x] **Phase 11: Asset Tracker** — Holdings CRUD, AMFI MF NAV fetch, net-worth aggregation, allocation chart, staleness indicators (completed 2026-06-11)
 - [ ] **Phase 12: Notes & Daily Routine Enhancement** — Routine toggle, per-day completion reset, optional reminder time, drag-reorder, streak/history
 
 ---
@@ -134,7 +134,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2)*
 
-  - [ ] 11-04-PLAN.md — Overview net-worth card: allocation donut + trend chart [ASSET-05, ASSET-07, ASSET-08]
+  - [x] 11-04-PLAN.md — Overview net-worth card: allocation donut + trend chart [ASSET-05, ASSET-07, ASSET-08]
 
 **UI hint**: yes
 
@@ -171,7 +171,7 @@ Plans:
 | 8. Stabilization | v1.1 | 4/4 | Complete    | 2026-06-09 |
 | 9. SchemaV6 & Accounts Management | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
-| 11. Asset Tracker | v1.1 | 3/4 | In Progress|  |
+| 11. Asset Tracker | v1.1 | 4/4 | Complete   | 2026-06-11 |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
 
 ---
