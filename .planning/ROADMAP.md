@@ -129,7 +129,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-  - [ ] 11-02-PLAN.md — AMFINavService + NetWorthCalculator + NetWorthSnapshotService + RootView daily hooks [ASSET-03, ASSET-05, ASSET-08]
+  - [x] 11-02-PLAN.md — AMFINavService + NetWorthCalculator + NetWorthSnapshotService + RootView daily hooks [ASSET-03, ASSET-05, ASSET-08]
   - [ ] 11-03-PLAN.md — Holdings CRUD under Settings > Assets: list/edit/detail/AMFI picker/staleness [ASSET-01, ASSET-02, ASSET-04, ASSET-06, ASSET-09]
 
 **Wave 3** *(blocked on Wave 2)*
@@ -171,7 +171,7 @@ Plans:
 | 8. Stabilization | v1.1 | 4/4 | Complete    | 2026-06-09 |
 | 9. SchemaV6 & Accounts Management | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
-| 11. Asset Tracker | v1.1 | 1/4 | In Progress|  |
+| 11. Asset Tracker | v1.1 | 2/4 | In Progress|  |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
 
 ---
