@@ -139,6 +139,9 @@
 		A1103EAV /* EditAssetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103EAV /* EditAssetView.swift */; };
 		A1103ASPV /* AMFISchemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ASPV /* AMFISchemePickerView.swift */; };
 		A1103ADV /* AssetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ADV /* AssetDetailView.swift */; };
+		A1104NWC /* NetWorthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWC /* NetWorthCard.swift */; };
+		A1104NWTC /* NetWorthTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWTC /* NetWorthTrendChart.swift */; };
+		A1104AST /* AllocationSegmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104AST /* AllocationSegmentTests.swift */; };
 		A1102ANS /* AMFINavService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANS /* AMFINavService.swift */; };
 		A1102ANST /* AMFINavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANST /* AMFINavServiceTests.swift */; };
 		A1102NWC /* NetWorthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWC /* NetWorthCalculator.swift */; };
@@ -305,6 +308,9 @@
 		F1103EAV /* EditAssetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAssetView.swift; sourceTree = "<group>"; };
 		F1103ASPV /* AMFISchemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFISchemePickerView.swift; sourceTree = "<group>"; };
 		F1103ADV /* AssetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetDetailView.swift; sourceTree = "<group>"; };
+		F1104NWC /* NetWorthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCard.swift; sourceTree = "<group>"; };
+		F1104NWTC /* NetWorthTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthTrendChart.swift; sourceTree = "<group>"; };
+		F1104AST /* AllocationSegmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllocationSegmentTests.swift; sourceTree = "<group>"; };
 		F1102ANS /* AMFINavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavService.swift; sourceTree = "<group>"; };
 		F1102ANST /* AMFINavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavServiceTests.swift; sourceTree = "<group>"; };
 		F1102NWC /* NetWorthCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCalculator.swift; sourceTree = "<group>"; };
@@ -423,6 +429,8 @@
 				F1103EAV /* EditAssetView.swift */,
 				F1103ASPV /* AMFISchemePickerView.swift */,
 				F1103ADV /* AssetDetailView.swift */,
+				F1104NWC /* NetWorthCard.swift */,
+				F1104NWTC /* NetWorthTrendChart.swift */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -666,6 +674,7 @@
 				F1102NWAT /* NetWorthAggregationTests.swift */,
 				F1103SBT /* StalenessBadgeTests.swift */,
 				F1103AGLT /* AssetGainLossTests.swift */,
+				F1104AST /* AllocationSegmentTests.swift */,
 				F905ATIT /* AccountTypeInferenceTests.swift */,
 				F906ACCT /* AccountCRUDTests.swift */,
 				F903GAAT /* GmailAccountAttributionTests.swift */,
@@ -892,6 +901,8 @@
 				A1103EAV /* EditAssetView.swift in Sources */,
 				A1103ASPV /* AMFISchemePickerView.swift in Sources */,
 				A1103ADV /* AssetDetailView.swift in Sources */,
+				A1104NWC /* NetWorthCard.swift in Sources */,
+				A1104NWTC /* NetWorthTrendChart.swift in Sources */,
 				A501 /* BiometricAuthPort.swift in Sources */,
 				A504 /* LockController.swift in Sources */,
 				A610GAP /* GmailAuthPort.swift in Sources */,
@@ -974,6 +985,7 @@
 				A1102NWAT /* NetWorthAggregationTests.swift in Sources */,
 				A1103SBT /* StalenessBadgeTests.swift in Sources */,
 				A1103AGLT /* AssetGainLossTests.swift in Sources */,
+				A1104AST /* AllocationSegmentTests.swift in Sources */,
 				A905ATIT /* AccountTypeInferenceTests.swift in Sources */,
 				A906ACCT /* AccountCRUDTests.swift in Sources */,
 				A903GAAT /* GmailAccountAttributionTests.swift in Sources */,
