@@ -132,6 +132,13 @@
 		A1102ACRT /* AssetCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ACRT /* AssetCRUDTests.swift */; };
 		A1103AVT /* AssetValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103AVT /* AssetValueTests.swift */; };
 		A1104NWST /* NetWorthSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWST /* NetWorthSnapshotTests.swift */; };
+		A1103SBT /* StalenessBadgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103SBT /* StalenessBadgeTests.swift */; };
+		A1103AGLT /* AssetGainLossTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103AGLT /* AssetGainLossTests.swift */; };
+		A1103SV /* StalenessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103SV /* StalenessView.swift */; };
+		A1103ALV /* AssetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ALV /* AssetsListView.swift */; };
+		A1103EAV /* EditAssetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103EAV /* EditAssetView.swift */; };
+		A1103ASPV /* AMFISchemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ASPV /* AMFISchemePickerView.swift */; };
+		A1103ADV /* AssetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ADV /* AssetDetailView.swift */; };
 		A1102ANS /* AMFINavService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANS /* AMFINavService.swift */; };
 		A1102ANST /* AMFINavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANST /* AMFINavServiceTests.swift */; };
 		A1102NWC /* NetWorthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWC /* NetWorthCalculator.swift */; };
@@ -291,6 +298,13 @@
 		F1102ACRT /* AssetCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetCRUDTests.swift; sourceTree = "<group>"; };
 		F1103AVT /* AssetValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetValueTests.swift; sourceTree = "<group>"; };
 		F1104NWST /* NetWorthSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshotTests.swift; sourceTree = "<group>"; };
+		F1103SBT /* StalenessBadgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StalenessBadgeTests.swift; sourceTree = "<group>"; };
+		F1103AGLT /* AssetGainLossTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGainLossTests.swift; sourceTree = "<group>"; };
+		F1103SV /* StalenessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StalenessView.swift; sourceTree = "<group>"; };
+		F1103ALV /* AssetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetsListView.swift; sourceTree = "<group>"; };
+		F1103EAV /* EditAssetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAssetView.swift; sourceTree = "<group>"; };
+		F1103ASPV /* AMFISchemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFISchemePickerView.swift; sourceTree = "<group>"; };
+		F1103ADV /* AssetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetDetailView.swift; sourceTree = "<group>"; };
 		F1102ANS /* AMFINavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavService.swift; sourceTree = "<group>"; };
 		F1102ANST /* AMFINavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavServiceTests.swift; sourceTree = "<group>"; };
 		F1102NWC /* NetWorthCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCalculator.swift; sourceTree = "<group>"; };
@@ -396,8 +410,21 @@
 				G126 /* Gmail */,
 				G127 /* Ingestion */,
 				G128 /* Shared */,
+				G1103 /* Assets */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		G1103 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				F1103SV /* StalenessView.swift */,
+				F1103ALV /* AssetsListView.swift */,
+				F1103EAV /* EditAssetView.swift */,
+				F1103ASPV /* AMFISchemePickerView.swift */,
+				F1103ADV /* AssetDetailView.swift */,
+			);
+			path = Assets;
 			sourceTree = "<group>";
 		};
 		G121 /* Expenses */ = {
@@ -637,6 +664,8 @@
 				F1104NWST /* NetWorthSnapshotTests.swift */,
 				F1102ANST /* AMFINavServiceTests.swift */,
 				F1102NWAT /* NetWorthAggregationTests.swift */,
+				F1103SBT /* StalenessBadgeTests.swift */,
+				F1103AGLT /* AssetGainLossTests.swift */,
 				F905ATIT /* AccountTypeInferenceTests.swift */,
 				F906ACCT /* AccountCRUDTests.swift */,
 				F903GAAT /* GmailAccountAttributionTests.swift */,
@@ -858,6 +887,11 @@
 				A911EAV /* EditAccountView.swift in Sources */,
 				A912ADV /* AccountDetailView.swift in Sources */,
 				A913MRS /* MigrationReviewSheet.swift in Sources */,
+				A1103SV /* StalenessView.swift in Sources */,
+				A1103ALV /* AssetsListView.swift in Sources */,
+				A1103EAV /* EditAssetView.swift in Sources */,
+				A1103ASPV /* AMFISchemePickerView.swift in Sources */,
+				A1103ADV /* AssetDetailView.swift in Sources */,
 				A501 /* BiometricAuthPort.swift in Sources */,
 				A504 /* LockController.swift in Sources */,
 				A610GAP /* GmailAuthPort.swift in Sources */,
@@ -938,6 +972,8 @@
 				A1104NWST /* NetWorthSnapshotTests.swift in Sources */,
 				A1102ANST /* AMFINavServiceTests.swift in Sources */,
 				A1102NWAT /* NetWorthAggregationTests.swift in Sources */,
+				A1103SBT /* StalenessBadgeTests.swift in Sources */,
+				A1103AGLT /* AssetGainLossTests.swift in Sources */,
 				A905ATIT /* AccountTypeInferenceTests.swift in Sources */,
 				A906ACCT /* AccountCRUDTests.swift in Sources */,
 				A903GAAT /* GmailAccountAttributionTests.swift in Sources */,
