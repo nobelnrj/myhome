@@ -13,4 +13,4 @@ import SwiftData
 /// Usage:
 ///   let account = Account(name: "HDFC CC", typeRaw: "credit_card")
 ///   @Query(sort: \Account.sortOrder) var accounts: [Account]
-typealias Account = SchemaV6.Account
+typealias Account = SchemaV7.Account
