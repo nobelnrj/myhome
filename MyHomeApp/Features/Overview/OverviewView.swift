@@ -95,7 +95,14 @@ private struct OverviewMonthContent: View {
         order: .reverse
     ) private var reviewItems: [Expense]
 
+    // Net-worth card data sources (D-04 / ASSET-05/07/08)
+    @Query(sort: \Asset.createdAt, order: .reverse) private var allAssets: [Asset]
+    @Query(sort: \NetWorthSnapshot.date, order: .reverse) private var netWorthSnapshots: [NetWorthSnapshot]
+    @Query private var allAccounts: [Account]
+    @Query private var allGlobalExpenses: [Expense]
+
     @State private var editingExpense: Expense?
+    @State private var navigateToAssets = false
 
     init(start: Date, end: Date, monthLabel: String,
          selectedTab: Binding<Int>,
@@ -143,6 +150,12 @@ private struct OverviewMonthContent: View {
 
         let recent = Array(monthExpenses.prefix(5))
 
+        // Net-worth suppression test: compute cashValue outside ScrollView (Pitfall A guard)
+        let netWorthBreakdown = NetWorthCalculator.breakdown(
+            assets: allAssets, accounts: allAccounts, expenses: allGlobalExpenses
+        )
+        let showNetWorth = !allAssets.isEmpty || netWorthBreakdown.cashValue != 0
+
         ScrollView(.vertical) {
             LazyVStack(alignment: .leading, spacing: 22) {
                 // Month label
@@ -164,7 +177,19 @@ private struct OverviewMonthContent: View {
                     ReviewBanner(count: reviewItems.count) { selectedTab = 1 }
                 }
 
-                // Where it's going — donut + legend
+                // Net Worth card — suppressed when no assets and cash is 0 (D-04 / ASSET-05)
+                if showNetWorth {
+                    sectionHeader("Net Worth", action: ("See holdings", { navigateToAssets = true }))
+                    NetWorthCard(
+                        allAssets: allAssets,
+                        allAccounts: allAccounts,
+                        allExpenses: allGlobalExpenses,
+                        snapshots: netWorthSnapshots
+                    )
+                    .padding(.horizontal, 16)
+                }
+
+                // Where it’s going — donut + legend
                 if !rankedSpend.isEmpty {
                     sectionHeader("Where it’s going")
                     WhereItsGoingCard(ranked: rankedSpend, total: totalSpend)
@@ -209,6 +234,9 @@ private struct OverviewMonthContent: View {
         .background(Color(.systemGroupedBackground))
         .sheet(item: $editingExpense) { expense in
             EditExpenseView(expense: expense)
+        }
+        .navigationDestination(isPresented: $navigateToAssets) {
+            AssetsListView()
         }
     }
 
