@@ -132,6 +132,11 @@
 		A1102ACRT /* AssetCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ACRT /* AssetCRUDTests.swift */; };
 		A1103AVT /* AssetValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103AVT /* AssetValueTests.swift */; };
 		A1104NWST /* NetWorthSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWST /* NetWorthSnapshotTests.swift */; };
+		A1102ANS /* AMFINavService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANS /* AMFINavService.swift */; };
+		A1102ANST /* AMFINavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANST /* AMFINavServiceTests.swift */; };
+		A1102NWC /* NetWorthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWC /* NetWorthCalculator.swift */; };
+		A1102NWSS /* NetWorthSnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWSS /* NetWorthSnapshotService.swift */; };
+		A1102NWAT /* NetWorthAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWAT /* NetWorthAggregationTests.swift */; };
 		A905ATIT /* AccountTypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F905ATIT /* AccountTypeInferenceTests.swift */; };
 		A906ACCT /* AccountCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F906ACCT /* AccountCRUDTests.swift */; };
 		A903GAAT /* GmailAccountAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903GAAT /* GmailAccountAttributionTests.swift */; };
@@ -286,6 +291,11 @@
 		F1102ACRT /* AssetCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetCRUDTests.swift; sourceTree = "<group>"; };
 		F1103AVT /* AssetValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetValueTests.swift; sourceTree = "<group>"; };
 		F1104NWST /* NetWorthSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshotTests.swift; sourceTree = "<group>"; };
+		F1102ANS /* AMFINavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavService.swift; sourceTree = "<group>"; };
+		F1102ANST /* AMFINavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavServiceTests.swift; sourceTree = "<group>"; };
+		F1102NWC /* NetWorthCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCalculator.swift; sourceTree = "<group>"; };
+		F1102NWSS /* NetWorthSnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshotService.swift; sourceTree = "<group>"; };
+		F1102NWAT /* NetWorthAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthAggregationTests.swift; sourceTree = "<group>"; };
 		F905ATIT /* AccountTypeInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeInferenceTests.swift; sourceTree = "<group>"; };
 		F1001TDS /* TransferDetectionScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorer.swift; sourceTree = "<group>"; };
 		F1002TSS /* TransferScanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanService.swift; sourceTree = "<group>"; };
@@ -555,6 +565,9 @@
 				F405 /* OverviewAggregation.swift */,
 				F907ABS /* AccountBalance.swift */,
 				F908CHX /* Color+Hex.swift */,
+				F1102ANS /* AMFINavService.swift */,
+				F1102NWC /* NetWorthCalculator.swift */,
+				F1102NWSS /* NetWorthSnapshotService.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -622,6 +635,8 @@
 				F1102ACRT /* AssetCRUDTests.swift */,
 				F1103AVT /* AssetValueTests.swift */,
 				F1104NWST /* NetWorthSnapshotTests.swift */,
+				F1102ANST /* AMFINavServiceTests.swift */,
+				F1102NWAT /* NetWorthAggregationTests.swift */,
 				F905ATIT /* AccountTypeInferenceTests.swift */,
 				F906ACCT /* AccountCRUDTests.swift */,
 				F903GAAT /* GmailAccountAttributionTests.swift */,
@@ -791,6 +806,9 @@
 				A116 /* Date+Display.swift in Sources */,
 				A907ABS /* AccountBalance.swift in Sources */,
 				A908CHX /* Color+Hex.swift in Sources */,
+				A1102ANS /* AMFINavService.swift in Sources */,
+				A1102NWC /* NetWorthCalculator.swift in Sources */,
+				A1102NWSS /* NetWorthSnapshotService.swift in Sources */,
 				A121 /* DecimalKeypadView.swift in Sources */,
 				A122 /* AddExpenseView.swift in Sources */,
 				A123 /* ExpenseListView.swift in Sources */,
@@ -918,6 +936,8 @@
 				A1102ACRT /* AssetCRUDTests.swift in Sources */,
 				A1103AVT /* AssetValueTests.swift in Sources */,
 				A1104NWST /* NetWorthSnapshotTests.swift in Sources */,
+				A1102ANST /* AMFINavServiceTests.swift in Sources */,
+				A1102NWAT /* NetWorthAggregationTests.swift in Sources */,
 				A905ATIT /* AccountTypeInferenceTests.swift in Sources */,
 				A906ACCT /* AccountCRUDTests.swift in Sources */,
 				A903GAAT /* GmailAccountAttributionTests.swift in Sources */,
