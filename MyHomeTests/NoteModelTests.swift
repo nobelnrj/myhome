@@ -137,7 +137,7 @@ struct NoteModelTests {
     // MARK: - STAB-08: Note typealias must match the production versionedSchema
 
     /// STAB-08 regression — the app's `Note`/`NoteBlock` typealiases MUST resolve to the same
-    /// schema version the production container is built from (`Schema(versionedSchema: SchemaV6.self)`).
+    /// schema version the production container is built from (`Schema(versionedSchema: SchemaV7.self)`).
     ///
     /// Pre-fix: `typealias Note = SchemaV4.Note` while the container registered `SchemaV5.Note`,
     /// so saving a note inserted an entity absent from the store's schema → SwiftData `save()`
@@ -153,7 +153,7 @@ struct NoteModelTests {
         // Build the container the same way appContainer() does: from the versioned schema.
         // Updated in Phase 9 (plan 09-01): SchemaV5 → SchemaV6 (STAB-08: container schema must
         // match the active typealias; Note is now SchemaV6.Note, so the container must be V6).
-        let schema = Schema(versionedSchema: SchemaV6.self)
+        let schema = Schema(versionedSchema: SchemaV7.self)
         let config = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .none)
         let container = try ModelContainer(for: schema, configurations: [config])
         let context = container.mainContext

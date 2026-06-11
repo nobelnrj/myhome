@@ -120,12 +120,18 @@
 		A701SV4 /* SchemaV4.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV4 /* SchemaV4.swift */; };
 		A701SV5 /* SchemaV5.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV5 /* SchemaV5.swift */; };
 		A701SV6 /* SchemaV6.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV6 /* SchemaV6.swift */; };
+		A701SV7 /* SchemaV7.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV7 /* SchemaV7.swift */; };
 		A901ACC /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = F901ACC /* Account.swift */; };
 		A902AST /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F902AST /* Asset.swift */; };
+		A911NWS /* NetWorthSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911NWS /* NetWorthSnapshot.swift */; };
 		A903SV6MT /* SchemaV6MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903SV6MT /* SchemaV6MigrationTests.swift */; };
 		A907ABS /* AccountBalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F907ABS /* AccountBalance.swift */; };
 		A908CHX /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F908CHX /* Color+Hex.swift */; };
 		A904ABT /* AccountBalanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F904ABT /* AccountBalanceTests.swift */; };
+		A1101SV7MT /* SchemaV7MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV7MT /* SchemaV7MigrationTests.swift */; };
+		A1102ACRT /* AssetCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ACRT /* AssetCRUDTests.swift */; };
+		A1103AVT /* AssetValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103AVT /* AssetValueTests.swift */; };
+		A1104NWST /* NetWorthSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWST /* NetWorthSnapshotTests.swift */; };
 		A905ATIT /* AccountTypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F905ATIT /* AccountTypeInferenceTests.swift */; };
 		A906ACCT /* AccountCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F906ACCT /* AccountCRUDTests.swift */; };
 		A903GAAT /* GmailAccountAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903GAAT /* GmailAccountAttributionTests.swift */; };
@@ -268,12 +274,18 @@
 		F701SV4 /* SchemaV4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV4.swift; sourceTree = "<group>"; };
 		F701SV5 /* SchemaV5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV5.swift; sourceTree = "<group>"; };
 		F701SV6 /* SchemaV6.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6.swift; sourceTree = "<group>"; };
+		F701SV7 /* SchemaV7.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV7.swift; sourceTree = "<group>"; };
 		F901ACC /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 		F902AST /* Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
+		F911NWS /* NetWorthSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshot.swift; sourceTree = "<group>"; };
 		F903SV6MT /* SchemaV6MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6MigrationTests.swift; sourceTree = "<group>"; };
 		F907ABS /* AccountBalance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountBalance.swift"; sourceTree = "<group>"; };
 		F908CHX /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		F904ABT /* AccountBalanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTests.swift; sourceTree = "<group>"; };
+		F1101SV7MT /* SchemaV7MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV7MigrationTests.swift; sourceTree = "<group>"; };
+		F1102ACRT /* AssetCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetCRUDTests.swift; sourceTree = "<group>"; };
+		F1103AVT /* AssetValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetValueTests.swift; sourceTree = "<group>"; };
+		F1104NWST /* NetWorthSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshotTests.swift; sourceTree = "<group>"; };
 		F905ATIT /* AccountTypeInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeInferenceTests.swift; sourceTree = "<group>"; };
 		F1001TDS /* TransferDetectionScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorer.swift; sourceTree = "<group>"; };
 		F1002TSS /* TransferScanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanService.swift; sourceTree = "<group>"; };
@@ -507,6 +519,7 @@
 				F701SV4 /* SchemaV4.swift */,
 				F701SV5 /* SchemaV5.swift */,
 				F701SV6 /* SchemaV6.swift */,
+				F701SV7 /* SchemaV7.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -521,6 +534,7 @@
 				F134NB /* NoteBlock.swift */,
 				F901ACC /* Account.swift */,
 				F902AST /* Asset.swift */,
+				F911NWS /* NetWorthSnapshot.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -604,6 +618,10 @@
 				F619MAGT /* MultiAccountGmailTests.swift */,
 				F903SV6MT /* SchemaV6MigrationTests.swift */,
 				F904ABT /* AccountBalanceTests.swift */,
+				F1101SV7MT /* SchemaV7MigrationTests.swift */,
+				F1102ACRT /* AssetCRUDTests.swift */,
+				F1103AVT /* AssetValueTests.swift */,
+				F1104NWST /* NetWorthSnapshotTests.swift */,
 				F905ATIT /* AccountTypeInferenceTests.swift */,
 				F906ACCT /* AccountCRUDTests.swift */,
 				F903GAAT /* GmailAccountAttributionTests.swift */,
@@ -838,8 +856,10 @@
 				A701SV4 /* SchemaV4.swift in Sources */,
 				A701SV5 /* SchemaV5.swift in Sources */,
 				A701SV6 /* SchemaV6.swift in Sources */,
+				A701SV7 /* SchemaV7.swift in Sources */,
 				A901ACC /* Account.swift in Sources */,
 				A902AST /* Asset.swift in Sources */,
+				A911NWS /* NetWorthSnapshot.swift in Sources */,
 				A703BEP /* BankEmailParser.swift in Sources */,
 				A703MN /* MerchantNormalizer.swift in Sources */,
 				A703CS /* ConfidenceScorer.swift in Sources */,
@@ -894,6 +914,10 @@
 				A619MAGT /* MultiAccountGmailTests.swift in Sources */,
 				A903SV6MT /* SchemaV6MigrationTests.swift in Sources */,
 				A904ABT /* AccountBalanceTests.swift in Sources */,
+				A1101SV7MT /* SchemaV7MigrationTests.swift in Sources */,
+				A1102ACRT /* AssetCRUDTests.swift in Sources */,
+				A1103AVT /* AssetValueTests.swift in Sources */,
+				A1104NWST /* NetWorthSnapshotTests.swift in Sources */,
 				A905ATIT /* AccountTypeInferenceTests.swift in Sources */,
 				A906ACCT /* AccountCRUDTests.swift in Sources */,
 				A903GAAT /* GmailAccountAttributionTests.swift in Sources */,
