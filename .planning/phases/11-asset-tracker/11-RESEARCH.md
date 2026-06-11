@@ -806,7 +806,7 @@ This is a greenfield phase for the Asset Tracker UI (SchemaV7 is additive). The 
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`NetWorthSnapshot` sub-total field shape**
    - What we know: D-09 requires total + per-class breakdown.
