@@ -154,8 +154,12 @@ final class AMFINavService {
 
     /// Date formatter for NAVAll.txt date column: "DD-MMM-yyyy" (e.g. "10-Jun-2026").
     ///
+    /// Stored as a nonisolated static constant to avoid the `@Observable` / `lazy` incompatibility
+    /// (T-11-04: Pitfall — `lazy` inside an `@Observable` class becomes a computed property via
+    /// macro expansion, which the observation tracker cannot handle). Static avoids lazy entirely.
+    ///
     /// Uses en_US_POSIX locale + Asia/Kolkata timezone (AMFI dates are IST — RESEARCH.md).
-    private lazy var navDateFormatter: DateFormatter = {
+    private static let navDateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "dd-MMM-yyyy"
         f.locale = Locale(identifier: "en_US_POSIX")
@@ -186,7 +190,7 @@ final class AMFINavService {
             let dateString = parts[5].trimmingCharacters(in: .whitespaces)
             // T-11-04: non-numeric NAV → skip row; never fatalError
             guard let nav = Decimal(string: navString),
-                  let navDate = navDateFormatter.date(from: dateString) else { continue }
+                  let navDate = Self.navDateFormatter.date(from: dateString) else { continue }
             results.append(AMFIScheme(code: code, name: name, nav: nav, navDate: navDate))
         }
         return results
