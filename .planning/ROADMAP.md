@@ -125,7 +125,7 @@ Plans:
 
 **Wave 1**
 
-  - [ ] 11-01-PLAN.md — SchemaV7 atomic migration (amfiSchemeCode + NetWorthSnapshot) + Wave-0 test scaffolds incl. BLOCKING migration fixture [ASSET-01, ASSET-08]
+  - [x] 11-01-PLAN.md — SchemaV7 atomic migration (amfiSchemeCode + NetWorthSnapshot) + Wave-0 test scaffolds incl. BLOCKING migration fixture [ASSET-01, ASSET-08]
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -171,7 +171,7 @@ Plans:
 | 8. Stabilization | v1.1 | 4/4 | Complete    | 2026-06-09 |
 | 9. SchemaV6 & Accounts Management | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
-| 11. Asset Tracker | v1.1 | 0/? | Not started | - |
+| 11. Asset Tracker | v1.1 | 1/4 | In Progress|  |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
 
 ---
