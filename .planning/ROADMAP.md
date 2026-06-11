@@ -121,7 +121,21 @@ Plans:
   4. An asset-allocation chart (donut/pie via Swift Charts) shows the portfolio split by asset class — mutual funds, stocks, NPS, cash
   5. The app records net-worth snapshots over time and displays a trend chart; every displayed NAV or price carries an explicit as-of date label; user can always override any price manually
 
-**Plans**: TBD
+**Plans**: 4 plans (1 schema wave, 2 parallel feature plans, 1 Overview plan)
+
+**Wave 1**
+
+  - [ ] 11-01-PLAN.md — SchemaV7 atomic migration (amfiSchemeCode + NetWorthSnapshot) + Wave-0 test scaffolds incl. BLOCKING migration fixture [ASSET-01, ASSET-08]
+
+**Wave 2** *(blocked on Wave 1)*
+
+  - [ ] 11-02-PLAN.md — AMFINavService + NetWorthCalculator + NetWorthSnapshotService + RootView daily hooks [ASSET-03, ASSET-05, ASSET-08]
+  - [ ] 11-03-PLAN.md — Holdings CRUD under Settings > Assets: list/edit/detail/AMFI picker/staleness [ASSET-01, ASSET-02, ASSET-04, ASSET-06, ASSET-09]
+
+**Wave 3** *(blocked on Wave 2)*
+
+  - [ ] 11-04-PLAN.md — Overview net-worth card: allocation donut + trend chart [ASSET-05, ASSET-07, ASSET-08]
+
 **UI hint**: yes
 
 ---
