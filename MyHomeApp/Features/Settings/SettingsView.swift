@@ -199,6 +199,12 @@ struct SettingsView: View {
                     }
                     .foregroundStyle(.primary)
 
+                    // Assets holdings management (D-05, Phase 11)
+                    NavigationLink(destination: AssetsListView()) {
+                        rowLabel("Assets", symbol: "chart.bar", color: Color(.systemPurple))
+                    }
+                    .foregroundStyle(.primary)
+
                     Button {
                         showManageCategories = true
                     } label: {
