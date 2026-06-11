@@ -8,11 +8,11 @@ import Foundation
 /// existing schema versions from this list).
 enum AppMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self]   // append V6 — never remove V1–V5
+        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self]   // append V7 — never remove V1–V6
     }
 
     static var stages: [MigrationStage] {
-        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6]   // append v5ToV6
+        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6, v6ToV7]   // append v6ToV7
     }
 
     // Use .custom(willMigrate: nil, didMigrate: nil) rather than .lightweight
@@ -107,6 +107,17 @@ enum AppMigrationPlan: SchemaMigrationPlan {
                 UserDefaults.standard.set(true, forKey: "accountReviewPending")
             }
         }
+    )
+
+    // V7 adds amfiSchemeCode to Asset and introduces NetWorthSnapshot @Model (D-03, Phase 11).
+    // Purely additive: amfiSchemeCode defaults nil; NetWorthSnapshot is a new entity.
+    // willMigrate/didMigrate are nil — no backfill needed.
+    // .custom over .lightweight: FB13812722 workaround preserved for all stages.
+    static let v6ToV7 = MigrationStage.custom(
+        fromVersion: SchemaV6.self,
+        toVersion: SchemaV7.self,
+        willMigrate: nil,
+        didMigrate: nil   // amfiSchemeCode defaults nil; NetWorthSnapshot is new — no backfill
     )
 
     // Note: inferAccountType(from:) is now the module-level free function in

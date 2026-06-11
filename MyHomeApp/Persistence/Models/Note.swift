@@ -23,4 +23,4 @@ import SwiftData
 /// Usage:
 ///   let note = Note(title: "Grocery List")
 ///   @Query var notes: [Note]
-typealias Note = SchemaV6.Note
+typealias Note = SchemaV7.Note

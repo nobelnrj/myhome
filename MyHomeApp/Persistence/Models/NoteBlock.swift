@@ -20,4 +20,4 @@ import SwiftData
 /// Usage:
 ///   let block = NoteBlock(kindRaw: "checkbox", text: "Buy milk", order: 0)
 ///   @Query var blocks: [NoteBlock]
-typealias NoteBlock = SchemaV6.NoteBlock
+typealias NoteBlock = SchemaV7.NoteBlock
