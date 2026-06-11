@@ -42,6 +42,11 @@ struct RootView: View {
     /// Transfer scan service — owned by RootView, injected into both GmailSyncController (post-sync)
     /// and SettingsView (on-demand "Scan for Transfers" action). Mirrors RoutineResetService pattern.
     @State private var transferScanService = TransferScanService()
+    /// AMFI NAV auto-refresh service (D-06, ASSET-03) — fetches NAVAll.txt once per IST day.
+    /// Shared with descendant asset views via .environment so the picker and pull-to-refresh work.
+    @State private var amfiNavService = AMFINavService()
+    /// Net-worth snapshot service (D-08, ASSET-08) — upserts one NetWorthSnapshot per IST day.
+    @State private var netWorthSnapshotService = NetWorthSnapshotService()
 
     /// Gmail sync controller — owned by MyHomeApp, passed in here (Phase 7: BGTask ownership).
     let gmailSyncController: GmailSyncController
@@ -91,6 +96,9 @@ struct RootView: View {
             // Inject context into transfer scan service; wire into gmail sync for post-sync detection (D-08)
             transferScanService.modelContext = modelContext
             gmailSyncController.transferScanService = transferScanService
+            // Phase 11: inject context into AMFI NAV service + net-worth snapshot service (D-06, D-08)
+            amfiNavService.modelContext = modelContext
+            netWorthSnapshotService.modelContext = modelContext
         }
         // Deep-link observer: notification banner tap → switch to Notes tab + open note
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in
@@ -117,6 +125,9 @@ struct RootView: View {
              gmailSyncController.scenePhaseChanged(newPhase)
              if newPhase == .active {
                  routineResetService.resetIfNeeded()   // synchronous — no Task needed (D-07)
+                 // Phase 11: daily NAV refresh + net-worth snapshot upsert (D-06, D-08)
+                 amfiNavService.refreshIfNeeded()      // IST gate; URLSession inside Task {}
+                 netWorthSnapshotService.upsertIfNeeded() // IST gate; compute/save inside Task {}
              }
              // Auto-trigger auth on foreground when locked (banking-app feel — D5-02, D5-01)
              // Pitfall: never call async directly in onChange; always wrap in Task
@@ -124,5 +135,8 @@ struct RootView: View {
                  Task { await lockController.authenticate() }
              }
          }
+        // Phase 11: pass amfiNavService into the environment so AssetsListView, AMFISchemePickerView,
+        // and any descendant can call refreshIfNeeded() / read schemeList (D-02, D-06).
+        .environment(amfiNavService)
     }
 }
