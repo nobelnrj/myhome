@@ -225,13 +225,15 @@ struct EditAssetView: View {
             nameError = "Holding name cannot be empty."
             return
         }
-        // T-11-09: reject unreasonably large values (mirrors T-09-05)
-        guard abs(units) < 1_000_000 else {
-            nameError = "Units must be less than 1,000,000."
+        // T-11-09 / WR-01: saveAsset is the single source of truth — re-assert every bound
+        // here, including positivity, so a programmatic/refactored path can't persist a
+        // zero/negative holding or a negative cost basis (which inverts gain/loss math).
+        guard units > 0, abs(units) < 1_000_000 else {
+            nameError = "Units must be greater than 0 and less than 1,000,000."
             return
         }
-        guard abs(costBasisPerUnit) < 1_000_000_000 else {
-            nameError = "Cost per unit must be less than ₹1,00,00,00,000."
+        guard costBasisPerUnit >= 0, abs(costBasisPerUnit) < 1_000_000_000 else {
+            nameError = "Cost per unit must be between ₹0 and ₹1,00,00,00,000."
             return
         }
 

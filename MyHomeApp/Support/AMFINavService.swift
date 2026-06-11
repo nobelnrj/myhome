@@ -82,7 +82,7 @@ final class AMFINavService {
     /// Called synchronously from RootView.onChange(of: scenePhase) on `.active`.
     /// URLSession work is wrapped in Task {} — never blocks the main thread (T-11-08).
     func refreshIfNeeded() {
-        guard let context = modelContext else { return }
+        guard let context = modelContext, !isFetching else { return }  // WR-02: re-entrancy guard
         let now = Date()
         let lastFetch = UserDefaults.standard.object(forKey: Self.lastFetchKey) as? Date ?? .distantPast
         guard Self.shouldFetch(lastFetchDate: lastFetch, referenceDate: now) else { return }
@@ -97,7 +97,7 @@ final class AMFINavService {
 
     /// Bypass the daily gate (for pull-to-refresh and "Fetch Now" button — D-06).
     func forceRefresh() {
-        guard let context = modelContext else { return }
+        guard let context = modelContext, !isFetching else { return }  // WR-02: no overlapping fetch
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Asia/Kolkata")!
         let todayIST = cal.startOfDay(for: Date())
