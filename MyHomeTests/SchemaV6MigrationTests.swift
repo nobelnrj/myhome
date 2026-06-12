@@ -64,7 +64,7 @@ struct SchemaV6MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 3. Migrate to V6 using the production AppMigrationPlan
-        let v6Schema = Schema(versionedSchema: SchemaV7.self)
+        let v6Schema = Schema(versionedSchema: SchemaV8.self)
         let migrateConfig = ModelConfiguration(schema: v6Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v6Schema,
@@ -150,7 +150,7 @@ struct SchemaV6MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 2. First migration open — runs v5ToV6 didMigrate backfill
-        let v6Schema = Schema(versionedSchema: SchemaV7.self)
+        let v6Schema = Schema(versionedSchema: SchemaV8.self)
         let config1 = ModelConfiguration(schema: v6Schema, url: migrateURL)
         let container1 = try ModelContainer(
             for: v6Schema,

@@ -323,6 +323,39 @@ enum SchemaV8: VersionedSchema {
         var npsAssetE: UUID? = nil              // Asset.id for Equity strategy holding
         var npsAssetC: UUID? = nil              // Asset.id for Corporate Debt strategy holding
         var npsAssetG: UUID? = nil              // Asset.id for Government Securities strategy holding
+
+        init(
+            id: UUID = UUID(),
+            assetID: UUID = UUID(),
+            dayOfMonth: Int = 1,
+            amount: Decimal = Decimal(0),
+            startDate: Date = Date(),
+            isActive: Bool = true,
+            lastAccruedDate: Date? = nil,
+            reminderNotificationID: String? = nil,
+            npsAllocationE: Int = 0,
+            npsAllocationC: Int = 0,
+            npsAllocationG: Int = 0,
+            npsAssetE: UUID? = nil,
+            npsAssetC: UUID? = nil,
+            npsAssetG: UUID? = nil
+        ) {
+            self.id = id
+            self.assetID = assetID
+            self.dayOfMonth = dayOfMonth
+            self.amount = amount
+            self.startDate = startDate
+            self.isActive = isActive
+            self.lastAccruedDate = lastAccruedDate
+            self.reminderNotificationID = reminderNotificationID
+            self.createdAt = Date()
+            self.npsAllocationE = npsAllocationE
+            self.npsAllocationC = npsAllocationC
+            self.npsAllocationG = npsAllocationG
+            self.npsAssetE = npsAssetE
+            self.npsAssetC = npsAssetC
+            self.npsAssetG = npsAssetG
+        }
     }
 
     // MARK: - SIPAmountChange @Model (NEW in SchemaV8 — D-07, D-08, Phase 11.1)
@@ -336,6 +369,19 @@ enum SchemaV8: VersionedSchema {
         var effectiveFrom: Date = Date()        // UTC; next installment on/after this date uses the new amount
         var amount: Decimal = Decimal(0)        // Decimal not Double (rule 3); new monthly installment amount
         var createdAt: Date = Date()            // UTC (rule 4)
+
+        init(
+            id: UUID = UUID(),
+            sipID: UUID = UUID(),
+            effectiveFrom: Date = Date(),
+            amount: Decimal = Decimal(0)
+        ) {
+            self.id = id
+            self.sipID = sipID
+            self.effectiveFrom = effectiveFrom
+            self.amount = amount
+            self.createdAt = Date()
+        }
     }
 
     // MARK: - Contribution @Model (NEW in SchemaV8 — D-03, D-05, D-08, Phase 11.1)
@@ -355,5 +401,28 @@ enum SchemaV8: VersionedSchema {
         var unitsAdded: Decimal = Decimal(0)    // Decimal; amount ÷ navUsed (rounded down to 4dp)
         var isEstimate: Bool = true             // D-03: true until user reconciles total units (D-05)
         var createdAt: Date = Date()            // UTC (rule 4)
+
+        init(
+            id: UUID = UUID(),
+            assetID: UUID = UUID(),
+            sipID: UUID = UUID(),
+            date: Date = Date(),
+            amount: Decimal = Decimal(0),
+            navUsed: Decimal = Decimal(0),
+            navDate: Date = Date(),
+            unitsAdded: Decimal = Decimal(0),
+            isEstimate: Bool = true
+        ) {
+            self.id = id
+            self.assetID = assetID
+            self.sipID = sipID
+            self.date = date
+            self.amount = amount
+            self.navUsed = navUsed
+            self.navDate = navDate
+            self.unitsAdded = unitsAdded
+            self.isEstimate = isEstimate
+            self.createdAt = Date()
+        }
     }
 }
