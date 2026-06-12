@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
-status: executing
-last_updated: "2026-06-12T15:35:33.378Z"
+status: ready_to_plan
+last_updated: 2026-06-12T20:51:35.546Z
 last_activity: 2026-06-12
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 21
-  completed_plans: 21
+  completed_plans: 53
   percent: 83
+stopped_at: Phase 11.1 complete (5/5) — ready to discuss Phase 12
 ---
 
 # Project State
@@ -20,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 11.1 — sip-automation-and-nps-nav-auto-refresh
+**Current focus:** Phase 12 — notes & daily routine enhancement
 
 ## Current Position
 
-Phase: 11.1 (sip-automation-and-nps-nav-auto-refresh) — EXECUTING
-Plan: 5 of 5
-Status: Ready to execute
+Phase: 12
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-06-12
 
 Progress: [██████████] 100%
@@ -35,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 25
+- Total plans completed: 30
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -49,6 +50,7 @@ Progress: [██████████] 100%
 | 09 | 4 | - | - |
 | 10 | 4 | - | - |
 | 11 | 4 | - | - |
+| 11.1 | 5 | - | - |
 
 **Recent Trend:**
 

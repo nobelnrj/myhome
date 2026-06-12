@@ -183,7 +183,7 @@ Plans:
 | 9. SchemaV6 & Accounts Management | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 11. Asset Tracker | v1.1 | 4/4 | Complete   | 2026-06-12 |
-| 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete   | 2026-06-12 |
+| 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete    | 2026-06-12 |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
 
 ---
