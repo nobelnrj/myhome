@@ -184,6 +184,7 @@
 		A1101NNST /* NPSNavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNST /* NPSNavServiceTests.swift */; };
 		A1101SAST /* SIPAccrualServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAST /* SIPAccrualServiceTests.swift */; };
 		A1101RCT /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCT /* ReconcileTests.swift */; };
+		A1101SSVT /* SIPSetupValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SSVT /* SIPSetupValidationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -378,6 +379,7 @@
 		F1101NNST /* NPSNavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavServiceTests.swift; sourceTree = "<group>"; };
 		F1101SAST /* SIPAccrualServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualServiceTests.swift; sourceTree = "<group>"; };
 		F1101RCT /* ReconcileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileTests.swift; sourceTree = "<group>"; };
+		F1101SSVT /* SIPSetupValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPSetupValidationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -724,6 +726,7 @@
 				F1101NNST /* NPSNavServiceTests.swift */,
 				F1101SAST /* SIPAccrualServiceTests.swift */,
 				F1101RCT /* ReconcileTests.swift */,
+				F1101SSVT /* SIPSetupValidationTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -1049,6 +1052,7 @@
 				A1101NNST /* NPSNavServiceTests.swift in Sources */,
 				A1101SAST /* SIPAccrualServiceTests.swift in Sources */,
 				A1101RCT /* ReconcileTests.swift in Sources */,
+				A1101SSVT /* SIPSetupValidationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
