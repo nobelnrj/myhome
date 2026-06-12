@@ -146,7 +146,7 @@ Plans:
 **Goal:** [Urgent work - to be planned]
 **Requirements**: TBD
 **Depends on:** Phase 11
-**Plans:** 0 plans
+**Plans:** 1/5 plans executed
 Plans:
 
 - [ ] TBD (run /gsd-plan-phase 11.1 to break down)
@@ -183,7 +183,7 @@ Plans:
 | 9. SchemaV6 & Accounts Management | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 11. Asset Tracker | v1.1 | 4/4 | Complete    | 2026-06-11 |
-| 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 0/? | Not started | - |
+| 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 1/5 | In Progress|  |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
 
 ---
