@@ -14,4 +14,4 @@ import SwiftData
 /// Usage:
 ///   let asset = Asset()
 ///   @Query var assets: [Asset]
-typealias Asset = SchemaV7.Asset
+typealias Asset = SchemaV8.Asset
