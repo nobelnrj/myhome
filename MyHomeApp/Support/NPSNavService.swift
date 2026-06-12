@@ -185,11 +185,13 @@ final class NPSNavService {
             }
         }
 
-        // Defensive: future object-with-data wrapper {"data": [[code, nav], ...]}
-        // Attempt to decode as a keyed container and extract the "data" key.
-        if let wrapper = try? JSONDecoder().decode([String: [NPSEntry]].self, from: data),
-           let entries = wrapper["data"] {
-            return entries.compactMap { entry in
+        // Live shape (confirmed 2026-06): object wrapper {"data": [[code, nav], ...], "metadata": {…}}.
+        // Decode via a dedicated struct that extracts ONLY "data" and ignores sibling keys
+        // (e.g. "metadata"). A [String: [NPSEntry]] dictionary decode would throw the moment any
+        // sibling key's value is not [NPSEntry] (metadata is an object) — that bug made the picker
+        // show "No Schemes Loaded" against the real endpoint while the bare-array fixture passed.
+        if let wrapper = try? JSONDecoder().decode(NPSLatestWrapper.self, from: data) {
+            return wrapper.data.compactMap { entry in
                 guard let nav = Decimal(string: String(format: "%.4f", entry.nav)) else { return nil }
                 return NPSScheme(code: entry.code, name: "", nav: nav)
             }
@@ -197,6 +199,14 @@ final class NPSNavService {
 
         // T-113-01: all decode paths failed — return [] silently
         return []
+    }
+
+    // MARK: - NPSLatestWrapper (live object-shape decoder)
+
+    /// Decodes the live `/api/latest-min` object shape `{"data": [[code, nav], ...], "metadata": {…}}`.
+    /// Only `data` is read; unknown sibling keys (e.g. `metadata`) are ignored by Decodable.
+    private struct NPSLatestWrapper: Decodable {
+        let data: [NPSEntry]
     }
 
     // MARK: - NPSEntry (private Decodable helper)

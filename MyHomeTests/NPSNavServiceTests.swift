@@ -58,6 +58,23 @@ struct NPSNavServiceTests {
         }
     }
 
+    // MARK: - parseNPSLatest: live object-wrapper shape (regression — UAT 11.1)
+
+    @Test("parseNPSLatest: live {\"data\":[...],\"metadata\":{...}} wrapper parses (metadata sibling ignored)")
+    func objectWrapperWithMetadataParses() {
+        let service = NPSNavService()
+        // The REAL npsnav.in/api/latest-min shape: object with a `data` array AND a `metadata`
+        // sibling object. The old [String:[NPSEntry]] fallback threw on the metadata key, so the
+        // picker showed "No Schemes Loaded" against the live endpoint. Lock the fix.
+        let json = """
+        {"data": [["SM001001", 49.5087], ["SM001002", 42.5581]],
+         "metadata": {"source": "npsnav.in", "updated": "2026-06-12"}}
+        """.data(using: .utf8)!
+        let schemes = service.parseNPSLatest(json)
+        #expect(schemes.count == 2, "Wrapper-shaped payload must parse both schemes; got \(schemes.count)")
+        #expect(schemes.contains { $0.code == "SM001001" && $0.nav > 0 })
+    }
+
     // MARK: - parseNPSLatest: Number nav precision (T-113-02)
 
     @Test("parseNPSLatest: JSON Number nav 49.5429 round-trips to Decimal via String intermediary")
