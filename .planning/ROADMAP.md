@@ -99,6 +99,7 @@ Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROAD
 **Plans**: 4 plans
 
 Plans:
+
 - [x] 10-01-PLAN.md — Detection scorer + scan service + AccountBalance sign verification (XFER-01, XFER-04)
 - [x] 10-02-PLAN.md — Confirmed-transfer spend/budget/chart exclusion (XFER-04)
 - [x] 10-03-PLAN.md — Review-Inbox confirm/reject + Transfers filter + post-sync scan hook (XFER-02, XFER-03)
@@ -146,8 +147,8 @@ Plans:
 **Requirements**: TBD
 **Depends on:** Phase 11
 **Plans:** 0 plans
-
 Plans:
+
 - [ ] TBD (run /gsd-plan-phase 11.1 to break down)
 
 ### Phase 12: Notes & Daily Routine Enhancement
