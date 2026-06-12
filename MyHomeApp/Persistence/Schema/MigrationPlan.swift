@@ -8,11 +8,11 @@ import Foundation
 /// existing schema versions from this list).
 enum AppMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self]   // append V7 — never remove V1–V6
+        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self, SchemaV8.self]   // append V8 — never remove V1–V7
     }
 
     static var stages: [MigrationStage] {
-        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6, v6ToV7]   // append v6ToV7
+        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6, v6ToV7, v7ToV8]   // append v7ToV8
     }
 
     // Use .custom(willMigrate: nil, didMigrate: nil) rather than .lightweight
@@ -118,6 +118,17 @@ enum AppMigrationPlan: SchemaMigrationPlan {
         toVersion: SchemaV7.self,
         willMigrate: nil,
         didMigrate: nil   // amfiSchemeCode defaults nil; NetWorthSnapshot is new — no backfill
+    )
+
+    // V8 adds npsSchemeCode to Asset and introduces SIP/SIPAmountChange/Contribution @Models (D-08, Phase 11.1).
+    // Purely additive: npsSchemeCode defaults nil; SIP/SIPAmountChange/Contribution are new empty tables.
+    // willMigrate/didMigrate are nil — no backfill needed.
+    // .custom over .lightweight: FB13812722 workaround preserved for all stages.
+    static let v7ToV8 = MigrationStage.custom(
+        fromVersion: SchemaV7.self,
+        toVersion: SchemaV8.self,
+        willMigrate: nil,
+        didMigrate: nil   // npsSchemeCode defaults nil; SIP/Contribution are new — no backfill
     )
 
     // Note: inferAccountType(from:) is now the module-level free function in

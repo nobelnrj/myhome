@@ -170,6 +170,20 @@
 		A709MN /* MerchantNormalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709MN /* MerchantNormalizerTests.swift */; };
 		A710IP /* IngestionPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F710IP /* IngestionPipelineTests.swift */; };
 		A711FIX /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = F711FIX /* Fixtures */; };
+		A1101SV8 /* SchemaV8.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV8 /* SchemaV8.swift */; };
+		A1101SIP /* SIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SIP /* SIP.swift */; };
+		A1101SAC /* SIPAmountChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAC /* SIPAmountChange.swift */; };
+		A1101CON /* Contribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101CON /* Contribution.swift */; };
+		A1101NNS /* NPSNavService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNS /* NPSNavService.swift */; };
+		A1101SAS /* SIPAccrualService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAS /* SIPAccrualService.swift */; };
+		A1101NSP /* NPSSchemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NSP /* NPSSchemePickerView.swift */; };
+		A1101SSV /* SIPSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SSV /* SIPSetupView.swift */; };
+		A1101CLV /* ContributionLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101CLV /* ContributionLogView.swift */; };
+		A1101RCV /* ReconcileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCV /* ReconcileView.swift */; };
+		A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV8MT /* SchemaV8MigrationTests.swift */; };
+		A1101NNST /* NPSNavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNST /* NPSNavServiceTests.swift */; };
+		A1101SAST /* SIPAccrualServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAST /* SIPAccrualServiceTests.swift */; };
+		A1101RCT /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCT /* ReconcileTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -350,6 +364,20 @@
 		F803SH /* CardStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStyle.swift; sourceTree = "<group>"; };
 		F804SH /* DonutChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonutChart.swift; sourceTree = "<group>"; };
 		F805SH /* StackBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackBar.swift; sourceTree = "<group>"; };
+		F1101SV8 /* SchemaV8.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV8.swift; sourceTree = "<group>"; };
+		F1101SIP /* SIP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIP.swift; sourceTree = "<group>"; };
+		F1101SAC /* SIPAmountChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAmountChange.swift; sourceTree = "<group>"; };
+		F1101CON /* Contribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contribution.swift; sourceTree = "<group>"; };
+		F1101NNS /* NPSNavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavService.swift; sourceTree = "<group>"; };
+		F1101SAS /* SIPAccrualService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualService.swift; sourceTree = "<group>"; };
+		F1101NSP /* NPSSchemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSSchemePickerView.swift; sourceTree = "<group>"; };
+		F1101SSV /* SIPSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPSetupView.swift; sourceTree = "<group>"; };
+		F1101CLV /* ContributionLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContributionLogView.swift; sourceTree = "<group>"; };
+		F1101RCV /* ReconcileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileView.swift; sourceTree = "<group>"; };
+		F1101SV8MT /* SchemaV8MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV8MigrationTests.swift; sourceTree = "<group>"; };
+		F1101NNST /* NPSNavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavServiceTests.swift; sourceTree = "<group>"; };
+		F1101SAST /* SIPAccrualServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualServiceTests.swift; sourceTree = "<group>"; };
+		F1101RCT /* ReconcileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -431,6 +459,10 @@
 				F1103ADV /* AssetDetailView.swift */,
 				F1104NWC /* NetWorthCard.swift */,
 				F1104NWTC /* NetWorthTrendChart.swift */,
+				F1101NSP /* NPSSchemePickerView.swift */,
+				F1101SSV /* SIPSetupView.swift */,
+				F1101CLV /* ContributionLogView.swift */,
+				F1101RCV /* ReconcileView.swift */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -565,6 +597,7 @@
 				F701SV5 /* SchemaV5.swift */,
 				F701SV6 /* SchemaV6.swift */,
 				F701SV7 /* SchemaV7.swift */,
+				F1101SV8 /* SchemaV8.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -580,6 +613,9 @@
 				F901ACC /* Account.swift */,
 				F902AST /* Asset.swift */,
 				F911NWS /* NetWorthSnapshot.swift */,
+				F1101SIP /* SIP.swift */,
+				F1101SAC /* SIPAmountChange.swift */,
+				F1101CON /* Contribution.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -603,6 +639,8 @@
 				F1102ANS /* AMFINavService.swift */,
 				F1102NWC /* NetWorthCalculator.swift */,
 				F1102NWSS /* NetWorthSnapshotService.swift */,
+				F1101NNS /* NPSNavService.swift */,
+				F1101SAS /* SIPAccrualService.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -682,6 +720,10 @@
 				F1004TSST /* TransferScanServiceTests.swift */,
 				F1005ABTT /* AccountBalanceTransferTests.swift */,
 				F1006EETT /* EditExpenseTransferTests.swift */,
+				F1101SV8MT /* SchemaV8MigrationTests.swift */,
+				F1101NNST /* NPSNavServiceTests.swift */,
+				F1101SAST /* SIPAccrualServiceTests.swift */,
+				F1101RCT /* ReconcileTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -920,9 +962,19 @@
 				A701SV5 /* SchemaV5.swift in Sources */,
 				A701SV6 /* SchemaV6.swift in Sources */,
 				A701SV7 /* SchemaV7.swift in Sources */,
+				A1101SV8 /* SchemaV8.swift in Sources */,
 				A901ACC /* Account.swift in Sources */,
 				A902AST /* Asset.swift in Sources */,
 				A911NWS /* NetWorthSnapshot.swift in Sources */,
+				A1101SIP /* SIP.swift in Sources */,
+				A1101SAC /* SIPAmountChange.swift in Sources */,
+				A1101CON /* Contribution.swift in Sources */,
+				A1101NNS /* NPSNavService.swift in Sources */,
+				A1101SAS /* SIPAccrualService.swift in Sources */,
+				A1101NSP /* NPSSchemePickerView.swift in Sources */,
+				A1101SSV /* SIPSetupView.swift in Sources */,
+				A1101CLV /* ContributionLogView.swift in Sources */,
+				A1101RCV /* ReconcileView.swift in Sources */,
 				A703BEP /* BankEmailParser.swift in Sources */,
 				A703MN /* MerchantNormalizer.swift in Sources */,
 				A703CS /* ConfidenceScorer.swift in Sources */,
@@ -993,6 +1045,10 @@
 				A1004TSST /* TransferScanServiceTests.swift in Sources */,
 				A1005ABTT /* AccountBalanceTransferTests.swift in Sources */,
 				A1006EETT /* EditExpenseTransferTests.swift in Sources */,
+				A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */,
+				A1101NNST /* NPSNavServiceTests.swift in Sources */,
+				A1101SAST /* SIPAccrualServiceTests.swift in Sources */,
+				A1101RCT /* ReconcileTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
