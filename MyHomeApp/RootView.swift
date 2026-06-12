@@ -47,6 +47,11 @@ struct RootView: View {
     @State private var amfiNavService = AMFINavService()
     /// Net-worth snapshot service (D-08, ASSET-08) — upserts one NetWorthSnapshot per IST day.
     @State private var netWorthSnapshotService = NetWorthSnapshotService()
+    /// NPS NAV auto-refresh service (D-01, ASSET-09) — fetches npsnav.in/api/latest-min once per IST day.
+    /// Shared via .environment so NPSSchemePickerView and EditAssetView can read schemeList.
+    @State private var npsNavService = NPSNavService()
+    /// SIP accrual engine (D-04, D-07, ASSET-09) — prices elapsed installments and writes Contribution rows.
+    @State private var sipAccrualService = SIPAccrualService()
 
     /// Gmail sync controller — owned by MyHomeApp, passed in here (Phase 7: BGTask ownership).
     let gmailSyncController: GmailSyncController
@@ -99,6 +104,9 @@ struct RootView: View {
             // Phase 11: inject context into AMFI NAV service + net-worth snapshot service (D-06, D-08)
             amfiNavService.modelContext = modelContext
             netWorthSnapshotService.modelContext = modelContext
+            // Phase 11.1: inject context into NPS NAV service + SIP accrual service (D-01, D-04)
+            npsNavService.modelContext = modelContext
+            sipAccrualService.modelContext = modelContext
         }
         // Deep-link observer: notification banner tap → switch to Notes tab + open note
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in
@@ -127,6 +135,11 @@ struct RootView: View {
                  routineResetService.resetIfNeeded()   // synchronous — no Task needed (D-07)
                  // Phase 11: daily NAV refresh + net-worth snapshot upsert (D-06, D-08)
                  amfiNavService.refreshIfNeeded()      // IST gate; URLSession inside Task {}
+                 // Phase 11.1: NPS NAV refresh + SIP accrual (D-01, D-04, D-07)
+                 // Order is mandatory (D-02): accrueIfNeeded BEFORE upsertIfNeeded so the
+                 // same-cycle net-worth snapshot includes the just-accrued units.
+                 npsNavService.refreshIfNeeded()       // IST gate; URLSession inside Task {}
+                 sipAccrualService.accrueIfNeeded()    // no IST gate; Task-wrapped
                  netWorthSnapshotService.upsertIfNeeded() // IST gate; compute/save inside Task {}
              }
              // Auto-trigger auth on foreground when locked (banking-app feel — D5-02, D5-01)
@@ -138,5 +151,8 @@ struct RootView: View {
         // Phase 11: pass amfiNavService into the environment so AssetsListView, AMFISchemePickerView,
         // and any descendant can call refreshIfNeeded() / read schemeList (D-02, D-06).
         .environment(amfiNavService)
+        // Phase 11.1: NPSSchemePickerView and EditAssetView read npsNavService from environment.
+        // SIPAccrualService does NOT need environment injection — only RootView drives it.
+        .environment(npsNavService)
     }
 }
