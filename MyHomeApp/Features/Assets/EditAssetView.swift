@@ -18,12 +18,14 @@ struct EditAssetView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @Environment(AMFINavService.self) private var amfiNavService
+    @Environment(NPSNavService.self) private var npsNavService
 
     // MARK: - Form State
 
     @State private var name: String = ""
     @State private var assetClassRaw: String = "mutual_fund"
     @State private var amfiSchemeCode: String? = nil
+    @State private var npsSchemeCode: String? = nil
     @State private var units: Decimal = 0
     @State private var costBasisPerUnit: Decimal = 0
     @State private var currentNAV: Decimal = 0
@@ -101,6 +103,42 @@ struct EditAssetView: View {
                             }
                             .frame(minHeight: 44)
                         }
+                    }
+                }
+
+                // MARK: Section 2b — NPS Scheme (conditional on nps class)
+                if assetClassRaw == "nps" {
+                    Section("NPS Scheme") {
+                        NavigationLink(destination: NPSSchemePickerView(
+                            selectedSchemeCode: $npsSchemeCode,
+                            npsNavService: npsNavService
+                        )) {
+                            HStack {
+                                Text("NPS Scheme")
+                                    .font(.body)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                if let code = npsSchemeCode {
+                                    Text(code)  // T-11-10: plain Text — no AttributedString
+                                        .font(.body)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                } else {
+                                    Text("Tap to choose a scheme")
+                                        .font(.body)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .frame(minHeight: 44)
+                        }
+                    }
+                }
+
+                // MARK: Section 2c — SIP (edit mode only — SIP requires a persisted Asset.id)
+                if asset != nil {
+                    Section("SIP") {
+                        NavigationLink("Configure SIP", destination: SIPSetupView(asset: asset!))
+                            .frame(minHeight: 44)
                     }
                 }
 
@@ -192,6 +230,7 @@ struct EditAssetView: View {
                     name = a.name ?? ""
                     assetClassRaw = a.assetClassRaw ?? "mutual_fund"
                     amfiSchemeCode = a.amfiSchemeCode
+                    npsSchemeCode = a.npsSchemeCode
                     units = a.units ?? 0
                     costBasisPerUnit = a.costBasisPerUnit ?? 0
                     currentNAV = a.currentNAV ?? 0
@@ -250,6 +289,8 @@ struct EditAssetView: View {
             target.assetClassRaw = assetClassRaw
             // T-11-09: clear scheme code for non-MF assets
             target.amfiSchemeCode = assetClassRaw == "mutual_fund" ? amfiSchemeCode : nil
+            // T-11-09: clear NPS scheme code when class is switched away from nps
+            target.npsSchemeCode = assetClassRaw == "nps" ? npsSchemeCode : nil
             target.units = units
             target.costBasisPerUnit = costBasisPerUnit
             target.currentNAV = currentNAV > 0 ? currentNAV : nil
