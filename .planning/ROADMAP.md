@@ -140,6 +140,16 @@ Plans:
 
 ---
 
+### Phase 11.1: SIP Automation and NPS NAV auto-refresh (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 11
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 11.1 to break down)
+
 ### Phase 12: Notes & Daily Routine Enhancement
 
 **Goal**: Users can designate any note as a daily routine that appears on every calendar day, receives an optional timed notification, supports drag-to-reorder checklist items, and tracks a completion streak
@@ -172,6 +182,7 @@ Plans:
 | 9. SchemaV6 & Accounts Management | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 11. Asset Tracker | v1.1 | 4/4 | Complete    | 2026-06-11 |
+| 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 0/? | Not started | - |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
 
 ---

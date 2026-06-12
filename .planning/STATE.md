@@ -2,16 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
-status: ready_to_plan
-last_updated: 2026-06-11T17:22:30.343Z
-last_activity: 2026-06-11 -- Phase 11 execution started
+status: Ready to discuss
+last_updated: "2026-06-12T04:56:56.709Z"
+last_activity: 2026-06-12
 progress:
-  total_phases: 5
-  completed_phases: 3
+  total_phases: 6
+  completed_phases: 4
   total_plans: 16
-  completed_plans: 48
-  percent: 60
-stopped_at: Phase 11 complete (4/4) — ready to discuss Phase 12
+  completed_plans: 16
+  percent: 67
 ---
 
 # Project State
@@ -21,14 +20,14 @@ stopped_at: Phase 11 complete (4/4) — ready to discuss Phase 12
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 12 — notes & daily routine enhancement
+**Current focus:** Phase 11.1 — SIP automation & NPS NAV auto-refresh
 
 ## Current Position
 
-Phase: 12
+Phase: 11.1
 Plan: Not started
-Status: Ready to plan
-Last activity: 2026-06-11
+Status: Ready to discuss
+Last activity: 2026-06-12
 
 Progress: [██████████] 100%
 
@@ -94,6 +93,7 @@ Progress: [██████████] 100%
 
 - Phase 3 edited: expanded scope to Notes + Reminders hub: reminders, recurrence, notifications, calendar (goal + 5 success criteria)
 - v1.1 roadmap created 2026-06-08: Phases 8-12 (Stabilization → SchemaV6+Accounts → Self-Transfer → Asset Tracker → Notes Enhancement); 32 requirements mapped; no orphans
+- Phase 11.1 inserted after Phase 11: SIP Automation and NPS NAV auto-refresh (URGENT)
 
 ### Decisions
 
@@ -176,9 +176,9 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-11T09:01:29.235Z
-Stopped at: Phase 11 context gathered
-Resume file: .planning/phases/11-asset-tracker/11-CONTEXT.md
+Last session: 2026-06-12T04:56:56.704Z
+Stopped at: Phase 11.1 context gathered
+Resume file: .planning/phases/11.1-sip-automation-and-nps-nav-auto-refresh/11.1-CONTEXT.md
 
 ## Operator Next Steps
 
