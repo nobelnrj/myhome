@@ -36,6 +36,9 @@ struct RootView: View {
     /// CR-03: Thread blockID deep-link through the view hierarchy so EditNoteView can
     /// scroll to and highlight the target block row when a block-level reminder is tapped.
     @State private var deepLinkBlockID: UUID? = nil
+    /// D-06: SIP reconcile notification tap — holds the resolved Asset to present ReconcileView.
+    /// Set by the kOpenReconcileNotification observer; cleared on sheet dismiss.
+    @State private var deepLinkReconcileSIPID: UUID? = nil
     /// Face ID gate state — @Observable owned via @State, never @StateObject (PITFALLS.md Pitfall 10)
     @State private var lockController = LockController()
     @State private var routineResetService = RoutineResetService()
@@ -117,6 +120,23 @@ struct RootView: View {
                 selectedTab = 3
             }
         }
+        // D-06: SIP reconcile deep-link observer — present ReconcileView for the SIP's holding.
+        // Mirrors kOpenNoteNotification pattern: read userInfo, store UUID, sheet presentation resolves.
+        .onReceive(NotificationCenter.default.publisher(for: kOpenReconcileNotification)) { notification in
+            if let sipID = notification.userInfo?["sipID"] as? UUID {
+                deepLinkReconcileSIPID = sipID
+            }
+        }
+        // D-06: Present ReconcileView when the user taps a SIP reconcile notification.
+        // Resolves sipID → SIP → Asset via FetchDescriptor using the @Environment modelContext.
+        .sheet(isPresented: Binding(
+            get: { deepLinkReconcileSIPID != nil },
+            set: { if !$0 { deepLinkReconcileSIPID = nil } }
+        )) {
+            if let sipID = deepLinkReconcileSIPID {
+                reconcileSheetView(for: sipID)
+            }
+        }
         // Privacy blur: active on inactive + background so app-switcher snapshot is obscured (T-05-04, D5-02)
         .blur(radius: lockController.isBlurred ? 20 : 0)
         .animation(.easeInOut(duration: 0.2), value: lockController.isBlurred)
@@ -154,5 +174,38 @@ struct RootView: View {
         // Phase 11.1: NPSSchemePickerView and EditAssetView read npsNavService from environment.
         // SIPAccrualService does NOT need environment injection — only RootView drives it.
         .environment(npsNavService)
+    }
+
+    // MARK: - Reconcile deep-link sheet (D-06)
+
+    /// Resolves a sipID UUID to its owning Asset and returns a ReconcileView sheet.
+    ///
+    /// Uses a FetchDescriptor on the @Environment modelContext — the same context already
+    /// present in RootView for other services. Resolves SIP.assetID → Asset.
+    /// If the SIP or Asset cannot be found (deleted, corrupted) the sheet is dismissed silently.
+    @ViewBuilder
+    private func reconcileSheetView(for sipID: UUID) -> some View {
+        // Resolve sipID → SIP → Asset synchronously from the main context.
+        // Both models are small; FetchDescriptor with fetchLimit=1 is safe on MainActor.
+        if let sip = fetchSIP(id: sipID),
+           let asset = fetchAsset(id: sip.assetID) {
+            ReconcileView(asset: asset)
+        } else {
+            // SIP or Asset not found — dismiss immediately with an empty view
+            EmptyView()
+                .onAppear { deepLinkReconcileSIPID = nil }
+        }
+    }
+
+    private func fetchSIP(id: UUID) -> SIP? {
+        var descriptor = FetchDescriptor<SIP>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try? modelContext.fetch(descriptor).first
+    }
+
+    private func fetchAsset(id: UUID) -> Asset? {
+        var descriptor = FetchDescriptor<Asset>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try? modelContext.fetch(descriptor).first
     }
 }

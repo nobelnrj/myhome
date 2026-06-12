@@ -8,6 +8,9 @@ import SwiftUI
 /// UNNotificationCategory identifier for note/block reminders.
 let kReminderCategoryID = "com.myhome.reminder"
 
+// kReconcileCategoryID is declared in SIPAccrualService.swift (= "com.myhome.sip.reconcile").
+// It is used here for category registration and deep-link routing (D-06).
+
 /// Complete action: checks the target checklist row and cancels future alerts.
 let kCompleteActionID   = "com.myhome.reminder.complete"
 
@@ -82,7 +85,15 @@ func registerReminderNotificationCategory() {
         intentIdentifiers: [],
         options: [.customDismissAction]
     )
-    UNUserNotificationCenter.current().setNotificationCategories([category])
+    // D-06 / T-115-04: Appended to the SAME categories array — one single registration call
+    // so the reminder category is not clobbered (a second call would replace the first).
+    let reconcileCategory = UNNotificationCategory(
+        identifier: kReconcileCategoryID,
+        actions: [],
+        intentIdentifiers: [],
+        options: []
+    )
+    UNUserNotificationCenter.current().setNotificationCategories([category, reconcileCategory])
 }
 
 // MARK: - NotificationActions content builder
@@ -173,8 +184,14 @@ final class NotificationActionDelegate: NSObject, UNUserNotificationCenterDelega
             handleSnooze(identifier: identifier, userInfo: userInfo)
 
         default:
-            // Notification tap — deep-link to note/row
-            handleDeepLink(userInfo: userInfo)
+            // D-06: SIP reconcile banner tap — deep-link into ReconcileView for the holding
+            let categoryID = response.notification.request.content.categoryIdentifier
+            if categoryID == kReconcileCategoryID {
+                handleReconcileDeepLink(userInfo: userInfo)
+            } else {
+                // Default: note/row deep-link
+                handleDeepLink(userInfo: userInfo)
+            }
         }
 
         completionHandler()
@@ -314,11 +331,36 @@ final class NotificationActionDelegate: NSObject, UNUserNotificationCenterDelega
             )
         }
     }
+
+    // MARK: - Reconcile deep-link (D-06)
+
+    /// Handles a tap on the monthly SIP reconcile notification.
+    ///
+    /// Reads `userInfo["sipID"]` as a UUID (T-115-03: guard-parsed, never force-unwrapped)
+    /// and posts `kOpenReconcileNotification` so RootView can present ReconcileView for
+    /// the corresponding holding.
+    private func handleReconcileDeepLink(userInfo: [AnyHashable: Any]) {
+        // T-115-03: parse via UUID(uuidString:) with guard — nil/garbage userInfo → no post, no presentation
+        guard let sipIDString = userInfo["sipID"] as? String,
+              let sipID = UUID(uuidString: sipIDString) else {
+            return
+        }
+        NotificationCenter.default.post(
+            name: kOpenReconcileNotification,
+            object: nil,
+            userInfo: ["sipID": sipID]
+        )
+    }
 }
 
-// MARK: - Deep-link notification name
+// MARK: - Deep-link notification names
 
 /// Posted by NotificationActionDelegate when the user taps a reminder banner.
 /// Payload: `["noteID": UUID, "blockID": UUID?]`
 /// Observed by the Notes UI layer to navigate to the correct note/row.
 let kOpenNoteNotification = Notification.Name("com.myhome.openNote")
+
+/// Posted by NotificationActionDelegate when the user taps a SIP reconcile banner (D-06).
+/// Payload: `["sipID": UUID]`
+/// Observed by RootView to present ReconcileView for the SIP's holding.
+let kOpenReconcileNotification = Notification.Name("com.myhome.openReconcile")
