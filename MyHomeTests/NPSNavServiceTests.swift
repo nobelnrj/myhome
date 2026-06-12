@@ -14,23 +14,33 @@ import Foundation
 ///
 /// All tests run offline using committed fixtures under MyHomeTests/Fixtures/nps/.
 @Suite("NPSNavServiceTests")
+@MainActor
 struct NPSNavServiceTests {
 
     // MARK: - Helpers
 
     /// Load a fixture file from MyHomeTests/Fixtures/nps/
+    ///
+    /// Uses #filePath to resolve relative to source file (reliable in xcodebuild).
+    /// Falls back to bundle resource lookup for Fixtures folder reference.
     private func fixtureData(named name: String) -> Data {
-        // In Xcode unit test bundles the test bundle resources include files from the test target.
-        // The fixture files are committed alongside the test sources; locate via Bundle.
+        // Primary: resolve via #filePath (works in xcodebuild simulator runs)
+        let thisFile = URL(fileURLWithPath: #filePath)
+        let testsDir = thisFile.deletingLastPathComponent()  // MyHomeTests/
+        let fileURL = testsDir.appendingPathComponent("Fixtures/nps/\(name)")
+        if let data = try? Data(contentsOf: fileURL) { return data }
+
+        // Fallback: bundle resource (Fixtures is a folder reference in pbxproj)
         let bundle = Bundle(for: NPSNavServiceTestsHelper.self)
-        if let url = bundle.url(forResource: name, withExtension: nil) {
+        let nsName = name as NSString
+        let stem = nsName.deletingPathExtension
+        let ext  = nsName.pathExtension
+        if let url = bundle.url(forResource: stem,
+                                withExtension: ext.isEmpty ? nil : ext,
+                                subdirectory: "Fixtures/nps") {
             return (try? Data(contentsOf: url)) ?? Data()
         }
-        // Fallback: locate relative to source file (works when running directly)
-        let sourceDir = URL(fileURLWithPath: #file)
-            .deletingLastPathComponent() // MyHomeTests/
-            .appendingPathComponent("Fixtures/nps/\(name)")
-        return (try? Data(contentsOf: sourceDir)) ?? Data()
+        return Data()
     }
 
     // MARK: - parseNPSLatest: fixture
