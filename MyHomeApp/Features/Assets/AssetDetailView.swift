@@ -84,6 +84,22 @@ struct AssetDetailView: View {
                     detailRow("AMFI Scheme Code", value: asset.amfiSchemeCode ?? "—")
                 }
             }
+
+            // SIP history + reconcile (mirrors EditAssetView SIP section style)
+            Section("SIP") {
+                NavigationLink(destination: ContributionLogView(asset: asset)) {
+                    Text("Contributions")
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                        .frame(minHeight: 44)
+                }
+                NavigationLink(destination: ReconcileView(asset: asset)) {
+                    Text("Reconcile units")
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                        .frame(minHeight: 44)
+                }
+            }
         }
         .listStyle(.insetGrouped)
         .navigationTitle(asset.name ?? "Holding")  // T-11-10: plain string access
