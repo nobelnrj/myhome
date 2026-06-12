@@ -4,7 +4,7 @@ import SwiftData
 /// Holdings CRUD list under Settings > Assets (D-05, ASSET-01, ASSET-02).
 ///
 /// Mirrors `AccountsListView` file-for-file.
-/// Pull-to-refresh triggers `amfiNavService.forceRefresh()` (D-06).
+/// Pull-to-refresh triggers `amfiNavService.forceRefresh()` + `npsNavService.forceRefresh()` (D-06).
 /// Each row shows IconTile (class), name, "class · N units", current value, and StalenessView.
 /// Swipe-delete calls `context.delete` + `context.save()` (CR-01).
 ///
@@ -20,6 +20,11 @@ struct AssetsListView: View {
 
     /// AMFINavService injected by RootView (Plan 02).
     @Environment(AMFINavService.self) private var amfiNavService
+
+    /// NPSNavService injected by RootView (Plan 11.1-04) — pull-to-refresh must
+    /// refresh NPS NAVs too, otherwise NPS holdings only update on the IST-gated
+    /// foreground pass with no manual override.
+    @Environment(NPSNavService.self) private var npsNavService
 
     // MARK: - State
 
@@ -56,6 +61,7 @@ struct AssetsListView: View {
                 .listStyle(.insetGrouped)
                 .refreshable {
                     amfiNavService.forceRefresh()
+                    npsNavService.forceRefresh()
                 }
             }
         }
