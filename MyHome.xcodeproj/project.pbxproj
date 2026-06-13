@@ -189,6 +189,7 @@
 		A1201SCT /* StreakCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SCT /* StreakCalculatorTests.swift */; };
 		A1201RNST /* RoutineNotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201RNST /* RoutineNotificationServiceTests.swift */; };
 		A1201NRT /* NoteReorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201NRT /* NoteReorderTests.swift */; };
+		A1204RCT /* RoutineCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1204RCT /* RoutineCalendarTests.swift */; };
 		A1101NNST /* NPSNavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNST /* NPSNavServiceTests.swift */; };
 		A1101SAST /* SIPAccrualServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAST /* SIPAccrualServiceTests.swift */; };
 		A1101RCT /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCT /* ReconcileTests.swift */; };
@@ -394,6 +395,7 @@
 		F1201SCT /* StreakCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculatorTests.swift; sourceTree = "<group>"; };
 		F1201RNST /* RoutineNotificationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationServiceTests.swift; sourceTree = "<group>"; };
 		F1201NRT /* NoteReorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteReorderTests.swift; sourceTree = "<group>"; };
+		F1204RCT /* RoutineCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineCalendarTests.swift; sourceTree = "<group>"; };
 		F1101NNST /* NPSNavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavServiceTests.swift; sourceTree = "<group>"; };
 		F1101SAST /* SIPAccrualServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualServiceTests.swift; sourceTree = "<group>"; };
 		F1101RCT /* ReconcileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileTests.swift; sourceTree = "<group>"; };
@@ -750,6 +752,7 @@
 				F1201SCT /* StreakCalculatorTests.swift */,
 				F1201RNST /* RoutineNotificationServiceTests.swift */,
 				F1201NRT /* NoteReorderTests.swift */,
+				F1204RCT /* RoutineCalendarTests.swift */,
 				F1101NNST /* NPSNavServiceTests.swift */,
 				F1101SAST /* SIPAccrualServiceTests.swift */,
 				F1101RCT /* ReconcileTests.swift */,
@@ -1085,6 +1088,7 @@
 				A1201SCT /* StreakCalculatorTests.swift in Sources */,
 				A1201RNST /* RoutineNotificationServiceTests.swift in Sources */,
 				A1201NRT /* NoteReorderTests.swift in Sources */,
+				A1204RCT /* RoutineCalendarTests.swift in Sources */,
 				A1101NNST /* NPSNavServiceTests.swift in Sources */,
 				A1101SAST /* SIPAccrualServiceTests.swift in Sources */,
 				A1101RCT /* ReconcileTests.swift in Sources */,
