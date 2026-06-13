@@ -48,6 +48,8 @@ final class Debouncer {
 /// 03-06 HOOK: "Set Reminder" entry points are marked with REMINDER_HOOK comments.
 ///
 /// Security: T-03-11 (error copy shown to user), T-03-12 (no body content in logs).
+/// Phase 12: Routine section (D-10), daily reminder (D-04/D-05), completion recording (D-06),
+///           compact streak + RoutineDetailView link (D-09), drag-to-reorder (D-11).
 struct EditNoteView: View {
 
     @Bindable var note: Note
@@ -73,6 +75,28 @@ struct EditNoteView: View {
     @State private var showNoteReminder: Bool = false
     @State private var reminderBlock: NoteBlock? = nil   // nil = note-level, non-nil = block-level
 
+    // Phase 12: drag-to-reorder edit mode (D-11)
+    @State private var editMode: EditMode = .inactive
+
+    // Phase 12: notification permission denied alert (T-12-06)
+    @State private var showNotificationDeniedAlert: Bool = false
+
+    // Phase 12: @Query for completions — predicate captured in init (Pitfall 4)
+    @Query private var completions: [RoutineCompletion]
+
+    // MARK: - Init
+
+    init(note: Note, targetBlockID: UUID? = nil) {
+        self.note = note
+        self.targetBlockID = targetBlockID
+        // Pitfall 4: capture note.id into a local before the predicate
+        let noteID = note.id
+        self._completions = Query(
+            filter: #Predicate<RoutineCompletion> { $0.noteID == noteID },
+            sort: [SortDescriptor(\.dayKey, order: .reverse)]
+        )
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -90,6 +114,9 @@ struct EditNoteView: View {
                         // Add block buttons
                         addBlockButtons
                             .padding(.bottom, 16)
+
+                        // Phase 12: Routine section (D-10) — always visible so user can opt in
+                        routineSection
                     }
                     .padding(.horizontal, 16)
                 }
@@ -124,6 +151,17 @@ struct EditNoteView: View {
                     }
                     .accessibilityLabel(note.reminderEnabled ? "Edit reminder" : "Set reminder")
                 }
+                // Phase 12: drag-to-reorder toggle (D-11)
+                ToolbarItem(placement: .secondaryAction) {
+                    Button {
+                        withAnimation {
+                            editMode = editMode.isEditing ? .inactive : .active
+                        }
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
+                    }
+                    .accessibilityLabel("Reorder items")
+                }
             }
             .confirmationDialog(
                 "Delete Note?",
@@ -139,6 +177,12 @@ struct EditNoteView: View {
             }
             .alert("Couldn't save note. Please try again.", isPresented: $saveError) {
                 Button("OK", role: .cancel) {}
+            }
+            // Phase 12: notification permission denied alert (T-12-06 / UI-SPEC Error States)
+            .alert("Couldn't schedule reminder", isPresented: $showNotificationDeniedAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Enable notifications in Settings > MyHome.")
             }
             // 03-06: Reminder edit sheet — single sheet per parent-coordinated handoff discipline
             .sheet(isPresented: $showNoteReminder) {
@@ -172,11 +216,25 @@ struct EditNoteView: View {
 
     @ViewBuilder
     private var blockList: some View {
-        let blocks = sortedBlocks
+        let blocks = blocksForDisplay
         if blocks.isEmpty {
             Text("Tap below to add a note or checklist item.")
                 .font(.body)
                 .foregroundStyle(.secondary)
+        } else if editMode.isEditing {
+            // Phase 12: nested List required for .onMove (Open Question #2 resolved)
+            // Wrap in a List only when in edit mode; keep ScrollView+VStack path when not editing.
+            List {
+                ForEach(blocks) { block in
+                    blockRow(block)
+                }
+                .onMove { source, destination in
+                    reorderBlocks(from: source, to: destination)
+                }
+            }
+            .environment(\.editMode, $editMode)
+            .frame(height: CGFloat(blocks.count) * 52)
+            .listStyle(.plain)
         } else {
             ForEach(blocks) { block in
                 blockRow(block)
@@ -294,6 +352,118 @@ struct EditNoteView: View {
         .padding(.top, 8)
     }
 
+    // MARK: - Routine Section (Phase 12 — D-10/D-04/D-06/D-09)
+
+    /// Routine section — always visible so users can opt any note into a daily routine.
+    /// GroupBox("Routine") per UI-SPEC Surface 1.
+    /// Security: T-12-10 — all strings via plain Text(...), never AttributedString.
+    @ViewBuilder
+    private var routineSection: some View {
+        GroupBox("Routine") {
+            VStack(alignment: .leading, spacing: 12) {
+                // D-10: Toggle to mark note as a daily routine
+                Toggle("Daily Routine", isOn: $note.isDailyRoutine)
+                    .onChange(of: note.isDailyRoutine) { _, isOn in
+                        if !isOn {
+                            note.routineDailyReminderTime = nil
+                        }
+                        // T-12-06: always cancel first, then re-schedule if on+time set
+                        RoutineNotificationService().cancel(noteID: note.id)
+                        if isOn, let time = note.routineDailyReminderTime {
+                            Task {
+                                await RoutineNotificationService().schedule(
+                                    noteID: note.id,
+                                    title: note.title,
+                                    time: time
+                                )
+                            }
+                        }
+                        markDirty()
+                    }
+
+                if note.isDailyRoutine {
+                    // D-04: Daily Reminder enable toggle — derived from routineDailyReminderTime != nil
+                    Toggle("Daily Reminder", isOn: Binding(
+                        get: { note.routineDailyReminderTime != nil },
+                        set: { enabled in
+                            if enabled {
+                                // Default fire time: 07:00 IST (D-04)
+                                note.routineDailyReminderTime = Calendar.current.date(
+                                    bySettingHour: 7, minute: 0, second: 0, of: Date()
+                                )
+                            } else {
+                                note.routineDailyReminderTime = nil
+                                RoutineNotificationService().cancel(noteID: note.id)
+                            }
+                            markDirty()
+                        }
+                    ))
+
+                    // D-04: Time picker — visible only when reminder is enabled
+                    if note.routineDailyReminderTime != nil {
+                        DatePicker(
+                            "Time",
+                            selection: Binding(
+                                get: { note.routineDailyReminderTime! },
+                                set: { newTime in
+                                    note.routineDailyReminderTime = newTime
+                                    // D-05: cancel-then-add on time change
+                                    RoutineNotificationService().cancel(noteID: note.id)
+                                    Task {
+                                        await RoutineNotificationService().schedule(
+                                            noteID: note.id,
+                                            title: note.title,
+                                            time: newTime
+                                        )
+                                    }
+                                    markDirty()
+                                }
+                            ),
+                            displayedComponents: .hourAndMinute
+                        )
+                    }
+
+                    // D-06: "Done today" button — shown ONLY for text-only routines (no checkbox blocks)
+                    if (note.blocks ?? []).filter({ $0.kindRaw == "checkbox" }).isEmpty {
+                        Button("Done today") {
+                            recordTodayCompletion()
+                            markDirty()
+                        }
+                        .buttonStyle(.bordered)
+                        .frame(minHeight: 44)
+                    }
+
+                    // D-09: Compact streak + NavigationLink to full history
+                    HStack {
+                        // T-12-10: plain Text — no AttributedString
+                        Text("🔥 \(currentStreak) day streak")
+                            .font(.subheadline)
+                        Spacer()
+                        NavigationLink("Routine History") {
+                            RoutineDetailView(note: note)
+                        }
+                        .font(.subheadline)
+                    }
+                }
+            }
+        }
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Streak Computed Property (Phase 12 — D-09)
+
+    /// Current streak count — uses StreakCalculator with IST calendar (mirrors RoutineResetService).
+    private var currentStreak: Int {
+        var istCal = Calendar(identifier: .gregorian)
+        istCal.timeZone = TimeZone(identifier: "Asia/Kolkata")!
+        return StreakCalculator.compute(
+            for: note.id,
+            completions: completions,
+            today: Date(),
+            calendar: istCal
+        ).currentStreak
+    }
+
     // MARK: - Computed
 
     /// Blocks sorted: open items first, checked items last (open-above-checked per UI-SPEC §5).
@@ -303,6 +473,13 @@ struct EditNoteView: View {
         let open = sorted.filter { !$0.isChecked }
         let checked = sorted.filter { $0.isChecked }
         return open + checked
+    }
+
+    /// Phase 12 (D-11): switch between raw-order (for drag reorder) and display-sorted blocks.
+    private var blocksForDisplay: [NoteBlock] {
+        editMode.isEditing
+            ? (note.blocks ?? []).sorted { $0.order < $1.order }   // raw order for reorder drag
+            : sortedBlocks                                            // open-above-checked (existing)
     }
 
     // MARK: - Auto-Save
@@ -378,6 +555,53 @@ struct EditNoteView: View {
         if block.isChecked && block.reminderEnabled {
             cancelBlockReminder(block)
         }
+        // Phase 12 (D-06): if this is a routine note and a block was just checked,
+        // verify all boxes are checked and record a completion at check-time.
+        if note.isDailyRoutine && block.isChecked {
+            checkAndRecordCompletion()
+        }
+        markDirty()
+    }
+
+    /// Phase 12 (D-06): guard all checkbox blocks are checked, then record today's completion.
+    private func checkAndRecordCompletion() {
+        let checkboxBlocks = (note.blocks ?? []).filter { $0.kindRaw == "checkbox" }
+        guard !checkboxBlocks.isEmpty else { return }
+        guard checkboxBlocks.allSatisfy(\.isChecked) else { return }
+        recordTodayCompletion()
+    }
+
+    /// Phase 12 (D-06/D-08): fetch-before-insert idempotent completion record.
+    ///
+    /// Writes/upserts a RoutineCompletion keyed by (noteID, IST-dayKey).
+    /// Called at check-time (before RoutineResetService can wipe isChecked) — T-12-07.
+    /// No .unique constraint used — CloudKit rule 2; dedup is in app code.
+    private func recordTodayCompletion() {
+        // IST day key — mirrors RoutineResetService.swift lines 26-29
+        var istCal = Calendar(identifier: .gregorian)
+        istCal.timeZone = TimeZone(identifier: "Asia/Kolkata")!
+        let dayKey = istCal.startOfDay(for: Date())
+        let noteID = note.id
+        // Fetch-before-insert for idempotency (no .unique — CloudKit rule 2)
+        let descriptor = FetchDescriptor<RoutineCompletion>(
+            predicate: #Predicate { $0.noteID == noteID && $0.dayKey == dayKey }
+        )
+        if let existing = try? context.fetch(descriptor).first {
+            existing.completedAt = Date()
+        } else {
+            let completion = RoutineCompletion(noteID: noteID, dayKey: dayKey)
+            context.insert(completion)
+        }
+        // Save is handled by the calling markDirty() path (debounced auto-save)
+    }
+
+    /// Phase 12 (D-11): re-index NoteBlock.order after drag-to-reorder.
+    private func reorderBlocks(from source: IndexSet, to destination: Int) {
+        var ordered = (note.blocks ?? []).sorted { $0.order < $1.order }
+        ordered.move(fromOffsets: source, toOffset: destination)
+        for (idx, block) in ordered.enumerated() {
+            block.order = idx   // re-index: 0, 1, 2, ...
+        }
         markDirty()
     }
 
@@ -404,6 +628,8 @@ struct EditNoteView: View {
     private func deleteNote() {
         debouncer.cancel()
         noteRemoved = true   // WR-09: block any in-flight debounced save
+        // T-12-06: cancel routine notification before deleting (no orphaned notifications)
+        RoutineNotificationService().cancel(noteID: note.id)
         context.delete(note)
         do {
             try context.save()
