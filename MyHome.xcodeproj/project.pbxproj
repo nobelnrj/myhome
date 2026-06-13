@@ -183,6 +183,10 @@
 		A1101CLV /* ContributionLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101CLV /* ContributionLogView.swift */; };
 		A1101RCV /* ReconcileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCV /* ReconcileView.swift */; };
 		A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV8MT /* SchemaV8MigrationTests.swift */; };
+		A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9MT /* SchemaV9MigrationTests.swift */; };
+		A1201SCT /* StreakCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SCT /* StreakCalculatorTests.swift */; };
+		A1201RNST /* RoutineNotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201RNST /* RoutineNotificationServiceTests.swift */; };
+		A1201NRT /* NoteReorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201NRT /* NoteReorderTests.swift */; };
 		A1101NNST /* NPSNavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNST /* NPSNavServiceTests.swift */; };
 		A1101SAST /* SIPAccrualServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAST /* SIPAccrualServiceTests.swift */; };
 		A1101RCT /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCT /* ReconcileTests.swift */; };
@@ -380,6 +384,10 @@
 		F1101CLV /* ContributionLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContributionLogView.swift; sourceTree = "<group>"; };
 		F1101RCV /* ReconcileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileView.swift; sourceTree = "<group>"; };
 		F1101SV8MT /* SchemaV8MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV8MigrationTests.swift; sourceTree = "<group>"; };
+		F1201SV9MT /* SchemaV9MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9MigrationTests.swift; sourceTree = "<group>"; };
+		F1201SCT /* StreakCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculatorTests.swift; sourceTree = "<group>"; };
+		F1201RNST /* RoutineNotificationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationServiceTests.swift; sourceTree = "<group>"; };
+		F1201NRT /* NoteReorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteReorderTests.swift; sourceTree = "<group>"; };
 		F1101NNST /* NPSNavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavServiceTests.swift; sourceTree = "<group>"; };
 		F1101SAST /* SIPAccrualServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualServiceTests.swift; sourceTree = "<group>"; };
 		F1101RCT /* ReconcileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileTests.swift; sourceTree = "<group>"; };
@@ -729,6 +737,10 @@
 				F1005ABTT /* AccountBalanceTransferTests.swift */,
 				F1006EETT /* EditExpenseTransferTests.swift */,
 				F1101SV8MT /* SchemaV8MigrationTests.swift */,
+				F1201SV9MT /* SchemaV9MigrationTests.swift */,
+				F1201SCT /* StreakCalculatorTests.swift */,
+				F1201RNST /* RoutineNotificationServiceTests.swift */,
+				F1201NRT /* NoteReorderTests.swift */,
 				F1101NNST /* NPSNavServiceTests.swift */,
 				F1101SAST /* SIPAccrualServiceTests.swift */,
 				F1101RCT /* ReconcileTests.swift */,
@@ -1057,6 +1069,10 @@
 				A1005ABTT /* AccountBalanceTransferTests.swift in Sources */,
 				A1006EETT /* EditExpenseTransferTests.swift in Sources */,
 				A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */,
+				A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */,
+				A1201SCT /* StreakCalculatorTests.swift in Sources */,
+				A1201RNST /* RoutineNotificationServiceTests.swift in Sources */,
+				A1201NRT /* NoteReorderTests.swift in Sources */,
 				A1101NNST /* NPSNavServiceTests.swift in Sources */,
 				A1101SAST /* SIPAccrualServiceTests.swift in Sources */,
 				A1101RCT /* ReconcileTests.swift in Sources */,

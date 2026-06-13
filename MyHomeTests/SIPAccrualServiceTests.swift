@@ -23,9 +23,10 @@ struct SIPAccrualServiceTests {
         return c
     }
 
-    /// Build an in-memory SchemaV8 ModelContainer for orchestration tests.
+    /// Build an in-memory SchemaV9 ModelContainer for orchestration tests.
+    /// (Updated from SchemaV8 → SchemaV9 in Phase 12 plan 12-01: atomic typealias flip.)
     private func makeContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV8.self)
+        let schema = Schema(versionedSchema: SchemaV9.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         return try ModelContainer(for: schema, configurations: [config])
     }
@@ -302,15 +303,15 @@ struct SIPAccrualServiceTests {
 
     @Test("effectiveAmount: returns SIP.amount when no changes precede the date")
     func effectiveAmountNoChanges() {
-        let sip = SchemaV8.SIP(amount: Decimal(5000))
+        let sip = SIP(amount: Decimal(5000))
         let result = service.effectiveAmount(forDate: istDate("10-06-2026"), sip: sip, changes: [])
         #expect(result == Decimal(5000))
     }
 
     @Test("effectiveAmount: returns older amount for date before a change")
     func effectiveAmountBeforeChange() {
-        let sip = SchemaV8.SIP(amount: Decimal(5000))
-        let change = SchemaV8.SIPAmountChange(
+        let sip = SIP(amount: Decimal(5000))
+        let change = SIPAmountChange(
             sipID: sip.id,
             effectiveFrom: istDate("01-04-2026"),
             amount: Decimal(7000)
@@ -322,8 +323,8 @@ struct SIPAccrualServiceTests {
 
     @Test("effectiveAmount: returns newer amount for date after a change")
     func effectiveAmountAfterChange() {
-        let sip = SchemaV8.SIP(amount: Decimal(5000))
-        let change = SchemaV8.SIPAmountChange(
+        let sip = SIP(amount: Decimal(5000))
+        let change = SIPAmountChange(
             sipID: sip.id,
             effectiveFrom: istDate("01-04-2026"),
             amount: Decimal(7000)
@@ -335,13 +336,13 @@ struct SIPAccrualServiceTests {
 
     @Test("effectiveAmount: stacked changes — picks the latest applicable change")
     func effectiveAmountStackedChanges() {
-        let sip = SchemaV8.SIP(amount: Decimal(5000))
-        let change1 = SchemaV8.SIPAmountChange(
+        let sip = SIP(amount: Decimal(5000))
+        let change1 = SIPAmountChange(
             sipID: sip.id,
             effectiveFrom: istDate("01-03-2026"),
             amount: Decimal(6000)
         )
-        let change2 = SchemaV8.SIPAmountChange(
+        let change2 = SIPAmountChange(
             sipID: sip.id,
             effectiveFrom: istDate("01-05-2026"),
             amount: Decimal(8000)
@@ -357,9 +358,9 @@ struct SIPAccrualServiceTests {
 
     @Test("effectiveAmount: change for a different SIP ID does not apply")
     func effectiveAmountIgnoresDifferentSIPChanges() {
-        let sip = SchemaV8.SIP(amount: Decimal(5000))
+        let sip = SIP(amount: Decimal(5000))
         let otherSIPID = UUID()
-        let change = SchemaV8.SIPAmountChange(
+        let change = SIPAmountChange(
             sipID: otherSIPID,  // belongs to a different SIP
             effectiveFrom: istDate("01-01-2026"),
             amount: Decimal(9999)
@@ -466,7 +467,7 @@ struct SIPAccrualServiceTests {
         let context = container.mainContext
 
         // Set up an Asset
-        let asset = SchemaV8.Asset()
+        let asset = Asset()
         asset.name = "Test MF"
         asset.assetClassRaw = "mutual_fund"
         asset.amfiSchemeCode = "120503"
@@ -474,7 +475,7 @@ struct SIPAccrualServiceTests {
         context.insert(asset)
 
         // Set up an INACTIVE SIP
-        let sip = SchemaV8.SIP(
+        let sip = SIP(
             assetID: asset.id,
             dayOfMonth: 5,
             amount: Decimal(5000),
@@ -521,7 +522,7 @@ struct SIPAccrualServiceTests {
         let container = try makeContainer()
         let context = container.mainContext
 
-        let asset = SchemaV8.Asset()
+        let asset = Asset()
         asset.name = "Test MF"
         asset.assetClassRaw = "mutual_fund"
         asset.amfiSchemeCode = "120503"
@@ -531,7 +532,7 @@ struct SIPAccrualServiceTests {
         var istCal2 = Calendar(identifier: .gregorian)
         istCal2.timeZone = TimeZone(identifier: "Asia/Kolkata")!
         let tomorrow = istCal2.date(byAdding: .day, value: 1, to: Date())!
-        let sip = SchemaV8.SIP(
+        let sip = SIP(
             assetID: asset.id,
             dayOfMonth: 5,
             amount: Decimal(5000),
@@ -564,7 +565,7 @@ struct SIPAccrualServiceTests {
     @Test("scheduleReconcileReminder identifier contains sip-reconcile prefix")
     func reconcileReminderIdentifier() async {
         // Verify the identifier scheme without actually hitting UNUserNotificationCenter
-        let sip = SchemaV8.SIP(dayOfMonth: 15)
+        let sip = SIP(dayOfMonth: 15)
         let expectedID = "sip-reconcile-\(sip.id.uuidString)"
         // Validate expected identifier format
         #expect(expectedID.hasPrefix("sip-reconcile-"), "Identifier must have sip-reconcile- prefix")
@@ -573,7 +574,7 @@ struct SIPAccrualServiceTests {
 
     @Test("cancelReconcileReminder uses correct identifier")
     func cancelReconcileReminderIdentifier() {
-        let sip = SchemaV8.SIP(dayOfMonth: 15)
+        let sip = SIP(dayOfMonth: 15)
         let svc = SIPAccrualService()
         // cancelReconcileReminder should not crash (it just removes a pending request)
         svc.cancelReconcileReminder(for: sip)
