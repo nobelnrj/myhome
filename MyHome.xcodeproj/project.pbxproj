@@ -193,6 +193,7 @@
 		A1101SAST /* SIPAccrualServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAST /* SIPAccrualServiceTests.swift */; };
 		A1101RCT /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCT /* ReconcileTests.swift */; };
 		A1101SSVT /* SIPSetupValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SSVT /* SIPSetupValidationTests.swift */; };
+		A1203RDV /* RoutineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RDV /* RoutineDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -381,6 +382,7 @@
 		F1201RC /* RoutineCompletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineCompletion.swift; sourceTree = "<group>"; };
 		F1202SC /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		F1203RNS /* RoutineNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationService.swift; sourceTree = "<group>"; };
+		F1203RDV /* RoutineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineDetailView.swift; sourceTree = "<group>"; };
 		F1101NNS /* NPSNavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavService.swift; sourceTree = "<group>"; };
 		F1101SAS /* SIPAccrualService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualService.swift; sourceTree = "<group>"; };
 		F1101NSP /* NPSSchemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSSchemePickerView.swift; sourceTree = "<group>"; };
@@ -527,6 +529,7 @@
 				F158RRS /* RoutineResetService.swift */,
 				F1202SC /* StreakCalculator.swift */,
 				F1203RNS /* RoutineNotificationService.swift */,
+				F1203RDV /* RoutineDetailView.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -941,6 +944,7 @@
 				A158RRS /* RoutineResetService.swift in Sources */,
 				A1202SC /* StreakCalculator.swift in Sources */,
 				A1203RNS /* RoutineNotificationService.swift in Sources */,
+				A1203RDV /* RoutineDetailView.swift in Sources */,
 				A145NA /* NotificationActions.swift in Sources */,
 				A404 /* SpendOverTimeAggregator.swift in Sources */,
 				A405 /* OverviewAggregation.swift in Sources */,
