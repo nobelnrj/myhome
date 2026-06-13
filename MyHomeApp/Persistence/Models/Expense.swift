@@ -18,4 +18,9 @@ import SwiftData
 /// Usage:
 ///   let expense = Expense(amount: Decimal(500), note: "Lunch")
 ///   @Query var expenses: [Expense]
-typealias Expense = SchemaV8.Expense
+/// Flipped from SchemaV8.Expense → SchemaV9.Expense in Phase 12 (plan 12-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV9.self)`. SchemaV9.Expense is
+/// copied verbatim from SchemaV8.Expense — no V9 changes to Expense.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Expense = SchemaV9.Expense      // was SchemaV8.Expense

@@ -13,4 +13,9 @@ import SwiftData
 /// Usage:
 ///   let sip = SIP()
 ///   @Query var sips: [SIP]
-typealias SIP = SchemaV8.SIP
+/// Flipped from SchemaV8.SIP → SchemaV9.SIP in Phase 12 (plan 12-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV9.self)`. SchemaV9.SIP is
+/// copied verbatim from SchemaV8.SIP — no V9 changes to SIP.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias SIP = SchemaV9.SIP      // was SchemaV8.SIP

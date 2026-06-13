@@ -10,4 +10,8 @@ import SwiftData
 /// Usage:
 ///   let change = SIPAmountChange()
 ///   @Query var changes: [SIPAmountChange]
-typealias SIPAmountChange = SchemaV8.SIPAmountChange
+/// Flipped from SchemaV8.SIPAmountChange → SchemaV9.SIPAmountChange in Phase 12 (plan 12-01).
+/// SchemaV9.SIPAmountChange is copied verbatim from SchemaV8.SIPAmountChange — no V9 changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias SIPAmountChange = SchemaV9.SIPAmountChange      // was SchemaV8.SIPAmountChange

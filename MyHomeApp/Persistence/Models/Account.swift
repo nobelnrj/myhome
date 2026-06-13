@@ -13,4 +13,9 @@ import SwiftData
 /// Usage:
 ///   let account = Account(name: "HDFC CC", typeRaw: "credit_card")
 ///   @Query(sort: \Account.sortOrder) var accounts: [Account]
-typealias Account = SchemaV8.Account
+/// Flipped from SchemaV8.Account → SchemaV9.Account in Phase 12 (plan 12-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV9.self)`. SchemaV9.Account is
+/// copied verbatim from SchemaV8.Account — no V9 changes to Account.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Account = SchemaV9.Account      // was SchemaV8.Account

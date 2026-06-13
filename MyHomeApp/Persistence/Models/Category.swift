@@ -15,4 +15,9 @@ import SwiftData
 /// Usage:
 ///   let category = Category(name: "Groceries", symbolName: "cart")
 ///   @Query(sort: \Category.sortOrder) var categories: [Category]
-typealias Category = SchemaV8.Category
+/// Flipped from SchemaV8.Category → SchemaV9.Category in Phase 12 (plan 12-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV9.self)`. SchemaV9.Category is
+/// copied verbatim from SchemaV8.Category — no V9 changes to Category.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Category = SchemaV9.Category      // was SchemaV8.Category

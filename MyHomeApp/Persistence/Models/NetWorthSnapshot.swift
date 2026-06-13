@@ -13,4 +13,8 @@ import SwiftData
 /// Usage:
 ///   let snapshot = NetWorthSnapshot()
 ///   @Query(sort: \NetWorthSnapshot.date, order: .reverse) var snapshots: [NetWorthSnapshot]
-typealias NetWorthSnapshot = SchemaV8.NetWorthSnapshot
+/// Flipped from SchemaV8.NetWorthSnapshot → SchemaV9.NetWorthSnapshot in Phase 12 (plan 12-01).
+/// SchemaV9.NetWorthSnapshot is copied verbatim from SchemaV8.NetWorthSnapshot — no V9 changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias NetWorthSnapshot = SchemaV9.NetWorthSnapshot      // was SchemaV8.NetWorthSnapshot

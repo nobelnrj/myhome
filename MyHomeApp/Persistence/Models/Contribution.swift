@@ -11,4 +11,8 @@ import SwiftData
 /// Usage:
 ///   let contribution = Contribution()
 ///   @Query var contributions: [Contribution]
-typealias Contribution = SchemaV8.Contribution
+/// Flipped from SchemaV8.Contribution → SchemaV9.Contribution in Phase 12 (plan 12-01).
+/// SchemaV9.Contribution is copied verbatim from SchemaV8.Contribution — no V9 changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Contribution = SchemaV9.Contribution      // was SchemaV8.Contribution

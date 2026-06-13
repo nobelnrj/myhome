@@ -8,11 +8,11 @@ import Foundation
 /// existing schema versions from this list).
 enum AppMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self, SchemaV8.self]   // append V8 — never remove V1–V7
+        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self, SchemaV8.self, SchemaV9.self]   // append V9 — never remove V1–V8
     }
 
     static var stages: [MigrationStage] {
-        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6, v6ToV7, v7ToV8]   // append v7ToV8
+        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6, v6ToV7, v7ToV8, v8ToV9]   // append v8ToV9
     }
 
     // Use .custom(willMigrate: nil, didMigrate: nil) rather than .lightweight
@@ -129,6 +129,17 @@ enum AppMigrationPlan: SchemaMigrationPlan {
         toVersion: SchemaV8.self,
         willMigrate: nil,
         didMigrate: nil   // npsSchemeCode defaults nil; SIP/Contribution are new — no backfill
+    )
+
+    // V9 adds routineDailyReminderTime to Note and introduces RoutineCompletion @Model (D-04, D-06, Phase 12).
+    // Purely additive: routineDailyReminderTime defaults nil; RoutineCompletion is a new empty table.
+    // willMigrate/didMigrate are nil — no backfill needed.
+    // .custom over .lightweight: FB13812722 workaround preserved for all stages.
+    static let v8ToV9 = MigrationStage.custom(
+        fromVersion: SchemaV8.self,
+        toVersion: SchemaV9.self,
+        willMigrate: nil,
+        didMigrate: nil   // routineDailyReminderTime defaults nil; RoutineCompletion is new — no backfill
     )
 
     // Note: inferAccountType(from:) is now the module-level free function in

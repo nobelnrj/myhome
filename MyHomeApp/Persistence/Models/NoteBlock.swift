@@ -20,4 +20,9 @@ import SwiftData
 /// Usage:
 ///   let block = NoteBlock(kindRaw: "checkbox", text: "Buy milk", order: 0)
 ///   @Query var blocks: [NoteBlock]
-typealias NoteBlock = SchemaV8.NoteBlock
+/// Flipped from SchemaV8.NoteBlock → SchemaV9.NoteBlock in Phase 12 (plan 12-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV9.self)`. SchemaV9.NoteBlock is
+/// copied verbatim from SchemaV8.NoteBlock — no V9 changes to NoteBlock.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias NoteBlock = SchemaV9.NoteBlock      // was SchemaV8.NoteBlock
