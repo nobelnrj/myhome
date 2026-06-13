@@ -171,7 +171,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-  - [ ] 12-02-PLAN.md — StreakCalculator (D-07 forgiving streak) + RoutineNotificationService (D-05 single-pending daily notification) [NOTE-03, NOTE-05]
+  - [x] 12-02-PLAN.md — StreakCalculator (D-07 forgiving streak) + RoutineNotificationService (D-05 single-pending daily notification) [NOTE-03, NOTE-05]
 
 **Wave 3** *(blocked on Wave 2; the two plans run in parallel — disjoint files)*
 
@@ -202,7 +202,7 @@ Plans:
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 11. Asset Tracker | v1.1 | 4/4 | Complete   | 2026-06-12 |
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete    | 2026-06-12 |
-| 12. Notes & Daily Routine Enhancement | v1.1 | 1/5 | In Progress|  |
+| 12. Notes & Daily Routine Enhancement | v1.1 | 2/5 | In Progress|  |
 
 ---
 

@@ -60,7 +60,7 @@
 
 - [ ] **NOTE-01**: User can mark a note as a daily routine; it surfaces on every day in the calendar view automatically.
 - [x] **NOTE-02**: A daily routine's checklist completion is tracked per-day (date-keyed `lastCheckedDate`), so it resets cleanly each day (satisfies STAB-04 at the data-model level).
-- [ ] **NOTE-03**: User can set an optional reminder time for a daily routine, delivering a local notification (reuses existing NotificationScheduler).
+- [x] **NOTE-03**: User can set an optional reminder time for a daily routine, delivering a local notification (reuses existing NotificationScheduler).
 - [ ] **NOTE-04**: User can reorder checklist items within a routine note (drag-to-reorder).
 - [x] **NOTE-05**: The app logs per-day routine completions and shows a streak/history view.
 
@@ -115,6 +115,6 @@
 | ASSET-09 | Phase 11 | Complete |
 | NOTE-01 | Phase 12 | Pending |
 | NOTE-02 | Phase 9 | Complete |
-| NOTE-03 | Phase 12 | Pending |
+| NOTE-03 | Phase 12 | Complete |
 | NOTE-04 | Phase 12 | Pending |
 | NOTE-05 | Phase 12 | Complete |
