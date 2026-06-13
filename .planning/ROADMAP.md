@@ -163,7 +163,25 @@ Plans:
   3. User can drag-reorder checklist items within a routine note and the new order persists after the view is dismissed
   4. The app shows a streak count (current consecutive days where all checklist items were marked complete) and a scrollable history of past per-day completions per routine note
 
-**Plans**: TBD
+**Plans**: 5 plans (1 schema wave, 1 logic/service wave, 2 parallel UI plans, 1 build+UAT gate)
+
+**Wave 1**
+
+  - [ ] 12-01-PLAN.md — SchemaV9 atomic migration (RoutineCompletion model + routineDailyReminderTime + all 11 typealias flips + v8ToV9 stage) + BLOCKING migration fixture & Wave-0 test scaffolds [NOTE-05]
+
+**Wave 2** *(blocked on Wave 1)*
+
+  - [ ] 12-02-PLAN.md — StreakCalculator (D-07 forgiving streak) + RoutineNotificationService (D-05 single-pending daily notification) [NOTE-03, NOTE-05]
+
+**Wave 3** *(blocked on Wave 2; the two plans run in parallel — disjoint files)*
+
+  - [ ] 12-03-PLAN.md — EditNoteView Routine section + drag-reorder + check-time completion + RoutineDetailView [NOTE-01, NOTE-03, NOTE-04, NOTE-05]
+  - [ ] 12-04-PLAN.md — DayAgendaView "Daily Routines" section + RoutineAgendaRow + dot-badge-invariance tests [NOTE-01, NOTE-05]
+
+**Wave 4** *(blocked on Wave 3)*
+
+  - [ ] 12-05-PLAN.md — Post-merge build gate + full suite + human UAT (notification, reorder, surfacing, cross-midnight streak) [NOTE-01, NOTE-03, NOTE-04, NOTE-05]
+
 **UI hint**: yes
 
 ---
@@ -184,7 +202,7 @@ Plans:
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 11. Asset Tracker | v1.1 | 4/4 | Complete   | 2026-06-12 |
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete    | 2026-06-12 |
-| 12. Notes & Daily Routine Enhancement | v1.1 | 0/? | Not started | - |
+| 12. Notes & Daily Routine Enhancement | v1.1 | 0/5 | Not started | - |
 
 ---
 
