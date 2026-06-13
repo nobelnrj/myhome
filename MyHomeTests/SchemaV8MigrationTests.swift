@@ -71,13 +71,13 @@ struct SchemaV8MigrationTests {
         let migrateConfig = ModelConfiguration(schema: v8Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v8Schema,
-            migrationPlan: AppMigrationPlan.self,
+            migrationPlan: MigrationTestsPlanV8.self,
             configurations: [migrateConfig]
         )
         let ctx = container.mainContext
 
         // 4. Assert the existing Asset row survived with npsSchemeCode == nil (D-01, D-08).
-        let assets = try ctx.fetch(FetchDescriptor<Asset>())
+        let assets = try ctx.fetch(FetchDescriptor<SchemaV8.Asset>())
         #expect(assets.count == 1, "Exactly 1 asset row must survive V7→V8 migration")
 
         let migratedAsset = assets.first
@@ -90,8 +90,10 @@ struct SchemaV8MigrationTests {
         #expect(migratedAsset?.amfiSchemeCode == nil,
                 "amfiSchemeCode must remain nil on this NPS asset (was not set in V7 seed)")
 
-        // 5. Assert existing Note row is intact (STAB-08 guard: Note typealias is on SchemaV8).
-        let notes = try ctx.fetch(FetchDescriptor<Note>())
+        // 5. Assert existing Note row is intact. Pinned to SchemaV8.Note explicitly:
+        //    the bare `Note` typealias now points at SchemaV9 (Phase 12 flip), so this V8-fixture
+        //    test references the V8 model directly to match the V8 container.
+        let notes = try ctx.fetch(FetchDescriptor<SchemaV8.Note>())
         #expect(notes.count == 1, "Note row must survive V7→V8 migration")
         #expect(notes.first?.title == "NPS tracker",
                 "Note title must be preserved through migration")
@@ -135,19 +137,19 @@ struct SchemaV8MigrationTests {
         let config = ModelConfiguration(schema: v8Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v8Schema,
-            migrationPlan: AppMigrationPlan.self,
+            migrationPlan: MigrationTestsPlanV8.self,
             configurations: [config]
         )
         let ctx = container.mainContext
 
         // FetchDescriptors MUST NOT crash — must return empty arrays (new entities, no rows).
-        let sips = try ctx.fetch(FetchDescriptor<SIP>())
+        let sips = try ctx.fetch(FetchDescriptor<SchemaV8.SIP>())
         #expect(sips.isEmpty, "SIP must return empty array (not crash) after V7→V8 migration")
 
-        let changes = try ctx.fetch(FetchDescriptor<SIPAmountChange>())
+        let changes = try ctx.fetch(FetchDescriptor<SchemaV8.SIPAmountChange>())
         #expect(changes.isEmpty, "SIPAmountChange must return empty array after V7→V8 migration")
 
-        let contributions = try ctx.fetch(FetchDescriptor<Contribution>())
+        let contributions = try ctx.fetch(FetchDescriptor<SchemaV8.Contribution>())
         #expect(contributions.isEmpty, "Contribution must return empty array after V7→V8 migration")
     }
 
@@ -187,34 +189,34 @@ struct SchemaV8MigrationTests {
         let config = ModelConfiguration(schema: v8Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v8Schema,
-            migrationPlan: AppMigrationPlan.self,
+            migrationPlan: MigrationTestsPlanV8.self,
             configurations: [config]
         )
         let ctx = container.mainContext
 
-        // Note round-trip (STAB-08: typealias Note = SchemaV8.Note must be consistent)
-        let note = Note(title: "Post-migration note")
+        // Note round-trip — pinned to SchemaV8.Note (bare typealias now resolves to SchemaV9 post-Phase-12)
+        let note = SchemaV8.Note(title: "Post-migration note")
         ctx.insert(note)
         try ctx.save()
-        let fetchedNotes = try ctx.fetch(FetchDescriptor<Note>())
+        let fetchedNotes = try ctx.fetch(FetchDescriptor<SchemaV8.Note>())
         #expect(fetchedNotes.contains { $0.title == "Post-migration note" },
                 "Note must be saveable and queryable in V8 migrated store (STAB-08)")
 
         // Asset round-trip with npsSchemeCode (new V8 field)
-        let asset = Asset()
+        let asset = SchemaV8.Asset()
         asset.name = "HDFC NPS Tier 1"
         asset.assetClassRaw = "nps"
         asset.npsSchemeCode = "SM001001"
         ctx.insert(asset)
         try ctx.save()
-        let fetchedAssets = try ctx.fetch(FetchDescriptor<Asset>())
+        let fetchedAssets = try ctx.fetch(FetchDescriptor<SchemaV8.Asset>())
         let npsAsset = fetchedAssets.first { $0.npsSchemeCode == "SM001001" }
         #expect(npsAsset != nil, "Asset with npsSchemeCode must be saveable after V8 migration")
         #expect(npsAsset?.name == "HDFC NPS Tier 1",
                 "Asset name must be preserved after V8 insert+query")
 
         // SIP round-trip
-        let sip = SIP()
+        let sip = SchemaV8.SIP()
         sip.assetID = asset.id
         sip.dayOfMonth = 5
         sip.amount = Decimal(5000)
@@ -224,7 +226,7 @@ struct SchemaV8MigrationTests {
         sip.npsAllocationG = 10
         ctx.insert(sip)
         try ctx.save()
-        let fetchedSIPs = try ctx.fetch(FetchDescriptor<SIP>())
+        let fetchedSIPs = try ctx.fetch(FetchDescriptor<SchemaV8.SIP>())
         #expect(fetchedSIPs.count == 1, "SIP must be saveable and queryable in V8 migrated store")
         let fetchedSIP = fetchedSIPs.first
         #expect(fetchedSIP?.dayOfMonth == 5, "SIP dayOfMonth must be preserved")
@@ -232,7 +234,7 @@ struct SchemaV8MigrationTests {
         #expect(fetchedSIP?.npsAllocationE == 75, "SIP npsAllocationE must be preserved")
 
         // Contribution round-trip
-        let contribution = Contribution()
+        let contribution = SchemaV8.Contribution()
         contribution.assetID = asset.id
         contribution.sipID = sip.id
         contribution.amount = Decimal(5000)
@@ -241,7 +243,7 @@ struct SchemaV8MigrationTests {
         contribution.isEstimate = true
         ctx.insert(contribution)
         try ctx.save()
-        let fetchedContributions = try ctx.fetch(FetchDescriptor<Contribution>())
+        let fetchedContributions = try ctx.fetch(FetchDescriptor<SchemaV8.Contribution>())
         #expect(fetchedContributions.count == 1, "Contribution must be saveable and queryable in V8 migrated store")
         #expect(fetchedContributions.first?.isEstimate == true, "Contribution.isEstimate must be preserved")
     }

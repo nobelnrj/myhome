@@ -60,7 +60,7 @@ struct SchemaV7MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 3. Migrate to V7 using the production AppMigrationPlan (SchemaV6 → SchemaV7).
-        let v7Schema = Schema(versionedSchema: SchemaV8.self)
+        let v7Schema = Schema(versionedSchema: SchemaV9.self)
         let migrateConfig = ModelConfiguration(schema: v7Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v7Schema,
@@ -121,7 +121,7 @@ struct SchemaV7MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 2. Migrate to V7 and verify the new NetWorthSnapshot entity is accessible.
-        let v7Schema = Schema(versionedSchema: SchemaV8.self)
+        let v7Schema = Schema(versionedSchema: SchemaV9.self)
         let config = ModelConfiguration(schema: v7Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v7Schema,
