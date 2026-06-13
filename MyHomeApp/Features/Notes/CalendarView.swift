@@ -287,8 +287,23 @@ struct DayAgendaView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
 
+    /// State for navigating to a tapped routine note via sheet (D-01).
+    @State private var editingRoutineNote: Note? = nil
+
     private var progress: DayProgress {
         CalendarAggregator.progress(for: day, notes: notes)
+    }
+
+    /// All routine notes — surfaced on every day (D-01/D-03).
+    ///
+    /// STAB-01: guard against tombstoned @Model objects (same pattern as remindersOnDay).
+    /// Routines appear on EVERY day, driven only by isDailyRoutine flag — NOT by any reminder.
+    private var routineNotes: [Note] {
+        notes.filter { note in
+            guard note.modelContext != nil else { return false }  // STAB-01: skip tombstoned notes
+            return note.isDailyRoutine
+        }
+        .sorted { $0.title < $1.title }  // alphabetical within section
     }
 
     /// All reminders (note + block level) due on this day, bound to live model targets.
@@ -328,14 +343,23 @@ struct DayAgendaView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if remindersOnDay.isEmpty {
+                if remindersOnDay.isEmpty && routineNotes.isEmpty {
                     ContentUnavailableView(
-                        "No Reminders",
+                        "Nothing Scheduled",
                         systemImage: "calendar",
-                        description: Text("No reminders scheduled for this day.")
+                        description: Text("No routines or reminders for this day.")
                     )
                 } else {
                     List {
+                        // Section 1: Daily Routines (D-01 — always first, every day)
+                        if !routineNotes.isEmpty {
+                            Section("Daily Routines") {
+                                ForEach(routineNotes) { note in
+                                    RoutineAgendaRow(note: note, onTap: { editingRoutineNote = note })
+                                }
+                            }
+                        }
+
                         // Progress header — recomputed live from model via `progress`
                         if progress.total > 0 {
                             Section {
@@ -354,34 +378,36 @@ struct DayAgendaView: View {
                         }
 
                         // Reminder items with actionable checkboxes
-                        Section {
-                            ForEach(remindersOnDay) { item in
-                                HStack(spacing: 12) {
-                                    // Actionable checkbox (>=44pt target) bound to live model
-                                    Button {
-                                        toggleCompletion(item)
-                                    } label: {
-                                        Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
-                                            .foregroundStyle(item.isChecked ? .secondary : Color.accentColor)
-                                            .font(.body)
-                                            .frame(minWidth: 44, minHeight: 44)
-                                    }
-                                    .buttonStyle(.plain)
-                                    .accessibilityLabel(item.isChecked ? "Mark incomplete" : "Mark complete")
+                        if !remindersOnDay.isEmpty {
+                            Section {
+                                ForEach(remindersOnDay) { item in
+                                    HStack(spacing: 12) {
+                                        // Actionable checkbox (>=44pt target) bound to live model
+                                        Button {
+                                            toggleCompletion(item)
+                                        } label: {
+                                            Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
+                                                .foregroundStyle(item.isChecked ? .secondary : Color.accentColor)
+                                                .font(.body)
+                                                .frame(minWidth: 44, minHeight: 44)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel(item.isChecked ? "Mark incomplete" : "Mark complete")
 
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(item.title)
-                                            .font(.body)
-                                            .strikethrough(item.isChecked)
-                                            .foregroundStyle(item.isChecked ? .secondary : .primary)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(item.title)
+                                                .font(.body)
+                                                .strikethrough(item.isChecked)
+                                                .foregroundStyle(item.isChecked ? .secondary : .primary)
 
-                                        Text(item.date.formattedAsReminderDate(isAllDay: item.isAllDay))
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
+                                            Text(item.date.formattedAsReminderDate(isAllDay: item.isAllDay))
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
                                     }
+                                    .padding(.vertical, 2)
+                                    .accessibilityLabel("\(item.title), \(item.isChecked ? "complete" : "pending")")
                                 }
-                                .padding(.vertical, 2)
-                                .accessibilityLabel("\(item.title), \(item.isChecked ? "complete" : "pending")")
                             }
                         }
                     }
@@ -394,6 +420,9 @@ struct DayAgendaView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .sheet(item: $editingRoutineNote) { note in
+                EditNoteView(note: note)
             }
         }
     }
@@ -475,5 +504,129 @@ struct DayAgendaView: View {
         NotificationScheduler(center: SystemNotificationCenter())
             .cancel(reminderID: note.id, leadCount: leadCount, weekdays: weekdays)
         note.reminderEnabled = false
+    }
+}
+
+// MARK: - RoutineAgendaRow
+
+/// A single row in the DayAgendaView "Daily Routines" section (D-01, D-03, D-06).
+///
+/// Mirrors AgendaReminderItem row structure. Displays completion state and provides
+/// check-time completion recording via fetch-before-insert idempotency (T-12-07).
+///
+/// Security: all strings use plain Text(...) — no AttributedString (T-12-10).
+private struct RoutineAgendaRow: View {
+    var note: Note
+    var onTap: () -> Void
+
+    @Environment(\.modelContext) private var context
+
+    // @Query for today's completion records for this note (Pitfall 4: captured in init).
+    @Query private var todayCompletions: [RoutineCompletion]
+
+    init(note: Note, onTap: @escaping () -> Void) {
+        self.note = note
+        self.onTap = onTap
+        var istCal = Calendar(identifier: .gregorian)
+        istCal.timeZone = TimeZone(identifier: "Asia/Kolkata")!
+        let dayKey = istCal.startOfDay(for: Date())
+        let noteID = note.id
+        self._todayCompletions = Query(
+            filter: #Predicate<RoutineCompletion> { $0.noteID == noteID && $0.dayKey == dayKey }
+        )
+    }
+
+    /// True when the routine is complete for today.
+    ///
+    /// - Checklist routines: all checkbox blocks are checked.
+    /// - Text-only routines: a RoutineCompletion record exists for today's IST dayKey.
+    private var isCompleteToday: Bool {
+        let checkboxBlocks = (note.blocks ?? []).filter { $0.kindRaw == "checkbox" }
+        if !checkboxBlocks.isEmpty {
+            return checkboxBlocks.allSatisfy(\.isChecked)
+        }
+        // Text-only: determined by RoutineCompletion record from @Query
+        return !todayCompletions.isEmpty
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button {
+                toggleAllBlocks()
+            } label: {
+                Image(systemName: isCompleteToday ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(isCompleteToday ? .secondary : Color.accentColor)
+                    .font(.body)
+                    .frame(minWidth: 44, minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isCompleteToday ? "Routine complete" : "Mark routine complete")
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(note.title)
+                    .font(.body)
+                    .strikethrough(isCompleteToday)
+                    .foregroundStyle(isCompleteToday ? .secondary : .primary)
+
+                // Status subtitle
+                if let time = note.routineDailyReminderTime {
+                    Text("Daily at \(time.formatted(.dateTime.hour().minute()))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Daily routine")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                // "Done today" inline button for text-only routines (D-06)
+                let checkboxBlocks = (note.blocks ?? []).filter { $0.kindRaw == "checkbox" }
+                if checkboxBlocks.isEmpty && !isCompleteToday {
+                    Button("Done today") {
+                        recordCompletion()
+                    }
+                    .buttonStyle(.bordered)
+                    .font(.caption)
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { onTap() }
+        }
+        .padding(.vertical, 2)
+    }
+
+    /// Toggles all checkbox blocks and records a completion at check-time (D-06, T-12-07).
+    ///
+    /// Mirrors recordTodayCompletion() from EditNoteView — fetch-before-insert idempotency.
+    private func toggleAllBlocks() {
+        let checkboxBlocks = (note.blocks ?? []).filter { $0.kindRaw == "checkbox" }
+        if !checkboxBlocks.isEmpty {
+            let newChecked = !checkboxBlocks.allSatisfy(\.isChecked)
+            for block in checkboxBlocks { block.isChecked = newChecked }
+            if newChecked { recordCompletion() }
+        } else {
+            // Text-only routine: tap on indicator records completion
+            if !isCompleteToday { recordCompletion() }
+        }
+        try? context.save()  // mirrors DayAgendaView.toggleCompletion line 451
+    }
+
+    /// Writes or upserts a RoutineCompletion for today's IST dayKey (fetch-before-insert).
+    ///
+    /// Mirrors recordTodayCompletion() pattern from EditNoteView (12-03) and PATTERNS.md.
+    private func recordCompletion() {
+        var istCal = Calendar(identifier: .gregorian)
+        istCal.timeZone = TimeZone(identifier: "Asia/Kolkata")!
+        let dayKey = istCal.startOfDay(for: Date())
+        let noteID = note.id
+        let descriptor = FetchDescriptor<RoutineCompletion>(
+            predicate: #Predicate { $0.noteID == noteID && $0.dayKey == dayKey }
+        )
+        if let existing = try? context.fetch(descriptor).first {
+            existing.completedAt = Date()
+        } else {
+            context.insert(RoutineCompletion(noteID: noteID, dayKey: dayKey))
+        }
+        try? context.save()  // explicit save (CLAUDE.md)
     }
 }
