@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
 status: planning
-last_updated: "2026-06-13T09:08:27.976Z"
+last_updated: "2026-06-13T09:41:23.966Z"
 last_activity: 2026-06-12
 progress:
   total_phases: 6
@@ -182,9 +182,9 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-13T09:08:27.971Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-notes-daily-routine-enhancement/12-CONTEXT.md
+Last session: 2026-06-13T09:41:23.961Z
+Stopped at: Phase 12 UI-SPEC approved
+Resume file: .planning/phases/12-notes-daily-routine-enhancement/12-UI-SPEC.md
 
 ## Operator Next Steps
 
