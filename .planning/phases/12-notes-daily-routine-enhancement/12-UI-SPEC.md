@@ -1,7 +1,8 @@
 ---
 phase: 12
 slug: notes-daily-routine-enhancement
-status: draft
+status: approved
+reviewed_at: 2026-06-13T00:00:00Z
 shadcn_initialized: false
 preset: none
 created: 2026-06-13
@@ -36,10 +37,10 @@ Derived from codebase inspection of EditNoteView, CalendarView, NoteRow, AssetDe
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| xs | 2pt | Block row vertical padding (`.padding(.vertical, 2)`) |
+| xs | 2pt | Block row vertical padding (`.padding(.vertical, 2)`) — pre-existing codebase value; tight block-row vertical padding, visual-only, not a grid gap. Not introduced by this phase. |
 | sm | 4pt | Block row vertical padding in editor (`.padding(.vertical, 4)`), grid spacing, icon gap in blockRow HStack |
 | md | 8pt | Button spacing in addBlockButtons HStack, calendar header vertical, weekday bottom padding |
-| base | 12pt | NoteRow vertical padding, HStack spacing in reminder/agenda rows |
+| base | 12pt | NoteRow vertical padding, HStack spacing in reminder/agenda rows — pre-existing codebase value (multiple of 4, outside canonical {4,8,16,24,32,48,64} set); matches existing NoteRow row height. Not introduced by this phase. |
 | lg | 16pt | Standard horizontal padding (`.padding(.horizontal, 16)`), section bottom padding, standard VStack spacing in editor, cardStyle inner padding |
 | xl | 24pt | Section header top padding in NotesListView (`.padding(.top, 24)`) |
 | 2xl | 32pt | — |
@@ -48,7 +49,7 @@ Derived from codebase inspection of EditNoteView, CalendarView, NoteRow, AssetDe
 - Minimum touch target: 44pt (`.frame(minWidth: 44, minHeight: 44)` / `.frame(width: 44, height: 44)`) — applies to all interactive buttons: checkboxes, pin buttons, nav arrows, "Done today" button.
 - Calendar day cell height: 48pt (`.frame(maxWidth: .infinity, minHeight: 48)`).
 - Calendar day number circle: 32pt width + height.
-- Dot badge: 6pt circle.
+- Dot badge: 6pt circle — pre-existing visual decoration (circular reminder dot), not a layout gap. Not introduced by this phase.
 - CardStyle corner radius: 16pt (`.continuous` style).
 
 ---
@@ -63,9 +64,11 @@ Derived from codebase inspection. The app uses SwiftUI semantic text styles excl
 | Heading | `.title2` + `.fontWeight(.semibold)` | Semibold | EditNoteView title TextField (existing, unchanged) |
 | Section header | `.headline` + `.fontWeight(.semibold)` | Semibold | "Daily Routines" section header in DayAgendaView; "Daily Routine" section header in NotesListView (existing pattern) |
 | Body | `.body` | Regular | Agenda row titles, routine note title text, streak label in RoutineDetailView rows, "Done today" button label |
-| Subheadline | `.subheadline` | Regular | Compact streak text ("🔥 N day streak") in EditNoteView Routine section; progress copy in DayAgendaView; reminder time display in Routine section; "Details" NavigationLink label |
+| Subheadline | `.subheadline` | Regular | Compact streak text ("🔥 N day streak") in EditNoteView Routine section; progress copy in DayAgendaView; reminder time display in Routine section; "Routine History" NavigationLink label |
 | Caption | `.caption` | Regular | Reminder date/time subtitle in agenda rows; per-day status label in RoutineDetailView history list |
 | Caption2 | `.caption2` | — | Weekday header labels in calendar grid (existing) |
+
+**Line height:** System default — no override. All styles above use SwiftUI's system-managed line height for the semantic Dynamic Type style; this phase introduces no custom `.lineSpacing()`.
 
 **Strikethrough rule (existing, applies to routine checklist items):** checked items render `.strikethrough(true)` + `.opacity(0.6)` + `.foregroundStyle(.secondary)`.
 
@@ -112,7 +115,7 @@ Derived from codebase inspection. The app uses iOS semantic system colors throug
 | Reminder enable toggle label | "Daily Reminder" |
 | Time picker label | "Time" |
 | Compact streak label | "🔥 {N} day streak" — where N is the integer from StreakCalculator.currentStreak |
-| Detail link label | "Details" (NavigationLink in Routine section) |
+| Detail link label | "Routine History" (NavigationLink in Routine section) |
 | "Done today" button (text-only routines) | "Done today" |
 | Reorder affordance toolbar button accessibility label | "Reorder items" |
 
@@ -175,7 +178,7 @@ This section is the primary output for the executor. Each new or modified surfac
    a. **Reminder enable toggle:** `Toggle("Daily Reminder", isOn: ...)` — boolean binding derived from `note.routineDailyReminderTime != nil`.
    b. **Time picker (visible when reminder is enabled):** `DatePicker("Time", selection: ..., displayedComponents: .hourAndMinute)` — `.hourAndMinute` only, no date component. Default time when first enabled: 07:00. Source: CONTEXT.md D-04, RESEARCH.md RQ-4.
    c. **"Done today" button (visible only when note has NO checkbox blocks):** `Button("Done today") { ... }` with `.buttonStyle(.bordered)`, `.frame(minHeight: 44)`. Source: CONTEXT.md D-06.
-   d. **Compact streak + Details link row:** `HStack` with `Text("🔥 {N} day streak").font(.subheadline)` on the left, `NavigationLink("Details") { RoutineDetailView(note: note) }.font(.subheadline)` on the right. Source: CONTEXT.md D-09.
+   d. **Compact streak + Details link row:** `HStack` with `Text("🔥 {N} day streak").font(.subheadline)` on the left, `NavigationLink("Routine History") { RoutineDetailView(note: note) }.font(.subheadline)` on the right. Source: CONTEXT.md D-09.
 
 **Spacing:** GroupBox inner VStack spacing 12pt. GroupBox bottom padding 16pt (`.padding(.bottom, 16)`).
 
@@ -275,7 +278,7 @@ Each row in the "Daily Routines" section represents one routine note. Layout:
 
 ### Surface 4: RoutineDetailView (New Screen)
 
-**What it is:** A dedicated detail screen for a routine note showing the current streak prominently and a scrollable 30-day completion history. Accessed via `NavigationLink("Details")` from EditNoteView's Routine section. Source: CONTEXT.md D-09.
+**What it is:** A dedicated detail screen for a routine note showing the current streak prominently and a scrollable 30-day completion history. Accessed via `NavigationLink("Routine History")` from EditNoteView's Routine section. Source: CONTEXT.md D-09.
 
 **Navigation:** Pushed onto the NavigationStack from EditNoteView (NavigationLink, not a sheet). NavigationTitle: `note.title` (plain string). `.navigationBarTitleDisplayMode(.inline)`.
 
