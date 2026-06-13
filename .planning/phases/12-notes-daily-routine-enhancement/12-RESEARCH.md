@@ -871,9 +871,11 @@ List {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED during planning — Phase 12 plans)
 
-1. **@Query predicate on UUID field (A3)**
+> All three resolved by the plans: OQ-1 via the Wave-0 UUID-predicate compile/run test in 12-01 Task 2 (fallback to `.uuidString` if it fails); OQ-2 via 12-03 Task 2 (nested `List` for checklist blocks in edit mode, with always-`List` fallback); OQ-3 via 12-04 Task 1 (check all blocks AND write the completion record for checklist routines; record-only for text-only). Resolution outcomes are recorded in each plan's SUMMARY at execution time.
+
+1. **@Query predicate on UUID field (A3)** — RESOLVED: 12-01 Task 2 Wave-0 test confirms/falls back.
    - What we know: `#Predicate { $0.noteID == noteID }` where `noteID: UUID` — UUID conforms to Equatable.
    - What's unclear: whether SwiftData's predicate macro allows UUID direct comparison or requires `.uuidString` workaround.
    - Recommendation: In Wave 0 test file, write a test that fetches `RoutineCompletion` by `noteID` with this predicate. If it fails to compile, switch to `$0.noteID.uuidString == noteID.uuidString`.
