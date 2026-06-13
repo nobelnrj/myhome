@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
 status: executing
-last_updated: "2026-06-13T10:05:10.505Z"
-last_activity: 2026-06-13 -- Phase 12 planning complete
+last_updated: "2026-06-13T10:58:30.212Z"
+last_activity: 2026-06-13
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 26
-  completed_plans: 21
-  percent: 81
+  completed_plans: 22
+  percent: 83
 ---
 
 # Project State
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 12 — notes & daily routine enhancement
+**Current focus:** Phase 12 — Notes & Daily Routine Enhancement
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
+Phase: 12 (Notes & Daily Routine Enhancement) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-06-13 -- Phase 12 planning complete
+Last activity: 2026-06-13
 
-Progress: [██████████] 100%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Progress: [██████████] 100%
 | Phase 11.1-sip-automation-and-nps-nav-auto-refresh P02 | 45 | 3 tasks | 3 files |
 | Phase 11.1 P04 | 35 | 3 tasks | 5 files |
 | Phase 11.1 P05 | 35 | 3 tasks | 6 files |
+| Phase 12-notes-daily-routine-enhancement P01 | 35m | 2 tasks | 14 files |
 
 ## Quick Tasks Completed
 
@@ -134,6 +135,9 @@ Recent decisions affecting current work:
 - [Phase ?]: nil chosen over false on unmark so scorer can re-evaluate (D-14)
 - [Phase ?]: Avoids init-time predicate complexity with asset.id capture
 - [Phase ?]: Enables direct unit testing without a view instance
+- [Phase ?]: OQ-1 RESOLVED: UUID direct equality in #Predicate compiles and works — no .uuidString fallback needed
+- [Phase ?]: All 11 model typealiases flipped atomically to SchemaV9 (STAB-08)
+- [Phase ?]: v8ToV9 uses nil-closure .custom stage — purely additive (RoutineCompletion new empty table)
 
 ### Pending Todos
 
@@ -182,9 +186,9 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ## Session Continuity
 
-Last session: 2026-06-13T09:41:23.961Z
+Last session: 2026-06-13T10:58:18.325Z
 Stopped at: Phase 12 UI-SPEC approved
-Resume file: .planning/phases/12-notes-daily-routine-enhancement/12-UI-SPEC.md
+Resume file: None
 
 ## Operator Next Steps
 
