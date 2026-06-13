@@ -176,7 +176,7 @@ Plans:
 **Wave 3** *(blocked on Wave 2; the two plans run in parallel — disjoint files)*
 
   - [x] 12-03-PLAN.md — EditNoteView Routine section + drag-reorder + check-time completion + RoutineDetailView [NOTE-01, NOTE-03, NOTE-04, NOTE-05]
-  - [ ] 12-04-PLAN.md — DayAgendaView "Daily Routines" section + RoutineAgendaRow + dot-badge-invariance tests [NOTE-01, NOTE-05]
+  - [x] 12-04-PLAN.md — DayAgendaView "Daily Routines" section + RoutineAgendaRow + dot-badge-invariance tests [NOTE-01, NOTE-05]
 
 **Wave 4** *(blocked on Wave 3)*
 
@@ -202,7 +202,7 @@ Plans:
 | 10. Self-Transfer Detection | v1.1 | 4/4 | Complete    | 2026-06-10 |
 | 11. Asset Tracker | v1.1 | 4/4 | Complete   | 2026-06-12 |
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete    | 2026-06-12 |
-| 12. Notes & Daily Routine Enhancement | v1.1 | 3/5 | In Progress|  |
+| 12. Notes & Daily Routine Enhancement | v1.1 | 4/5 | In Progress|  |
 
 ---
 
