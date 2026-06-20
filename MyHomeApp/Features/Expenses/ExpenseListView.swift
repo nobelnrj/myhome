@@ -120,17 +120,6 @@ struct ExpenseListView: View {
                         }
 
                         // "Possible Transfers" section — pending scorer-detected pairs (D-11, XFER-02)
-                        // Defensive: only render a row when the credit leg is still present and the
-                        // debit leg is still pending (isTransfer == nil). This guards against a race
-                        // where one leg was already confirmed/rejected before the view re-evaluated.
-                        let pendingPairs: [(debit: Expense, credit: Expense)] = pendingDebitLegs.compactMap { debit in
-                            guard debit.isTransfer == nil,
-                                  let pairID = debit.transferPairID,
-                                  let credit = expenses.first(where: { $0.id == pairID }),
-                                  credit.isTransfer == nil
-                            else { return nil }
-                            return (debit: debit, credit: credit)
-                        }
                         if !pendingPairs.isEmpty {
                             Section("Possible Transfers") {
                                 ForEach(pendingPairs, id: \.debit.id) { pair in
@@ -197,15 +186,15 @@ struct ExpenseListView: View {
                 EditExpenseView(expense: expense)
             }
         }
-        // Keep the badge count in sync whenever reviewItems or pending pairs change (D7-04, XFER-03)
-        .onChange(of: reviewItems.count) { _, _ in
-            reviewBadgeCount = reviewItems.count + pendingDebitLegs.count
-        }
-        .onChange(of: pendingDebitLegs.count) { _, _ in
-            reviewBadgeCount = reviewItems.count + pendingDebitLegs.count
+        // Keep the badge count in sync with what the UI actually renders as actionable (D7-04, XFER-03).
+        // We observe the derived `actionableBadgeCount` directly: confirming a transfer flips
+        // `isTransfer` (not the raw @Query counts), so watching counts alone would miss it and leave
+        // the badge stuck. `actionableBadgeCount` recomputes on every dependency change.
+        .onChange(of: actionableBadgeCount) { _, newCount in
+            reviewBadgeCount = newCount
         }
         .onAppear {
-            reviewBadgeCount = reviewItems.count + pendingDebitLegs.count
+            reviewBadgeCount = actionableBadgeCount
         }
     }
 
@@ -254,6 +243,35 @@ struct ExpenseListView: View {
     }
 
     // MARK: - Derived data
+
+    /// Actionable pending transfer pairs — the source of truth for BOTH the "Possible Transfers"
+    /// section AND the tab badge count (XFER-03).
+    ///
+    /// `pendingDebitLegs` (the @Query) is deliberately broad — it matches `transferPairID != nil
+    /// && amount > 0` and does NOT filter on `isTransfer` (#Predicate on optional Bool is unreliable
+    /// in SwiftData — see the @Query note above). After a pair is *confirmed*, `confirmPair()` sets
+    /// `isTransfer = true` but keeps `transferPairID` intact (D-16 balance-move relies on the link),
+    /// so the confirmed leg stays in `pendingDebitLegs`.
+    ///
+    /// We therefore narrow to genuinely-actionable pairs here: both legs still pending
+    /// (`isTransfer == nil`) and the credit leg still present. Basing the badge on this (rather than
+    /// the raw `pendingDebitLegs.count`) prevents a stuck badge with no row to act on.
+    private var pendingPairs: [(debit: Expense, credit: Expense)] {
+        pendingDebitLegs.compactMap { debit in
+            guard debit.isTransfer == nil,
+                  let pairID = debit.transferPairID,
+                  let credit = expenses.first(where: { $0.id == pairID }),
+                  credit.isTransfer == nil
+            else { return nil }
+            return (debit: debit, credit: credit)
+        }
+    }
+
+    /// The number the Expenses tab badge should show — review inbox items plus actionable
+    /// transfer pairs. Mirrors exactly what the UI renders as needing action (XFER-03).
+    private var actionableBadgeCount: Int {
+        reviewItems.count + pendingPairs.count
+    }
 
     /// Expenses after applying the active category filter, preserving @Query date order.
     private var filteredExpenses: [Expense] {
