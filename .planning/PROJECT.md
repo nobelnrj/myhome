@@ -4,11 +4,11 @@
 
 **Shipped:** v1.1 Accounts, Assets & Household Polish (2026-06-20) — see [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md). The app is now a light household finance hub: account-aware spend with self-transfer detection, a net-worth Asset Tracker (free AMFI MF NAV + manual holdings + SIP automation), and daily-routine notes — on top of the v1.0 MVP (automated Gmail expense ingestion, budgets, notes/reminders, overview, Face ID).
 
-## Next Milestone: v1.2 Neumorphic Redesign
+## Current Milestone: v1.2 Neumorphic Redesign
 
 **Goal:** A full neumorphic (Soft UI) visual redesign of the entire app, plus the design handoff's net-new surfaces — making My Home look and feel like a polished, cohesive personal-finance product rather than a stock SwiftUI app.
 
-**Target work (to be formalized via /gsd-new-milestone):**
+**Target features:**
 - **Neumorphic design system** — implement the exact tokens (charcoal surfaces, dual light/dark shadows, canary-yellow accent, 26px radii, floating capsule tab bar, rolling money readouts) from `design/design_handoff_myhome_neumorphic/`.
 - **Restyle every screen** — Overview, Activity, Budgets, Notes, Settings AND the unshown surfaces (Accounts, Assets/Net-worth, Transfer Inbox, Gmail/Ingestion) to one consistent neumorphic look (decided: restyle all).
 - **Dedicated Analytics screen** (net-new) — time-range tabs, spending-trend area chart, by-category bars, delta chips.

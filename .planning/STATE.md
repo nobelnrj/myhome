@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Accounts, Assets & Household Polish
-status: milestone_complete
-last_updated: "2026-06-20T11:30:00.000Z"
+milestone: v1.2
+milestone_name: Neumorphic Redesign
+status: planning
+last_updated: "2026-06-20T11:47:54.731Z"
 last_activity: 2026-06-20
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 26
-  completed_plans: 25
-  percent: 83
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -24,12 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 
 ## Current Position
 
-Phase: 12 (Notes & Daily Routine Enhancement) — EXECUTING
-Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-06-13
-
-Progress: [██████████] 96%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-06-20 — Milestone v1.2 started
 
 ## Performance Metrics
 
