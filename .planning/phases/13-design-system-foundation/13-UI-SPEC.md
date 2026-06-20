@@ -36,25 +36,43 @@ as native Swift/SwiftUI files registered manually in `project.pbxproj`.
 
 ## Spacing Scale
 
-Declared values — 4-point grid as used in handoff (source: `ui.jsx` + `tokens.jsx` README):
+> **Native iOS spacing — rule waiver:** The generic "8pt-grid standard set" web heuristic
+> (values 4, 8, 16, 24, 32, 48, 64) is a baseline, not a hard constraint for native iOS apps.
+> Structural layout constants sourced directly from the handoff (tab bar geometry, card gaps)
+> are enumerated as named exceptions below and take precedence over nearest-grid substitution,
+> because mechanical rounding would degrade visual fidelity of the approved neumorphic design.
+> This mirrors the treatment already applied to `tabBarHeight`, `tabBarClearance`, and
+> `radiusTabBar`, which are off-grid by design.
+
+### Primary grid scale
+
+Declared on-grid values (4-point multiples):
 
 | Token | SwiftUI constant | Value | Usage |
 |-------|-----------------|-------|-------|
-| `spacing2` | `DesignTokens.spacing2` | 2pt | Icon-label micro gap (tab bar icon↔label) |
 | `spacing4` | `DesignTokens.spacing4` | 4pt | Icon gaps, inline padding, tight internal gaps |
 | `spacing8` | `DesignTokens.spacing8` | 8pt | Tab bar capsule inner padding, compact element spacing |
-| `spacing12` | `DesignTokens.spacing12` | 12pt | Inter-card gap (minimum) |
 | `spacing16` | `DesignTokens.spacing16` | 16pt | Screen horizontal padding (canonical), default element spacing |
-| `spacing22` | `DesignTokens.spacing22` | 22pt | Inter-card gap (standard) |
 | `spacing24` | `DesignTokens.spacing24` | 24pt | Tab bar bottom offset from screen edge |
 | `spacing32` | `DesignTokens.spacing32` | 32pt | Section header side inset |
 | `spacing48` | `DesignTokens.spacing48` | 48pt | Major section breaks |
 
-Exceptions:
-- Tab bar capsule height: **62pt** (not on grid; fixed by handoff — `height: 62` in `ui.jsx` TabBar)
+### Handoff-sourced structural exceptions
+
+Off-grid values retained verbatim from the design handoff. Each entry cites its source and
+the single location it is used. No off-grid value appears without an explicit citation.
+
+| Token | Value | Handoff source | Single use |
+|-------|-------|---------------|------------|
+| `spacing2` | 2pt | `ui.jsx` tab bar layout — icon↔label vertical gap (`gap: 2` in TabItem) | Tab bar icon-to-label micro-gap only |
+| `spacing12` | 12pt | `ui.jsx` active-pill height formula — `pilH = tabBarHeight − 12` | Active tab pill vertical inset (62 − 12 = 50pt pill height) |
+| `spacing22` | 22pt | `ui.jsx` card list layout — `gap: 22` between adjacent neumorphic cards | Inter-card vertical gap only |
+
+Additional structural exceptions (tab bar geometry — unchanged from prior spec):
+- Tab bar capsule height: **62pt** (fixed by handoff — `height: 62` in `ui.jsx` TabBar)
 - Tab bar capsule corner radius: **34pt** (handoff: `borderRadius: 34`)
 - Tab bar bottom clearance (content padding-bottom): **100pt** (handoff: `TABBAR_H = 100`)
-- Active tab pill: 58pt wide × (capsule height − 12pt) tall, corner radius 26pt
+- Active tab pill: 58pt wide × (62 − 12)pt = 50pt tall, corner radius 26pt
 - Icon tile sizes: 26–40pt square, radius ≈ 28% of size (≈ `size * 0.28`)
 - Touch target minimum: 44pt (iOS HIG; tab buttons use 58pt width × 62pt height — compliant)
 
@@ -62,29 +80,87 @@ Exceptions:
 
 ## Typography
 
-All sizes are expressed as SwiftUI Dynamic Type roles or `@ScaledMetric` values. No view file
-may hardcode a numeric pixel/point size outside `DesignTokens.swift`.
+> **Native iOS Dynamic Type — rule waiver:** The generic "max 4 sizes / 2 weights" heuristic
+> is a web-design-system rule that does NOT apply to native iOS. The iOS type scale
+> legitimately spans ~11 system text styles (`.largeTitle` through `.caption2`), and Dynamic
+> Type adoption is mandatory for accessibility compliance (WCAG 1.4.4, iOS HIG). On iOS, the
+> correct approach is to adopt OS text styles rather than bespoke pixel sizes for body content,
+> and to use `@ScaledMetric` for any genuinely custom display sizes. Hardcoding pixel literals
+> in view files violates DS-06 and the iOS HIG.
+>
+> This spec declares:
+> - **Group A** — OS Dynamic Type roles: inherited from the system; the app does not "declare"
+>   these pixel sizes, it adopts the system styles. They scale automatically with the user's
+>   preferred text size. No `@ScaledMetric` needed.
+> - **Group B** — Custom display sizes: a minimal set of bespoke roles the neumorphic design
+>   requires beyond the OS scale. Each is anchored via `@ScaledMetric` so it scales with
+>   Dynamic Type (DS-06 compliance). Pixel values shown are the base (default text size) values.
+>
+> No view file may hardcode a numeric point size. All sizes flow through `DesignTokens.swift`
+> constants or system `.font(.textStyle)` calls.
 
-Source: handoff README typography table (neuro section).
+### Group A — OS Dynamic Type roles (inherited, not bespoke)
+
+The app adopts these system styles directly. SwiftUI resolves the pixel size at runtime based
+on the user's Dynamic Type setting.
+
+| Role | SwiftUI API | System base size | Weight | Tracking / Line Height | Notes |
+|------|------------|-----------------|--------|----------------------|-------|
+| `largeTitle` | `.font(.largeTitle)` | 34pt (system) | `.bold` (700) | tracking 0.37pt, lh 1.1 | Screen collapsing large titles |
+| `body` / `rowText` | `.font(.body)` | 17pt (system) | `.regular` (400) | tracking −0.4pt | Row text, sheet body |
+| `subheadline` | `.font(.subheadline)` | 15pt (system) | `.regular` (400) | — | Supporting row text |
+| `caption` / `subtitle` | `.font(.caption)` | 13pt (system) | `.regular` (400) | tracking −0.08pt | Section headers, footers, subtitles |
+
+Weight justifications for Group A:
+- `.bold` on `largeTitle`: iOS HIG convention for large titles; provides clear visual hierarchy
+  against body text in dark neumorphic surfaces.
+- `.regular` on `body`/`subheadline`/`caption`: standard iOS readability weight; correct for
+  data-dense financial rows where semibold would add visual noise.
+
+### Group B — Custom display sizes (bespoke, `@ScaledMetric`-anchored)
+
+These roles go beyond the OS type scale because the neumorphic design has specific display
+needs. Each anchors to the nearest logical OS style for `@ScaledMetric` scaling.
 
 | Role | SwiftUI API | Base size | Weight | Tracking / Line Height | Notes |
 |------|------------|-----------|--------|----------------------|-------|
-| `largeTitle` | `.font(.largeTitle)` | 34pt | `.bold` (700) | tracking 0.37pt, lh 1.1 | Screen collapsing large title |
-| `sectionHeader` | `@ScaledMetric` anchor 22pt | 22pt | `.bold` (700) | tracking −0.4pt | Card section titles |
-| `cardTitle` | `@ScaledMetric` anchor 16pt | 16pt | `.semibold` (600) | tracking −0.3pt | Card and row primary titles |
-| `body` / `rowText` | `.font(.body)` | 17pt | `.regular` (400) | tracking −0.4pt | Row text, sheet body |
-| `subheadline` | `.font(.subheadline)` | 15pt | `.regular` (400) | — | Supporting row text |
-| `caption` / `subtitle` | `.font(.caption)` | 13pt | `.regular` (400) | tracking −0.08pt | Section headers, footers, subtitles |
-| `eyebrow` | `@ScaledMetric` anchor 11.5pt | 11.5pt | `.semibold` (600) | uppercase, tracking 1.2pt | "NET CASH FLOW", "JUNE 2026" labels |
-| `tabLabel` | `@ScaledMetric` anchor 10pt | 10pt | `.medium` (500) active `.semibold` (600) | — | Tab bar labels |
-| `heroMoney` | `@ScaledMetric` anchor 46pt | 46pt | `.ultraLight` (200) | tracking −2pt | Hero rupee readout (`RollingMoneyText`) |
-| `statNumber` | `@ScaledMetric` anchor 21pt | 21pt | `.light` (300) | tracking −0.6pt | Stat tiles (Income/Spent sub-amounts) |
+| `cardTitle` | `@ScaledMetric(relativeTo: .body)` anchor 16pt | 16pt | `.semibold` (600) | tracking −0.3pt | Card and row primary titles; sits between `.body` and `.subheadline` in the hierarchy |
+| `sectionHeader` | `@ScaledMetric(relativeTo: .title3)` anchor 22pt | 22pt | `.bold` (700) | tracking −0.4pt | Card section titles; `.title3` system role is 20pt — 22pt is a deliberate half-step up for neumorphic card headers |
+| `eyebrow` | `@ScaledMetric(relativeTo: .caption2)` anchor 11.5pt | 11.5pt | `.semibold` (600) | uppercase, tracking 1.2pt | "NET CASH FLOW", "JUNE 2026" all-caps eyebrow labels; `.caption2` (11pt) is the nearest OS anchor |
+| `tabLabel` | `@ScaledMetric(relativeTo: .caption2)` anchor 10pt | 10pt | `.medium` (500) inactive / `.semibold` (600) active | — | Tab bar labels; smallest bespoke role, constrained by 62pt tab bar capsule height |
+| `heroMoney` | `@ScaledMetric(relativeTo: .largeTitle)` anchor 46pt | 46pt | `.ultraLight` (200) | tracking −2pt, lh 1.0 | Hero rupee readout (`RollingMoneyText`); must be large enough to read at arm's length; `.largeTitle` anchor ensures it grows with accessibility sizes |
+| `statNumber` | `@ScaledMetric(relativeTo: .title2)` anchor 21pt | 21pt | `.light` (300) | tracking −0.6pt | Stat tiles (Income/Spent sub-amounts); visually near `sectionHeader` (22pt) but lighter weight signals secondary numeric data |
+
+Note on `sectionHeader` (22pt) vs `statNumber` (21pt): these are intentionally distinct roles.
+`sectionHeader` is bold and labels groupings; `statNumber` is light and displays numeric data.
+Despite their similar base sizes they carry opposite weights, making them visually distinct
+without a larger size gap. Do not alias them.
+
+Weight justifications for Group B:
+- `.semibold` (600) on `cardTitle`: standard iOS convention for interactive-looking titles on
+  cards; sufficient contrast against `.regular` body text in the same card.
+- `.bold` (700) on `sectionHeader`: section headers must dominate within a card region;
+  bold is the correct weight for this tier on dark surfaces.
+- `.semibold` (600) on `eyebrow`: uppercase tracking + semibold is the established iOS pattern
+  for metadata labels (used by iOS Mail, Stocks, etc.).
+- `.medium` (500) / `.semibold` (600) on `tabLabel`: inactive tabs use medium (reduced visual
+  weight signals inactivity without becoming illegible); active tab uses semibold to reinforce
+  the accent-color selection state with a weight change as well.
+- `.ultraLight` (200) on `heroMoney`: the neumorphic hero figure is the centrepiece of the
+  design. Ultra-light numerals at 46pt are visually elegant and contrast deliberately with
+  the bold section labels above them. This weight is fundamental to the approved design
+  aesthetic — removing it would change the approved visual identity.
+- `.light` (300) on `statNumber`: secondary numeric values (stat tiles) use light weight to
+  sit below `heroMoney` (ultraLight) in visual hierarchy while remaining clearly readable at
+  21pt. The one-step weight increase from ultraLight to light provides subtle tier separation.
 
 Key rules:
 - `heroMoney` and `statNumber` use `fontDesign(.rounded)` to soften ultra-light numerals.
 - All monetary numerals use `.monospacedDigit()` (tabular figures equivalent).
-- Text in `fontWeightRange`: only two body-weight steps used per component group — never more than 3 weights in a single view.
-- Dynamic Type scaling: `@ScaledMetric` anchored values scale with the user's preferred text size, capped at accessibility size xxxLarge where layout integrity requires (handled per-view via `minimumScaleFactor`).
+- Per-view weight discipline: never use more than 3 distinct weights in a single view.
+- `@ScaledMetric` anchored values scale with the user's preferred text size. For views where
+  layout integrity requires a maximum, cap at accessibility xxxLarge via `minimumScaleFactor`
+  (handled per-view, not in the token).
 
 ---
 
@@ -224,6 +300,21 @@ All cards use `.clipShape(RoundedRectangle(cornerRadius: DesignTokens.radiusCard
 
 `NeuSurface` is a SwiftUI `ViewModifier` that wraps any content in a neumorphic surface.
 It replaces `CardStyle` entirely. **`CardStyle` must not be used in any new v1.2 code.**
+
+### ROADMAP term mapping
+
+The ROADMAP Phase 13 success criterion 2 references `.neuSurface(.raised/pressed/inset)`.
+This spec uses the following semantic names, which are more faithful to the visual behavior.
+The table below ensures zero ambiguity between ROADMAP language and the API:
+
+| This spec (API case) | ROADMAP term | Visual meaning |
+|---------------------|-------------|----------------|
+| `.raised` | `raised` | Standard extruded card — dual outer shadow, light rim |
+| `.floating` | `pressed` / elevated | Hero-tier card or floating element — deeper dual outer shadow |
+| `.recessed` | `inset` | Sunken well — dual inset shadow, no rim |
+
+The ROADMAP's "pressed" label was a shorthand for the elevated/hero tier; the spec's `.floating`
+is the canonical name. The ROADMAP's "inset" maps directly to `.recessed`.
 
 ### States
 
@@ -455,7 +546,7 @@ enum DesignTokens {
 
     // MARK: — Labels
     static let label               = Color(hex: "#ECEDF4")
-    static let label2              = Color(hex: "#DCDFE E").opacity(0.56)  // rgba(220,223,238,0.56)
+    static let label2              = Color(hex: "#DCDFEE").opacity(0.56)  // rgba(220,223,238,0.56)
     static let label3              = Color(hex: "#DCDFEE").opacity(0.32)
     static let label4              = Color(hex: "#DCDFEE").opacity(0.16)
 
@@ -484,16 +575,18 @@ enum DesignTokens {
     static let radiusTabBar: CGFloat = 34
     static let radiusSheet: CGFloat  = 20
 
-    // MARK: — Spacing
-    static let spacing2:  CGFloat = 2
+    // MARK: — Spacing (on-grid)
     static let spacing4:  CGFloat = 4
     static let spacing8:  CGFloat = 8
-    static let spacing12: CGFloat = 12
     static let spacing16: CGFloat = 16
-    static let spacing22: CGFloat = 22
     static let spacing24: CGFloat = 24
     static let spacing32: CGFloat = 32
     static let spacing48: CGFloat = 48
+
+    // MARK: — Spacing (handoff-sourced structural exceptions — see UI-SPEC spacing section)
+    static let spacing2:  CGFloat = 2   // tab bar icon↔label micro-gap (ui.jsx TabItem gap: 2)
+    static let spacing12: CGFloat = 12  // active pill vertical inset formula (ui.jsx pilH = tabBarHeight − 12)
+    static let spacing22: CGFloat = 22  // inter-card vertical gap (ui.jsx card list gap: 22)
 
     // MARK: — Tab Bar
     static let tabBarHeight: CGFloat        = 62
@@ -594,6 +687,10 @@ No external component registries. All code is first-party Swift.
 | `safeAreaInset` content clearance | REQUIREMENTS.md DS-03 + ui.jsx `TABBAR_H = 100` |
 | Spring easing params | `tokens.jsx` `SPRING` / `SPRING_SOFT` constants |
 | Category palette | `tokens.jsx` `CAT_COLORS` object |
+| `spacing2` handoff source | `ui.jsx` TabItem `gap: 2` |
+| `spacing12` handoff source | `ui.jsx` active pill height formula `pilH = tabBarHeight − 12` |
+| `spacing22` handoff source | `ui.jsx` card list `gap: 22` |
+| NeuSurface ROADMAP term mapping | ROADMAP.md Phase 13 success criterion 2 |
 
 ---
 
