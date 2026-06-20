@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>MyHome — Liquid UI</title>
+<link rel="stylesheet" href="src/liquid.css" />
+<link rel="stylesheet" href="src/analytics.css" />
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" rx="22" fill="#05060F"/>
+    <circle cx="34" cy="42" r="20" fill="#003D2E" opacity="0.8"/>
+    <circle cx="66" cy="60" r="22" fill="#1A0533" opacity="0.85"/>
+    <path d="M50 30v40M38 44l12-14 12 14" stroke="#00F5A0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>
+</template>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; background: #02030A; overscroll-behavior: none; }
+  #root { height: 100%; }
+  .noscroll::-webkit-scrollbar { display: none; }
+  .noscroll { scrollbar-width: none; -ms-overflow-style: none; }
+  .tap { transition: opacity .12s; } .tap:active { opacity: 0.45; }
+  .rowtap { transition: background .08s; } .rowtap:active { background: var(--fill3) !important; }
+  .keycap:active { background: var(--fill) !important; }
+  input::placeholder { color: var(--label3); }
+  button { font: inherit; -webkit-tap-highlight-color: transparent; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="src/tokens.jsx"></script>
+<script type="text/babel" src="src/icons.jsx"></script>
+<script type="text/babel" src="src/data.jsx"></script>
+<script type="text/babel" src="src/motion.jsx"></script>
+<script type="text/babel" src="src/charts.jsx"></script>
+<script type="text/babel" src="src/glass.jsx"></script>
+<script type="text/babel" src="src/ui.jsx"></script>
+<script type="text/babel" src="src/calendar.jsx"></script>
+<script type="text/babel" src="frames/ios-frame.jsx"></script>
+<script type="text/babel" src="src/home.jsx"></script>
+<script type="text/babel" src="src/expenses.jsx"></script>
+<script type="text/babel" src="src/addexpense.jsx"></script>
+<script type="text/babel" src="src/budgets.jsx"></script>
+<script type="text/babel" src="src/notes.jsx"></script>
+<script type="text/babel" src="src/settings.jsx"></script>
+<script type="text/babel" src="src/analytics.jsx"></script>
+<script type="text/babel" src="src/app.jsx"></script>
+</body>
+</html>

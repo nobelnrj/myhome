@@ -1,0 +1,66 @@
+/* analytics.css — motion layer for the Analytics screen.
+   Liquid tab underline, area-chart reveal, scanning-dot pulse, bar shimmer,
+   elastic bar inflate, glass tooltip float, AI orb breathe, typewriter caret. */
+
+/* ── Hero area chart: scanning dot soft pulse glow ── */
+@keyframes lqaDotPulse {
+  0%, 100% { transform: scale(1);   opacity: 0.55; }
+  50%      { transform: scale(2.2); opacity: 0; }
+}
+@keyframes lqaDotCore {
+  0%, 100% { box-shadow: 0 0 8px 1px var(--neg), 0 0 16px 2px var(--neg); }
+  50%      { box-shadow: 0 0 14px 3px var(--neg), 0 0 28px 5px var(--neg); }
+}
+
+/* ── Category bar: liquid fill shimmer sweeping along the column ── */
+@keyframes lqaShimmer {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+/* ── Detail tooltip: glass chip floats up ── */
+@keyframes lqaTipIn {
+  0%   { opacity: 0; transform: translate(-50%, 8px) scale(0.86); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translate(-50%, -6px) scale(1); }
+}
+
+/* ── AI orb: 3-step breathing pulse ── */
+@keyframes lqaOrbBreathe {
+  0%   { transform: scale(0.82); box-shadow: 0 0 0 0 color-mix(in srgb, var(--glow) 55%, transparent), 0 0 14px 2px color-mix(in srgb, var(--glow) 60%, transparent); }
+  33%  { transform: scale(1.0);  box-shadow: 0 0 0 5px color-mix(in srgb, var(--glow) 0%, transparent), 0 0 18px 4px color-mix(in srgb, var(--glow) 75%, transparent); }
+  66%  { transform: scale(1.16); box-shadow: 0 0 0 9px color-mix(in srgb, var(--glow) 0%, transparent), 0 0 24px 6px color-mix(in srgb, var(--glow) 55%, transparent); }
+  100% { transform: scale(0.82); box-shadow: 0 0 0 0 color-mix(in srgb, var(--glow) 0%, transparent), 0 0 14px 2px color-mix(in srgb, var(--glow) 60%, transparent); }
+}
+@keyframes lqaOrbRing {
+  0%   { transform: scale(0.6); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* ── Typewriter caret blink ── */
+@keyframes lqaCaret {
+  0%, 49%  { opacity: 1; }
+  50%, 100%{ opacity: 0; }
+}
+
+/* ── Hero card sheen drift (subtle liquid life on the violet edge) ── */
+@keyframes lqaEdgeGlow {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* Section entrance (cards lift in) */
+@keyframes lqaLift {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Analytics overlay entrance */
+@keyframes lqaScreenIn {
+  from { opacity: 0; transform: scale(1.035); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lqa-dot, .lqa-dotpulse, .lqa-shimmer, .lqa-orb, .lqa-orbring, .lqa-edgeglow { animation: none !important; }
+}
