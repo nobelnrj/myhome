@@ -1,10 +1,11 @@
 ---
 phase: 13
 slug: design-system-foundation
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-21
+reviewed_at: 2026-06-21T00:00:00Z
 ---
 
 # Phase 13 — UI Design Contract: Design System Foundation
