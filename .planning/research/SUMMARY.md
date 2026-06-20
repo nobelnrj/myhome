@@ -1,19 +1,19 @@
 # Project Research Summary
 
-**Project:** My Home — v1.1 Milestone: Accounts, Assets & Household Polish
-**Domain:** iOS-only personal-finance + household-ops app (SwiftData, SwiftUI, India-focused)
-**Researched:** 2026-06-08
-**Confidence:** HIGH (stack, architecture, pitfalls from direct codebase inspection); MEDIUM (NPS pricing source, self-transfer edge cases)
+**Project:** My Home v1.2 — Neumorphic Redesign
+**Domain:** iOS personal-finance app — visual redesign milestone (Soft UI design system + Analytics screen + AI Insight card)
+**Researched:** 2026-06-20
+**Confidence:** HIGH (design system, Swift Charts, FoundationModels availability gating); MEDIUM (FoundationModels latency/guardrail behaviour under real IST load)
 
 ---
 
 ## Executive Summary
 
-My Home v1.1 adds four feature areas — Accounts Management, Self-Transfer Detection, Asset Tracker, and Notes/Daily Routine enhancement — to a shipped, stable v1.0 app. All four agents converge on one non-negotiable ordering constraint: **stabilization must come first**. There are two confirmed crash vectors in the live app that must be fixed before any schema or feature work begins. The DayAgendaView/AgendaReminderItem path holds live references to cascade-deleted NoteBlock objects (EXC_BAD_ACCESS), and GmailSyncController.syncAccount() captures live `@Model` Category references across `await` suspension points and calls `ctx.save()` inside a per-message loop. Both crashes are well-understood and have deterministic fixes; neither requires a schema change. The daily-routine stale-completion bug (NoteBlock.isChecked persisting across days) is also resolved in this stabilization pass via a date-keyed approach — `RoutineResetService` triggered on `scenePhase .active`, not a timer or background job.
+v1.2 is a visual and surface-area milestone on top of a fully shipped, feature-complete app. The goal is to transform My Home from a functional SwiftUI app into a polished Soft UI product using the neumorphic design handoff (`design/design_handoff_myhome_neumorphic/`), while adding three net-new UI surfaces: a "Where it's going" spend donut on Overview, a dedicated Analytics screen (area chart + category bars + delta chips), and an on-device AI Insight card powered by Apple's FoundationModels framework. Every capability is delivered by first-party Apple frameworks — zero new SPM dependencies are added. The deployment target stays at iOS 17.0; FoundationModels is adopted behind a two-layer gate (`#available(iOS 26, *)` plus `SystemLanguageModel.default.availability`) so the AI card is invisibly absent on ineligible devices without affecting anything else.
 
-The single riskiest non-crash task in v1.1 is the SchemaV6 migration. All four research agents agree the migration must be **additive only**: `Expense.sourceAccount` (the Gmail dedup idempotency key) is retained unchanged, and `Expense.accountID` (UUID FK to the new `Account` entity) is added alongside it — the two fields serve different purposes and must coexist through at least SchemaV7. The one migration task that requires special attention is backfilling `accountID` on existing expenses from the legacy `sourceAccount` string. This is the single highest-risk task in the milestone and requires a real migration test against a V5 fixture store (a copy of the live simulator `default.store`) run under Swift Testing before the feature ships. All new fields across all four feature areas are additive and optional-with-defaults, keeping the migration stage `willMigrate: nil` and only requiring a non-nil `didMigrate` for the account-backfill pass.
+The recommended build order is strictly dependency-aware: Design System foundation first (tokens + NeuSurface/components + capsule tab bar + RollingMoneyText), then a restyle pass over all existing screens, then the Analytics screen, then the AI Insight card which re-uses the Analytics view model and aggregator. Skipping this order — for example, restyling screens before tokens are stable — causes the entire restyle to be written twice. The most consequential architectural decision is treating `DesignTokens` as a single source of truth: all colors, radii, and shadow values flow from one file so a design token change propagates everywhere without touching 30+ views.
 
-Data source reliability is tiered and the app design must reflect this: AMFI NAV (mutual funds via `portal.amfiindia.com/spages/NAVAll.txt`) is HIGH confidence — official, stable, free; NPS NAV via `npsnav.in` is MEDIUM confidence — reliable data from Protean CRA but single-maintainer risk; Indian stock quotes via Yahoo Finance `v8/finance/chart` are LOW confidence — undocumented, fragile, legally grey. Manual override is mandatory for stocks and NPS; it is the primary entry path, not a fallback. The net-worth view must always render from cached data and must never block on a network call. Zero new SPM dependencies are required across all four feature areas.
+The top risks in v1.2 are accessibility regressions and the FoundationModels finance-safety constraint. Neumorphism's near-surface-color shadows (white at 3.5% opacity) fall below WCAG 1.4.11 for interactive elements; accessibility must be treated as a first-class requirement built into the design-system components from the start, not audited at the end. For the AI card, the model must never compute or derive monetary figures — all rupee amounts, percentages, and deltas must be pre-computed in Swift and injected as literal context, with the model's output verified against those injected facts before display. Both of these risks are avoidable with the correct component design in Phase A.
 
 ---
 
@@ -21,224 +21,150 @@ Data source reliability is tiered and the app design must reflect this: AMFI NAV
 
 ### Recommended Stack
 
-The v1.0 stack (Swift 6.2 + SwiftUI + SwiftData + Swift Testing, iOS 17 minimum, Xcode 26) is unchanged for v1.1. The only meaningful additions are a set of free external HTTP data sources for asset pricing — all hit via existing `URLSession` — and a `PriceFetchService` actor pattern for fetch/cache. Zero new SPM packages are added.
+v1.2 adds no new SPM packages. Every new capability maps to an existing or newly available first-party framework. The neumorphic design system is pure SwiftUI `ViewModifier` / `ShapeStyle` primitives — two `.shadow()` modifiers on a rounded rect are the entire visual effect. Swift Charts `SectorMark` (iOS 17+, already at the deployment floor) and `AreaMark` (iOS 16+) cover all chart types needed. `FoundationModels` is the only genuinely new framework adoption, and it is weak-linked via `#available(iOS 26, *)` so the linker omits it entirely on older devices.
 
-**Core technologies:**
-- **Swift 6.2 / Xcode 26:** Application language and IDE — no change from v1.0
-- **SwiftData (VersionedSchema → SchemaV6):** Persistence layer; additive migration adds `Account`, `Asset` @Model types and five fields on `Expense`, two on `Note`, one on `NoteBlock`
-- **URLSession (no SDK):** All price fetching (AMFI, npsnav.in, Yahoo Finance) — existing framework, zero new deps
-- **PriceFetchService (`@Observable` class):** Owns all external price fetching; owned by `AssetsView` via `@State`, not a singleton; matches `GmailSyncController` ownership pattern
-- **UNUserNotificationCenter / NotificationScheduler (existing):** Daily routine notification — reuse existing `.daily` recurrence path; no new infrastructure
-- **Swift Testing (in-toolchain):** Primary test harness — critical for migration fixture test (V5 → V6 backfill)
+**Core technologies for v1.2:**
+- `SwiftUI ViewModifier` + `.shadow()`: neumorphic surface system — two shadow calls per card, wrapped in a reusable `NeuSurface` modifier; no UIKit, no third-party UI library
+- `ContentTransition.numericText(value:)` (iOS 17+): rolling-money odometer animation — two lines of SwiftUI, no animation library
+- `SwiftUI TabView` + `.toolbar(.hidden, for: .tabBar)` (iOS 16+): floating capsule tab bar — custom `HStack` overlay in ~60 lines
+- `Swift Charts SectorMark` (iOS 17+): spend donut on Overview — already used in `DonutChart.swift`; restyle only, no reimplementation
+- `Swift Charts AreaMark` + `LineMark` (iOS 16+): Analytics spending trend — existing `SpendOverTimeChart` pattern reused
+- `FoundationModels` (iOS 26+, `#available`-gated): AI Insight card — `LanguageModelSession` with `@Generable` output struct; streaming via `streamResponse(to:)` for typewriter reveal
+- `DesignTokens` enum (new): single Swift file translating all `tokens.jsx` neuro skin values to typed Color/CGFloat/Shadow constants
 
-**Data source reliability (critical for design decisions):**
-
-| Source | Asset Type | Confidence | Notes |
-|--------|-----------|------------|-------|
-| `portal.amfiindia.com/spages/NAVAll.txt` | Mutual funds | HIGH | Official AMFI bulk file; stable multi-year URL; ~5 MB plain text; parse on background actor |
-| `api.mfapi.in/mf/{schemeCode}` | Mutual funds (fallback/onboarding) | MEDIUM-HIGH | Third-party JSON wrapper over AMFI; convenient but adds SPoF |
-| `npsnav.in/api/latest-min` | NPS | MEDIUM | Data from Protean CRA (official); single-maintainer open-source aggregator risk |
-| `query1.finance.yahoo.com/v8/finance/chart/{sym}` | Stocks | LOW | Undocumented, unofficial, historically fragile; ~360 req/hr cap; legally grey for personal use |
-| Manual entry | All types | N/A — mandatory | Primary path for NPS, FD, other; mandatory fallback for stocks |
+**Anti-additions confirmed by research:** No Liquid Glass (`.glassEffect()`), no blur/translucency, no third-party AI, no cloud LLM, no third-party charting library, no deployment-target bump to iOS 26, no SwiftData schema change (SchemaV9 is sufficient).
 
 ### Expected Features
 
-All four areas constitute the v1.1 MVP. No area can be deferred without shipping a partial milestone.
-
 **Must have (table stakes):**
-- **Accounts:** Add/edit/delete Account with name, type, last-4, opening balance; manual balance entry + timestamp; per-account monthly spend total; account list view; link expenses via `sourceAccount` string matching to `accountID` FK
-- **Self-Transfer:** 5-signal scorer (exact amount + both own accounts + opposite direction within 3 days + not categorised + not a reversal) surfaced to Transfer Inbox with three-state confirm (Mark as Transfer / Not a Transfer / Dismiss for now); `transferStateRaw` field on Expense; confirmed transfers excluded from ALL spend/budget queries
-- **Asset Tracker:** Add/edit/delete holding (name, type, units, cost basis); current value = `units × currentNAV`; total net worth = holdings value + account balances; asset allocation chart (pie/donut via Swift Charts); manual NAV override with staleness label; MF NAV refresh from AMFI/mfapi.in (best-effort, non-blocking)
-- **Notes/Daily Routine:** `Note.isRoutine` + `Note.routineTime` fields; `NoteBlock.lastCheckedDate` (the bug fix — replaces permanent `isChecked` bool for daily routines); per-day checkbox reset on `scenePhase .active` via `RoutineResetService`; daily notification via existing `NotificationScheduler`; calendar view shows routine as repeating event
+- `NeuSurface` ViewModifier with raised / pressed / inset variants — the shadow pair IS the style
+- `DesignTokens` enum: all surface colors, text colors, accent, category palette, radii, shadow parameters
+- `RollingMoneyText` view: odometer count-up for all hero rupee amounts (~780ms, easeOutCubic)
+- Floating capsule tab bar: 62px tall, 34px radius, canary-yellow active pill, spring animation on selection
+- Restyle all existing screens (Overview, Activity, Budgets, Notes, Settings, Accounts, Assets, Transfer Inbox)
+- "Where it's going" spend donut on Overview: `SectorMark` ring with category segments, grow-in animation, center rolling total, top-4 legend
+- Analytics screen: time-range tabs (Week/Month/Year), spend headline + delta chip vs prior period, smooth area chart, by-category horizontal bars with stagger animation
+- AI Insight card: availability-gated, typewriter reveal via streaming, breathing orb loading state, graceful fallback when unavailable (section omitted entirely on ineligible devices)
 
-**Should have (differentiators — include in v1.1 if time permits):**
-- Color/SF Symbol per account for fast visual identification
-- "Unlinked expenses" indicator after initial account setup
-- Retroactive self-transfer detection over all historical expenses on first v1.1 launch
-- Net transfer flow summary on Overview (₹X moved between own accounts this month)
-- Holdings grouped by fund house; staleness badge per holding
-- Multiple daily routines (morning + evening) as independent Notes
+**Should have (differentiators / P2):**
+- Donut tap-to-filter: tapping a segment pre-filters the Activity screen to that category
+- Scanning dot animation along the area chart line
+- Range-aware AI insight specificity (Week insight names days; Month names weeks; Year names worst month)
+- Budget gap referenced in AI suggestion ("Skipping one keeps you under budget")
 
-**Defer (v2+):**
-- CloudKit sync for account balances, holdings, routine completions across devices
-- Holding transaction log (purchase tranches) for XIRR calculation
-- CAS or broker import for holdings
-- Balance history snapshots → net-worth-over-time chart (NetWorthSnapshot model)
-- Routine completion history log (RoutineCompletion model)
+**Defer to v2+:**
+- Custom date-range picker on Analytics
+- Year-over-year insight requiring multi-year data
+- Persistent insight history in SwiftData
 
 ### Architecture Approach
 
-The existing layered architecture (SwiftUI Views → Service/Aggregator layer → SwiftData/Persistence) extends cleanly for all four feature areas. New services follow established patterns: `SelfTransferDetector` mirrors `DedupChecker` (pure static struct), `NetWorthAggregator` mirrors `BudgetCalculator` (pure static enum), `PriceFetchService` mirrors `GmailSyncController` (owned via `@State`, not singleton), `RoutineResetService` is called from `RootView.onChange(of: scenePhase)` at the same hook as `GmailSyncController.scenePhaseChanged()`. The UUID FK pattern (`accountID: UUID?` on Expense rather than `@Relationship`) is the established CloudKit-safe approach already used by `GmailAccountStore`.
+The codebase at v1.1 / SchemaV9 has inline styling scattered across all views — no token file, no shared surface modifier. v1.2 adds a `DesignSystem/` folder as a new architectural layer below all features; every view becomes a consumer of tokens, never a producer of hex values. The Analytics screen introduces one new pure-static aggregator (`AnalyticsAggregator`) that mirrors the discipline of the existing `SpendOverTimeAggregator` and `BudgetCalculator` — pure static functions operating on already-fetched arrays, called in SwiftUI `body {}` before any Chart DSL. The AI Insight card introduces one `@Observable` service (`InsightService`) scoped to `AnalyticsView`, following the existing `@Observable` + `@State` service pattern.
 
-**Major components (new and modified):**
-1. **SchemaV6 + AppMigrationPlan** — one additive migration stage; two new @Model types (Account, Asset); new fields on Expense, Note, NoteBlock; `didMigrate` closure for account backfill
-2. **AccountsView + AccountLinkingService** — CRUD for accounts; post-creation backfill pass sets `accountID` on existing expenses by matching `sourceAccount` strings; `GmailSyncController` stamps `accountID` on new ingested expenses by looking up accounts by `gmailAddress`
-3. **SelfTransferDetector + TransferConfirmView** — pure static scorer called after each sync batch; confirm UI reuses `ReviewInboxRow` pattern; flagged pairs get `transferStateRaw = "pendingReview"`
-4. **PriceFetchService + NetWorthAggregator + AssetsView** — `@Observable` fetch service; `NetWorthAggregator.totalNetWorth(accounts:assets:)` is pure/synchronous; always renders from cached `lastKnownNav`
-5. **RoutineResetService** — pure struct; called on `scenePhase .active`; resets `block.isChecked = false` on all blocks of routine notes where `routineLastResetDate < startOfToday`; explicit `context.save()` at end
-6. **BudgetCalculator (modified)** — all spend queries gain `transferStateRaw != "confirmed"` predicate; confirmed transfers visible only in a dedicated Transfers section
+**Major new components:**
+1. `DesignSystem/DesignTokens.swift` — single source of truth for all visual constants; no view ever hardcodes a hex value
+2. `DesignSystem/NeuSurface.swift` — `ViewModifier` with `.raised`, `.pressed`, `.inset` variants; replaces existing `CardStyle`
+3. `DesignSystem/NeuTabBar.swift` — floating capsule tab bar replacing native SwiftUI tab bar via `.toolbar(.hidden, for: .tabBar)`
+4. `DesignSystem/RollingMoneyText.swift` — animated odometer; Decimal to Double for animation interpolation only; formats from authoritative Decimal at end state
+5. `Support/AnalyticsAggregator.swift` — pure static; buckets + delta% + byCategory + `SpendSummary` for AI; reuses `SpendOverTimeAggregator` bucketing, never reimplements it
+6. `Features/Analytics/AnalyticsView.swift` — new screen pushed from Overview (not a 6th tab — matches `home.jsx` design intent); owns `InsightService` as `@State`
+7. `Features/Analytics/InsightService.swift` — `@Observable`, `@available(iOS 26, *)`, manages session lifecycle, caching, streaming, all error branches
+8. `Features/Analytics/AIInsightCard.swift` — conditionally rendered; hidden entirely on ineligible devices
 
-**Key anti-patterns to avoid (all four agents agree):**
-- `@Relationship` between Account and Expense (fan-out + CloudKit incompatibility) — use UUID FK
-- Storing asset type as a Swift enum in @Model — use `assetTypeRaw: String?`
-- PriceFetchService as a singleton — own as `@State` in AssetsView
-- BGAppRefreshTask for routine reset — use `scenePhase .active` hook instead
-- Replacing `sourceAccount` with `accountID` FK — keep both; sourceAccount is the dedup key
+**Modified components:** `RootView` (add NeuTabBar overlay, suppress native tab bar), `CardStyle` (replace with `neuSurface(.raised)` or delete), `CategoryStyle` (extend to use `DesignTokens.catColors`), `DonutChart` (restyle colors, keep chart logic intact), all existing screen views (apply neumorphic tokens).
+
+**No schema change:** SchemaV9 is sufficient throughout. No new `@Model` types, no `VersionedSchema` bump, no typealias risk.
 
 ### Critical Pitfalls
 
-1. **DayAgendaView EXC_BAD_ACCESS on cascade-deleted NoteBlock** — Guard every model property access in CalendarView/DayAgendaView with `isDeleted`/`modelContext != nil` check before accessing `block.isChecked` or `note.blocks`. Fix before any schema work. (PITFALLS.md Pitfall 1, vector c)
+1. **Neumorphic contrast failure on interactive elements** — The neuro skin's 3.5% white shadow fails WCAG 1.4.11 for non-text UI components; buttons defined only by shadow depth are invisible to low-contrast users. Prevention: build contrast assertions into `NeuSurface` and `NeuTabBar` from the start; run Xcode Accessibility Inspector with Greyscale filter after every new component; mandate zero Accessibility Inspector warnings as a Phase A exit criterion. The canary yellow (`#FFD60A` = 8:1+ on charcoal) must be used for all active/selected states.
 
-2. **GmailSyncController cross-actor Category references across await suspension points** — Capture only `[String: PersistentIdentifier]` before the `for messageID` loop; re-fetch `Category` by ID inside the same context after each await. Move `ctx.save()` outside the per-message loop — batch all inserts, one save after the loop. (PITFALLS.md Pitfall 1, vectors b and e)
+2. **Hallucinated monetary figures in AI Insight** — FoundationModels cannot perform arithmetic; prompting it to compute percentages or rupee amounts produces plausible but factually incorrect numbers that erode user trust in a finance app. Prevention: pre-compute ALL figures in Swift using exact `Decimal` arithmetic inside `AnalyticsAggregator`; inject as literal context strings; use a `@Generable` struct with only a `String` insight field; implement `InsightVerifier` that cross-checks any rupee figure in the output against injected context and falls back to a templated string on mismatch.
 
-3. **SchemaV6 backfill: sourceAccount string → accountID FK** — This is the single highest-risk migration task. Must have a non-nil `didMigrate` closure that walks all existing Expenses and links `accountID` by matching `sourceAccount` strings to Account entities. Requires a V5 fixture migration test under Swift Testing before shipping. Silent failure leaves all existing expenses unlinked with no crash or error. (PITFALLS.md Pitfall 4)
+3. **Dynamic Type breakage from pixel font sizes** — The design handoff specifies pixel-exact sizes (11px, 13px, 42px). Translating directly to `.font(.system(size: 42))` bypasses Dynamic Type scaling. Prevention: define a `NMFont` enum mapping each design size to the nearest `Font.TextStyle`; use `@ScaledMetric` for derived layout values; include UI snapshot tests at `xsSmall` and `accessibility5` presets in Phase A.
 
-4. **Self-transfer false positives hiding real spend** — Never auto-exclude. The confirm flow is mandatory. Gate "own account" signal strictly: both `sourceAccount` values must resolve to known Account entities. Exact Decimal match only — no fuzzy amount tolerance for Indian bank alerts. (PITFALLS.md Pitfall 5)
+4. **Reduce Motion violations** — Rolling-money odometer, breathing AI orb, and area chart animations must stop when Reduce Motion is enabled. Prevention: create a shared `MotionEnvironment` observable reading `@Environment(\.accessibilityReduceMotion)` at root; every `withAnimation` call site and `animateOnMount` flag must branch on this gate; test by enabling Reduce Motion in Simulator and walking every animated screen.
 
-5. **Stale asset prices presented without date context** — Every asset price shown must carry an "as-of date" label. Manual override must always be available. UI must never block on a network call; always render from `lastKnownNav` immediately, refresh in background. Amber stale badge when `navDate` is >1 trading day old. Parse NAV values as `String` → `Decimal(string:)`, never `Double`. (PITFALLS.md Pitfalls 6, 7, 8)
+5. **iOS 26 deployment target trap** — Developer silences FoundationModels compiler errors by raising the deployment target from iOS 17 to iOS 26, instantly dropping all iOS 17–25 devices. Prevention: keep `IPHONEOS_DEPLOYMENT_TARGET = 17.0`; mark `InsightService` with `@available(iOS 26, *)`; use `if #available(iOS 26, *) { ... }` in `AnalyticsView` to conditionally render the AI section; write a unit test verifying all four availability branches.
+
+6. **Missing pbxproj file registrations** — The project uses explicit `PBXFileReference` entries (no synchronized groups). New `.swift` files in `DesignSystem/` and `Features/Analytics/` are silently excluded until 4 manual `project.pbxproj` edits are made per file. Incremental builds may succeed while clean builds fail. Prevention: register every new `.swift` file in the same commit it is created; clean build (`xcodebuild clean build`) is a required exit criterion for every phase.
+
+7. **FoundationModels 4096-token context limit and guardrail false positives** — Verbose prompts with raw expense lists exceed the on-device context window (`exceededContextWindowSize`); finance vocabulary can trigger `guardrailViolation`. Prevention: pre-aggregate to max 8 category totals + 3 top merchants before prompt; implement `PromptBuilder` with 2,048-token budget guard; catch both errors explicitly and fall back to templated string.
 
 ---
 
 ## Implications for Roadmap
 
-### Suggested Build Order
+Based on the dependency graph across all four research files, the build order is fixed. The design system is a hard prerequisite — not optional Phase 1 nice-to-have.
 
-```
-Phase 1: Stabilization (bugs + routine data model fix)
-    |
-    v  (gates everything — no schema work until crashes are fixed)
-Phase 2: SchemaV6 + Accounts Management
-    |
-    v  (gates self-transfer — needs Account entity for "own account" signal)
-Phase 3: Self-Transfer Detection
-    |
-    v  (independent of assets; completes spend-accuracy picture before net-worth view)
-Phase 4: Asset Tracker           (only needs Phase 2; can parallel Phase 3)
-    |
-Phase 5: Notes Enhancement       (only needs Phase 2; can parallel Phases 3 and 4)
-```
+### Phase A: Design System Foundation
 
-Notes Enhancement and Asset Tracker can run in parallel or interleaved after SchemaV6 is complete; both only depend on the schema phase, not on each other or on Self-Transfer.
+**Rationale:** All other v1.2 work depends on stable token constants, the `NeuSurface` modifier, and the capsule tab bar. Building any screen before tokens are locked means every color and shadow value gets written twice. This phase also establishes the accessibility and Reduce Motion infrastructure that all subsequent phases inherit automatically.
 
----
+**Delivers:** Working neumorphic foundation app-wide: `DesignTokens` enum, `NeuSurface` modifier (raised/pressed/inset), `NeuTabBar` capsule overlay, `RollingMoneyText`, `DeltaChip`, `SegmentedRangeBar`, `MotionEnvironment` (Reduce Motion gate), updated `CategoryStyle` with luminous palette, `CardStyle` replaced.
 
-### Phase 1: Stabilization
+**Features addressed:** NeuSurface/NeuTokens (P1), RollingNumberView (P1), capsule tab bar (P1), typography token definitions.
 
-**Rationale:** Two confirmed crash vectors and one data-model bug must be resolved before any schema or feature work. These fixes require no migration, no new models, and no new dependencies — they are pure logic/guard corrections. All four agents rank this as the unconditional gate.
+**Pitfalls to avoid:** Contrast failure (Accessibility Inspector zero-warning check in component tests), Dynamic Type breakage (NMFont enum here), Reduce Motion violations (MotionEnvironment here), shadow performance in lists (single-pass `Canvas` or `compositingGroup` per row, not two `.shadow()` per row in `ForEach`), missing pbxproj registrations (clean build after all 10+ new files added at once).
 
-**Delivers:**
-- Crash-free Notes + Calendar: `DayAgendaView`/`AgendaReminderItem` `isDeleted` guard before accessing `block.isChecked` or `note.blocks`
-- Crash-safe Gmail sync: `Category` PersistentIdentifier capture replaces live @Model reference across `await` suspension points; `ctx.save()` moved outside per-message loop
-- Category sort order fix: `max(existing.sortOrder) + 1` on insert
-- RoutineResetService skeleton wired to `scenePhase .active` (the `lastCheckedDate` field itself lands in SchemaV6 in Phase 2; Phase 1 ships the crash fixes and seeds the service structure)
+**Research flag:** Standard patterns — no additional phase research needed.
 
-**Addresses:** FEATURES.md "Stabilisation fixes: category ordering, sync/notes crash" (P1 must-have)
+### Phase B: Restyle Existing Screens
 
-**Avoids:** PITFALLS.md Pitfalls 1 (crash), 2 (stale routine completion), 3 (category sort), 10a (timezone routine reset)
+**Rationale:** Restyling all screens in one focused pass immediately after the token foundation is stable prevents token drift. Order within phase: Overview first (most sub-components), then Activity + Expenses, then Budgets, then Notes, then Settings/Accounts/Assets/Transfer Inbox.
 
-**Research flag:** Standard patterns; no research phase needed.
+**Delivers:** Every screen using neumorphic tokens; no stock SwiftUI system colors visible anywhere; `DonutChart.swift` restyled with luminous category palette and glow (chart logic unchanged); floating tab bar safe-area insets applied to all scroll containers.
 
-**TENSION — routine fix phasing:** FEATURES.md and PITFALLS.md classify the routine data-model fix as Phase 1. ARCHITECTURE.md places the `lastCheckedDate` field addition in SchemaV6. **Resolution:** The RoutineResetService logic and the DayAgendaView guard ship in Phase 1 (no schema change required for the guard). The `lastCheckedDate` field is bundled into SchemaV6 in Phase 2 to avoid an intermediate migration stage. Phase 1 delivers the crash fixes and service skeleton; Phase 2 completes the data model and wires the full per-day reset.
+**Features addressed:** Full app restyle (P1); `DonutChart.swift` color update (prerequisite for spend donut P1).
 
----
+**Pitfalls to avoid:** DonutChart clipping — apply `.clipShape` to card container, not the `Chart` view; DonutChart color mismatch — update `DonutSegment.color` in the aggregator, not the view; safe area inset for floating tab bar — all `ScrollView` and `List` containers need `.safeAreaInset(edge: .bottom)` equal to tab bar height + 16pt; clean build after each screen batch.
 
-### Phase 2: SchemaV6 + Accounts Management
+**Research flag:** Standard patterns — no additional phase research needed.
 
-**Rationale:** SchemaV6 is the foundation for all feature areas. All new models, fields, and migration stages must be in place before any feature that reads or writes them. Accounts is bundled here because Account is the first new @Model and its `didMigrate` backfill is the riskiest migration task — validating it early contains that risk before other features build on top.
+### Phase C: Analytics Screen
 
-**Delivers:**
-- SchemaV6 migration: `Account` and `Asset` @Model types; `Expense.accountID`, `isTransfer`, `transferPairID`, `transferConfirmed`, `transferStateRaw`; `Note.isRoutine`, `routineLastResetDate`; `NoteBlock.lastCheckedDate`
-- `v5ToV6` `didMigrate` closure: backfills `expense.accountID` from `sourceAccount` strings; covered by a migration test against a real V5 fixture store
-- `sourceAccount` field retained unchanged on `Expense` — it is the Gmail dedup key, must not be removed
-- AccountsView CRUD (add/edit/delete Account; manual balance; last-updated timestamp)
-- AccountLinkingService: post-creation backfill pass + GmailSyncController `accountID` stamping on new ingested expenses
-- Per-account monthly spend total (filtered @Query on Expense)
-- `NoteBlock.lastCheckedDate` wired into RoutineResetService; full per-day reset operational
+**Rationale:** Analytics is independent of screen restyle (only depends on Phase A tokens) but benefits from seeing the restyled Overview first to confirm design direction before committing Analytics layout. The aggregator must be written and unit-tested before the view is built.
 
-**Addresses:** FEATURES.md Accounts table stakes (all five)
+**Delivers:** Full Analytics screen pushed from the Overview Analytics entry row (not a 6th tab — matches `home.jsx` `openAnalytics` callback design intent); `AnalyticsAggregator` with IST-correct date bucketing and prior-period delta; area chart with Catmull-Rom interpolation and peak marker; by-category horizontal bars with stagger animation; time-range tabs (Week/Month/Year); spend headline + delta chip; "Where it's going" spend donut on Overview with grow-in animation; `SpendSummary` struct ready for AI consumption.
 
-**Avoids:** PITFALLS.md Pitfall 4 (sourceAccount → Account migration data loss); Pitfall 1.6 (ModelContainer migration crash)
+**Features addressed:** Analytics screen (all P1 items), spend donut on Overview (P1).
 
-**Research flag:** The `didMigrate` closure pattern may benefit from a focused planning research pass. This is the codebase's first non-nil `didMigrate` closure — verify error-handling behavior (does a throwing closure roll back or leave the store partially migrated?) against the existing `FB13812722` workaround in `MigrationPlan.swift`. All other Accounts work is standard SwiftData CRUD.
+**Pitfalls to avoid:** UTC/IST midnight bucketing — use `Calendar.current` with explicit `timeZone = TimeZone.current`; write `testMidnightISTBucketBoundary` with expenses at 18:29Z and 18:31Z asserting different IST day buckets; never pass `@Query` arrays directly into Chart DSL — aggregate in `body {}` first; Year tab must clip to current month (no future-month zero bars); clean build.
 
----
+**Research flag:** Standard patterns — `SpendOverTimeAggregator` discipline is proven in the codebase; IST bucketing test is explicitly called out with exact test cases.
 
-### Phase 3: Self-Transfer Detection
+### Phase D: AI Insight Card
 
-**Rationale:** Requires the Account entity (Phase 2) to be complete — the "both accounts are own accounts" signal is the essential false-positive gate. The `transferStateRaw` and other Expense transfer fields are already in SchemaV6 from Phase 2.
+**Rationale:** Hard dependency on Phase C: `InsightService.refresh()` takes a `SpendSummary` from `AnalyticsAggregator`; the card lives inside `AnalyticsView`. Must come last.
 
-**Delivers:**
-- `SelfTransferDetector` pure static struct: 5-signal scorer, 3-day calendar window, exact Decimal amount match, own-account gate
-- Transfer Inbox (TransferConfirmView): three-state confirm UI reusing `ReviewInboxRow` pattern; separate section from low-confidence parse inbox
-- `BudgetCalculator` and `SpendOverTimeAggregator` updated: `transferStateRaw != "confirmed"` predicate on all spend queries
-- Retroactive detection pass on v1.1 first launch over historical expenses
-- Net transfer flow summary on Overview
+**Delivers:** `InsightService` (`@Observable`, `@available(iOS 26, *)`); `SpendInsight` `@Generable` struct (String-only output fields); streaming generation via `streamResponse(to:)` with typewriter reveal; breathing orb loading state; `InsightVerifier` cross-checking output against injected facts; `PromptBuilder` with 2,048-token budget guard; graceful fallback for all four unavailability cases (section hidden for `deviceNotEligible`, settings CTA for `notEnabled`, skeleton for `modelNotReady`, retry button for generation failure); `prewarm()` called on Analytics screen appear.
 
-**Addresses:** FEATURES.md Self-Transfer table stakes and differentiators
+**Features addressed:** AI Insight card (P1), typewriter reveal, streaming.
 
-**Avoids:** PITFALLS.md Pitfall 5 (false positives); UX pitfall of auto-exclusion without confirmation
+**Pitfalls to avoid:** Finance-AI hallucination — `InsightVerifier` is mandatory before shipping; deployment target trap — `grep IPHONEOS_DEPLOYMENT_TARGET project.pbxproj` must return `17.0`; context window — `PromptBuilderTests.testBudgetWith150Expenses` must pass under 2,048 estimated tokens; guardrail false positives — catch `guardrailViolation` and show templated fallback; latency — use `streamResponse` not blocking `respond`, call `prewarm()` on screen appear; parallel sessions — serialise requests; clean build; verify all four availability branches in unit tests.
 
-**Research flag:** Standard patterns — signal scorer logic and ReviewInboxRow reuse are well-understood. No research phase needed. During planning, spot-check a sample of the household's historical expenses to validate the 3-day window covers all actual self-transfers (the window is reasoned but unvalidated against real data).
-
----
-
-### Phase 4: Asset Tracker
-
-**Rationale:** Depends only on SchemaV6 (Phase 2). Independent of Self-Transfer (Phase 3) and Notes Enhancement (Phase 5). Can be built in parallel with Phase 3 in a two-track workflow; in single-track serial order it comes after Self-Transfer to keep spend-accuracy complete before net-worth is built.
-
-**Delivers:**
-- `Asset` @Model CRUD (add/edit/delete holding; units, cost basis, manual NAV override)
-- PriceFetchService: AMFI NAVAll.txt bulk parse (primary MF source); mfapi.in (fallback/onboarding search); Yahoo Finance `v8/finance/chart` for stocks (best-effort, timeout < 3s); npsnav.in for NPS (best-effort)
-- NetWorthAggregator: pure static `totalNetWorth(accounts:assets:)`
-- NetWorthView: account balances + holdings; "as of [date]" label on every price; amber stale badge for NAVs older than 1 trading day; always renders from `lastKnownNav` (never blocks)
-- Asset allocation chart (pie/donut by type via Swift Charts)
-- Manual NAV override with "manual" badge
-
-**Addresses:** FEATURES.md Asset Tracker table stakes (all seven)
-
-**Avoids:** PITFALLS.md Pitfalls 6 (unofficial endpoint breaking), 7 (Decimal vs Double), 8 (stale price as live), 10b (timezone NAV date parsing with `TimeZone(identifier: "Asia/Kolkata")`)
-
-**Research flag:** AMFI NAVAll.txt field format and Yahoo Finance response structure are already verified in STACK.md. No additional research phase needed. If Yahoo Finance breaks during implementation: fall back to manual-only for stocks without delay; do not chase alternative endpoints.
-
----
-
-### Phase 5: Notes Enhancement (Daily Routine Calendar Reminder)
-
-**Rationale:** Depends only on SchemaV6 (Phase 2). Independent of Phases 3 and 4. In single-track serial order it comes last; it can be parallelized with Phase 4 once Phase 2 is complete.
-
-**Delivers:**
-- `Note.isRoutine` toggle in EditNoteView; `Note.routineTime` time picker
-- RoutineResetService fully wired: resets `block.isChecked = false` where `routineLastResetDate < startOfToday(IST)`; explicit `context.save()`; called from `RootView.onChange(of: scenePhase)` on `.active`
-- Daily notification via existing `NotificationScheduler` with `.daily` recurrence; `schedule()` called only on enable/edit, never on every BGAppRefreshTask run
-- CalendarAggregator integration: `isRoutine = true` notes surface as repeating daily events in CalendarView (no changes to CalendarAggregator needed — existing `reminderEnabled = true` + `RecurrenceType.daily` path already handles this)
-- Multiple routines supported via independent Notes with `isRoutine = true`
-
-**Addresses:** FEATURES.md Notes Enhancement table stakes (all six)
-
-**Avoids:** PITFALLS.md Pitfall 9 (notification explosion from re-scheduling on every BGAppRefreshTask); Pitfall 10a (timezone routine reset must use `Calendar.current` with explicit `timeZone = TimeZone.current`, not UTC calendar)
-
-**Research flag:** All infrastructure exists. The only new code is thin wiring. No research phase needed. One unit test is critical and must be written: call `schedule()` N times for the same reminder ID and assert `pendingCount() == 1`.
-
----
+**Research flag:** This phase requires knowing whether the dev iPhone is A17 Pro+ for on-device testing. If not, all testing uses a mock `InsightService`. The mock path is straightforward; no additional research needed either way.
 
 ### Phase Ordering Rationale
 
-- **Stabilization before schema:** Crash fixes are no-migration logic changes; doing schema work on a crashing app risks masking or compounding crash vectors and makes debugging harder.
-- **SchemaV6 + Accounts before Self-Transfer:** The "both accounts are own accounts" signal is the false-positive gate — Account entity must exist before the scorer is meaningful.
-- **SchemaV6 before Assets and Notes Enhancement:** Both depend on new @Model fields in SchemaV6.
-- **Assets and Notes Enhancement are parallel after SchemaV6:** Neither depends on the other; both depend only on the schema phase.
-- **Self-Transfer before Assets in serial order:** Self-Transfer completes the spend-accuracy picture (confirmed transfers excluded from totals) before the net-worth view is built, ensuring net-worth figures are correct from day one.
+- Phase A must precede everything: no token constants = restyling is written twice; no `MotionEnvironment` = Reduce Motion wired incorrectly in every subsequent view.
+- Phases B and C are technically parallelisable after Phase A completes, but B to completion first keeps the restyle concern in one focused context and reduces the risk of a token change in Phase C rippling back into already-restyled views.
+- Phase D has a hard dependency on Phase C: `SpendSummary` and `AnalyticsView` must exist before `InsightService` can be wired.
+- No schema changes anywhere in v1.2: SchemaV9 is sufficient throughout, eliminating the entire typealias/migration-footgun category.
 
 ### Research Flags
 
-Phases needing deeper research during planning:
-- **Phase 2 (`didMigrate` closure):** First non-nil `didMigrate` closure in this codebase. Recommend a focused research pass on SwiftData custom migration error-handling behavior before writing the migration stage.
+**Phases with standard patterns (no research phase needed):**
+- Phase A: `ViewModifier` + `.shadow()` is a primitive SwiftUI pattern; neumorphic dual-shadow implementation is thoroughly documented.
+- Phase B: Screen restyling is mechanical application of Phase A tokens; no new APIs.
+- Phase C: `SpendOverTimeAggregator` pattern is already proven in the codebase; `AreaMark` / `BarMark` are used in v1.0.
+- Phase D: FoundationModels implementation pattern is documented with Swift code examples in STACK.md; PITFALLS.md covers every error branch with specific catch clauses.
 
-Phases with standard patterns (skip research phase):
-- **Phase 1 (Stabilization):** Root causes are confirmed; fixes are deterministic.
-- **Phase 3 (Self-Transfer):** Signal scorer and ReviewInboxRow reuse are well-understood. Spot-check historical data during planning to validate the 3-day window.
-- **Phase 4 (Asset Tracker):** AMFI and Yahoo Finance formats are verified. PriceFetchService mirrors existing GmailSyncController pattern.
-- **Phase 5 (Notes Enhancement):** All infrastructure exists; thin wiring only.
+### Open Questions for Roadmap Planning
+
+1. **Analytics as push from Overview vs. 6th tab.** Research recommends push (matches `home.jsx` `openAnalytics` callback, avoids NeuTabBar layout changes and selectedTab renumbering). Default recommendation: push from Overview. Confirm before finalising Phase C scope.
+
+2. **Dev device Apple Intelligence eligibility.** If Reo's iPhone is not iPhone 15 Pro or later, all Phase D AI testing uses mock `InsightService`. Confirm device before Phase D begins to set correct expectations.
 
 ---
 
@@ -246,45 +172,53 @@ Phases with standard patterns (skip research phase):
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | v1.0 stack unchanged; v1.1 data sources verified June 2026; Yahoo Finance is LOW for that specific source but overall stack is HIGH |
-| Features | HIGH | All four areas well-scoped; dependency graph is clear; anti-features explicitly called out |
-| Architecture | HIGH | Based on direct codebase reading (SchemaV5, MigrationPlan, GmailSyncController, CalendarView, NotificationScheduler); no speculation |
-| Pitfalls | HIGH | Root causes confirmed against codebase + Apple Developer Forums; crash vectors are identified, not inferred |
+| Stack | HIGH | All technologies are first-party Apple frameworks with official documentation; no third-party choices; zero new SPM dependencies |
+| Features | HIGH | Design handoff is the authoritative pixel-faithful spec; features map directly to it; must-have / P2 / defer boundaries are clear |
+| Architecture | HIGH | Based on direct codebase reading of 187 Swift files at SchemaV9; existing patterns (`SpendOverTimeAggregator`, `@Observable` services, dynamic `@Query` init) are verified and directly reusable |
+| Pitfalls | HIGH (neumorphism, Swift Charts, pbxproj); MEDIUM (FoundationModels latency and guardrail behaviour) | Accessibility and shadow performance pitfalls verified against WCAG and community sources; FoundationModels latency benchmarks from community sources, not Apple-published SLAs |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **SchemaV6 `didMigrate` closure error handling:** The codebase has no prior example of a non-nil `didMigrate` closure. Before writing it, validate whether a throwing `didMigrate` rolls back the migration or leaves the store in a partial state — particularly in the context of the existing `FB13812722` workaround in `MigrationPlan.swift`.
+- **FoundationModels latency under IST real conditions:** The 2–5 second generation latency and streaming characteristics are from community sources, not Apple-published SLAs. Mitigation: `prewarm()` on screen appear; streaming so first character appears quickly; hard 10-second timeout with templated fallback. No additional research needed — these mitigations are correct regardless of exact latency.
 
-- **Self-transfer 3-day window validation:** The 3-day window is well-reasoned for Indian domestic settlement (NEFT/IMPS/UPI) but has not been validated against the household's actual transaction history. Spot-check historical expenses during Phase 3 planning to confirm 3 days is sufficient and does not miss weekend-lag transfers.
+- **Guardrail vocabulary sensitivity with Indian finance terms:** Specific terms that trigger `guardrailViolation` are not documented. Mitigation: neutral framing in prompts, avoid emotionally charged framing, catch `guardrailViolation` with fallback, test with a max-spend month scenario (rent + dining + medical in same month) before shipping Phase D.
 
-- **Yahoo Finance rate-limit behavior for this household:** A 2-person household with ~10–20 stock holdings fetching once per day is far below the reported ~360 req/hr community cap. The accepted risk is that the endpoint can add auth requirements without notice. The implementation must fall back to manual immediately on any non-200 or decode error — do not retry.
-
-- **npsnav.in availability guarantee:** Single-maintainer hobby project. App must degrade gracefully to last-known NAV on any fetch failure. Manual override is the primary NPS entry path; treat the API as a convenience-only enhancement.
+- **Dev device Apple Intelligence eligibility:** Unknown at research time. User to confirm before Phase D begins.
 
 ---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Direct codebase reading — `SchemaV5.swift`, `MigrationPlan.swift`, `GmailSyncController.swift`, `CalendarView.swift`, `NotificationScheduler.swift`, `CalendarAggregator.swift`, `ReviewInboxRow.swift`, `GmailAccountStore.swift`
-- `portal.amfiindia.com/spages/NAVAll.txt` — Verified field format June 2026; semicolon-delimited; Scheme Code field 1, NAV field 5, Date field 6 in DD-MMM-YYYY format
-- developer.apple.com — Swift 6.2, Xcode 26, SwiftData iOS 17+, `@Observable`, `BGAppRefreshTask`
-- github.com/apple/swift-testing — Bundled in Swift 6 toolchain; parameterized + parallel + async-native
+- `design/design_handoff_myhome_neumorphic/src/tokens.jsx` — canonical neuro skin token values (surface colors, shadow formulas, accent palette, category colors)
+- `design/design_handoff_myhome_neumorphic/src/ui.jsx` — TabBar, Screen, Row components; floating capsule tab bar specification
+- `design/design_handoff_myhome_neumorphic/src/analytics.jsx` — Analytics screen, AIInsight card, AreaChart, CategoryBars, LiquidTabs
+- `design/design_handoff_myhome_neumorphic/src/home.jsx` — HomeScreen; Analytics entry as push not tab (`openAnalytics` callback)
+- `design/design_handoff_myhome_neumorphic/src/motion.jsx` — RollingNumber/RollingMoney animation spec (780ms easeOutCubic)
+- Apple Developer Documentation: `SystemLanguageModel`, `LanguageModelSession`, `LanguageModelSession.GenerationError` — availability states, error types, device eligibility
+- Apple WWDC25 session 286 "Meet the Foundation Models framework" — capabilities, limitations, 4096-token context window, hardware requirements
+- Apple WWDC25 session 248 "Explore prompt design and safety for on-device foundation models" — guardrail behaviour, prompt engineering guidance
+- Direct codebase reading: `RootView.swift`, `DonutChart.swift`, `SpendOverTimeAggregator.swift`, `BudgetCalculator.swift`, `OverviewAggregation.swift`, `CardStyle.swift`, `CategoryStyle.swift`, `SchemaV9.swift`, `MyHomeApp.swift`
+- Project memory: `xcodeproj-explicit-file-refs.md`, `schema-version-mutation-footgun.md`, `AccountBalance sign convention`
 
 ### Secondary (MEDIUM confidence)
-- `api.mfapi.in/mf/{schemeCode}` — Verified June 2026; JSON; `data[0].nav` string decimal; community-maintained AMFI wrapper
-- `npsnav.in/api/latest-min` — Verified June 2026; JSON `[schemeCode, nav]` pairs; data from Protean CRA (official PFRDA-appointed CRA); single-maintainer open-source aggregator
-- YNAB transfer matching documentation — Exact-amount-match requirement and two-transaction rule; adapted to 3-day window for Indian settlement
-- Apple Developer Forums — SwiftData EXC_BAD_ACCESS, cross-actor ModelContext violations, migration relationship crashes (forums.developer.apple.com/forums/thread/745424, /757820)
-- fatbobman.com, simplykyra.com, delasign.com — SwiftData threading and deleted-object crash patterns
+- AppCoda "Building Pie Charts and Donut Charts with SwiftUI in iOS 17" — SectorMark iOS 17 availability confirmed
+- AppCoda "Getting Started with Foundation Models in iOS 26" — availability gating patterns, graceful degradation
+- AzamSharp "The Ultimate Guide to the Foundation Models Framework" — token limits, latency benchmarks, `prewarm()`
+- CreateWithSwift "Exploring the Foundation Models Framework" — `@Generable` macro, `@Guide` constrained fields
+- Hacking with Swift "How to Build Neumorphic Designs with SwiftUI" — dual-shadow ViewModifier pattern
+- Axess Lab "Neumorphism — the accessible and inclusive way" — WCAG 1.4.11 contrast requirements for Soft UI interactive elements
+- Medium (Xurxe Toivo Garcia) "For a more accessible Neumorphism" — shadow opacity thresholds for accessibility
+- Hacking with Swift Forums "Performance issues when adding shadows to a bunch of views" — `Canvas` / `compositingGroup` mitigation for list row shadows
+- Fatbobman "Fixing ScrollView Clipping — Allow Shadows to Overflow in SwiftUI" — chart container clipping prevention
+- DEV Community "How to Fall Back Gracefully When Apple Intelligence Isn't Available" — unavailability reason UX patterns
 
 ### Tertiary (LOW confidence)
-- `query1.finance.yahoo.com/v8/finance/chart/{sym}` — Verified working June 2026; `chart.result[0].meta.regularMarketPrice`; undocumented, no formal ToS coverage; `~360 req/hr` rate limit per community reports (github.com/ranaroussi/yfinance issue #2128)
-- 0xramm/Indian-Stock-Market-API, maanavshah/stock-market-india — Unofficial Yahoo Finance wrappers for India stocks; confirms fragility of the ecosystem
+- eleken.co "Fintech UX best practices" — progressive disclosure, contextual insights — informs Analytics screen information hierarchy but not implementation
 
 ---
-
-*Research completed: 2026-06-08*
+*Research completed: 2026-06-20*
+*Milestone: v1.2 Neumorphic Redesign*
 *Ready for roadmap: yes*

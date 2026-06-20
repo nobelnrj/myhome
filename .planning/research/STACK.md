@@ -1,7 +1,7 @@
 # Stack Research
 
 **Domain:** iOS-only personal-finance + notes household app (single-user v1, CloudKit-ready, Gmail-ingested expenses, Face ID-gated, TDD)
-**Researched:** 2026-05-28 (v1.0) · **Updated:** 2026-06-08 (v1.1 additions)
+**Researched:** 2026-05-28 (v1.0) · **Updated:** 2026-06-08 (v1.1 additions) · **Updated:** 2026-06-20 (v1.2 neumorphic + AI additions)
 **Confidence:** HIGH for Apple-platform choices; MEDIUM for Gmail-on-iOS library choice (vendor SDK volatility); LOW where noted inline
 
 ---
@@ -14,6 +14,8 @@ The single most important non-obvious recommendation: **use SwiftData**, not Cor
 
 **v1.1 addendum:** All four new feature areas (Asset Tracker, Accounts, Self-Transfer Detection, Notes Enhancement) require **zero new SPM dependencies**. The only meaningful stack addition is a set of external HTTP data sources for pricing data — all free, all hit via the existing `URLSession`. The main architectural additions are: a `PriceService` actor pattern (URLSession + caching), a `VersionedSchema` bump for the new `Account` and `Asset` SwiftData models, and plain-text/JSON parsing helpers. Full detail in the v1.1 section below.
 
+**v1.2 addendum:** The neumorphic redesign, Swift Charts analytics surfaces, and FoundationModels AI insight require **zero new SPM dependencies**. Every new capability is delivered by first-party Apple frameworks. The only adoption decisions are: (1) a design-system implementation in pure SwiftUI using `ViewModifier`/`ShapeStyle` primitives, (2) enabling Swift Charts `SectorMark` (already available at the iOS 17 floor), (3) importing `FoundationModels` behind a `#available(iOS 26, *)` guard that keeps the iOS 17 deployment target intact. Full detail in the v1.2 section below.
+
 ---
 
 ## Recommended Stack
@@ -25,16 +27,17 @@ The single most important non-obvious recommendation: **use SwiftData**, not Cor
 | **Swift** | 6.2 (current as of May 2026) | Application language | Bundled with Xcode 26; introduces `@concurrent`, inline arrays, the `Span` type, and matured strict concurrency. For a learner, Swift 6.2's "Approachable Concurrency" mode lets you opt into single-threaded-by-default and skip the strict concurrency cliff that bit early Swift-6 adopters. |
 | **SwiftUI** | iOS 17 baseline (iOS 26 features available) | UI framework | The default modern path. iOS 17+ removed essentially every reason to mix UIKit. RN background makes the declarative model a comfortable jump. |
 | **iOS deployment target** | **iOS 17.0** | Minimum supported OS | iOS 17 unlocks `@Observable`, SwiftData, `ScrollView` paging, `ContentUnavailableView`, `inspector`, and improved Swift Charts. Both users have recent iPhones (per PROJECT.md), so iOS 17 is free. Do **not** target iOS 16 — you lose SwiftData and the entire Observation framework. |
-| **Xcode** | **26.x** (current branch; 26.3 latest at time of writing) | IDE / build / Instruments / simulator | Required for Swift 6.2, Swift Testing UI integration, the new SwiftUI Instrument, and Icon Composer. Older Xcode 15 is not viable: no `#expect` test reporter, no Swift 6 strict concurrency, no Liquid-Glass support. |
+| **Xcode** | **26.x** (current branch; 26.5 latest at time of writing) | IDE / build / Instruments / simulator | Required for Swift 6.2, Swift Testing UI integration, the new SwiftUI Instrument, and Icon Composer. Required for FoundationModels compilation and the `@Generable` macro. |
 | **SwiftData** | iOS 17+ (use iOS 18+ APIs where available behind `if #available`) | Local persistence with CloudKit-ready model graph | See "SwiftData vs Core Data" section below. Right call for greenfield iOS 17+ app, especially given the CloudKit-future requirement. |
 | **Swift Testing** | Bundled in Swift 6 toolchain / Xcode 26 (no SPM dep) | Unit + integration tests | Macro-based `@Test` / `#expect`; parameterized tests; parallel-by-default; first-class async/await; can coexist with XCTest. This is the TDD-default project's primary harness. |
 | **XCTest** | Bundled | UI tests only | Swift Testing does not yet cover `XCUIApplication`-driven UI tests; UI tests stay in XCTest. Unit/integration tests should be Swift Testing. |
-| **Swift Charts** | iOS 17+ baseline (iOS 16 minimum but use 17+ features) | All charts (spend-by-category, spend-over-time) | First-party, SwiftUI-native, declarative chart DSL. No third-party charting library is competitive on iOS 17+ for this scope. |
+| **Swift Charts** | iOS 17+ baseline (iOS 16 minimum but use 17+ features) | All charts (spend-by-category, spend-over-time, donut/sector, analytics) | First-party, SwiftUI-native, declarative chart DSL. `SectorMark` (donut/pie) is available from iOS 17. `AreaMark` (trend chart) is iOS 16. No third-party charting library is competitive on iOS 17+ for this scope. |
 | **Observation framework (`@Observable`)** | iOS 17+ | View-model state | Replaces `ObservableObject`/`@Published`. Tracks field-level changes, fewer re-renders, no Combine import. |
 | **LocalAuthentication** | iOS 17+ | Face ID app lock | First-party, one API call (`LAContext.evaluatePolicy`). No alternative worth considering. |
 | **Keychain Services (Security framework)** | iOS 17+ | OAuth token storage | Required for storing the Gmail refresh token. Wrap in a thin helper (e.g., a 30-line `KeychainStore`) — do not pull in a third-party wrapper for v1. |
 | **CloudKit / NSPersistentCloudKitContainer (via SwiftData)** | iOS 17+ for SwiftData; iOS 18+ for shared databases via SwiftData | Sync (post-v1) | Already exposed through SwiftData's `ModelConfiguration(cloudKitDatabase:)`. Nothing to bolt on later beyond enabling the capability and the schema-readiness rules below. |
 | **BackgroundTasks** | iOS 17+ | Inbox polling for new bank emails | `BGAppRefreshTask` (short, frequent, network OK) is the right fit — schedule every ~30 min, opportunistically run when iOS deems the app worth waking. `BGProcessingTask` (long, plugged-in, idle) is overkill for ~50 email lookups. |
+| **FoundationModels** | **iOS 26+** (gated with `#available`) | On-device AI spending insight — natural language generation via Apple Intelligence | First-party, on-device, free, fully private. No API key, no network call, no cloud. Requires iOS 26 + Apple-Intelligence-capable hardware (iPhone 15 Pro / A17 Pro or later; or M-series iPad). Availability must be checked at runtime via `SystemLanguageModel.default.availability`. App deployment target stays iOS 17. |
 
 ### Supporting Libraries
 
@@ -52,7 +55,7 @@ The single most important non-obvious recommendation: **use SwiftData**, not Cor
 | Tool | Purpose | Notes |
 |------|---------|-------|
 | **Swift Package Manager (Xcode-integrated)** | All third-party deps | Use SPM exclusively. Both Google's SDKs and pointfreeco's libraries ship SPM manifests. No `Podfile`, no `Cartfile`. |
-| **Xcode Instruments (SwiftUI instrument new in Xcode 26)** | Performance + view-update profiling if needed | Likely unused in v1 — two users, low volume — but it is the tool you reach for first when something feels slow. |
+| **Xcode Instruments (SwiftUI instrument new in Xcode 26)** | Performance + view-update profiling if needed | Likely unused in v1 — two users, low volume — but it is the tool you reach for first when something feels slow. Also covers FoundationModels request profiling. |
 | **Xcode Test Plans** | Group Swift Testing + XCTest plans, parallelization, code coverage | Configure one plan that runs unit tests on every keystroke (CMD-U) and a separate one for UI tests. |
 
 ### Explicitly Deferred (do not install in v1)
@@ -64,6 +67,362 @@ The single most important non-obvious recommendation: **use SwiftData**, not Cor
 | **fastlane** | Solves problems a 2-user free-provisioning app does not have (TestFlight automation, screenshot generation, code-signing dance). Revisit when you upgrade to the $99/yr program and add TestFlight. |
 | **GitHub Actions / any CI** | A green local `xcodebuild test` plus a pre-commit habit is enough until you have a collaborator. CI for a solo-built household app is ceremony, not value. |
 | **Firebase Crashlytics / Sentry / any analytics** | PROJECT.md explicitly excludes telemetry. Use Xcode's built-in Organizer → Crashes once on TestFlight. |
+
+---
+
+## v1.2 Stack Additions — Neumorphic Design System + Swift Charts Analytics + FoundationModels AI Insight
+
+> This section is the primary new content for the v1.2 milestone. The validated v1.0/v1.1 stacks above are unchanged. Zero new SPM dependencies.
+
+### Summary of What Changes (and What Does Not)
+
+| Area | Change | Rationale |
+|------|--------|-----------|
+| **Neumorphic design system** | New `ViewModifier` family + `ShapeStyle` conformances in SwiftUI | Pure SwiftUI — no third-party UI library needed |
+| **Design tokens** | New `DesignSystem` namespace with typed color/radius/shadow constants | Translates `tokens.jsx` to Swift `Color`/`CGFloat`/`Shadow` constants |
+| **Rolling money readout** | `ContentTransition.numericText()` (iOS 16+) or `KeyframeAnimator` (iOS 17+) | Both available at iOS 17 floor; no dep |
+| **Floating capsule tab bar** | Custom `TabView` replacement using SwiftUI `HStack` + `.tabItem`-less capsule overlay | Pure SwiftUI |
+| **Analytics screen (area + bar charts)** | `AreaMark` + `BarMark` in Swift Charts (iOS 16+) | Already used in v1 |
+| **Spend donut on Overview** | `SectorMark` in Swift Charts (iOS 17+) | Already at floor; available today |
+| **AI Insight card** | `import FoundationModels` + `LanguageModelSession` behind `#available(iOS 26, *)` | iOS 26 feature; iOS 17 fallback required |
+| **Deployment target** | **Stays iOS 17.0** | FoundationModels gated with `#available`, not a blanket bump |
+
+---
+
+### 1. Neumorphic Design System — Pure SwiftUI
+
+**No new dependencies. No UIKit. No third-party UI library.**
+
+The design handoff (`tokens.jsx`, `liquid.css`) is a React/CSS reference. Every token maps directly to SwiftUI primitives:
+
+#### Token Translation: JSX → Swift
+
+| CSS / JSX token | Swift equivalent |
+|-----------------|-----------------|
+| `--bg: #1C1C23` | `Color(hex: "1C1C23")` — app background surface |
+| `--label: #ECEDF4` | `Color(hex: "ECEDF4")` — primary text |
+| `--glow: #FFD60A` | `Color(hex: "FFD60A")` — accent / canary yellow |
+| `--card-radius: 26px` | `cornerRadius: 26` |
+| `--glass-shadow: -6px -6px 14px rgba(255,255,255,0.035), 7px 7px 18px rgba(0,0,0,0.55)` | Two `.shadow()` modifiers: white offset top-left (highlight), dark offset bottom-right (depth) |
+| `--accent-soft: rgba(#FFD60A, 0.16)` | `Color.accent.opacity(0.16)` |
+| `font-variant-numeric: tabular-nums` | `.monospacedDigit()` on `Text` |
+
+#### Dual-Shadow Pattern (the neumorphic primitive)
+
+The neumorphic effect is entirely two `shadow` modifiers on a rounded rect. Implement as a `ViewModifier`:
+
+```swift
+struct NeumorphicCard: ViewModifier {
+    // Light source: top-left highlight
+    let highlight = Color.white.opacity(0.035)
+    // Dark shadow: bottom-right depth
+    let depth     = Color.black.opacity(0.55)
+
+    func body(content: Content) -> some View {
+        content
+            .background(Color("SurfaceBG"))       // #1C1C23
+            .clipShape(RoundedRectangle(cornerRadius: 26))
+            .shadow(color: highlight, radius: 7, x: -6, y: -6)
+            .shadow(color: depth,     radius: 9, x: 7,  y: 7)
+    }
+}
+
+extension View {
+    func neumorphicCard() -> some View { modifier(neumorphicCard()) }
+}
+```
+
+This pattern exactly replicates `--glass-shadow: -6px -6px 14px rgba(255,255,255,0.035), 7px 7px 18px rgba(0,0,0,0.55)` from the neuro style in `tokens.jsx`.
+
+#### Design Token Namespace
+
+Create a single `DesignTokens.swift` file (no external dep):
+
+```swift
+enum DS {
+    // Surfaces
+    static let bg         = Color(hex: "1C1C23")  // --bg
+    static let bgElevated = Color(hex: "262630")  // --bg-elevated2
+    static let fill       = Color(hex: "16161C")  // --fill (inset elements)
+
+    // Text
+    static let label      = Color(hex: "ECEDF4")  // --label
+    static let label2     = Color.white.opacity(0.56)
+    static let label3     = Color.white.opacity(0.32)
+
+    // Accent
+    static let accent     = Color(hex: "FFD60A")  // --glow / canary yellow
+    static let accentSoft = Color(hex: "FFD60A").opacity(0.16) // --accent-soft
+    static let positive   = Color(hex: "34E29B")  // --pos / income green
+    static let negative   = Color(hex: "FF6B6B")  // --neg / spend red
+
+    // Geometry
+    static let radius: CGFloat     = 26   // --card-radius
+    static let radiusSmall: CGFloat = 16
+
+    // Category colours (from CAT_COLORS in tokens.jsx)
+    enum Category {
+        static let groceries     = Color(hex: "2DD4BF")
+        static let dining        = Color(hex: "FB923C")
+        static let fuel          = Color(hex: "F472B6")
+        static let utilities     = Color(hex: "7DD3FC")
+        static let rent          = Color(hex: "818CF8")
+        static let shopping      = Color(hex: "E879F9")
+        static let health        = Color(hex: "A78BFA")
+        static let subscriptions = Color(hex: "22D3EE")
+        static let entertainment = Color(hex: "C084FC")
+        static let other         = Color(hex: "94A3B8")
+    }
+}
+```
+
+Add a `Color(hex:)` initializer (a 10-line extension on `Color` — a well-known pattern, no library needed).
+
+#### Rolling Money Readout
+
+`ContentTransition.numericText()` is the correct SwiftUI API. Available iOS 16+, so it is available at the iOS 17 floor with no gating needed. The iOS 17 variant adds a `value: Double` parameter for direction-aware animation (counting up vs. counting down):
+
+```swift
+// Rolling number that counts up/down when value changes
+Text(amount, format: .currency(code: "INR"))
+    .contentTransition(.numericText(value: amount))
+    .monospacedDigit()
+    .animation(.spring(response: 0.4, dampingFraction: 0.7), value: amount)
+```
+
+`monospacedDigit()` corresponds to the `.lq-num` CSS class in `liquid.css` (`font-variant-numeric: tabular-nums`).
+
+#### Floating Capsule Tab Bar
+
+SwiftUI's built-in `TabView` renders the system tab bar, which cannot be restyled into a floating capsule. The correct approach is a custom overlay tab bar:
+
+- Hide the native `TabView` tab bar with `.toolbar(.hidden, for: .tabBar)` (iOS 16+)
+- Render a custom `HStack` with SF Symbol icons in a capsule `RoundedRectangle`
+- Apply `neumorphicCard()` modifier with reduced shadow intensity for the floating state
+- Manage the selected tab with `@State var selectedTab: Tab`
+
+No library needed. The pattern is ~60 lines of pure SwiftUI.
+
+**iOS availability:** `.toolbar(.hidden, for: .tabBar)` is iOS 16+. Available at the iOS 17 floor.
+
+---
+
+### 2. Swift Charts: Analytics Screen + Spend Donut
+
+**No new dependencies. Swift Charts is already in the v1.0 stack.**
+
+#### SectorMark (Spend Donut — "Where it's going")
+
+`SectorMark` is available from **iOS 17** — exactly the deployment floor. No `#available` guard needed.
+
+```swift
+Chart(categoryTotals, id: \.category) { item in
+    SectorMark(
+        angle: .value("Spend", item.amount),
+        innerRadius: .ratio(0.55),   // donut hole
+        angularInset: 2
+    )
+    .foregroundStyle(item.color)
+    .cornerRadius(4)
+}
+.frame(height: 220)
+```
+
+`innerRadius: .ratio(0.55)` produces the donut shape. `angularInset` adds separation between wedges.
+
+#### AreaMark (Spending Trend — Analytics screen)
+
+`AreaMark` is iOS 16+. Available at floor.
+
+```swift
+Chart(dailyTotals) { point in
+    AreaMark(
+        x: .value("Date", point.date),
+        y: .value("Amount", point.amount)
+    )
+    .foregroundStyle(
+        LinearGradient(
+            colors: [DS.accent.opacity(0.5), DS.accent.opacity(0.05)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    )
+
+    LineMark(
+        x: .value("Date", point.date),
+        y: .value("Amount", point.amount)
+    )
+    .foregroundStyle(DS.accent)
+    .lineStyle(StrokeStyle(lineWidth: 2))
+}
+```
+
+Layer `LineMark` on top of `AreaMark` to draw the crisp line on top of the gradient fill — this is the standard Swift Charts pattern for an area chart with a visible edge.
+
+#### Delta Chips (Analytics screen)
+
+Delta chips ("▲ 12% vs last month") are pure SwiftUI `Text` + `Image(systemName:)` inside a `Capsule`-clipped `HStack`. No chart involvement.
+
+#### Time-Range Tabs (Analytics screen)
+
+Use `Picker(.segmented)` or a custom segmented control using the neumorphic style. SwiftUI `Picker` with `.pickerStyle(.segmented)` is the simplest path; restyle its accent to `DS.accent` via `.tint(DS.accent)`.
+
+---
+
+### 3. FoundationModels AI Insight Card — Availability-Gated
+
+This is the only genuinely new framework adoption in v1.2.
+
+#### The Core Tension: iOS 17 Floor vs. iOS 26 Requirement
+
+**FoundationModels requires iOS 26.** The app targets iOS 17. These are not in conflict — they require explicit availability gating.
+
+**Apple's supported pattern:** Keep the deployment target at iOS 17. Import `FoundationModels` (an iOS 26 framework) and guard every call site with `#available(iOS 26, *)`. On iOS 17–25 devices, the AI card renders a graceful fallback. On iOS 26 devices with Apple Intelligence enabled, the full insight generates.
+
+This is standard Apple availability gating — the same pattern used for `SwiftData` iOS 18 APIs within an iOS 17+ app. The Xcode compiler enforces that `#available` guards are present; you cannot accidentally call a FoundationModels API on an older OS without the compiler rejecting the build.
+
+#### Import and Deployment Target: No Change Required
+
+```
+Deployment Target:      iOS 17.0  ← DO NOT CHANGE
+Build SDK:              iOS 26 SDK (Xcode 26)  ← already in use
+New import:             import FoundationModels (inside #available guard)
+```
+
+The iOS 26 SDK (Xcode 26) can build code that targets iOS 17+. The linker weak-links the `FoundationModels` framework so it is absent on older OS versions — this is the same mechanism that made optional framework adoption possible since iOS 8.
+
+#### Two-Layer Availability Check
+
+FoundationModels needs two checks in sequence:
+
+1. **OS version check** (`#available(iOS 26, *)`) — confirms the framework exists at runtime
+2. **Model availability check** (`SystemLanguageModel.default.availability`) — confirms Apple Intelligence is enabled and the model is ready on *this specific device*
+
+Neither check alone is sufficient. A device can be on iOS 26 with Apple Intelligence turned off (`appleIntelligenceNotEnabled`), or on eligible hardware but with the model still downloading (`modelNotReady`).
+
+#### Recommended Implementation Pattern
+
+```swift
+// AIInsightCard.swift — the view manages its own availability state
+
+struct AIInsightCard: View {
+    let spendSummary: SpendSummary
+
+    var body: some View {
+        if #available(iOS 26, *) {
+            AIInsightCardiOS26(spendSummary: spendSummary)
+        } else {
+            AIInsightUnavailableCard(reason: .osVersion)
+        }
+    }
+}
+
+// Separated into its own file so the @available annotation is clean
+@available(iOS 26, *)
+struct AIInsightCardiOS26: View {
+    let spendSummary: SpendSummary
+    @State private var insight: String?
+    @State private var isGenerating = false
+    @State private var unavailabilityReason: AIUnavailabilityReason?
+
+    private let model = SystemLanguageModel.default
+
+    var body: some View {
+        Group {
+            switch model.availability {
+            case .available:
+                // Show insight or generate button
+                insightContent
+            case .unavailable(.appleIntelligenceNotEnabled):
+                AIInsightUnavailableCard(reason: .notEnabled)
+            case .unavailable(.deviceNotEligible):
+                AIInsightUnavailableCard(reason: .deviceNotEligible)
+            case .unavailable(.modelNotReady):
+                AIInsightUnavailableCard(reason: .modelNotReady)
+            case .unavailable:
+                AIInsightUnavailableCard(reason: .other)
+            }
+        }
+    }
+
+    private var insightContent: some View {
+        // ... neumorphic card with generated text or shimmer placeholder
+    }
+
+    func generateInsight() async {
+        guard !isGenerating else { return }
+        isGenerating = true
+        defer { isGenerating = false }
+
+        let session = LanguageModelSession(instructions: """
+            You are a concise personal finance assistant for a household budget app.
+            Analyze the spending summary and produce ONE sentence of actionable insight.
+            Be specific to the numbers. Do not use the word "budget" as a filler.
+            Response must be 25 words or fewer.
+            """)
+
+        do {
+            let prompt = spendSummary.insightPrompt  // e.g. "₹18,400 spent this month. Top: Groceries ₹5,200, Dining ₹3,800."
+            let response = try await session.respond(to: prompt)
+            insight = response.content
+        } catch {
+            // On-device model error — silently show "No insight available"
+            insight = nil
+        }
+    }
+}
+
+enum AIUnavailabilityReason {
+    case osVersion, notEnabled, deviceNotEligible, modelNotReady, other
+}
+```
+
+Key implementation decisions:
+
+- **Single-turn session per generation.** Create a new `LanguageModelSession` each time the user taps "Generate insight" — the spending summary is compact (< 200 tokens), so multi-turn context is not needed.
+- **Instructions in the session, not the prompt.** The system instruction sets the role and constraints; the prompt is purely the data. This gives the model the best signal for a well-constrained output.
+- **Keep the prompt under 200 tokens.** Spend summary for one month (top 5 categories + total) is ~50 tokens. The 4,096-token on-device model limit is not a concern at this scope.
+- **Do not use `@Generable` here.** The output is a single sentence. Structured generation adds complexity without benefit when you just want one `String`.
+- **Streaming is optional.** For a single sentence, streaming (`streamResponse`) shows no visible benefit. Use `respond(to:)` instead — simpler, no partial-state management.
+- **Graceful fallback for all unavailability cases.** Each case renders a different `AIInsightUnavailableCard` variant with appropriate messaging. The unavailable state is not an error — it is the expected path for iOS 17–25 users and non-Apple-Intelligence-capable devices.
+
+#### Device Eligibility for Apple Intelligence (FoundationModels)
+
+Apple Intelligence on-device model runs on:
+
+- iPhone 15 Pro / iPhone 15 Pro Max (A17 Pro chip) and later iPhone models
+- iPad with M1 chip or later
+- Mac with M1 chip or later
+
+iPhone 15 (non-Pro) and earlier do not support Apple Intelligence regardless of iOS version. Reo's iPhone is implied to be relatively recent (PROJECT.md mentions "both phones are recent"), but the app must handle the `deviceNotEligible` case anyway.
+
+**Confidence:** HIGH for the availability-gating pattern. HIGH that FoundationModels is iOS 26+. MEDIUM for exact device eligibility list (verified via multiple sources but Apple has not published a fully definitive list in a single canonical doc page).
+
+#### Fallback UX
+
+The `AIInsightUnavailableCard` should:
+
+- For `osVersion` / `deviceNotEligible`: show a muted neumorphic card with a lock icon and "AI insights require Apple Intelligence (iPhone 15 Pro or later, iOS 26)." Do not prompt the user to upgrade hardware.
+- For `notEnabled`: show a card with a brief CTA "Enable Apple Intelligence in Settings → [your name] → Apple Intelligence to unlock spending insights." Include a `Link` to `UIApplication.openSettingsURLString`.
+- For `modelNotReady`: show a subtle "AI model loading…" shimmer — the model usually becomes available within minutes of OS upgrade.
+- For all cases: the rest of the Overview screen must be fully functional. The AI card is purely additive.
+
+---
+
+### Anti-Additions: What NOT to Add for v1.2
+
+| Do Not Add | Why | What to Use Instead |
+|------------|-----|---------------------|
+| **Any third-party UI library** (Lottie, SwiftUIX, Introspect, etc.) | Neumorphism is two `shadow()` modifiers — zero reason to pull in a UI library | SwiftUI `ViewModifier` + `ShapeStyle` |
+| **Any third-party AI/LLM library** (OpenAI SDK, LangChain Swift, etc.) | Finance data must not leave the device; FoundationModels is free and on-device | `import FoundationModels` gated with `#available` |
+| **Liquid Glass (`.glassEffect()`)** | iOS 26 system design language; visually incompatible with the chosen neumorphic dark-charcoal aesthetic; neumorphism is the design direction, not glassmorphism | Custom neumorphic `ViewModifier` per the design handoff |
+| **UIBlurEffect / UIVisualEffectView** | Neuro skin in tokens.jsx explicitly uses `--glass-blur: none` — neumorphism is opaque, not translucent | No blur; dual-shadow only |
+| **CloudKit for v1.2** | Still gated behind the $99/yr developer program upgrade decision | Local-only, same as v1.1 |
+| **A bump of the iOS deployment target to iOS 26** | Would exclude any device running iOS 17–25; defeats the design constraint | Keep iOS 17; use `#available(iOS 26, *)` |
+| **OpenAI / Anthropic / Gemini API calls** | Violates "no paid services," "no network calls for finance data," and "finance data stays on device" | FoundationModels (on-device, free) |
+| **NaturalLanguage framework for AI insight** | NaturalLanguage is not a generative model; it does classification/tagging, not sentence generation | FoundationModels for generation |
+| **Charts from a third-party library** | Swift Charts `SectorMark` + `AreaMark` cover every chart type needed in v1.2 | `import Charts` |
+| **SwiftUI animations library** (Shimmer, ElegantAnimation, etc.) | Rolling number is two lines: `.contentTransition(.numericText(value:))` + `.animation()` | Built-in `ContentTransition` + `KeyframeAnimator` |
 
 ---
 
@@ -350,6 +709,7 @@ All first-party frameworks. No SDK changes.
 
 ```swift
 // Package.swift dependencies (or "Add Package Dependency" in Xcode)
+// v1.2 adds ZERO new SPM packages (FoundationModels is a bundled Apple framework)
 // v1.1 adds ZERO new SPM packages
 dependencies: [
     .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "9.1.0"),
@@ -378,6 +738,8 @@ targets: [
     ),
 ]
 ```
+
+**No linker flags or framework embedding needed for FoundationModels** — it is a first-party Apple framework available automatically in the iOS 26 SDK. It is weak-linked at the OS level; the `#available(iOS 26, *)` guard is the only runtime gating required.
 
 Capabilities to enable in the Xcode target (Signing & Capabilities tab):
 - **Sign in with Apple** — not strictly needed v1, but cheap to keep on the shelf.
@@ -409,6 +771,10 @@ Capabilities to enable in the Xcode target (Signing & Capabilities tab):
 | **AMFI NAVAll.txt bulk parse (MF)** | **mfapi.in per-fund JSON** | mfapi.in is more convenient per-fund but adds a single-point-of-failure layer on top of AMFI. Use AMFI direct as primary; mfapi.in as a fallback or for fund-name search at onboarding. |
 | **Yahoo Finance v8/chart (stocks)** | **NSE India direct endpoint** | NSE direct requires browser-style session cookie setup before each API call, which is fragile in a background context. Yahoo Finance is simpler despite its own fragility. |
 | **npsnav.in (NPS)** | **Manual-only for NPS** | Valid choice. NPS balances change slowly; a user with one NPS account can enter the NAV quarterly. npsnav.in only adds value for users who check NPS performance frequently. The app must work well without it. |
+| **FoundationModels (`#available(iOS 26, *)`)** | **Bumping deployment target to iOS 26** | Bumping the deployment target to iOS 26 would let you use FoundationModels unconditionally but would exclude any device running iOS 17–25. For this household app both phones are recent, but the safe engineering default is `#available` gating. If both users confirm iOS 26 and eligible hardware, bumping the target is a valid simplification — but it is a one-way door. Keep iOS 17 target for now. |
+| **FoundationModels (on-device)** | **OpenAI / Gemini API** | Cloud AI violates the "finance data stays on device" constraint and adds recurring cost. FoundationModels is always the right choice for this app's threat model. |
+| **`ContentTransition.numericText(value:)`** | **Third-party counter animation library** | The built-in transition is two lines of code. No library exists in this space that adds meaningful capability over the system API. |
+| **Custom floating tab bar (SwiftUI overlay)** | **`TabView` with default styling** | The neumorphic floating capsule tab bar cannot be achieved by styling `TabView` — it uses a separate visual layer entirely. The custom overlay is the only path. ~60 lines of SwiftUI. |
 
 ---
 
@@ -433,6 +799,10 @@ Capabilities to enable in the Xcode target (Signing & Capabilities tab):
 | **Any paid stock/financial data API (Alpha Vantage, Refinitiv, Tickermarket, etc.)** | Violates "zero recurring cost" hard constraint. | Yahoo Finance unofficial endpoint with manual override always available. |
 | **NSE direct API without cookie session (stocks)** | Does not work; NSE returns 403 or redirects without proper session cookies and Referer header. | Yahoo Finance v8/chart with `.NS` suffix. |
 | **Storing scheme codes/identifiers as hardcoded strings** | AMFI and NPS occasionally renumber schemes. | Store user-selected scheme codes in the `Asset` SwiftData model; let the user pick during onboarding via a search-by-name flow against the bulk file. |
+| **Any third-party UI library for neumorphism** | Neumorphism is two `shadow()` modifiers and typed color constants. A third-party library adds a dependency for a pattern that is simpler to implement inline. | SwiftUI `ViewModifier`, `Color(hex:)` extension, `RoundedRectangle`. |
+| **Liquid Glass (`.glassEffect()`) for the neumorphic skin** | `.glassEffect()` is iOS 26's glassmorphism material. The design handoff's neuro skin uses opaque charcoal surfaces (`--glass-blur: none`), not translucent blur. Applying Liquid Glass over the neuro surfaces would break the visual language. | Dual-shadow `ViewModifier` per the design tokens. |
+| **Any cloud/remote AI API for the insight card** | Finance data must never leave the device. The constraint is categorical, not a tradeoff. | `FoundationModels` on-device. |
+| **Bumping iOS deployment target to iOS 26 for FoundationModels** | Excludes devices on iOS 17–25 with no benefit to the existing feature set. | `#available(iOS 26, *)` guard on all FoundationModels call sites. |
 
 ---
 
@@ -446,6 +816,9 @@ Capabilities to enable in the Xcode target (Signing & Capabilities tab):
 - Switch `ModelConfiguration` to `.automatic`. SwiftData migrates the local store into the CloudKit private database on first sync.
 - Add a `CKShare` flow for the records you want shared (wife joins via an iMessage link). On iOS 18+ SwiftData has `.shared` zone support; on iOS 17 you must hand-roll the `CKShare` via `CKContainer` for those records.
 - Plan for an idempotent merge: every write should be `upsert by UUID`, never positional.
+
+**If both users confirm iOS 26 + Apple Intelligence (at some future point):**
+- The `#available(iOS 26, *)` guards can be removed and the deployment target bumped if the household has fully moved to iOS 26 hardware. This simplifies the AI card significantly — no fallback UI needed. Decision point: do this only after confirming both phones are on iOS 26 and Apple Intelligence is enabled.
 
 **If parsing accuracy turns out to be the killer feature (lots of failing emails):**
 - Add a `ParsedExpenseCandidate` `@Model` with a `confidence: Double` and an "inbox" view of candidates < 0.7 confidence.
@@ -466,6 +839,11 @@ Capabilities to enable in the Xcode target (Signing & Capabilities tab):
 - Show last-known NAV with staleness warning, offer manual edit.
 - Consider direct Protean CRA scraping as a fallback (the data is on a public HTML page); this is a maintenance burden not worth pre-building.
 
+**If the AI insight card should expand beyond a single sentence (future):**
+- Switch to `@Generable` structured output with a `SpendingInsight` struct (headline + bullet points).
+- Use `streamResponse` to show the insight assembling in real-time for a more polished UX.
+- Still no new dependencies — all FoundationModels APIs.
+
 ---
 
 ## Version Compatibility
@@ -483,6 +861,10 @@ Capabilities to enable in the Xcode target (Signing & Capabilities tab):
 | mfapi.in JSON | URLSession, no deps | REST; no auth; no rate limit. Third-party wrapper over AMFI. |
 | npsnav.in JSON | URLSession, no deps | REST; no auth; "non-commercial" usage restriction. Third-party scraper. |
 | Yahoo Finance v8/chart | URLSession, no deps | Undocumented; no auth currently; ~360 req/hr rate limit (per community reports). `.NS` suffix for NSE stocks. |
+| **Swift Charts `SectorMark`** | **iOS 17+** | Available from iOS 17 baseline — no `#available` guard needed. `AreaMark`, `BarMark`, `LineMark` are iOS 16+. |
+| **`ContentTransition.numericText(value:)`** | **iOS 17+** | The `value: Double` variant (direction-aware) is iOS 17. The basic `numericText()` is iOS 16. Both available at floor. |
+| **`.toolbar(.hidden, for: .tabBar)`** | **iOS 16+** | Needed to suppress native tab bar when building custom floating tab bar. Available at floor. |
+| **`FoundationModels`** | **iOS 26+ only** | Framework not present on iOS 17–25. Must be imported inside `#available(iOS 26, *)` block. Hardware requirement: A17 Pro (iPhone 15 Pro) or M1 or later. Apple Intelligence must be enabled by user. |
 
 ---
 
@@ -495,9 +877,16 @@ Capabilities to enable in the Xcode target (Signing & Capabilities tab):
 | SwiftData over Core Data | HIGH (for greenfield iOS 17+ with eventual CloudKit sync) — MEDIUM if you discover the project needs heavy migration/history work | SwiftData's CloudKit story matured in iOS 18. Core Data is the documented fallback. |
 | Swift Testing as primary harness | HIGH | Ships in the toolchain, parameterized + parallel + async-native, Apple's stated direction. |
 | Swift Charts | HIGH | First-party, no competitive alternative on iOS 17+. |
+| `SectorMark` available at iOS 17 floor | HIGH | Verified via Apple docs and multiple tutorial sources (appcoda.com, augmentedcode.io, sarunw.com). No `#available` guard required. |
+| `ContentTransition.numericText(value:)` available at iOS 17 | HIGH | Verified via sarunw.com and designcode.io. The `value:` parameter for direction-aware animation is iOS 17. |
 | `@Observable` (Observation framework) | HIGH | Apple's documented default for SwiftUI model state since iOS 17. |
 | LocalAuthentication + Keychain for Face ID + token storage | HIGH | The only correct choice on Apple platforms. |
 | BackgroundTasks (`BGAppRefreshTask`) for Gmail polling | HIGH for the framework choice; MEDIUM for actual wake-frequency guarantees | iOS decides when to fire it; not deterministic. Real-world cadence is "several times a day for an actively used app." Accept that and design the UX around "next time you open the app, anything new from Gmail is here." |
+| FoundationModels requires iOS 26 | HIGH | Confirmed by multiple developer sources, Apple's own WWDC materials, and the skill documentation. |
+| `#available(iOS 26, *)` gating keeps iOS 17 deployment target | HIGH | This is standard Apple availability gating — the same pattern used for every new framework since iOS 8. Xcode enforces the guards at compile time. |
+| Device eligibility: A17 Pro (iPhone 15 Pro) or M1+ | MEDIUM | Confirmed by multiple sources but Apple has not published a definitive single-page list. The `deviceNotEligible` availability case is the runtime safety net regardless. |
+| Two-layer availability check (OS version + `SystemLanguageModel.default.availability`) | HIGH | Documented in the foundation-models-on-device skill and confirmed by multiple Apple developer articles. Both checks are necessary. |
+| Zero new SPM deps for v1.2 | HIGH | FoundationModels is a bundled Apple framework; neumorphism is pure SwiftUI primitives; Swift Charts is already in the stack. |
 | GoogleSignIn-iOS + GTLR Gmail client | MEDIUM | The official Google path, but Google has historically reshuffled its iOS auth libraries (GIDSignIn → AppAuth migration in v6, etc.). Pin major versions and re-evaluate annually. Raw `ASWebAuthenticationSession` + `URLSession` is a viable escape hatch. |
 | Swift Package Manager only | HIGH | CocoaPods is sunsetting; Carthage is niche. SPM is the default. |
 | Skip CI / fastlane / SwiftLint in v1 | MEDIUM (opinion, not consensus) | Some developers swear by enforcing these from day one. For a solo, learning-focused, two-user project the friction outweighs the value. Revisit at v1.1. |
@@ -518,22 +907,33 @@ Capabilities to enable in the Xcode target (Signing & Capabilities tab):
 - `github.com/rishikeshsreehari/npsnav` — Open-source scraper backing npsnav.in; confirms Protean CRA as data origin
 - `query1.finance.yahoo.com/v8/finance/chart/RELIANCE.NS?interval=1d&range=1d` — Verified June 2026; `chart.result[0].meta.regularMarketPrice` is the current price field; `.NS` suffix for NSE stocks
 - `github.com/ranaroussi/yfinance` issue #2128 — Rate limiting introduced late 2024; ~360 req/hr; community-sourced
-- developer.apple.com/xcode/whats-new/ — Xcode 26 confirmed as current; SwiftUI Instrument, XCUIAutomation, Icon Composer.
-- developer.apple.com/swift/whats-new/ — Swift 6.2 confirmed current; `@concurrent`, Inline Arrays, `Span`, Approachable Concurrency.
-- developer.apple.com/ios/ — iOS 26 named as current OS in 2026; Liquid Glass, Apple Intelligence on-device.
-- developer.apple.com/documentation/observation — `@Observable` macro, iOS 17 baseline, replaces `ObservableObject`/`@Published`.
-- developer.apple.com/documentation/swiftui/managing-model-data-in-your-app — Apple-recommended pattern: `@Observable` + light view-model layer ("MV" style) over heavyweight per-screen MVVM.
-- github.com/apple/swift-testing — Swift Testing bundled in Swift 6 toolchain & Xcode 16+; production-ready May 2026 (Swift 6.3.2 release).
-- github.com/google/GoogleSignIn-iOS — v9.1.0 (Jan 2026), SPM-installable, ASWebAuthenticationSession-based OAuth.
-- github.com/google/GTMAppAuth — v5.0.0 (May 2025), actively maintained, bridges OAuth → Google API clients.
-- github.com/google/gtm-session-fetcher — v5.3.0 (May 2026), required HTTP layer.
-- github.com/google/google-api-objectivec-client-for-rest — v5.3.0 (May 2026), `GoogleAPIClientForREST_Gmail` product for Gmail API.
-- github.com/pointfreeco/swift-snapshot-testing — v1.19.2 (Mar 2026), works with Swift Testing.
-- github.com/realm/SwiftLint — v0.63.3 (May 2026); noted but deferred.
-- github.com/swiftlang/swift-format — v602.0.0 (Sept 2025), bundled with Xcode 26; deferred.
+- `developer.apple.com/xcode/whats-new/` — Xcode 26 confirmed as current; SwiftUI Instrument, XCUIAutomation, Icon Composer.
+- `developer.apple.com/swift/whats-new/` — Swift 6.2 confirmed current; `@concurrent`, Inline Arrays, `Span`, Approachable Concurrency.
+- `developer.apple.com/ios/` — iOS 26 named as current OS in 2026; Liquid Glass, Apple Intelligence on-device.
+- `developer.apple.com/documentation/observation` — `@Observable` macro, iOS 17 baseline, replaces `ObservableObject`/`@Published`.
+- `developer.apple.com/documentation/swiftui/managing-model-data-in-your-app` — Apple-recommended pattern: `@Observable` + light view-model layer ("MV" style) over heavyweight per-screen MVVM.
+- `github.com/apple/swift-testing` — Swift Testing bundled in Swift 6 toolchain & Xcode 16+; production-ready May 2026 (Swift 6.3.2 release).
+- `github.com/google/GoogleSignIn-iOS` — v9.1.0 (Jan 2026), SPM-installable, ASWebAuthenticationSession-based OAuth.
+- `github.com/google/GTMAppAuth` — v5.0.0 (May 2025), actively maintained, bridges OAuth → Google API clients.
+- `github.com/google/gtm-session-fetcher` — v5.3.0 (May 2026), required HTTP layer.
+- `github.com/google/google-api-objectivec-client-for-rest` — v5.3.0 (May 2026), `GoogleAPIClientForREST_Gmail` product for Gmail API.
+- `github.com/pointfreeco/swift-snapshot-testing` — v1.19.2 (Mar 2026), works with Swift Testing.
+- `github.com/realm/SwiftLint` — v0.63.3 (May 2026); noted but deferred.
+- `github.com/swiftlang/swift-format` — v602.0.0 (Sept 2025), bundled with Xcode 26; deferred.
 - Apple Core Data + CloudKit guide (`NSPersistentCloudKitContainer`) — established CloudKit fallback path if SwiftData blocks shipping.
+- `www.appcoda.com/swiftui-chart-ios17/` — SectorMark iOS 17 minimum confirmed; donut chart implementation patterns.
+- `lyvennithasasikumar.medium.com/ios-17-updates-enhancing-swift-charts` — Confirms SectorMark added in iOS 17 Swift Charts update.
+- `sarunw.com/posts/animating-number-changes-in-swiftui/` — `ContentTransition.numericText()` iOS 16+; `numericText(value:)` iOS 17+.
+- `designcode.io/swiftui-handbook-numeric-text-animation-using-contenttransition/` — Rolling number implementation with `ContentTransition`; tabular numeral configuration via `.monospacedDigit()`.
+- `dev.to/arshtechpro/apples-foundation-models-framework-run-ai-on-device-with-just-a-few-lines-of-swift-lbp` — FoundationModels iOS 26 requirement; `import FoundationModels`; `SystemLanguageModel.default.availability` pattern.
+- `azamsharp.com/2025/06/18/the-ultimate-guide-to-the-foundation-models-framework.html` — Comprehensive FoundationModels guide; single-turn vs. multi-turn sessions; 4,096 token limit; `respond(to:)` vs. `streamResponse`.
+- `dev.to/arshtechpro/how-to-fall-back-gracefully-when-apple-intelligence-isnt-available-48j` — Graceful fallback patterns for `deviceNotEligible`, `appleIntelligenceNotEnabled`, `modelNotReady` cases.
+- `stora.sh/blog/2026-04-21-apple-foundation-models-framework-ios-26-integration-guide` — iPhone 15 Pro / A17 Pro minimum hardware; M-series iPad and Mac support.
+- everything-claude-code skill: `foundation-models-on-device` — Authoritative patterns for `LanguageModelSession`, `@Generable`, availability checks, streaming, tool calling.
+- everything-claude-code skill: `swiftui-patterns` — `@Observable`, `ViewModifier`, `NavigationStack`, performance patterns for SwiftUI in 2026.
+- everything-claude-code skill: `liquid-glass-design` — iOS 26 Liquid Glass `.glassEffect()` API; explicitly NOT used in the neumorphic skin (cited as contrast/anti-pattern).
 
 ---
 
 *Stack research for: iOS-only personal-finance + notes household app (Reo, solo developer, new to native iOS)*
-*Researched: 2026-05-28 (v1.0) · Updated: 2026-06-08 (v1.1 data sources + accounts/assets/self-transfer/notes additions)*
+*Researched: 2026-05-28 (v1.0) · Updated: 2026-06-08 (v1.1 data sources + accounts/assets/self-transfer/notes additions) · Updated: 2026-06-20 (v1.2 neumorphic design system + Swift Charts analytics/donut + FoundationModels AI insight)*

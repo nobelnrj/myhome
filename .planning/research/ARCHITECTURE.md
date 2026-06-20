@@ -1,467 +1,598 @@
-# Architecture Research
+# Architecture Patterns
 
-**Domain:** iOS SwiftData personal-finance + household-ops app (v1.1 additive milestone)
-**Researched:** 2026-06-08
-**Confidence:** HIGH — based on direct codebase reading; no external sources needed
-
----
-
-## Context: What Exists at SchemaV5
-
-Four @Model types live in `SchemaV5` (the current schema):
-
-| Model | Key fields | Notes |
-|-------|-----------|-------|
-| `Expense` | amount, date, note, categories[], sourceAccount (String?), gmailMessageID, ingestionStateRaw, parseConfidence | sourceAccount = Gmail email address, not a real Account entity |
-| `Category` | name, symbolName, sortOrder, monthlyBudget, expenses[] | |
-| `Note` | title, blocks[], isPinned, reminder* fields (Data? encoded) | |
-| `NoteBlock` | kindRaw, text, isChecked, order, note, reminder* fields | |
-
-`typealias Expense = SchemaV5.Expense` pattern is used throughout — all views bind to bare `Expense`, `Note`, etc. The typealias is flipped in `Persistence/Models/` at each schema bump; no view file needs touching.
-
-Migration strategy: `.custom(willMigrate: nil, didMigrate: nil)` for every stage (workaround for FB13812722). All migrations so far are purely additive — new optional fields or new models. This pattern must continue for CloudKit readiness.
+**Domain:** iOS SwiftUI/SwiftData personal-finance app — v1.2 Neumorphic Redesign milestone
+**Researched:** 2026-06-20
+**Confidence:** HIGH — grounded in direct codebase reading of 187 Swift files at SchemaV9
 
 ---
 
-## SchemaV6 Migration Shape
+## Context: What Exists at v1.1 / SchemaV9
 
-### New @Model Types to Add
+The app at v1.1 is fully functional. The design system does not yet exist as a layer; styling is scattered inline across views using stock SwiftUI semantic colors (`Color(.secondarySystemBackground)`, `.accentColor`, `.primary`, `.secondary`) with a thin shared abstraction in `Features/Shared/`:
 
-**Account** — represents a household bank account:
-```
-var id: UUID = UUID()
-var name: String? = nil               // "HDFC Savings", "ICICI CC"
-var institutionName: String? = nil    // "HDFC Bank"
-var accountTypeRaw: String? = nil     // "savings" | "credit" | "demat" | "nps" | "other"
-var last4: String? = nil              // last 4 digits of card/account — display only
-var balance: Decimal? = nil           // manually entered or API-refreshed current balance
-var balanceCurrencyCode: String = "INR"
-var balanceUpdatedAt: Date? = nil     // when balance was last set
-var gmailAddress: String? = nil       // link to GmailAccount.email for auto-linking ingested expenses
-var isActive: Bool = true             // soft-delete alternative; keeps history intact
-var sortOrder: Int = 0
-var createdAt: Date = Date()
-var updatedAt: Date = Date()
-// Relationship declared on Expense side (see below)
-```
+| Shared abstraction | What it does | v1.2 status |
+|--------------------|--------------|-------------|
+| `CardStyle.swift` (ViewModifier) | Applies `Color(.secondarySystemBackground)` + 16px radius + shadow 0.04 | **Replace** with neumorphic surface modifier |
+| `CategoryStyle.swift` (enum) | Maps Category → display Color + SF Symbol; uses iOS system palette | **Extend** with design-system cat colors; retain hashed fallback |
+| `DonutChart.swift` (generic View) | Swift Charts `SectorMark` donut; used by Overview "Where it's going" | **Restyle** colors/glow; keep chart logic intact |
+| `IconTile.swift` (View) | Rounded-square category badge | **Restyle** with neumorphic fill/glow |
+| `StackBar.swift` | Horizontal stack bar for budget overview hero | **Restyle** |
 
-**Asset** — a single holding (mutual fund, stock, NPS tier, or external balance entry):
-```
-var id: UUID = UUID()
-var name: String? = nil               // "Mirae Asset Large Cap", "HDFC NIFTY 50"
-var assetTypeRaw: String? = nil       // "mf" | "stock" | "nps" | "fd" | "other"
-var isinOrCode: String? = nil         // ISIN for MF/stock; scheme code for AMFI lookup
-var units: Decimal? = nil             // units held (MF/NPS); nil for stocks with qty=1
-var quantity: Decimal? = nil          // quantity for stocks
-var purchaseNav: Decimal? = nil       // purchase price / NAV
-var purchaseCurrencyCode: String = "INR"
-var lastKnownNav: Decimal? = nil      // cached last fetch
-var lastNavFetchedAt: Date? = nil     // when lastKnownNav was set
-var manualOverrideNav: Decimal? = nil // if set, use this instead of fetched NAV for net-worth
-var sortOrder: Int = 0
-var isActive: Bool = true
-var createdAt: Date = Date()
-var updatedAt: Date = Date()
-// accountID: UUID? — optional link to an Account (for MF folios in a demat, etc.)
-var accountID: UUID? = nil            // denormalised FK avoids cross-type @Relationship issues
-```
+Chart infrastructure (in `Support/`):
+- `SpendOverTimeAggregator` — pure static; buckets `[Expense]` into `[SpendBucket]` (week/month/year). Uses in `SpendOverTimeChart` on existing Expenses tab.
+- `OverviewAggregation` — pure static; top-3 categories, aggregate threshold, pinned note.
+- `BudgetCalculator` — pure static; monthly spend map, uncategorized spend, month boundaries.
+- `SpendByCategoryChart` — `BarMark` chart; used on existing screen; input: `[CategorySpendItem]`.
 
-### Modified @Model: Expense (V5 -> V6)
+Root / navigation:
+- `MyHomeApp.swift` — owns `ModelContainer`, `GmailSyncController`; registers BGTask.
+- `RootView.swift` — `TabView` with 5 tabs (Home 0, Expenses 1, Budgets 2, Notes 3, Settings 4); owns service @State instances; wires `scenePhase` → all services.
+- Each tab owns its own `NavigationStack`; no shared `NavigationPath`.
+- Tab bar rendered by SwiftUI's built-in `TabView`; must be **replaced** with the floating capsule.
 
-Add these optional fields:
+No existing theme/token file exists. No `Color+Theme.swift`, no `DesignTokens` enum. The neumorphic layer must be created from scratch.
+
+---
+
+## Three New Architecture Concerns
+
+### 1. Neumorphic Design System Layer
+
+#### Design Token Structure (from `tokens.jsx` analysis)
+
+The `neuro` skin (the target) specifies these token groups that must be mirrored in Swift:
+
+**Surface colors (charcoal)**
 ```
-var accountID: UUID? = nil            // FK to Account.id; nil = no account linked
-var isTransfer: Bool = false          // flagged as self-transfer
-var transferPairID: UUID? = nil       // ID of the paired expense (debit <-> credit)
-var transferConfirmed: Bool = false   // user confirmed this is a transfer
-var transferStateRaw: String? = nil   // "pendingReview" | "confirmed" | "rejected"
+--bg:            #1C1C23   // page/screen background
+--bg-elevated2:  #262630   // raised card surface
+--fill:          #16161C   // inset/pressed surface
+--fill2:         #191920
+--fill3:         #15151B
+--label:         #ECEDF4   // primary text
+--label2:        rgba(220,223,238,0.56)
+--label3:        rgba(220,223,238,0.32)
+--label4:        rgba(220,223,238,0.16)
+--sep:           rgba(255,255,255,0.05)
 ```
 
-`sourceAccount` (String = Gmail email) is RETAINED as-is. It serves the dedup/idempotency key (D-MA-03) and must not be replaced. `accountID` is the new FK to the real `Account` entity and can be set independently.
-
-**Rationale for UUID FK instead of @Relationship:** CloudKit does not support cross-entity relationships reliably when one side is optional and the other is a large fan-out. Using a UUID FK with application-side joins is the established CloudKit-safe pattern already used by GmailAccountStore (which stores email strings, not @Relationship references).
-
-### Modified @Model: Note (V5 -> V6)
-
-Add daily-routine reset tracking fields:
+**Dual shadow (neumorphic extrusion)**
 ```
-var isRoutine: Bool = false                  // marks this note as a daily routine
-var routineLastResetDate: Date? = nil        // UTC start-of-day when completions last reset
+Raised shadow:  -6px -6px 14px rgba(255,255,255,0.035),
+                 7px  7px 18px rgba(0,0,0,0.55)
+Float shadow:   -9px -9px 22px rgba(255,255,255,0.04),
+                11px 11px 28px rgba(0,0,0,0.62)
+Inset rim:      inset 1px 1px 1px rgba(255,255,255,0.045),
+                inset -1px -1px 1px rgba(0,0,0,0.30)
+Card radius:    26px
 ```
 
-These two fields enable the per-day completion-state model (see Daily Routine section below).
+**Accent palette**
+```
+--accent (canary yellow):  #FFD60A
+--accent-soft:             rgba(255,214,10,0.16)
+--pos (income/gain):       #34E29B
+--neg (spend/loss):        #FF6B6B
+Category colors: defined per-id in CAT_COLORS (teal, orange, pink, etc.)
+```
 
-### SchemaV6 Models List
+**Tab bar** (from `ui.jsx` → `TabBar` component):
+- Floating capsule, 62px height, 34px borderRadius, positioned 24px above screen bottom
+- Glass body: `var(--glass-tint-strong)` = `#22222C` (neuro skin), no backdrop blur
+- Active tab indicator: slides with spring animation, accent-soft background + accent glow
+- Five icons + labels, 58px wide each
+
+#### Recommended Swift Structure
+
+```
+MyHomeApp/DesignSystem/
+├── DesignTokens.swift          NEW — Color + CGFloat constants
+├── NeuSurface.swift            NEW — ViewModifier (raised/pressed/inset variants)
+├── NeuTabBar.swift             NEW — floating capsule TabView replacement
+├── RollingMoneyText.swift      NEW — animated odometer number view
+├── DeltaChip.swift             NEW — ±% badge (green/red, glow border)
+├── SegmentedRangeBar.swift     NEW — liquid-ink tab underline control (Analytics)
+└── Color+Neumorphic.swift      NEW — Color extension for token lookups
+```
+
+**DesignTokens.swift** — single source of truth:
 ```swift
-enum SchemaV6: VersionedSchema {
-    static let versionIdentifier = Schema.Version(6, 0, 0)
-    static var models: [any PersistentModel.Type] {
-        [
-            SchemaV6.Expense.self,
-            SchemaV6.Category.self,
-            SchemaV6.Note.self,
-            SchemaV6.NoteBlock.self,
-            SchemaV6.Account.self,    // NEW
-            SchemaV6.Asset.self,      // NEW
-        ]
-    }
-    // ... copies of V5 models verbatim with additive changes + new Account + Asset
+enum DesignTokens {
+    // Surfaces
+    static let bgPrimary        = Color(hex: "#1C1C23")
+    static let bgElevated       = Color(hex: "#262630")
+    static let fillInset        = Color(hex: "#16161C")
+    // Text
+    static let labelPrimary     = Color(hex: "#ECEDF4")
+    static let labelSecondary   = Color(hex: "#DCDFEESS").opacity(0.56)
+    static let labelTertiary    = Color(hex: "#DCDFEE").opacity(0.32)
+    // Accent
+    static let accentYellow     = Color(hex: "#FFD60A")
+    static let accentSoft       = Color(hex: "#FFD60A").opacity(0.16)
+    static let posGreen         = Color(hex: "#34E29B")
+    static let negRed           = Color(hex: "#FF6B6B")
+    // Shadows (CGSize/opacity used in View modifier)
+    static let neuRaisedLight   = Shadow(color: .white.opacity(0.035), radius: 14, x: -6, y: -6)
+    static let neuRaisedDark    = Shadow(color: .black.opacity(0.55),  radius: 18, x: 7,  y: 7)
+    static let cardRadius: CGFloat = 26
+    static let cardRadiusSmall: CGFloat = 16
+    // Category palette (matches CAT_COLORS in tokens.jsx)
+    static let catColors: [String: Color] = [
+        "groceries":     Color(hex: "#2DD4BF"),
+        "dining":        Color(hex: "#FB923C"),
+        "fuel":          Color(hex: "#F472B6"),
+        "utilities":     Color(hex: "#7DD3FC"),
+        "rent":          Color(hex: "#818CF8"),
+        "shopping":      Color(hex: "#E879F9"),
+        "health":        Color(hex: "#A78BFA"),
+        "subscriptions": Color(hex: "#22D3EE"),
+        "entertainment": Color(hex: "#C084FC"),
+        "other":         Color(hex: "#94A3B8"),
+    ]
 }
 ```
 
-### Migration Stage v5ToV6
+**NeuSurface.swift** — three variants, each a `ViewModifier`:
+- `.raised` — default card surface: bgElevated + dual shadow + inset rim
+- `.pressed` — inset/tapped state: fillInset + inverted shadow (dark top-left, light bottom-right)
+- `.inset` — track/progress background: fillInset + no shadow
+
+Usage: `view.neuSurface(.raised, radius: DesignTokens.cardRadius)`
+
+**Light/dark adaptation**: The design is dark-only for the Neomorphism skin (no dynamic color needed for `neuro` style). `DesignTokens` constants are static. If future light mode is wanted, wrap in a `@Environment(\.colorScheme)` check — but for v1.2 the neuro skin is dark-only; this is a non-issue.
+
+**Existing `CardStyle` modifier**: Replace call sites. `cardStyle(...)` → `neuSurface(.raised)`. The old modifier is removed after all call sites are updated (done per-screen during the restyle phase).
+
+**CategoryStyle.swift**: Extend to read from `DesignTokens.catColors` by mapping the existing `symbolName` string to the new luminous palette. The hashed fallback logic is retained. No schema change needed.
+
+**RollingMoneyText** — animated odometer view translating `RollingNumber`/`RollingMoney` from `motion.jsx`:
 ```swift
-static let v5ToV6 = MigrationStage.custom(
-    fromVersion: SchemaV5.self,
-    toVersion: SchemaV6.self,
-    willMigrate: nil,
-    didMigrate: nil
-)
-```
-Purely additive: two new models, five new optional fields on Expense, two new optional fields on Note. No data transformation needed. `willMigrate/didMigrate` stay nil.
+struct RollingMoneyText: View {
+    let value: Decimal          // authoritative Decimal — never Double
+    var duration: Double = 0.78 // seconds, matches design's 780ms
+    var style: Font = .largeTitle
 
-### Typealias Updates (Persistence/Models/)
-- `Expense.swift`: flip to `SchemaV6.Expense`
-- `Note.swift`: flip to `SchemaV6.Note`
-- Add `Account.swift`: `typealias Account = SchemaV6.Account`
-- Add `Asset.swift`: `typealias Asset = SchemaV6.Asset`
-
----
-
-## System Architecture Overview
-
-```
-+--------------------------------------------------------------------------+
-|                          SwiftUI Views Layer                              |
-+------------+---------------+-------------+--------------+----------------+
-|  Expenses  |   Accounts    |   Assets    |    Notes     |    Overview    |
-|  (exists)  |   (NEW)       |   (NEW)     |  (enhanced)  |  (+ net worth) |
-+------------+---------------+-------------+--------------+----------------+
-|                         Service / Aggregator Layer                        |
-|  GmailSyncController   PriceFetchService    SelfTransferDetector          |
-|  NotificationScheduler  NetWorthAggregator  RoutineResetService           |
-|  BudgetCalculator       CalendarAggregator  AccountLinkingService         |
-+--------------------------------------------------------------------------+
-|                        SwiftData / Persistence Layer                      |
-|  SchemaV6: Expense, Category, Note, NoteBlock, Account, Asset            |
-|  AppMigrationPlan: V1->V2->V3->V4->V5->V6                               |
-|  ModelContainer+App: App Group store URL, CloudKit=.none (v1.1)          |
-+--------------------------------------------------------------------------+
-```
-
----
-
-## Component Responsibilities
-
-| Component | Responsibility | Where It Lives | Status |
-|-----------|---------------|----------------|--------|
-| `Account` @Model | Household bank account entity | `SchemaV6` + `Persistence/Models/Account.swift` | NEW |
-| `Asset` @Model | Single investment holding | `SchemaV6` + `Persistence/Models/Asset.swift` | NEW |
-| `AccountsView` | CRUD for accounts; per-account spend | `Features/Accounts/` | NEW |
-| `AssetsView` | CRUD for assets; holdings list | `Features/Assets/` | NEW |
-| `NetWorthView` | Net worth = account balances + holding values | `Features/Assets/` | NEW |
-| `PriceFetchService` | Best-effort AMFI NAV / unofficial stock quote | `Features/Assets/PriceFetchService.swift` | NEW |
-| `NetWorthAggregator` | Pure static helper: sum balances + holdings value | `Support/NetWorthAggregator.swift` | NEW |
-| `SelfTransferDetector` | Post-ingestion pass: detect debit/credit pairs across accounts | `Features/Ingestion/SelfTransferDetector.swift` | NEW |
-| `TransferConfirmView` | Review Inbox-style confirm UI for transfer pairs | `Features/Expenses/TransferConfirmView.swift` | NEW |
-| `RoutineResetService` | Per-day reset of routine checklist state | `Support/RoutineResetService.swift` | NEW |
-| `GmailSyncController` | Add post-sync SelfTransferDetector call; stamp accountID | `Features/Gmail/` | MODIFIED |
-| `Note` @Model | Add `isRoutine`, `routineLastResetDate` fields | `SchemaV6` | MODIFIED |
-| `Expense` @Model | Add `accountID`, `isTransfer`, `transferPairID`, `transferConfirmed`, `transferStateRaw` | `SchemaV6` | MODIFIED |
-| `BudgetCalculator` | Filter out confirmed transfers from spend totals | `Support/BudgetCalculator.swift` | MODIFIED |
-
----
-
-## Recommended Project Structure (New Folders)
-
-```
-MyHomeApp/Features/
-+-- Accounts/               # NEW -- Account management feature
-|   +-- AccountsView.swift      # list + quick-edit of accounts
-|   +-- AddAccountView.swift    # add/edit sheet
-|   +-- AccountRow.swift        # row component
-+-- Assets/                 # NEW -- Asset tracker + net worth
-|   +-- AssetsView.swift        # holdings list
-|   +-- AddAssetView.swift      # add/edit holding
-|   +-- NetWorthView.swift      # net worth breakdown card
-|   +-- AssetRow.swift          # holding row
-|   +-- PriceFetchService.swift # URLSession price fetch
-+-- Expenses/               # EXISTING -- add TransferConfirmView
-|   +-- TransferConfirmView.swift   # NEW -- self-transfer confirm UI
-
-MyHomeApp/Support/
-+-- NetWorthAggregator.swift    # NEW -- pure static sum helper
-+-- RoutineResetService.swift   # NEW -- per-day reset logic
-
-MyHomeApp/Features/Ingestion/
-+-- SelfTransferDetector.swift  # NEW -- debit/credit pair detection
-
-MyHomeApp/Persistence/Models/
-+-- Account.swift               # NEW -- typealias Account = SchemaV6.Account
-+-- Asset.swift                 # NEW -- typealias Asset = SchemaV6.Asset
-```
-
----
-
-## Integration Points: New vs Existing
-
-### 1. Account @Model vs Expense.sourceAccount
-
-`Expense.sourceAccount` is a Gmail email string used for ingestion dedup -- do NOT replace it with a FK.
-`Expense.accountID` (UUID?) is the new FK to `Account.id` that links an expense to a household account entity.
-
-Linking strategy:
-- When a user creates an `Account`, they can set `gmailAddress` on it (matching GmailAccount.email).
-- An `AccountLinkingService` pass at Account creation time sets `accountID` on all existing Expenses where `expense.sourceAccount == account.gmailAddress`.
-- Going forward, `GmailSyncController.syncAccount()` stamps `accountID` on new ingested expenses by looking up accounts by `gmailAddress` before inserting. One extra fetch at sync start: `let accountsByGmail: [String: Account]`.
-- Manual expenses get `accountID` set via an optional picker in `AddExpenseView`.
-
-Account deletion: application-side nil-out of `accountID` on affected Expenses before deleting the Account model. No cascade needed in SwiftData.
-
-### 2. Self-Transfer Detection Seam
-
-`SelfTransferDetector` is a pure value-type struct (mirrors `DedupChecker`):
-```swift
-struct SelfTransferDetector {
-    /// Returns matched (debit, credit) pairs from the provided expense window.
-    static func detectPairs(in expenses: [Expense], windowHours: Int = 6) -> [(Expense, Expense)]
+    // Internal state: animates a Double from previous to next value via
+    // withAnimation(.easeOut(duration:)) + interpolation using a @State displayValue: Double.
+    // Formats displayValue via Decimal(displayValue).formattedINRWhole() for display only.
+    // Decimal → Double conversion happens only for animation interpolation, never for money math.
 }
 ```
 
-Called from `GmailSyncController.syncAccount()` after the last `ctx.save()` in each sync batch:
+The Decimal→Double→animate→format pattern is safe here because the *displayed* intermediate value is for animation only; the authoritative value is always the Decimal source and is the value used when animation completes.
+
+**NeuTabBar** — replaces `TabView`'s built-in tab bar. Implemented as a `ZStack` overlay in `RootView`:
+- Floating `HStack` of `NeuTabItem` views in a capsule `RoundedRectangle`
+- `@Namespace` animation for the sliding active indicator
+- Badge support via `ZStack` overlay count chip on individual tab icons
+- `selectedTab: Binding<Int>` mirrors the existing `@State private var selectedTab` in `RootView`
+
+**RootView integration**: The existing `TabView` loses `.tabItem {}` modifiers. The `TabView` becomes a plain page container with `tabViewStyle(.page(indexDisplayMode: .never))` or the tabs become manual `ZStack` with conditional visibility. The simpler approach: keep `TabView` for content hosting (so navigation stacks continue to work), add `NeuTabBar` as a `.overlay(alignment: .bottom)` on the `TabView`, and suppress the native bar with `.toolbar(.hidden, for: .tabBar)`.
+
+---
+
+### 2. FoundationModels AI Insight Service Layer
+
+#### Framework Facts (HIGH confidence from Apple Developer documentation and verified community sources)
+
+- Framework: `FoundationModels` (iOS 26+, Apple Intelligence required)
+- On-device ~3B parameter model; no network calls; no API keys
+- Availability check: `SystemLanguageModel.default.availability`
+  - `.available` — ready
+  - `.unavailable(reason:)` with `deviceNotEligible`, `appleIntelligenceNotEnabled`, `modelNotReady`, `@unknown default`
+- Session API: `LanguageModelSession(instructions:)` — maintains conversation history
+- Response: `session.respond(to:)` async throws → `content: String`
+- Streaming: `session.streamResponse(to:)` → `AsyncSequence` of partial types
+- Structured output: `@Generable` macro on a struct; `session.respond(to:generating: MyStruct.self)`
+
+#### Service Layer Design
+
 ```swift
-// After all expenses written for this sync batch:
-let recentExpenses = (try? ctx.fetch(FetchDescriptor<Expense>())) ?? []
-let pairs = SelfTransferDetector.detectPairs(in: recentExpenses)
-for (debit, credit) in pairs {
-    debit.isTransfer = true
-    debit.transferPairID = credit.id
-    debit.transferStateRaw = "pendingReview"
-    credit.isTransfer = true
-    credit.transferPairID = debit.id
-    credit.transferStateRaw = "pendingReview"
-}
-try? ctx.save()
-```
+// MyHomeApp/Features/AI/InsightService.swift   NEW
 
-The `TransferConfirmView` reuses the `ReviewInboxRow` skeleton -- a section in `ExpenseListView` titled "Possible Transfers" above the existing "Needs Review" section. Swipe-to-confirm mirrors the accept/discard pattern. Confirmed transfers (`transferStateRaw = "confirmed"`) are excluded from spend aggregation by updating `BudgetCalculator` and `SpendOverTimeAggregator` to filter on `isTransfer && transferConfirmed`.
-
-### 3. Price-Fetch Service Seam
-
-`PriceFetchService` is an `@Observable` class owned by `AssetsView` (or a parent coordinator) via `@State`. Not a singleton. Matches how `GmailSyncController` is owned by `RootView` via `@State`.
-
-```swift
 @Observable
-final class PriceFetchService {
-    var isFetching: Bool = false
-    var lastError: String? = nil
+final class InsightService {
+    enum State {
+        case idle
+        case loading
+        case ready(insight: SpendInsight)
+        case unavailable(reason: String)
+        case failed(error: Error)
+    }
 
-    func fetchAll(assets: [Asset], modelContext: ModelContext) async
-    func fetchAMFI(schemeCode: String) async throws -> Decimal   // AMFI free API
-    func fetchStockQuote(symbol: String) async -> Decimal?       // best-effort, unofficial
+    var state: State = .idle
+    private var session: LanguageModelSession?
+    private var cachedForRange: AnalyticsRange?
+    private var cachedAt: Date?
+
+    /// Called by AnalyticsView when range changes or on-appear.
+    @MainActor
+    func refresh(summary: SpendSummary) async { ... }
+}
+
+@Generable
+struct SpendInsight {
+    @Guide(description: "2–3 sentence natural-language observation about spending patterns")
+    var text: String
+
+    @Guide(description: "The main category driving the observation, e.g. 'Dining'")
+    var leadCategory: String?
+
+    @Guide(description: "Whether total spend is trending up or down vs comparison period",
+           anyOf: ["up", "down", "flat"])
+    var trend: String
 }
 ```
 
-AMFI endpoint (HIGH confidence -- free, stable):
-`https://api.mfapi.in/mf/<schemeCode>` returns NAV JSON. Most reliable free Indian MF NAV source.
-
-Stock quotes (LOW confidence on free official sources):
-Yahoo Finance `v8/finance/chart/` is de-facto standard but unofficial. Always allow `manualOverrideNav` to take precedence. Show "approx" indicator when `lastNavFetchedAt` is stale (>24h).
-
-Caching: `lastKnownNav` + `lastNavFetchedAt` are persisted on `Asset` @Model. PriceFetchService reads these first -- if within 4h, skip the network call.
-
-`NetWorthAggregator` (pure static, mirrors BudgetCalculator):
+**Availability gating** — checked at `InsightService.refresh()` entry:
 ```swift
-enum NetWorthAggregator {
-    static func totalNetWorth(accounts: [Account], assets: [Asset]) -> Decimal
-    static func totalAccountBalance(accounts: [Account]) -> Decimal
-    static func totalHoldingsValue(assets: [Asset]) -> Decimal
-    // Per-asset current value:
-    // (manualOverrideNav ?? lastKnownNav ?? purchaseNav ?? 0) * (units ?? quantity ?? 1)
+guard case .available = SystemLanguageModel.default.availability else {
+    let reason = unavailabilityReason(SystemLanguageModel.default.availability)
+    state = .unavailable(reason: reason)
+    return
 }
 ```
 
-### 4. Daily Routine Per-Day Completion Reset
+The `AnalyticsView` renders the `AIInsightCard` only when `insightService.state != .unavailable`. On unavailable devices, the card section is simply omitted — no error state shown, no placeholders. The rest of `AnalyticsView` (area chart, category bars) is unaffected.
 
-The bug: a note with daily-recurrence reminder has its checklist blocks (`NoteBlock.isChecked`) persist across days. The checklist should reset to unchecked when the user opens the app on a new day.
-
-Model approach -- date-keyed completion via routineLastResetDate (recommended):
-- `Note.isRoutine: Bool = false` -- marks this as a daily routine note
-- `Note.routineLastResetDate: Date? = nil` -- UTC start-of-day of the last reset
-
-`RoutineResetService` (pure struct, called on app foreground):
+**Input: SpendSummary** — a pure value type constructed by `AnalyticsAggregator` before being passed to `InsightService`. Never pass raw SwiftData `[Expense]` to the service:
 ```swift
-struct RoutineResetService {
-    static func resetIfNeeded(notes: [Note], context: ModelContext) throws
-    // For each note where isRoutine == true && routineLastResetDate < startOfToday:
-    //   set all blocks.isChecked = false
-    //   note.routineLastResetDate = startOfToday (UTC)
-    // Explicit context.save() at end
+struct SpendSummary {
+    let range: AnalyticsRange
+    let total: Decimal
+    let previousTotal: Decimal          // for delta %
+    let topCategories: [(name: String, amount: Decimal)]
+    let buckets: [SpendBucket]          // already computed by AnalyticsAggregator
 }
 ```
 
-Called from `RootView.onChange(of: scenePhase)` on `.active` transition -- the same hook used by `GmailSyncController.scenePhaseChanged()`. Deterministic; no background task needed.
+The `SpendSummary` is formatted into a compact prompt string inside `InsightService.refresh()` — no PII, only aggregate numbers and category names.
 
-Calendar integration: a routine note with `isRoutine = true` and `reminderEnabled = true` (daily `RecurrenceType.daily`) already surfaces in `CalendarView` on every day via the existing `CalendarAggregator.perDayCounts()`. No changes to CalendarAggregator needed. The "daily reminder in calendar" feature is achieved by: set `isRoutine = true` in `EditNoteView`, auto-configure reminder to daily recurrence. The existing `NotificationScheduler` handles the rest.
+**Caching** — `InsightService` caches the last `SpendInsight` for the current `range`. Calling `refresh()` with the same range + same-day data skips the LLM call. Cache is invalidated when `range` changes or on new calendar day.
+
+**Session lifecycle** — one `LanguageModelSession` per app session (created lazily on first use). Not recreated on each call. This matches the WWDC recommendation to reuse sessions.
+
+**Ownership** — `InsightService` is owned as `@State private var insightService = InsightService()` in `AnalyticsView`, not in `RootView`. The service is scoped to the Analytics feature; no app-wide sharing needed. If `RootView` ever needs to warm up the model, it can call `SystemLanguageModel.default.availability` check only — not hold the service.
+
+**File location**: `MyHomeApp/Features/Analytics/InsightService.swift`
 
 ---
 
-## Key Data Flows
+### 3. Analytics Data Aggregation
 
-### Expense Ingestion (V1.1 extended)
-```
-Gmail sync (GmailSyncController.syncAccount)
-    |
-    v
-Parse + ConfidenceScorer + DedupChecker  [existing]
-    |
-    v
-Write Expense with sourceAccount + accountID (lookup by gmailAddress)
-    |
-    v
-SelfTransferDetector.detectPairs(in: recentExpenses)   [NEW]
-    |
-    v
-Flag transfer pairs: isTransfer=true, transferStateRaw="pendingReview"
-    |
-    v
-TransferConfirmView shows pairs -> user confirms or rejects
-    |
-    v
-BudgetCalculator / SpendOverTimeAggregator filter out confirmed transfers
-```
+#### New Aggregator: AnalyticsAggregator
 
-### Net Worth Computation
-```
-AssetsView appears
-    |
-    v
-PriceFetchService.fetchAll(assets:modelContext:)  [async, best-effort]
-    |
-    v
-Asset.lastKnownNav updated in SwiftData
-    |
-    v
-NetWorthView (@Query on Account + Asset, live)
-    |
-    v
-NetWorthAggregator.totalNetWorth(accounts:assets:)  [pure, synchronous]
-    |
-    v
-Account Balances + Holdings Value = Net Worth
+The existing `SpendOverTimeAggregator` handles bucketing for the week/month/year area chart — this is directly reusable. The Analytics screen adds:
+- Spend vs previous period (delta %)
+- Category bars sorted by amount
+- The `SpendSummary` struct for the AI service
+
+```swift
+// MyHomeApp/Support/AnalyticsAggregator.swift   NEW (mirrors SpendOverTimeAggregator discipline)
+
+enum AnalyticsAggregator {
+    /// Buckets expenses and computes comparison-period delta.
+    static func compute(
+        expenses: [Expense],        // current-period expenses (from @Query in AnalyticsView)
+        previousExpenses: [Expense], // prior period for delta (same window shifted back)
+        range: AnalyticsRange,
+        categories: [Category]
+    ) -> AnalyticsResult
+
+    struct AnalyticsResult {
+        let buckets: [SpendBucket]                           // reused from SpendOverTimeAggregator
+        let total: Decimal
+        let previousTotal: Decimal
+        let deltaPct: Double                                 // (total - previousTotal) / previousTotal
+        let byCategory: [(category: Category, spent: Decimal)]   // sorted descending
+        let summary: SpendSummary                           // feeds InsightService
+    }
+}
 ```
 
-### Daily Routine Reset
+**Pure contract**: same as `SpendOverTimeAggregator` and `BudgetCalculator` — operates on already-fetched arrays, no SwiftData access, no `@Query`, no Charts import.
+
+**Reuse of existing infrastructure**:
+- Buckets: `SpendOverTimeAggregator.bucket(expenses:range:)` — called from `AnalyticsAggregator.compute()`, not duplicated.
+- Category spend map: `BudgetCalculator.monthlySpend(for:categories:)` — reused for the by-category bars.
+- `SpendRange` enum (existing): extend or alias as `AnalyticsRange` (or reuse directly if the same week/month/year cases fit).
+
+**Where aggregation logic lives**: `AnalyticsAggregator` is a pure static helper in `Support/`. It is called from `AnalyticsView`'s `body` before any Chart DSL, identical to how `OverviewView` calls `BudgetCalculator.monthlySpend()` pre-body. No separate view model class is needed — the existing inline aggregation pattern in `body {}` (outside Chart DSL) is already established and works correctly.
+
+**Overview donut reuse**: `WhereItsGoingCard` in `OverviewView` already uses `DonutChart` with `rankedSpend`. The Analytics "by category" bars use `AnalyticsAggregator.compute().byCategory`. Both share the same `BudgetCalculator.monthlySpend()` call path — no duplication of aggregation logic; only the input `[Expense]` scope differs (month-bounded for Overview, range-bounded for Analytics).
+
+**@Query scope in AnalyticsView**:
+```swift
+// Current period
+@Query private var currentExpenses: [Expense]
+// Previous period (shifted date window)
+@Query private var previousExpenses: [Expense]
+
+init(range: AnalyticsRange) {
+    // Dynamically construct predicates based on range
+    // Pattern: same as OverviewMonthContent init with dynamic Query construction
+    let (curStart, curEnd) = AnalyticsAggregator.windowBounds(for: range, offset: 0)
+    let (prevStart, prevEnd) = AnalyticsAggregator.windowBounds(for: range, offset: -1)
+    _currentExpenses = Query(filter: #Predicate { $0.date >= curStart && $0.date <= curEnd }, ...)
+    _previousExpenses = Query(filter: #Predicate { $0.date >= prevStart && $0.date <= prevEnd }, ...)
+}
 ```
-App transitions to foreground (ScenePhase .active)
-    |
-    v
-RootView.onChange(of: scenePhase)
-    |
-    v
-RoutineResetService.resetIfNeeded(notes:context:)
-    |
-    v
-For each Note where isRoutine && routineLastResetDate < startOfToday:
-    block.isChecked = false  (all blocks)
-    note.routineLastResetDate = startOfToday
-    |
-    v
-context.save()  [explicit -- no autosave reliance per CLAUDE.md]
+
+This mirrors `OverviewMonthContent`'s dynamic `Query` init pattern exactly.
+
+---
+
+## Complete Component Map: New vs Modified
+
+### New Components
+
+| Component | Kind | Location | Purpose |
+|-----------|------|----------|---------|
+| `DesignTokens` | enum | `DesignSystem/DesignTokens.swift` | Single source of truth for all visual constants |
+| `NeuSurface` | ViewModifier | `DesignSystem/NeuSurface.swift` | Raised/pressed/inset neumorphic surfaces |
+| `NeuTabBar` | View | `DesignSystem/NeuTabBar.swift` | Floating capsule tab bar with spring animation |
+| `RollingMoneyText` | View | `DesignSystem/RollingMoneyText.swift` | Animated odometer Decimal → formatted INR |
+| `DeltaChip` | View | `DesignSystem/DeltaChip.swift` | ±% badge with pos/neg glow border |
+| `SegmentedRangeBar` | View | `DesignSystem/SegmentedRangeBar.swift` | Liquid-ink sliding range control |
+| `Color+Neumorphic` | extension | `DesignSystem/Color+Neumorphic.swift` | `Color(hex:)` initializer (already have `Color+Hex.swift` — check if exists) |
+| `AnalyticsView` | View | `Features/Analytics/AnalyticsView.swift` | New Analytics tab (area chart + category bars + AI insight) |
+| `AreaTrendChart` | View | `Features/Analytics/AreaTrendChart.swift` | Swift Charts `AreaMark` + `LineMark` with scanning dot simulation |
+| `CategoryBarsView` | View | `Features/Analytics/CategoryBarsView.swift` | Horizontal liquid-glow category bars with tap tooltip |
+| `AIInsightCard` | View | `Features/Analytics/AIInsightCard.swift` | Frosted glass card, typewriter text reveal, breathing orb |
+| `InsightService` | @Observable | `Features/Analytics/InsightService.swift` | FoundationModels session, availability gate, caching |
+| `AnalyticsAggregator` | enum | `Support/AnalyticsAggregator.swift` | Pure static analytics computation, delta %, SpendSummary |
+| `SpendSummary` | struct | `Support/AnalyticsAggregator.swift` | Value type fed to InsightService |
+| `AnalyticsResult` | struct | `Support/AnalyticsAggregator.swift` | Full output of AnalyticsAggregator.compute() |
+
+### Modified Components
+
+| Component | Location | What Changes |
+|-----------|----------|-------------|
+| `RootView` | `RootView.swift` | Add `NeuTabBar` overlay; suppress native tab bar; add Analytics tab (tag 5); own `insightService` only if pre-warming |
+| `CardStyle` | `Features/Shared/CardStyle.swift` | Replace body with neumorphic surface; or delete and migrate call sites to `neuSurface(.raised)` |
+| `CategoryStyle` | `Features/Shared/CategoryStyle.swift` | Extend `bySymbol` map to use `DesignTokens.catColors` luminous palette |
+| `DonutChart` | `Features/Shared/DonutChart.swift` | No logic change; restyle colors to luminous cat palette + glow |
+| `IconTile` | `Features/Shared/IconTile.swift` | Restyle background fill; add luminous glow shadow |
+| `OverviewView` (all subviews) | `Features/Overview/` | Apply neumorphic tokens to all card containers; replace `cardStyle()` calls |
+| `SpendByCategoryChart` | `Features/Overview/SpendByCategoryChart.swift` | Restyle bar colors to luminous cat palette |
+| `SpendOverTimeChart` | `Features/Overview/SpendOverTimeChart.swift` | Restyle line/area colors to DesignTokens.negRed + accent |
+| `BudgetsView` + subviews | `Features/Budgets/` | Apply neumorphic tokens |
+| `ExpenseListView` + subviews | `Features/Expenses/` | Apply neumorphic tokens |
+| `NotesHomeView` + subviews | `Features/Notes/` | Apply neumorphic tokens |
+| `SettingsView` | `Features/Settings/SettingsView.swift` | Apply neumorphic tokens |
+| `AssetsListView` + subviews | `Features/Assets/` | Apply neumorphic tokens |
+| `AccountsListView` + subviews | `Features/Settings/` | Apply neumorphic tokens |
+
+**No schema changes in v1.2.** SchemaV9 is not bumped. The AI Insight, Analytics aggregation, and design system are all presentation/service-layer concerns. No new `@Model` types needed.
+
+---
+
+## Data Flow
+
+### Design System Token Flow
+```
+DesignTokens (constants)
+    ↓
+NeuSurface ViewModifier
+    ↓
+Applied to: every card/row/sheet container across all screens
+            NeuTabBar (reads token constants directly)
+            RollingMoneyText (reads labelPrimary, negRed, posGreen)
+            DeltaChip (reads negRed/posGreen + accentSoft)
+```
+
+### Analytics Screen Data Flow
+```
+@Query currentExpenses (date-bounded)
+@Query previousExpenses (prior period)
+@Query categories
+    ↓ (body, pre-Chart-DSL)
+AnalyticsAggregator.compute(...)
+    ↓
+AnalyticsResult {
+    .buckets    → AreaTrendChart (Swift Charts AreaMark+LineMark)
+    .byCategory → CategoryBarsView (custom animated bars)
+    .summary    → InsightService.refresh(summary:)
+    .deltaPct   → DeltaChip
+    .total      → RollingMoneyText (hero number)
+}
+    ↓
+InsightService (async, @Observable)
+    ↓ availability gate
+SystemLanguageModel.default.availability == .available
+    ↓
+LanguageModelSession.respond(to: prompt, generating: SpendInsight.self)
+    ↓
+SpendInsight.text → AIInsightCard (typewriter animation)
+```
+
+### AI Insight Availability Gate
+```
+AnalyticsView.onAppear / range change
+    ↓
+InsightService.refresh(summary:)
+    ↓
+SystemLanguageModel.default.availability
+    ├── .available           → create/reuse session, call respond(), update .state = .ready(insight:)
+    ├── .unavailable(reason) → .state = .unavailable(reason:) — AIInsightCard section hidden
+    └── throws               → .state = .failed(error:) — AIInsightCard shows retry button
+    ↓
+AnalyticsView observes insightService.state
+    ├── .idle/.loading → skeleton shimmer in AIInsightCard
+    ├── .ready         → show insight text (typewriter animation on text change)
+    ├── .unavailable   → AIInsightCard not rendered (section omitted entirely)
+    └── .failed        → "Couldn't generate insight" + retry button
+```
+
+### Existing App Unaffected Path
+```
+Devices without Apple Intelligence:
+SystemLanguageModel.default.availability == .unavailable(deviceNotEligible)
+    ↓
+InsightService.state = .unavailable
+    ↓
+AIInsightCard not rendered in AnalyticsView
+    ↓
+Everything else (charts, tab bar, tokens, all screens) unaffected — zero dependency on FoundationModels
 ```
 
 ---
 
-## Dependency-Ordered Build Sequence
+## Recommended Build Order (Dependency-Aware)
 
 ```
-Phase 0: Stabilization         (no schema changes; fixes 3 bugs before V6 work)
-    |
-    v
-Phase 1: SchemaV6 + Migration  (Account + Asset models; all new fields on Expense + Note)
-    |
-    v
-Phase 2: Accounts Feature      (AccountsView, AccountLinkingService, per-account spend)
-    |
-    v
-Phase 3: Self-Transfer         (SelfTransferDetector, TransferConfirmView, aggregator filter)
-    |
-    v
-Phase 4: Asset Tracker         (AssetsView, PriceFetchService, NetWorthAggregator, NetWorthView)
-    |
-    v  (independent of 3; can swap with Phase 3)
-Phase 5: Notes Enhancement     (isRoutine toggle, RoutineResetService, calendar daily reminder)
+Phase A: Design System Foundation        ← MUST come first; everything depends on this
+    - DesignTokens.swift
+    - NeuSurface.swift (ViewModifier, testable with Previews)
+    - NeuTabBar.swift (replaces native tab bar in RootView)
+    - RollingMoneyText.swift
+    - DeltaChip.swift
+    - Color+Hex.swift audit (file exists at Support/Color+Hex.swift — verify if reusable)
+    - Update CategoryStyle to use DesignTokens.catColors
+    - Update CardStyle → neuSurface(.raised) or delete CardStyle entirely
+    - Deliverable: app looks neumorphic on RootView entry; existing tabs use new tab bar
+
+Phase B: Restyle Existing Screens        ← Depends on Phase A tokens being stable
+    Ordered by screen complexity (Overview is the most complex):
+    B1. Overview (most components: hero, donut, budget glance, recent)
+    B2. Expenses + ExpenseRow + ReviewInboxRow
+    B3. Budgets + BudgetCategoryCard
+    B4. Notes (NotesHomeView, NoteRow, CalendarView)
+    B5. Settings + AccountsListView + AssetsListView + AccountDetailView
+    - Deliverable: every screen restyled; no stock SwiftUI colors visible
+
+Phase C: Analytics Screen (net-new)      ← Depends on Phase A; independent of Phase B
+    C1. AnalyticsAggregator (pure static, write tests first)
+    C2. AnalyticsView shell (tabs, data flow, @Query wiring)
+    C3. AreaTrendChart (Swift Charts; reuse SpendOverTimeAggregator output)
+    C4. CategoryBarsView (custom animated view; no Charts dependency)
+    C5. Add Analytics tab to RootView (NeuTabBar gets 6th item, or Analytics is
+        pushed from Overview "Analytics" entry row — match design intent)
+    - Deliverable: Analytics screen with real data, no AI card yet
+
+Phase D: AI Insight Card                 ← Depends on Phase C (needs AnalyticsView + SpendSummary)
+    D1. InsightService (availability gate, session, caching; iOS 26 only)
+    D2. SpendInsight @Generable struct
+    D3. AIInsightCard view (typewriter animation, breathing orb, skeleton)
+    D4. Wire InsightService into AnalyticsView
+    - Deliverable: AI Insight working on iOS 26 / Apple Intelligence devices;
+      invisible (section hidden) on all other devices
 ```
 
-Phase 4 (Assets) only needs Phase 1 complete -- it is independent of Phases 2 and 3 and can be built in parallel with them if needed.
+**Why this order:**
+- Phase A must precede B because the token constants are the foundation all screen restyling depends on. Building B without A means all styling gets written twice.
+- Phase B and Phase C are independent and can be interleaved by screen if needed (e.g. restyle Overview in B1 while building Analytics shell in C1). However, running B to completion first means the restyle pass is done in one focused context, reducing the risk of token drift.
+- Phase D depends on Phase C because `InsightService.refresh()` takes a `SpendSummary` from `AnalyticsAggregator`, which is built in C1. The AI card also lives inside `AnalyticsView`, built in C2.
 
-Phase 5 (Notes) only needs Phase 1 complete -- independent of Phases 2, 3, 4.
+---
+
+## Integration Constraints from Codebase
+
+### Xcode pbxproj — Critical
+Per `xcodeproj-explicit-file-refs.md` (memory): every new `.swift` file requires 4 manual edits to `project.pbxproj`. The `DesignSystem/` folder is new; all 7+ files in it must be explicitly registered. Phase A will produce the most new files at once — allocate time for pbxproj wiring.
+
+### Schema Footgun Guard
+Per `schema-version-mutation-footgun.md` (memory): v1.2 makes **no schema changes**. No SchemaV10, no typealias flips. This eliminates the entire category of typealias/schema migration bugs.
+
+### Swift 6 Concurrency
+`InsightService` is `@Observable` + `@MainActor`-isolated. `LanguageModelSession` calls are `async throws`; they must be wrapped in `Task { await ... }` from `onChange(of:)` or called from `.task {}` modifier in `AnalyticsView`. Pattern mirrors `LockController.authenticate()` in `RootView`:
+```swift
+.task(id: selectedRange) {
+    let summary = AnalyticsAggregator.compute(...).summary
+    await insightService.refresh(summary: summary)
+}
+```
+
+### iOS Minimum Version
+`FoundationModels` requires iOS 26. The app's current minimum is iOS 17. This means:
+- `InsightService` must gate on both `#available(iOS 26, *)` AND `SystemLanguageModel.default.availability`.
+- `import FoundationModels` must be wrapped in `#if canImport(FoundationModels)` or placed in a file with `@available(iOS 26, *)` annotation on the entire class.
+- Recommended: mark `InsightService` with `@available(iOS 26, *)`. In `AnalyticsView`, use `if #available(iOS 26, *) { InsightServiceSection(...) }` to conditionally render the AI card section.
+
+### TabBar Navigation
+Adding an Analytics tab changes `selectedTab` integer values. Design shows Analytics as a NavigationStack push from the Overview "Analytics" entry row (not a new tab), which avoids renumbering. The design handoff's `AnalyticsScreen` component is a slide-in `PushView` overlay, not a tab. Confirm with roadmapper: **Analytics as push from Overview** (no new tab slot, tab bar stays at 5 items) vs **Analytics as 6th tab** (requires NeuTabBar to accommodate). The simpler approach — push from Overview — avoids tab count changes and matches the `home.jsx` code exactly (`openAnalytics` callback shows `AnalyticsScreen` as a slide-over).
+
+---
+
+## Patterns to Follow
+
+### Token Usage — Always Indirect
+Views never hardcode hex values. All colors come from `DesignTokens.*` or `CategoryStyle.color(for:)`. This is what makes the system a *system* — a single token change propagates everywhere.
+
+### Aggregation Before Chart DSL
+Established pattern (Pitfall A from existing codebase): all `BudgetCalculator`, `SpendOverTimeAggregator` calls happen in `body {}` BEFORE entering `Chart {}`. `AnalyticsAggregator.compute()` follows the same rule. Never pass `@Query` arrays directly into Chart DSL.
+
+### Decimal-Safe Double Conversion
+Established pattern (Pitfall B): `Decimal → Double` via `NSDecimalNumber(decimal:).doubleValue` at aggregation boundary only. `RollingMoneyText` internally interpolates `Double` for animation but formats from the authoritative `Decimal` source at the end state.
+
+### @Observable Services, Not @StateObject
+All existing services (`LockController`, `AMFINavService`, `RoutineResetService`, etc.) use `@Observable` + `@State`. `InsightService` follows the same pattern. No `ObservableObject`, no `@Published`.
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: @Relationship between Account and Expense
-**What people do:** Add `@Relationship var expenses: [Expense]` on Account.
-**Why it's wrong:** SchemaV5 documents this exact pattern as causing "Circular reference resolving attached macro 'Relationship'" on fan-out relationships. CloudKit also does not support large fan-out relationships reliably.
-**Do this instead:** UUID FK (`accountID: UUID?` on Expense). Join at query time in aggregators and filtered views.
+### Anti-Pattern 1: Scattered Token Values
+**What goes wrong:** Colors and radii inlined in each view file (the current state).
+**Why it's bad:** One design token change requires editing 30+ files; inconsistency creeps in.
+**Prevention:** All visual constants in `DesignTokens`. Phase A establishes this before any screen restyling begins.
 
-### Anti-Pattern 2: Storing asset type as a Swift enum in @Model
-**What people do:** `var assetType: AssetType` where AssetType is a Swift enum.
-**Why it's wrong:** CloudKit rule 8 (no stored enums). Same pitfall as `ingestionStateRaw` on Expense and `kindRaw` on NoteBlock.
-**Do this instead:** `var assetTypeRaw: String?` with a computed var for decoding.
+### Anti-Pattern 2: FoundationModels Import Without Availability Guard
+**What goes wrong:** `import FoundationModels` at top of file → compile failure on iOS 17 targets.
+**Prevention:** Either wrap the entire `InsightService` class with `@available(iOS 26, *)` or use `#if canImport(FoundationModels)`. Test that the app builds and runs on iOS 17 simulator after wiring.
 
-### Anti-Pattern 3: PriceFetchService as a singleton
-**What people do:** `static let shared = PriceFetchService()` injected via environment.
-**Why it's wrong:** The service holds network tasks; singletons can't be cleaned up cleanly. Tests become complex.
-**Do this instead:** Own as `@State private var priceFetcher = PriceFetchService()` in `AssetsView`, inject `modelContext` explicitly. Matches the GmailSyncController ownership pattern.
+### Anti-Pattern 3: Passing Raw [Expense] to InsightService
+**What goes wrong:** LLM prompt includes individual transaction records (PII risk, prompt too long).
+**Prevention:** Always construct `SpendSummary` (aggregate totals, category names, no merchant names, no dates) in `AnalyticsAggregator` before calling `InsightService.refresh(summary:)`.
 
-### Anti-Pattern 4: Background rollover job for routine reset
-**What people do:** BGAppRefreshTask that resets routine checklists overnight.
-**Why it's wrong:** BGAppRefreshTask execution is not guaranteed and the slot is already used for Gmail sync.
-**Do this instead:** `RoutineResetService.resetIfNeeded()` on foreground activation -- deterministic and always runs before the user sees content.
+### Anti-Pattern 4: Creating a New LanguageModelSession Per Request
+**What goes wrong:** Each new session discards conversation context and incurs model warm-up cost.
+**Prevention:** `InsightService` creates session lazily once. Cache is checked before calling `respond()`. Session is retained for the `InsightService` lifetime.
 
-### Anti-Pattern 5: Replacing sourceAccount with accountID FK
-**What people do:** Treating `Expense.sourceAccount` (Gmail email) as redundant once `accountID` exists.
-**Why it's wrong:** `sourceAccount` is the dedup idempotency key in `GmailSyncController.syncAccount()` (D-MA-03). Removing it breaks dedup for all existing and future ingested expenses.
-**Do this instead:** Keep both. `sourceAccount` = Gmail email for ingestion pipeline. `accountID` = FK to Account entity for spend/account views.
+### Anti-Pattern 5: Storing Decimal in RollingMoneyText Animation as Double
+**What goes wrong:** `Decimal(displayValue: Double)` reconstruction loses precision; displayed amount drifts from authoritative value at animation completion.
+**Prevention:** `RollingMoneyText` holds `var displayValue: Double` for animation interpolation only. When animation completes, render from the original `Decimal` parameter (not from `Decimal(displayValue)`). Format calls always use the source Decimal.
 
-### Anti-Pattern 6: Separate RoutineCompletion @Model
-**What people do:** A `RoutineCompletion` @Model with `(noteID, date, isCompleted)` records.
-**Why it's wrong:** Creates a growing append-only table, CloudKit sync overhead, complex cleanup.
-**Do this instead:** Reset `NoteBlock.isChecked = false` directly on live blocks when day changes. Store only `routineLastResetDate` on Note for idempotency.
-
----
-
-## CloudKit Readiness Checklist for New Models
-
-Both Account and Asset must follow all SchemaV5 rules:
-- All stored properties have a default or are optional
-- No `@Attribute(.unique)` anywhere
-- Decimal for money (never Double)
-- UTC timestamps via `Date = Date()`
-- UUID primary key (`id: UUID = UUID()`)
-- No stored enums (use `*Raw: String?`)
-- No `@Relationship` fan-out from Account to Expense (use UUID FK instead)
-- Both added to `SchemaV6.models` list and to `AppMigrationPlan.schemas`
+### Anti-Pattern 6: Making Analytics a Sixth Tab Before Confirming Design Intent
+**What goes wrong:** NeuTabBar with 6 items needs layout adjustment (narrower items); changes selectedTab integer values, potentially breaking deep links.
+**Prevention:** Default to the `home.jsx` pattern: Analytics is a push/slide from Overview. Only add as a tab if the roadmapper explicitly requires it after reviewing the design.
 
 ---
 
 ## Sources
 
-- Direct codebase reading (HIGH confidence, first-party source):
-  - `MyHomeApp/Persistence/Schema/SchemaV5.swift`
-  - `MyHomeApp/Persistence/Schema/MigrationPlan.swift`
-  - `MyHomeApp/Persistence/ModelContainer+App.swift`
-  - `MyHomeApp/Features/Gmail/GmailSyncController.swift`
-  - `MyHomeApp/Features/Gmail/GmailAccountStore.swift`
-  - `MyHomeApp/Support/NotificationScheduler.swift`
-  - `MyHomeApp/Support/CalendarAggregator.swift`
-  - `MyHomeApp/Features/Notes/CalendarView.swift`
-  - `MyHomeApp/Persistence/Models/ReminderValueTypes.swift`
-  - `MyHomeApp/Features/Expenses/ReviewInboxRow.swift`
-- AMFI MF NAV API (`api.mfapi.in`) -- free Indian MF NAV endpoint (MEDIUM confidence)
+- Direct codebase reading (HIGH confidence):
+  - `MyHomeApp/RootView.swift` — tab structure, service ownership, scenePhase wiring
+  - `MyHomeApp/Features/Shared/CardStyle.swift` — current card surface approach
+  - `MyHomeApp/Features/Shared/CategoryStyle.swift` — current color mapping
+  - `MyHomeApp/Features/Overview/OverviewView.swift` — aggregation before Chart DSL pattern; WhereItsGoingCard; dynamic @Query init
+  - `MyHomeApp/Features/Overview/SpendByCategoryChart.swift` — CategorySpendItem, BarMark pattern
+  - `MyHomeApp/Features/Overview/SpendOverTimeChart.swift` — existing AreaMark+LineMark, reusable for Analytics
+  - `MyHomeApp/Support/SpendOverTimeAggregator.swift` — pure static bucketing; directly reusable in Analytics
+  - `MyHomeApp/Support/OverviewAggregation.swift` — pure static aggregation discipline
+  - `MyHomeApp/Support/BudgetCalculator.swift` — monthlySpend reusable for category bars
+  - `MyHomeApp/Features/Shared/DonutChart.swift` — existing SectorMark donut
+  - `MyHomeApp/Persistence/Schema/SchemaV9.swift` — confirmed schema at 11 model types; no v1.2 changes needed
+  - `MyHomeApp/Persistence/Models/Expense.swift` — typealias pattern, STAB-08 lesson
+  - `MyHomeApp/MyHomeApp.swift` — ModelContainer, BGTask, service ownership pattern
+- Design handoff (HIGH confidence — primary design specification):
+  - `design/design_handoff_myhome_neumorphic/src/tokens.jsx` — neuro skin token values
+  - `design/design_handoff_myhome_neumorphic/src/ui.jsx` — TabBar, Screen, GroupedList, Row components
+  - `design/design_handoff_myhome_neumorphic/src/analytics.jsx` — Analytics screen, AIInsight card, AreaChart, CategoryBars, LiquidTabs
+  - `design/design_handoff_myhome_neumorphic/src/home.jsx` — HomeScreen, Analytics entry row, push-not-tab pattern
+  - `design/design_handoff_myhome_neumorphic/src/motion.jsx` — RollingNumber/RollingMoney animation spec
+- Apple FoundationModels framework (MEDIUM confidence — iOS 26, released 2025/2026; verified via AppCoda tutorial and CreateWithSwift documentation):
+  - `SystemLanguageModel.default.availability` enum cases: `.available`, `.unavailable(reason:)`
+  - `LanguageModelSession(instructions:)` init; `.respond(to:)` async; `.streamResponse(to:)` AsyncSequence
+  - `@Generable` macro; `@Guide` for constrained fields
+  - Minimum: iOS 26, Apple Intelligence enabled hardware
+  - Source: [AppCoda Foundation Models guide](https://www.appcoda.com/foundation-models/), [CreateWithSwift framework exploration](https://www.createwithswift.com/exploring-the-foundation-models-framework/)
+- Memory context (HIGH confidence — established project conventions):
+  - `schema-version-mutation-footgun.md` — no schema bump in v1.2
+  - `xcodeproj-explicit-file-refs.md` — 4 manual pbxproj edits per new .swift file
+  - `AccountBalance sign convention` — Decimal money handling
 
 ---
-*Architecture research for: MyHome v1.1 -- Accounts, Assets & Household Polish*
-*Researched: 2026-06-08*
+
+*Architecture research for: MyHome v1.2 — Neumorphic Redesign + Analytics + AI Insight*
+*Researched: 2026-06-20*

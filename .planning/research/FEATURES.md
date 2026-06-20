@@ -1,7 +1,7 @@
 # Feature Research
 
 **Domain:** Personal household finance + ops hub (iOS, 2-person household, India)
-**Researched:** 2026-06-08 (v1.1 update; v1.0 research preserved below)
+**Researched:** 2026-06-08 (v1.1 update; v1.0 research preserved below) | 2026-06-20 (v1.2 update)
 **Confidence:** HIGH (self-transfer detection signals, daily-routine data model), MEDIUM (asset tracker scope and India stock API reliability)
 
 ---
@@ -483,6 +483,398 @@ DailyRoutine
 
 ---
 
+## v1.2 Feature Research — Neumorphic Redesign (2026-06-20)
+
+### v1.2 Scoping Principle
+
+v1.2 is primarily a **visual milestone** on top of a feature-complete app. The four new surfaces (design system, analytics screen, spend donut, AI insight card) are judged against: "does this make the app feel like something you want to open every morning?"
+
+This document does NOT re-research any v1.0/v1.1 feature. All existing functionality (expense tracking, budgets, notes, accounts, assets) is already shipped; v1.2 only reskins it and adds three net-new UI surfaces plus one new screen.
+
+Design authority: `design/design_handoff_myhome_neumorphic/` — the HTML/React prototype is the pixel-faithful reference. All token values, shadow formulas, and layout decisions in this research are drawn directly from that handoff.
+
+---
+
+## Feature Area 5: Neumorphic Design System
+
+### What It Is
+
+A cohesive Soft UI look applied to every screen in the app. Neumorphism = surfaces share the background color and gain depth purely from two opposing shadows (light from top-left, dark at bottom-right). The handoff pins a dark charcoal canvas (`#1C1C23`) with a canary-yellow accent (`#FFD60A`) as the sole saturated color. No translucency, no blur, no glassmorphism.
+
+The design system is a **prerequisite** for all other v1.2 surfaces — it must be built first because analytics, donut, and AI card all use its shadow tokens, radii, and color palette.
+
+### Core Token Set (from handoff, verbatim)
+
+| Token | Value | SwiftUI Usage |
+|-------|-------|---------------|
+| Canvas bg | `#1C1C23` | `.background` on root view |
+| Raised surface | `#1F1F27` | Default Card fill |
+| Raised surface (strong) | `#22222C` | Hero card, tab bar, sheets |
+| Elevated control | `#262630` | Segmented picker active fill |
+| Recessed fill | `#15151B` | Progress tracks, text inputs |
+| Accent yellow | `#FFD60A` | Active tab, CTAs, Analytics tile |
+| Accent soft | `rgba(255,214,10,0.16)` | Active-tab pill background |
+| Positive | `#34E29B` | Income, positive net, up arrows |
+| Negative | `#FF6B6B` | Spend, negative, over-budget |
+| Primary label | `#ECEDF4` | All body text |
+| Secondary label | `rgba(220,223,238,0.56)` | Subtitles, captions |
+
+Shadow pair (the heart of the style):
+- **Raised card**: `shadow(-6,-6,14, white@3.5%) + shadow(7,7,18, black@55%)`
+- **Floating element**: `shadow(-9,-9,22, white@4%) + shadow(11,11,28, black@62%)`
+- **Recessed well**: `inset shadow(2,2,5,black@50%) + inset shadow(-2,-2,5,white@3.5%)`
+- **Pressed/active state**: swap to recessed shadow
+
+In SwiftUI these map to `.shadow(color: .white.opacity(0.035), radius: 14, x: -6, y: -6)` + `.shadow(color: .black.opacity(0.55), radius: 18, x: 7, y: 7)` applied via a custom `ViewModifier`.
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| `NeuSurface` ViewModifier encoding all three shadow states (raised/recessed/floating) | Every card needs this; without it there is no Soft UI | LOW | One ViewModifier with an enum parameter; applied as `.neuRaised()`, `.neuRecessed()`, `.neuFloat()` |
+| Design token constants as Swift enum or struct | Hardcoded hex in every view is fragile; tokens make theme-wide changes possible | LOW | `NeuTokens.canvas`, `NeuTokens.accent`, etc.; all Color values |
+| Shadow pair on every card surface | The shadows ARE the style — missing them makes the app look flat-charcoal, not Soft UI | LOW | Apply via `NeuSurface` modifier; never use system `.card` or `.regularMaterial` |
+| 26px card radius throughout | Under-rounded cards break the Soft UI illusion; the handoff is explicit on this | LOW | `NeuTokens.cardRadius = 26`; capsule bars use `.infinity` |
+| Floating capsule tab bar (62px tall, radius 34px, yellow active pill) | The handoff defines the tab bar as a floating element with float-shadow; stock SwiftUI `.tabBar` does not match | MEDIUM | Custom `TabBar` view that replaces `.tabViewStyle` entirely; manage tab selection in app state |
+| Active tab: yellow icon + label + soft yellow pill background | Tab active state is the primary accent usage; missing = accent has no anchor | LOW | Conditional color/background on each tab item |
+| Rolling money readouts (odometer count-up on mount/change, ~780ms easeOutCubic) | The handoff explicitly defines this as a motion primitive; static numbers feel dead in this style | MEDIUM | `RollingNumberView` using `TimelineView` or manual animation loop; apply to all `₹` hero amounts |
+| Pressed/active feedback: opacity dim to 0.45 + recessed shadow swap | Neumorphic controls must "press in" visually when tapped | LOW | `.pressedStyle()` modifier using `DragGesture(minimumDistance:0)` to detect press |
+| Restyle all six existing screens (Overview, Activity, Budgets, Notes, Settings, + Accounts, Assets, Transfer Inbox) | The app looks inconsistent if unrestyled screens sit behind a redesigned Overview | HIGH | This is the high-complexity item; each screen needs a reskin pass |
+| Category color palette (11 colors) from handoff | Charts, bars, and donut segments all use these specific colors; deviation looks wrong | LOW | `groceries: #2DD4BF, dining: #FB923C, fuel: #F472B6, utilities: #7DD3FC, rent: #818CF8, shopping: #E879F9, health: #A78BFA, subscriptions: #22D3EE, entertainment: #C084FC, other: #94A3B8` |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Inner rim highlight on raised cards (`inset 1px 1px 1px rgba(255,255,255,0.045)`) | Adds the final edge-lit look that makes surfaces feel genuinely embossed | LOW | Add to `NeuSurface` modifier; one extra `.shadow` call |
+| Spring animation on tab highlight slide (`cubic-bezier(.34,1.32,.42,1)`) | The snappy elastic slide makes tab switching feel premium | LOW | SwiftUI `.animation(.spring(response:0.35, dampingFraction:0.7))` on the highlight offset |
+| Yellow-accent glowing icon tile for Analytics entry button (solid `#FFD60A` fill, near-black icon) | The Analytics tile stands out from all other cards, creating a clear visual hierarchy | LOW | `RoundedRectangle` filled with accent; icon in `#1A1404` for contrast |
+| Positive/Negative pill next to net cash flow hero number | Semantic color chip that conveys direction at a glance without reading the number | LOW | Conditional `--pos`/`--neg` tinted capsule |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Light mode support | System default | Neumorphism in dark charcoal requires near-identical surface and background tones — the style fundamentally breaks in light mode where shadows need to invert completely and the look becomes "dirty beige" | Pinned dark mode only; the design handoff is explicit that this is a dark-themed system |
+| Multiple theme variants / skins | The prototype supports 6 skins | The handoff says "implement only the Neomorphism style"; shipping multiple themes multiplies QA surface and dilutes identity | One theme, well executed |
+| Glassmorphism blur or translucency | Popular and visually similar | The handoff is explicit: "No translucency, no blur" — Soft UI and Glass are distinct styles | Solid opaque surfaces with the dual-shadow system |
+| Gradient fills on card backgrounds | Looks rich | Breaks the Soft UI contract: surfaces must be the same color family as the canvas, not gradients | Reserve gradients for the budget bar fill and chart lines only |
+| System `.background` and `.card` ShapeStyles | Easiest approach | These adopt tint colors in dark mode and don't match the exact charcoal tokens | Hard-code `Color(hex: NeuTokens.raisedSurface)` via the NeuSurface modifier |
+
+### Existing Data Dependencies
+
+The design system has NO data dependencies — it is pure UI restyling. Every view just gets new colors, shadows, and radii applied on top of its existing data bindings.
+
+---
+
+## Feature Area 6: "Where It's Going" Spend Donut
+
+### What It Is
+
+A ring donut chart on the Overview screen showing the current month's expenses broken down by category. Each slice is one category's color from the palette. The center shows a "SPENT" eyebrow and the total spend as a rolling number. A legend below (or beside) shows the top 4 categories with their colors and amounts. Tapping a slice filters the Activity list — this is the drill-down interaction.
+
+This surface replaces the existing spend-by-category bar chart (Swift Charts `BarMark`) on Overview with a more visually compact and premium ring representation, while keeping category drill-through.
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Ring donut from current month's expenses grouped by category | Core feature; without segments the ring is meaningless | LOW | Group `Expense` by `category` for current calendar month; filter out `transferStateRaw == "confirmed"` |
+| Each category segment gets its color from the category palette | Color encodes category identity throughout the app | LOW | Map `category.id` to `CAT_COLORS` palette |
+| Center label: "SPENT" eyebrow + rolling total spend amount | Users need the absolute total visible, not just proportions | LOW | Overlay `ZStack` center on the SVG ring |
+| Top-4 category legend (colored dot, name, amount) | Context for what each color means; without this the ring is ambiguous | LOW | Sort descending by amount; show top 4; "Others" roll-up if more than 4 |
+| Gap between segments (visual separation) | Segments without gaps blur together in neumorphic dark context | LOW | Use `strokeDasharray` gap or SwiftUI `SectorMark.angularInset` |
+| Animate segments growing in on appear (0 → full arc, ~900ms spring) | Static ring feels dead in the Soft UI context | LOW | `stroke-dasharray` transition from 0 → target length; or SwiftUI `trim(from:to:)` animated |
+| Segment glow (`drop-shadow` in the category color) | Adds depth and makes segments legible against dark canvas | LOW | SwiftUI `.shadow(color: segmentColor.opacity(0.5), radius: 5)` on `SectorMark` or custom SVG layer |
+| Empty state: plain circle track with "No expenses this month" | If there are no expenses the ring must still render gracefully | LOW | Show the recessed ring track with a center message |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Tap-to-filter: tap a segment → Activity screen pre-filtered to that category | Turns the donut from decoration into a navigation shortcut | MEDIUM | Pass a `selectedCategory` binding; Activity screen already supports category filter |
+| "Others" roll-up segment for categories beyond the top 4 | Prevents the ring from having 10 tiny slices | LOW | Sum all categories ranked 5+ into a grey "Others" segment |
+| Rolling number in center animates when month changes | Motion connects the chart to the live data | LOW | Reuse the `RollingNumberView` component from the design system |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Exploding/exploded segments on tap | Some pie charts "pop" a slice outward | Breaks the neumorphic flush surface aesthetic; the ring is embedded in a card, not floating | Tap highlights the segment by brightening its glow and shows a tooltip chip |
+| Full-screen donut or dedicated Donut tab | More room = more data | Overview is the right home; a dedicated tab wastes navigation hierarchy for a glance metric | Keep it on Overview; Analytics screen provides the deeper breakdown |
+| 3D or isometric donut | Trendy in some finance apps | Clashes with the flat-Soft-UI system; impossible to render legibly in dark charcoal | Flat ring only |
+| Percentage labels on each segment | Some chart libraries default to this | Segments are too narrow for readable text at small chart sizes; and the legend already gives amounts | Show percentage in tap-tooltip only |
+
+### Existing Data Dependencies
+
+| Data | Source | Status |
+|------|--------|--------|
+| `Expense.amount` grouped by `Expense.category` for current month | SwiftData `@Query` with month predicate | Exists |
+| `Expense.transferStateRaw` for exclusion of confirmed transfers | `Expense` model (SchemaV6) | Added in v1.1 |
+| Category color palette | Static constant in code (design tokens) | New in v1.2 |
+| Total spend (sum of category amounts) | Derived from the same query | Exists |
+
+---
+
+## Feature Area 7: Dedicated Analytics Screen
+
+### What It Is
+
+A full-screen overlay (not a tab) opened from the Analytics card on Overview. It contains: time-range tabs (Week / Month / Year), a total-spend headline with a delta chip (vs prior period), a smooth area chart showing spend over time, an AI Insight card, and a by-category horizontal bar list. The design handoff's `analytics.jsx` is the exact reference.
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Time-range tab switcher: Week / Month / Year | Without time-range control the chart is locked to one view; this is the primary interaction | LOW | Segmented control using neumorphic recessed track + raised yellow pill for active state |
+| Total spend headline for the selected range | Anchor number that all other content in the screen explains | LOW | Sum of `Expense.amount` for the range, excluding confirmed transfers |
+| Delta chip: ▲/▼ % vs prior period, colored green if down / coral if up | "Is this better or worse than last period?" is the most actionable question on this screen | MEDIUM | Compute prior-period sum; calculate `(current - prior) / prior * 100`; green chip for negative delta (less spend = good) |
+| "vs last week/month/year" label next to delta chip | Without this, "8.4%" is ambiguous — better or worse? | LOW | Static label changes with the range selection |
+| Smooth area chart (Catmull-Rom curve, left-to-right draw animation) | A chart that draws itself on appear is expected in a premium finance UI | MEDIUM | Swift Charts `AreaMark` + `LineMark` with `.interpolationMethod(.catmullRom)`; animate via `chartXScale` expansion or a `trim` modifier |
+| Area chart fill gradient (coral at peaks → transparent at baseline) | Depth cue for a spending area chart | LOW | Swift Charts `.foregroundStyle(.linearGradient(...))` on the `AreaMark` |
+| Peak marker dot on the highest value | Draws the eye to the worst spending period | LOW | Overlay a `PointMark` at the max-value x-axis position |
+| X-axis labels (M/T/W/T/F/S/S for week; W1–W5 for month; J–D for year) | Required for chart readability | LOW | Swift Charts `AxisMark` on `.chartXAxis` |
+| Staggered by-category horizontal bars (icon chip + name + amount + colored fill bar) | Category breakdown is the second most important content on this screen | MEDIUM | `ForEach` over categories sorted by spend descending; each row has an icon tile, label, amount, and a recessed-track + colored-fill progress bar |
+| Stagger animation on category bar grow-in (each bar delayed by ~60ms) | Makes the list feel organized rather than all-at-once | LOW | `animation(.spring(...).delay(Double(index) * 0.06))` on bar width |
+| Tap-to-show tooltip on category bar (amount + % of spend) | Progressive disclosure of the percentage detail | LOW | Toggle a boolean on tap; show a chip above the bar |
+| "Back" / close button (circular soft control) | Screen opens as a push/overlay; user must be able to close it | LOW | Circular neumorphic button with chevron.left; yellow accent icon |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Scanning dot travelling along the area chart line (continuous loop) | Draws attention to the chart's most recent data point and makes the screen feel live | MEDIUM | `animateMotion` along the path (SVG) or a custom overlay dot that rides the chart line using `chartOverlay` + `GeometryReader` |
+| "Spending trend" card label with period indicator (e.g. "June 2026") | Contextualizes the chart so the user knows what period they're looking at | LOW | `Text` label above the chart inside the raised card |
+| Color-coded peak x-axis label (matches the coral negative color) | Highlights the worst day/week visually | LOW | Conditional foreground color on the peak axis label |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Custom date range picker (from/to dates) | Power user request | Adds a picker UI, date validation, edge cases; the three fixed ranges cover 95% of what the household will use | Week / Month / Year is sufficient; add custom range only if explicitly requested post-ship |
+| Export to CSV / PDF | "Save my analytics" | Out of scope for a local private tool; adds file picker, formatting, share sheet | The data lives in the app; no export needed |
+| Comparison mode (two periods side by side) | Some analytics apps offer this | Doubles the query complexity and chart rendering; disproportionate complexity for a 2-person household | The delta chip covers the comparison need adequately |
+| Line chart instead of area chart | Simpler to implement | The area fill provides the visual weight that makes spending highs feel visceral — important for a "where is my money going?" screen | Area chart with gradient fill |
+| Bar chart instead of area chart for the trend | Bar charts are clearer for discrete periods | Week and Month views have 5–7 data points which suits a smooth area curve; bars at this density look cluttered on a phone | Area for the trend; horizontal bars for the category breakdown |
+
+### Existing Data Dependencies
+
+| Data | Source | Status |
+|------|--------|--------|
+| `Expense.amount` + `Expense.date` for range queries | SwiftData `@Query` with date predicate | Exists |
+| `Expense.category` for grouping | `Expense.category: String` | Exists |
+| Prior-period expenses for delta computation | Same model, different date range | Exists (query logic is new) |
+| Category color palette | Design tokens (v1.2 new) | New in v1.2 |
+| Category icon (SF Symbol name) | Category model or static mapping | Exists |
+
+---
+
+## Feature Area 8: On-Device AI Insight Card
+
+### What It Is
+
+A card on the Analytics screen that displays a single natural-language sentence about the user's spending for the selected time range. Example: "Dining is up 34% this week — three weekend orders drove most of it. Skipping one keeps you under budget." The text is generated by Apple's FoundationModels framework (the on-device ~3B parameter model powering Apple Intelligence) using structured spending data as context.
+
+The card has a violet left-edge glow, a "breathing orb" animation, "AI INSIGHT" eyebrow, sparkles icon, and typewriter text reveal. These are decoration — the core feature is the insight text itself.
+
+### Capability Ground Truth (HIGH confidence — verified against WWDC25 session 286)
+
+The on-device model is a ~3B parameter LLM running on A17 Pro / M1+ chips with Apple Intelligence enabled. It is optimized for:
+- Content summarization and generation from supplied context
+- Structured output (guided generation into Swift types)
+- Short-to-medium text tasks broken into discrete pieces
+
+It is NOT designed for:
+- World knowledge or current events (does not know market context)
+- Complex multi-step reasoning (e.g., financial forecasting)
+- Long-context analysis (keep prompts short; use structured data, not raw text)
+
+Availability gating is required before every session:
+```swift
+switch SystemLanguageModel.default.availability {
+case .available: // proceed
+case .unavailable(let reason): // show static fallback
+}
+```
+
+Unavailability reasons: `deviceNotEligible`, `appleIntelligenceNotEnabled`, `modelNotReady`. The card must gracefully degrade in all three cases.
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Single natural-language insight sentence for the selected time range | The reason for the card's existence; a card that always says "No insight available" is useless | MEDIUM | Prompt the model with structured spending summary; request a 1–2 sentence output |
+| Availability check before every generation; graceful fallback when unavailable | Devices without Apple Intelligence (pre-A17 Pro, or AI disabled) must not show an error modal | LOW | Show a static "Insights available on Apple Intelligence-enabled devices" message in the card shell |
+| Insight refreshes when time-range tab changes | The insight must correspond to the currently selected period (Week/Month/Year) | LOW | Trigger a new generation whenever `range` binding changes; cancel the previous in-flight task |
+| Typewriter text reveal (character-by-character, ~26ms per char) | Matches the streaming nature of model output; signals to the user that this is generated, not a static string | LOW | Stream from `LanguageModelSession.respond(to:)` using `AsyncThrowingStream`; update a `@State var shownText: String` progressively |
+| Violet card accent (left edge glow + violet wash) distinguishes the AI card from financial data cards | AI-generated content must be visually distinct from data-derived content | LOW | Hard-code the violet styling; this is not a design token variation, it is a semantic signal |
+| "AI INSIGHT" eyebrow + sparkles icon | Labels the card as AI-generated, setting correct expectations | LOW | Static label; SF Symbol `sparkles` |
+| Breathing orb animation (pulsing circle) shows the model is thinking / alive | Standard loading affordance for AI content | LOW | SwiftUI scale animation loop while generating; stop when text is complete |
+| Loading state while model generates | Generation takes 2–5 seconds; a blank card with no feedback feels broken | LOW | Show the breathing orb alone, no text, until first characters appear |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Range-aware insight: Week insight names specific days, Month insight names specific weeks, Year insight names the worst month | Specificity makes insights feel personal rather than generic | MEDIUM | Include range-appropriate data in the prompt (day-of-week spend for Week, week totals for Month, month totals for Year) |
+| Actionable suggestion in the insight ("Skipping one keeps you under budget") | Converts observation into behavior change; the most useful thing the card can say | MEDIUM | Include budget data in the prompt so the model can reference the gap between current spend and budget limit |
+| Fastest-growing category observation ("your fastest-growing category since March") | Year-range insight can reference prior months from the same data window | MEDIUM | Include month-by-month category totals in the Year prompt; let the model identify the trend |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Cloud LLM fallback (Claude / GPT) when on-device is unavailable | More capable model; always available | Finance data leaving the device is a hard no for a private household tool; also adds API cost and network dependency | Static "Insights available on supported devices" message. The device gate is not a bug; it is by design. |
+| Multiple insight cards or a feed of insights | More insights = more value | The on-device model is a device-scale model; long outputs degrade quality; a single focused sentence is more trustworthy than a paragraph of hallucinations | One insight card, one sentence, refreshed per range change |
+| Persistent insight history (save past insights to SwiftData) | "What did it say last month?" | Generated text is ephemeral and context-dependent; saving it creates a historical artifact that may become misleading as data changes | Regenerate on demand; no persistence |
+| Manual "regenerate" button | Some AI UIs offer this | Exposes the model's non-determinism; if users see different outputs for the same data they lose trust | Generate once per range per session; if the user changes the range and comes back, it regenerates naturally |
+| Fine-tuned or custom adapters | Better domain accuracy | Out of scope; FoundationModels adapters are for Apple's built-in use cases (content tagging, etc.); custom training is not exposed | Well-engineered prompt with structured spending data is sufficient for 1–2 sentence observations |
+| Insight accuracy disclaimer / caveat text | Legal / trust concern | Adds visual noise to a card that is already trust-sensitive due to the violet styling | The violet styling and "AI INSIGHT" label already set appropriate expectations; a legal disclaimer is overkill for a private household app |
+
+### Prompt Engineering Strategy (MEDIUM confidence)
+
+The FoundationModels model works best with structured, factual input rather than conversational context. For a spending insight, the prompt should supply:
+
+```
+Context (for Week range):
+- Total spend this week: ₹8,420
+- Prior week total: ₹8,980 (6.2% less this week)
+- Top categories: Groceries ₹2,380, Dining ₹1,920, Fuel ₹1,450
+- Budget limit: ₹35,000/month (₹8,750/week pro-rata)
+- User's currency: INR
+
+Task: Write one to two sentences summarizing the most notable spending pattern 
+and, if applicable, one actionable suggestion. Be specific. Do not use generic 
+advice. Do not mention investments, savings rates, or advice outside the data provided.
+```
+
+Keep the entire prompt under 500 tokens. The model is not designed for long-context reasoning; short, structured prompts produce better outputs than narrative context.
+
+**Guided generation** (structured output) is preferable over free text for reliability:
+
+```swift
+@Generable
+struct SpendingInsight {
+    var observation: String   // what happened
+    var suggestion: String?   // optional actionable tip
+}
+```
+
+Concatenate `observation + " " + (suggestion ?? "")` for display. This prevents the model from generating multi-paragraph output or going off-topic.
+
+### Existing Data Dependencies
+
+| Data | Source | Status |
+|------|--------|--------|
+| Weekly/monthly/yearly expense totals by category | SwiftData `@Query` grouped by category + date range | Exists (new grouping logic needed) |
+| Prior-period totals for delta comparison | Same model, prior date range | New query logic (shared with Analytics screen) |
+| Monthly budget limits per category | `Budget` model | Exists |
+| `SystemLanguageModel` framework | FoundationModels (iOS 26, A17 Pro+) | New dependency |
+
+---
+
+## v1.2 Feature Dependencies
+
+```
+NeurophicDesignSystem (no data deps — pure UI)
+    └──required-by──> ALL other v1.2 surfaces
+                       (AnalyticsScreen, SpendDonut, AIInsightCard all use NeuSurface,
+                        NeuTokens, RollingNumberView, capsule tab bar)
+
+SpendDonut (Overview screen addition)
+    ├──requires──> Expense.amount + Expense.category (exists)
+    ├──requires──> transferStateRaw exclusion (SchemaV6, v1.1)
+    └──requires──> Category color palette (NeuTokens, v1.2)
+
+AnalyticsScreen (new full-screen overlay)
+    ├──requires──> Expense date-range queries with category grouping (new query logic)
+    ├──requires──> Prior-period queries for delta chip (new query logic)
+    ├──requires──> Category color palette (NeuTokens, v1.2)
+    └──enhances──> SpendDonut (tap-to-filter navigates here)
+
+AIInsightCard (within AnalyticsScreen)
+    ├──requires──> AnalyticsScreen (card lives inside it)
+    ├──requires──> Aggregated spending data from AnalyticsScreen queries
+    ├──requires──> Budget limit data (Budget model, exists)
+    └──requires──> FoundationModels framework (iOS 26, Apple Intelligence)
+```
+
+### Dependency Notes
+
+- **Design system first**: NeuSurface, NeuTokens, RollingNumberView, and the capsule tab bar must be built before any screen reskin can begin. The reskin pass then applies uniformly to all screens.
+- **AnalyticsScreen query logic is shared with AIInsightCard**: Build the spending-aggregation query (by-category, by-period, prior-period) once in a `SpendingAnalyticsViewModel`; both the chart and the AI prompt consume it.
+- **SpendDonut and AnalyticsScreen are independent after the design system is ready**: They can be built in parallel if needed.
+- **AIInsightCard requires iOS 26 and Apple Intelligence**: The build target minimum can stay iOS 17; the card must availability-gate at runtime. Do not use `#available` on the card view itself — use the `SystemLanguageModel.default.availability` check inside the view model.
+
+---
+
+## v1.2 MVP Definition
+
+### Must Have (the milestone is complete when all are done)
+
+- [ ] `NeuSurface` ViewModifier with three states (raised / recessed / float) — Design System
+- [ ] `NeuTokens` color/shadow constants — Design System
+- [ ] `RollingNumberView` (odometer count-up) — Design System
+- [ ] Custom floating capsule tab bar with yellow active pill — Design System
+- [ ] Reskin Overview screen with neumorphic surfaces — Reskin
+- [ ] Reskin Activity, Budgets, Notes, Settings screens — Reskin
+- [ ] Reskin Accounts, Assets, Transfer Inbox screens — Reskin
+- [ ] "Where it's going" spend donut on Overview (segments + center total + legend) — Donut
+- [ ] Donut segment grow-in animation on appear — Donut
+- [ ] Analytics screen (full-screen overlay from Overview card) — Analytics
+- [ ] Time-range tabs (Week/Month/Year) with sliding active pill — Analytics
+- [ ] Total spend headline + delta chip (vs prior period) — Analytics
+- [ ] Smooth area chart (Catmull-Rom, left-to-right draw) with peak marker — Analytics
+- [ ] By-category horizontal bars with stagger animation + tap tooltip — Analytics
+- [ ] AI Insight card with availability gate + typewriter reveal + graceful fallback — AI
+
+### Add After v1.2 Validation
+
+- [ ] Tap-to-filter from donut segment → Activity pre-filtered to category
+- [ ] Scanning dot animation along area chart line
+- [ ] Range-aware insight specificity tuning (budget gap in suggestion)
+
+### Future (v2+)
+
+- [ ] Custom date-range picker on Analytics
+- [ ] Year-over-year insight with multi-year data
+
+---
+
+## v1.2 Feature Prioritization Matrix
+
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| NeuSurface / NeuTokens design system | HIGH (enables everything) | LOW | P1 |
+| RollingNumberView | HIGH (hero UX) | MEDIUM | P1 |
+| Capsule tab bar | HIGH (visible on every screen) | MEDIUM | P1 |
+| Screen reskin — Overview | HIGH | MEDIUM | P1 |
+| Screen reskin — remaining screens | HIGH | HIGH | P1 |
+| Spend donut on Overview | HIGH | MEDIUM | P1 |
+| Analytics screen — time range + headline + delta | HIGH | MEDIUM | P1 |
+| Analytics screen — area chart | HIGH | MEDIUM | P1 |
+| Analytics screen — category bars | HIGH | LOW | P1 |
+| AI Insight card (basic — availability gate + insight) | MEDIUM | MEDIUM | P1 |
+| Donut tap-to-filter | MEDIUM | MEDIUM | P2 |
+| Area chart scanning dot | LOW | MEDIUM | P2 |
+| Actionable AI suggestion with budget context | MEDIUM | LOW | P2 |
+
+---
+
+## Sources
+
+- Design handoff: `design/design_handoff_myhome_neumorphic/README.md` — canonical token values, shadow formulas, screen layouts, motion specs (verified 2026-06-20)
+- Design prototype source: `design/design_handoff_myhome_neumorphic/src/analytics.jsx`, `src/home.jsx`, `src/charts.jsx` — exact component behavior and data structures
+- [Apple WWDC25 session 286 "Meet the Foundation Models framework"](https://developer.apple.com/videos/play/wwdc2025/286/) — capabilities, limitations, availability enum, hardware requirements (HIGH confidence)
+- [AppCoda — Getting Started with Foundation Models in iOS 26](https://www.appcoda.com/foundation-models/) — availability gating patterns, graceful degradation (MEDIUM confidence)
+- [Swift Charts donut chart — swiftwithmajid](https://swiftwithmajid.com/2023/09/26/mastering-charts-in-swiftui-pie-and-donut-charts/) — `SectorMark` + `innerRadius` for donut, iOS 17 requirement (HIGH confidence)
+- [SwiftUI neumorphism — Hacking with Swift](https://www.hackingwithswift.com/articles/213/how-to-build-neumorphic-designs-with-swiftui) — dual-shadow ViewModifier pattern (MEDIUM confidence)
+- [Fintech UX best practices — eleken.co](https://www.eleken.co/blog-posts/fintech-ux-best-practices) — progressive disclosure, contextual insights vs raw data (MEDIUM confidence)
+
+---
+
+---
+
 ## v1.0 Feature Research (archived — do not re-litigate)
 
 The section below is the original v1.0 research (2026-05-28). It is preserved
@@ -548,3 +940,4 @@ PROJECT.md already excludes: Android, SMS reading, cross-Apple-ID sharing in v1,
 *Feature research for: My Home iOS app*
 *v1.0 original research: 2026-05-28*
 *v1.1 update: 2026-06-08*
+*v1.2 update: 2026-06-20*
