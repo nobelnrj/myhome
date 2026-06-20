@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Accounts, Assets & Household Polish
-status: executing
-last_updated: "2026-06-13T11:23:25.125Z"
-last_activity: 2026-06-13
+status: milestone_complete
+last_updated: "2026-06-20T11:30:00.000Z"
+last_activity: 2026-06-20
 progress:
   total_phases: 6
   completed_phases: 5
@@ -185,6 +185,18 @@ Open human-verification artifacts deferred at milestone close — code is implem
 | uat_gap | 06-UAT.md | core-complete-1-deferred-issue |
 | verification_gap | 02-VERIFICATION.md | human_needed |
 | verification_gap | 04-VERIFICATION.md | human_needed |
+
+### Acknowledged at v1.1 Milestone Close (2026-06-20)
+
+Open artifacts deferred at v1.1 close — code is implemented; the verification items are outstanding manual on-device passes carried into v1.2 as tracked debt:
+
+| Category | Item | Status |
+|----------|------|--------|
+| uat_gap | 09-HUMAN-UAT.md | partial (1 pending scenario) |
+| verification_gap | 08-VERIFICATION.md | human_needed |
+| verification_gap | 09-VERIFICATION.md | human_needed |
+| quick_task | 260603-lvt-support-syncing-from-multiple-gmail-acco | missing/stale |
+| todo | test-isolation-swiftdata-multicontainer.md | pending (test-infra debt) |
 
 ## Session Continuity
 

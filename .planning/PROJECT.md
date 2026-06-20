@@ -1,21 +1,39 @@
 # My Home
 
-## Current Milestone: v1.1 Accounts, Assets & Household Polish
+## Current State
+
+**Shipped:** v1.1 Accounts, Assets & Household Polish (2026-06-20) — see [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md). The app is now a light household finance hub: account-aware spend with self-transfer detection, a net-worth Asset Tracker (free AMFI MF NAV + manual holdings + SIP automation), and daily-routine notes — on top of the v1.0 MVP (automated Gmail expense ingestion, budgets, notes/reminders, overview, Face ID).
+
+## Next Milestone: v1.2 Neumorphic Redesign
+
+**Goal:** A full neumorphic (Soft UI) visual redesign of the entire app, plus the design handoff's net-new surfaces — making My Home look and feel like a polished, cohesive personal-finance product rather than a stock SwiftUI app.
+
+**Target work (to be formalized via /gsd-new-milestone):**
+- **Neumorphic design system** — implement the exact tokens (charcoal surfaces, dual light/dark shadows, canary-yellow accent, 26px radii, floating capsule tab bar, rolling money readouts) from `design/design_handoff_myhome_neumorphic/`.
+- **Restyle every screen** — Overview, Activity, Budgets, Notes, Settings AND the unshown surfaces (Accounts, Assets/Net-worth, Transfer Inbox, Gmail/Ingestion) to one consistent neumorphic look (decided: restyle all).
+- **Dedicated Analytics screen** (net-new) — time-range tabs, spending-trend area chart, by-category bars, delta chips.
+- **AI Insight card** (net-new) — natural-language spending insight powered by **Apple FoundationModels on-device** (free, private, offline; no API/keys).
+- **"Where it's going" spend donut** (net-new) on Overview.
+
+**Key context:**
+- Still local-only (no CloudKit/sharing — remains the v2.0 trigger gated on the $99/yr upgrade).
+- AI Insight is **on-device only** (FoundationModels, iOS 26 / Apple Intelligence) — finance data never leaves the device; gracefully degrades where unsupported.
+- This is primarily a visual/UX milestone over a feature-complete app — redesign first, then layer in the net-new surfaces.
+
+<details>
+<summary>Previous milestone: v1.1 Accounts, Assets & Household Polish (shipped 2026-06-20)</summary>
 
 **Goal:** Grow My Home from an automated expense tracker into a light household finance + ops hub — account-aware spend with self-transfer detection, a net-worth asset tracker, smarter daily-routine reminders, and a stability/UX cleanup pass.
 
-**Target features:**
-- Stabilization — fix 3 known bugs (add-category appends to bottom; sync/notes crash; daily-routine completion resets at end of day)
-- Accounts management — model & manage the household's bank accounts (balances, per-account spend), building on the existing `Expense.sourceAccount` + multi-Gmail work
-- Self-transfer detection — auto-flag debit/credit pairs between own accounts into a confirm step; excluded transfers don't count as spend
-- Asset tracker — mutual funds, stocks, NPS & account balances → net-worth view, with free public NAV/quote APIs (AMFI etc.) and manual override
-- Notes enhancement — daily routine surfaces in the calendar as a daily reminder; better day-to-day note features
+- Stabilization — fixed crash vectors, category ordering, daily-routine reset.
+- Accounts management — bank accounts with live balances + per-account spend.
+- Self-transfer detection — auto-detect + confirm; excluded from spend.
+- Asset tracker — MF/stocks/NPS + account balances → net worth (free AMFI NAV, manual override, SIP automation, NPS NAV refresh).
+- Notes enhancement — daily routine in calendar, timed notifications, drag-reorder, streak/history.
 
-**Key context:**
-- v1.1 is additive and still local-only (no CloudKit/sharing — that remains the v2.0 trigger gated on the $99/yr upgrade).
-- Asset prices come from **free public APIs** (AMFI MF NAV is reliable; India stock-quote endpoints are fragile/unofficial — manual override always available). Network fetch is best-effort, never blocking.
-- Self-transfer is **auto-detect + confirm**, never silent exclusion.
-- Charter note: v1.0 explicitly excluded investments/net-worth tracking. v1.1 intentionally reverses that exclusion (see Out of Scope).
+Local-only, free-data-only, auto-detect+confirm (never silent), additive CloudKit-ready schema (V5→V9).
+
+</details>
 
 ## What This Is
 

@@ -1,5 +1,27 @@
 # Milestones
 
+## v1.1 Accounts, Assets & Household Polish (Shipped: 2026-06-20)
+
+**Phases completed:** 6 phases (8-12, incl. inserted 11.1), 26 plans
+**Timeline:** 2026-06-03 → 2026-06-20 (~17 days)
+**Code:** ~118 Swift files in the app target; 200 commits since v1.0 (365 files changed, +49k/-26.8k LOC across app + planning)
+**Requirements:** 32/32 v1.1 requirements complete
+
+**Delivered:** Grew My Home from an automated expense tracker into a light household finance + ops hub — account-aware spend with self-transfer detection, a net-worth Asset Tracker (manual holdings + free AMFI MF NAV + allocation/trend charts), SIP automation with NPS NAV auto-refresh, a Notes daily-routine enhancement (calendar surfacing, timed notifications, drag-reorder, streak/history), and a stability/UX cleanup pass. Local-only, free-data-only, manual override always available.
+
+**Key accomplishments:**
+
+- **Phase 8 — Stabilization:** Fixed two production crash vectors (Notes calendar tombstone access; Gmail sync Category-after-await + per-loop save), locked category insertion order, and scaffolded the RoutineResetService.
+- **Phase 9 — SchemaV6 & Accounts Management:** Additive V5→V6 migration (Account + Asset models, Expense/Note fields) with backfill fixture test; full Accounts CRUD with live baseline-±-transactions balances, per-account spend, archive, and per-day routine reset (IST).
+- **Phase 10 — Self-Transfer Detection:** Deterministic 5-signal scorer + Transfer Inbox confirm/reject; confirmed transfers excluded from all spend/budget/charts and applied as balance-moves (net worth unchanged); manual mark/unmark on any expense.
+- **Phase 11 — Asset Tracker:** MF/stock/NPS holdings CRUD, best-effort AMFI NAV auto-refresh with staleness badges, net worth = holdings + account balances with per-holding gain/loss, allocation donut, and net-worth trend snapshots.
+- **Phase 11.1 — SIP Automation & NPS NAV (INSERTED):** Recurring SIP unit accrual service plus best-effort NPS NAV auto-refresh, reversing the v1.1 NPS-auto-fetch deferral once the manual flow was proven.
+- **Phase 12 — Notes & Daily Routine Enhancement:** SchemaV9 RoutineCompletion model; routine notes surface on every calendar day, optional once-per-day timed notification (no duplicate stacking), drag-reorder of checklist items, and a forgiving streak + per-day completion history.
+
+**Known deferred items at close:** 8 open artifacts acknowledged as deferred — see STATE.md → Deferred Items (1 partial Phase 09 UAT, 2 human-needed verifications, 1 stale multi-Gmail quick task, 1 test-infra todo). Code is implemented; the verification items are outstanding manual on-device passes.
+
+---
+
 ## v1.0 MVP (Shipped: 2026-06-03)
 
 **Phases completed:** 7 phases, 26 plans, 43 tasks
