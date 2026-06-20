@@ -88,8 +88,34 @@
 
 ## Traceability
 
-<!-- Filled by the roadmapper: REQ-ID → Phase mapping. -->
-
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| _to be populated by roadmap_ | | |
+| DS-01 | Phase 13 | Pending |
+| DS-02 | Phase 13 | Pending |
+| DS-03 | Phase 13 | Pending |
+| DS-04 | Phase 13 | Pending |
+| DS-05 | Phase 13 | Pending |
+| DS-06 | Phase 13 | Pending |
+| SKIN-01 | Phase 14 | Pending |
+| SKIN-02 | Phase 14 | Pending |
+| SKIN-03 | Phase 14 | Pending |
+| SKIN-04 | Phase 14 | Pending |
+| SKIN-05 | Phase 14 | Pending |
+| SKIN-06 | Phase 14 | Pending |
+| SKIN-07 | Phase 14 | Pending |
+| SKIN-08 | Phase 14 | Pending |
+| SKIN-09 | Phase 14 | Pending |
+| OVR-05 | Phase 14 | Pending |
+| OVR-06 | Phase 14 | Pending |
+| ANL-01 | Phase 15 | Pending |
+| ANL-02 | Phase 15 | Pending |
+| ANL-03 | Phase 15 | Pending |
+| ANL-04 | Phase 15 | Pending |
+| ANL-05 | Phase 15 | Pending |
+| ANL-06 | Phase 15 | Pending |
+| ANL-07 | Phase 15 | Pending |
+| AI-01 | Phase 16 | Pending |
+| AI-02 | Phase 16 | Pending |
+| AI-03 | Phase 16 | Pending |
+| AI-04 | Phase 16 | Pending |
+| AI-05 | Phase 16 | Pending |
