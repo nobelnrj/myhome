@@ -20,11 +20,11 @@
 <!-- Pure UI, zero data dependencies. Ships FIRST — every other v1.2 surface depends on stable tokens. -->
 
 - [x] **DS-01**: A single source-of-truth `DesignTokens` defines the neumorphic palette (charcoal surfaces, canary-yellow accent), dual light/dark shadow specs, 26px corner radius, and spacing scale — translated from `design/design_handoff_myhome_neumorphic/src/tokens.jsx`.
-- [ ] **DS-02**: A reusable `NeuSurface` view-modifier family renders raised / recessed / floating states via the dual-shadow system, so any view adopts the look with one modifier (replaces the thin `CardStyle`).
+- [x] **DS-02**: A reusable `NeuSurface` view-modifier family renders raised / recessed / floating states via the dual-shadow system, so any view adopts the look with one modifier (replaces the thin `CardStyle`).
 - [ ] **DS-03**: A floating capsule tab bar replaces the stock `TabView` chrome, with correct safe-area insets so scrolled content is never occluded and existing deep-link tab indices remain stable.
-- [ ] **DS-04**: A rolling/animated money readout component (`.contentTransition(.numericText)`) for headline figures (balances, totals).
+- [x] **DS-04**: A rolling/animated money readout component (`.contentTransition(.numericText)`) for headline figures (balances, totals).
 - [x] **DS-05**: Dark-mode-only palette — no light-mode variant, no translucency/blur/Liquid Glass; solid opaque surfaces with the dual-shadow system only.
-- [ ] **DS-06**: The design system is accessible by construction — meets WCAG 1.4.11 (3:1) non-text contrast for interactive surface boundaries (never relying on the 3.5%-white shadow as the only affordance), scales with Dynamic Type via font tokens (no hardcoded pixel sizes), and honors Reduce Motion (rolling-money and typewriter animations degrade to instant).
+- [x] **DS-06**: The design system is accessible by construction — meets WCAG 1.4.11 (3:1) non-text contrast for interactive surface boundaries (never relying on the 3.5%-white shadow as the only affordance), scales with Dynamic Type via font tokens (no hardcoded pixel sizes), and honors Reduce Motion (rolling-money and typewriter animations degrade to instant).
 
 ### Restyle Existing Screens (SKIN)
 
@@ -91,11 +91,11 @@
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
 | DS-01 | Phase 13 | Complete |
-| DS-02 | Phase 13 | Pending |
+| DS-02 | Phase 13 | Complete |
 | DS-03 | Phase 13 | Pending |
-| DS-04 | Phase 13 | Pending |
+| DS-04 | Phase 13 | Complete |
 | DS-05 | Phase 13 | Complete |
-| DS-06 | Phase 13 | Pending |
+| DS-06 | Phase 13 | Complete |
 | SKIN-01 | Phase 14 | Pending |
 | SKIN-02 | Phase 14 | Pending |
 | SKIN-03 | Phase 14 | Pending |

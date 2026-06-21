@@ -72,7 +72,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 13-02-PLAN.md — NeuSurface (raised/floating/recessed) + RollingMoneyText; deprecate CardStyle (DS-02, DS-04, DS-06)
+- [x] 13-02-PLAN.md — NeuSurface (raised/floating/recessed) + RollingMoneyText; deprecate CardStyle (DS-02, DS-04, DS-06)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -144,7 +144,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 11. Asset Tracker | v1.1 | 4/4 | Complete | 2026-06-12 |
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete | 2026-06-12 |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 5/5 | Complete | 2026-06-20 |
-| 13. Design System Foundation | v1.2 | 1/3 | In Progress|  |
+| 13. Design System Foundation | v1.2 | 2/3 | In Progress|  |
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 0/? | Not started | - |
 | 15. Analytics Screen | v1.2 | 0/? | Not started | - |
 | 16. AI Insight Card | v1.2 | 0/? | Not started | - |
