@@ -76,7 +76,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 13-03-PLAN.md — NeuTabBar floating capsule + RootView/MyHomeApp integration + accessibility gate (DS-03, DS-05, DS-06)
+- [x] 13-03-PLAN.md — NeuTabBar floating capsule + RootView/MyHomeApp integration + accessibility gate (DS-03, DS-05, DS-06) *(code-complete; human-verify checkpoint outstanding as v1.2 debt)*
 
 **UI hint**: yes
 
