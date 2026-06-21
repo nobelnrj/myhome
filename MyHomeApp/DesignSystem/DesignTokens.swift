@@ -1,0 +1,112 @@
+// DesignTokens.swift
+// Single source of truth for all neumorphic visual tokens.
+// Translated from design/design_handoff_myhome_neumorphic/src/tokens.jsx (neuro branch).
+// Phase 13: DS-01
+
+import SwiftUI
+
+enum DesignTokens {
+
+    // MARK: - Canvas & Surface
+    static let bgCanvas               = Color(hex: "#1C1C23")
+    static let surfaceRaised          = Color(hex: "#1F1F27")
+    static let surfaceRaisedStrong    = Color(hex: "#22222C")
+    static let surfaceElevatedControl = Color(hex: "#262630")
+    static let fillRecessed           = Color(hex: "#16161C")
+    static let fillRecessed2          = Color(hex: "#191920")
+    static let fillRecessed3          = Color(hex: "#15151B")
+
+    // MARK: - Accent & Semantic
+    static let accent        = Color(hex: "#FFD60A")
+    static let accentSoft    = Color(hex: "#FFD60A").opacity(0.16)
+    static let accentOnYellow = Color(hex: "#1A1404")
+    static let positive      = Color(hex: "#34E29B")
+    static let negative      = Color(hex: "#FF6B6B")
+    static let orange        = Color(hex: "#FFB020")
+
+    // MARK: - Labels
+    // Base: #ECEDF4 for primary; #DCDFEE (rgb 220,223,238) with opacity for secondary tiers
+    static let label  = Color(hex: "#ECEDF4")
+    static let label2 = Color(hex: "#DCDFEE").opacity(0.56)
+    static let label3 = Color(hex: "#DCDFEE").opacity(0.32)
+    static let label4 = Color(hex: "#DCDFEE").opacity(0.16)
+
+    // MARK: - Separators & Borders
+    static let separatorHairline = Color.white.opacity(0.05)
+    static let separatorEdge     = Color.black.opacity(0.30)
+    static let glassBorder       = Color.white.opacity(0.025)
+
+    // MARK: - Category Palette
+    static let catGroceries     = Color(hex: "#2DD4BF")
+    static let catDining        = Color(hex: "#FB923C")
+    static let catFuel          = Color(hex: "#F472B6")
+    static let catUtilities     = Color(hex: "#7DD3FC")
+    static let catRent          = Color(hex: "#818CF8")
+    static let catAuto          = Color(hex: "#38BDF8")
+    static let catShopping      = Color(hex: "#E879F9")
+    static let catHealth        = Color(hex: "#A78BFA")
+    static let catSubscriptions = Color(hex: "#22D3EE")
+    static let catEntertainment = Color(hex: "#C084FC")
+    static let catOther         = Color(hex: "#94A3B8")
+
+    // MARK: - Corner Radii
+    static let radiusCard:   CGFloat = 26
+    static let radiusInner:  CGFloat = 20   // mid-range of 16–22 spec
+    static let radiusPill:   CGFloat = 999
+    static let radiusTabBar: CGFloat = 34
+    static let radiusSheet:  CGFloat = 20
+    // radiusIconTile is computed per-component: size * 0.28
+
+    // MARK: - Spacing (on-grid 4-point multiples)
+    static let spacing4:  CGFloat = 4
+    static let spacing8:  CGFloat = 8
+    static let spacing16: CGFloat = 16
+    static let spacing24: CGFloat = 24
+    static let spacing32: CGFloat = 32
+    static let spacing48: CGFloat = 48
+
+    // MARK: - Spacing (handoff-sourced structural exceptions — see UI-SPEC spacing section)
+    static let spacing2:  CGFloat = 2    // tab bar icon↔label micro-gap (ui.jsx TabItem gap: 2)
+    static let spacing12: CGFloat = 12   // active pill vertical inset formula (ui.jsx pilH = tabBarHeight − 12)
+    static let spacing22: CGFloat = 22   // inter-card vertical gap (ui.jsx card list gap: 22)
+
+    // MARK: - Tab Bar Geometry
+    static let tabBarHeight:       CGFloat = 62
+    static let tabBarBottomOffset: CGFloat = 24
+    static let tabBarClearance:    CGFloat = 100   // safeAreaInset height for content (TABBAR_H)
+    static let tabItemWidth:       CGFloat = 58
+
+    // MARK: - Shadow Helpers
+    // NOTE: @ScaledMetric cannot be a static stored property on an enum (Swift compiler error:
+    // "property wrappers are not allowed on static stored properties").
+    // Group B font base sizes (heroMoney 46pt, statNumber 21pt, cardTitle 16pt, etc.) are
+    // declared as @ScaledMetric instance properties in each consumer view — not here.
+    struct ShadowSpec {
+        let lightColor: Color
+        let lightRadius: CGFloat
+        let lightX: CGFloat
+        let lightY: CGFloat
+        let darkColor: Color
+        let darkRadius: CGFloat
+        let darkX: CGFloat
+        let darkY: CGFloat
+    }
+
+    /// Standard raised card: dual outer shadow (light top-left, dark bottom-right)
+    static let shadowRaised = ShadowSpec(
+        lightColor: .white.opacity(0.035), lightRadius: 7,  lightX: -6, lightY: -6,
+        darkColor:  .black.opacity(0.55),  darkRadius:  9,  darkX:   7, darkY:   7
+    )
+
+    /// Floating element (hero card, tab bar capsule, bottom sheet): deeper dual outer shadow
+    static let shadowFloat = ShadowSpec(
+        lightColor: .white.opacity(0.04),  lightRadius: 11, lightX: -9, lightY: -9,
+        darkColor:  .black.opacity(0.62),  darkRadius:  14, darkX:  11, darkY:  11
+    )
+
+    // MARK: - Spring Animations
+    /// Bouncy spring — matches handoff cubic-bezier(.34,1.32,.42,1); used for tab pill slide
+    static let springBouncy: Animation = .spring(response: 0.4, dampingFraction: 0.65)
+    /// Soft spring — matches handoff cubic-bezier(.32,.72,0,1); used for sheet slide-up / push
+    static let springSoft:   Animation = .spring(response: 0.4, dampingFraction: 0.90)
+}
