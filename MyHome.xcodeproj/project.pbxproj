@@ -195,6 +195,12 @@
 		A1101RCT /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCT /* ReconcileTests.swift */; };
 		A1101SSVT /* SIPSetupValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SSVT /* SIPSetupValidationTests.swift */; };
 		A1203RDV /* RoutineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RDV /* RoutineDetailView.swift */; };
+		A13DS1 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DS1 /* DesignTokens.swift */; };
+		A13NS /* NeuSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13NS /* NeuSurface.swift */; };
+		A13NTB /* NeuTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13NTB /* NeuTabBar.swift */; };
+		A13RMT /* RollingMoneyText.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMT /* RollingMoneyText.swift */; };
+		A13DST /* DesignTokensTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DST /* DesignTokensTests.swift */; };
+		A13RMTT /* RollingMoneyTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMTT /* RollingMoneyTextTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -400,6 +406,12 @@
 		F1101SAST /* SIPAccrualServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualServiceTests.swift; sourceTree = "<group>"; };
 		F1101RCT /* ReconcileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileTests.swift; sourceTree = "<group>"; };
 		F1101SSVT /* SIPSetupValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPSetupValidationTests.swift; sourceTree = "<group>"; };
+		F13DS1 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		F13NS /* NeuSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuSurface.swift; sourceTree = "<group>"; };
+		F13NTB /* NeuTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuTabBar.swift; sourceTree = "<group>"; };
+		F13RMT /* RollingMoneyText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyText.swift; sourceTree = "<group>"; };
+		F13DST /* DesignTokensTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokensTests.swift; sourceTree = "<group>"; };
+		F13RMTT /* RollingMoneyTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyTextTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -436,6 +448,7 @@
 				F102 /* RootView.swift */,
 				F106 /* MyHome.entitlements */,
 				F105 /* Info.plist */,
+				G_DS /* DesignSystem */,
 				G110 /* Resources */,
 				G120 /* Features */,
 				G130 /* Persistence */,
@@ -444,6 +457,17 @@
 				G160 /* Gmail */,
 			);
 			path = MyHomeApp;
+			sourceTree = "<group>";
+		};
+		G_DS /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				F13DS1 /* DesignTokens.swift */,
+				F13NS /* NeuSurface.swift */,
+				F13NTB /* NeuTabBar.swift */,
+				F13RMT /* RollingMoneyText.swift */,
+			);
+			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 		G110 /* Resources */ = {
@@ -757,6 +781,8 @@
 				F1101SAST /* SIPAccrualServiceTests.swift */,
 				F1101RCT /* ReconcileTests.swift */,
 				F1101SSVT /* SIPSetupValidationTests.swift */,
+				F13DST /* DesignTokensTests.swift */,
+				F13RMTT /* RollingMoneyTextTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -1021,6 +1047,10 @@
 				A703HP /* HDFCParser.swift in Sources */,
 				A703IP /* ICICIParser.swift in Sources */,
 				A703CUB /* CUBParser.swift in Sources */,
+				A13DS1 /* DesignTokens.swift in Sources */,
+				A13NS /* NeuSurface.swift in Sources */,
+				A13NTB /* NeuTabBar.swift in Sources */,
+				A13RMT /* RollingMoneyText.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1093,6 +1123,8 @@
 				A1101SAST /* SIPAccrualServiceTests.swift in Sources */,
 				A1101RCT /* ReconcileTests.swift in Sources */,
 				A1101SSVT /* SIPSetupValidationTests.swift in Sources */,
+				A13DST /* DesignTokensTests.swift in Sources */,
+				A13RMTT /* RollingMoneyTextTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
