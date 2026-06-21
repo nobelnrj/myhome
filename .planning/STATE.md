@@ -140,6 +140,9 @@ Recent decisions affecting current work:
 - [Phase ?]: OQ-1 RESOLVED: UUID direct equality in #Predicate compiles and works — no .uuidString fallback needed
 - [Phase ?]: All 11 model typealiases flipped atomically to SchemaV9 (STAB-08)
 - [Phase ?]: v8ToV9 uses nil-closure .custom stage — purely additive (RoutineCompletion new empty table)
+- [Phase 13→14, 2026-06-21]: DS-03 floating capsule tab bar REVERTED to native iOS tab bar per user (commit 92e3e61). NeuTabBar.swift now orphaned/unused (delete during Phase 14). Phase 14 restyles the NATIVE bar's colors only — do NOT rebuild a custom tab bar. Reference design's yellow-active-pill bar is explicitly out of scope.
+- [Phase 14 SKIN DECISION, 2026-06-21]: Design handoff ships 6 interchangeable skins (Liquid Glass / Glassmorphism / Neomorphism / Minimalism / Bento / Spatial). User's reference screenshots = the DEFAULT 'liquid' (Liquid Glass) skin; Phase 13 DesignTokens.swift translated the 'neuro' (Neomorphism) branch — hence the mismatch. After a side-by-side comparison (design/skin-comparison.html), user CHOSE **Neomorphism** (keep what Phase 13 built) over matching the glass reference. So: NO rework of DesignTokens/NeuSurface; Phase 14 applies the existing neuro tokens + canary-yellow accent + colored category palette + "Where it's going" donut + net-cash-flow card across all 67 feature view files. Do NOT pursue Liquid Glass / translucent material.
+- [Phase 14 verified state, 2026-06-21]: Phase 13 components (DesignTokens/NeuSurface/RollingMoneyText/NeuTabBar) exist + pushed to main + compile, but are applied to 0 real screens (only CardStyle.swift deprecation shim references them). All 67 feature views still use system colors (secondarySystemBackground, .accentColor blue). Phase 14 is the wiring/restyle pass. CardStyle is marked "removed in Phase 14".
 
 ### Pending Todos
 
@@ -206,4 +209,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Run /gsd-plan-phase 8 to plan Phase 8: Stabilization
+- Run /gsd-plan-phase 14 to plan Phase 14: Restyle Existing Screens + Overview Donut (native tab bar retained; match reference mockup)

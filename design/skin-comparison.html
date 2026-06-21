@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MyHome — Liquid Glass vs Neomorphism</title>
+<style>
+  :root{
+    --accent:#FFD60A; --pos:#34E29B; --neg:#FF6B6B;
+    --cat-groceries:#2DD4BF; --cat-dining:#FB923C; --cat-shopping:#E879F9; --cat-fuel:#F472B6;
+  }
+  *{box-sizing:border-box; -webkit-font-smoothing:antialiased;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;}
+  body{margin:0; background:#050509; color:#fff; padding:28px 18px 48px;}
+  h1{font-size:20px; font-weight:700; text-align:center; margin:0 0 4px;}
+  .sub{text-align:center; color:#8b8b96; font-size:13px; margin:0 0 22px;}
+  .stage{display:flex; gap:40px; justify-content:center; align-items:flex-start; flex-wrap:wrap;}
+  .col{display:flex; flex-direction:column; align-items:center; gap:12px;}
+  .tag{font-size:13px; font-weight:600; letter-spacing:.3px;}
+  .tag .meta{display:block; font-weight:400; color:#7d7d88; font-size:11px; margin-top:2px;}
+
+  /* ---- iPhone frame ---- */
+  .phone{width:300px; height:620px; border-radius:46px; padding:11px; position:relative;
+    box-shadow:0 30px 70px rgba(0,0,0,.6), inset 0 0 0 2px #2a2a31;}
+  .screen{width:100%; height:100%; border-radius:36px; overflow:hidden; position:relative;}
+  .notch{position:absolute; top:9px; left:50%; transform:translateX(-50%); width:96px; height:24px;
+    background:#000; border-radius:14px; z-index:30;}
+  .content{position:absolute; inset:0; padding:46px 16px 78px; overflow:hidden;}
+  .statusbar{position:absolute; top:14px; left:20px; right:20px; display:flex; justify-content:space-between;
+    font-size:12px; font-weight:600; z-index:20;}
+  .title{font-size:24px; font-weight:700; margin:0 0 14px;}
+
+  /* ---- generic card pieces ---- */
+  .card{border-radius:var(--card-radius); padding:16px;}
+  .kicker{font-size:10px; letter-spacing:1px; font-weight:600; color:var(--c-label2);}
+  .hero{font-size:30px; font-weight:800; margin:6px 0 12px; color:var(--pos);}
+  .split{display:flex; gap:10px;}
+  .stat{flex:1; padding:10px; border-radius:14px; background:var(--c-fill);}
+  .stat .l{font-size:10px; color:var(--c-label2);} .stat .v{font-size:15px; font-weight:700; margin-top:2px;}
+  .pos{color:var(--pos);} .neg{color:var(--neg);}
+  .row{display:flex; align-items:center; gap:11px; padding:11px; border-radius:16px; margin-top:10px; background:var(--c-card2);}
+  .ic{width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+  .row .name{flex:1; font-size:13px; font-weight:600;} .row .amt{font-size:13px; font-weight:700; color:var(--c-label);}
+  .reviewcard{display:flex; align-items:center; gap:11px; margin-top:14px;}
+  .reviewcard .ic{background:rgba(255,214,10,.16); color:var(--accent);}
+  .reviewcard .t{flex:1; font-size:13px; font-weight:600;}
+  .donut-wrap{display:flex; align-items:center; gap:16px; margin-top:14px;}
+  .donut{width:96px; height:96px; border-radius:50%; flex-shrink:0;
+    background:conic-gradient(var(--cat-groceries) 0 38%, var(--cat-shopping) 38% 63%, var(--cat-dining) 63% 82%, var(--cat-fuel) 82% 100%);
+    -webkit-mask:radial-gradient(circle 30px at center, transparent 98%, #000 100%);
+            mask:radial-gradient(circle 30px at center, transparent 98%, #000 100%);}
+  .donut-c{position:relative;} .donut-c .ctr{position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;} .ctr .cl{font-size:9px; color:var(--c-label2);} .ctr .cv{font-size:15px; font-weight:800;}
+  .legend{font-size:11px; line-height:1.9;} .legend .d{display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:7px;}
+  .legend .amt{float:right; color:var(--c-label2); font-weight:600;}
+  /* ---- native tab bar ---- */
+  .tabbar{position:absolute; left:0; right:0; bottom:0; height:66px; display:flex;
+    padding:8px 6px 18px; z-index:25;}
+  .tabbar .tb{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:9px; color:var(--c-label2);}
+  .tabbar .tb.on{color:var(--accent);} .tabbar .tb .ti{font-size:17px;}
+
+  /* ============ LIQUID GLASS skin ============ */
+  .liquid .screen{background:#07070E;}
+  .liquid .content::before{content:""; position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(120% 120% at 0% 0%, rgba(255,214,10,.22) 0%, transparent 55%),
+      radial-gradient(120% 120% at 100% 100%, rgba(255,107,107,.16) 0%, transparent 55%),
+      radial-gradient(90% 90% at 80% 10%, rgba(26,5,51,.9) 0%, transparent 60%),
+      radial-gradient(90% 90% at 10% 90%, rgba(0,61,46,.85) 0%, transparent 60%);}
+  .liquid .content > *{position:relative; z-index:1;}
+  .liquid{
+    --card-radius:24px; --c-label:#fff; --c-label2:rgba(226,232,255,.60);
+    --c-fill:rgba(255,255,255,.11); --c-card2:rgba(255,255,255,.075);}
+  .liquid .card{
+    background:rgba(255,255,255,.085);
+    -webkit-backdrop-filter:saturate(135%) blur(24px); backdrop-filter:saturate(135%) blur(24px);
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 16px 38px rgba(0,0,0,.45);}
+  .liquid .row, .liquid .stat{border:1px solid rgba(255,255,255,.06);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);}
+  .liquid .tabbar{background:rgba(7,7,14,.55); -webkit-backdrop-filter:saturate(135%) blur(24px);
+    backdrop-filter:saturate(135%) blur(24px); border-top:1px solid rgba(255,255,255,.08);}
+  .liquid .phone{background:linear-gradient(160deg,#15151c,#0a0a10);}
+
+  /* ============ NEOMORPHISM skin (what Phase 13 built) ============ */
+  .neuro .screen{background:#1C1C23;}
+  .neuro{
+    --card-radius:26px; --c-label:#ECEDF4; --c-label2:rgba(220,223,238,.56);
+    --c-fill:#16161C; --c-card2:#1F1F27;}
+  .neuro .card{
+    background:#1F1F27;
+    box-shadow:-6px -6px 7px rgba(255,255,255,.035), 7px 7px 9px rgba(0,0,0,.55);}
+  .neuro .row{box-shadow:inset 2px 2px 4px rgba(0,0,0,.45), inset -2px -2px 4px rgba(255,255,255,.02); background:#1A1A21;}
+  .neuro .stat{box-shadow:inset 2px 2px 4px rgba(0,0,0,.45), inset -2px -2px 4px rgba(255,255,255,.02); background:#1A1A21;}
+  .neuro .tabbar{background:#1C1C23; box-shadow:0 -1px 0 rgba(255,255,255,.04);}
+  .neuro .phone{background:linear-gradient(160deg,#26262e,#15151b);}
+</style>
+</head>
+<body>
+  <h1>MyHome — same screen, two skins from the same design system</h1>
+  <p class="sub">Left = <b>Liquid Glass</b> (your reference screenshots) &nbsp;·&nbsp; Right = <b>Neomorphism</b> (what Phase 13 built). Identical content &amp; accent colors.</p>
+
+  <div class="stage" id="stage"></div>
+
+<script>
+  const SCREEN = `
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span>&#9679;&#9679;&#9679; &#128246; &#128267;</span></div>
+    <div class="content">
+      <div class="title">Overview</div>
+
+      <div class="card">
+        <div class="kicker">NET CASH FLOW</div>
+        <div class="hero">+ &#8377;88,861</div>
+        <div class="split">
+          <div class="stat"><div class="l">Income</div><div class="v pos">&#8377;92,645</div></div>
+          <div class="stat"><div class="l">Spent</div><div class="v neg">&#8377;3,784</div></div>
+        </div>
+      </div>
+
+      <div class="card reviewcard" style="padding:13px 14px;">
+        <div class="ic">&#128233;</div>
+        <div class="t">4 expenses to review<br><span style="font-weight:400;color:var(--c-label2);font-size:11px;">Imported from Gmail</span></div>
+        <div style="color:var(--c-label2);">&#8250;</div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="kicker">WHERE IT&#8217;S GOING</div>
+        <div class="donut-wrap">
+          <div class="donut-c"><div class="donut"></div>
+            <div class="ctr"><div class="cl">SPENT</div><div class="cv">&#8377;3,784</div></div></div>
+          <div class="legend" style="flex:1;">
+            <div><span class="d" style="background:var(--cat-groceries)"></span>Groceries<span class="amt">&#8377;2,106</span></div>
+            <div><span class="d" style="background:var(--cat-shopping)"></span>Shopping<span class="amt">&#8377;1,141</span></div>
+            <div><span class="d" style="background:var(--cat-dining)"></span>Dining<span class="amt">&#8377;537</span></div>
+            <div><span class="d" style="background:var(--cat-fuel)"></span>Other<span class="amt">&#8377;0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tb on"><div class="ti">&#127968;</div>Home</div>
+      <div class="tb"><div class="ti">&#128203;</div>Activity</div>
+      <div class="tb"><div class="ti">&#128202;</div>Budgets</div>
+      <div class="tb"><div class="ti">&#128221;</div>Notes</div>
+      <div class="tb"><div class="ti">&#9881;</div>Settings</div>
+    </div>`;
+
+  const skins = [
+    {cls:'liquid', label:'Liquid Glass', meta:'your reference screenshots'},
+    {cls:'neuro',  label:'Neomorphism',  meta:'what Phase 13 built'}
+  ];
+  document.getElementById('stage').innerHTML = skins.map(s => `
+    <div class="col ${s.cls}">
+      <div class="phone"><div class="screen">${SCREEN}</div></div>
+      <div class="tag">${s.label}<span class="meta">${s.meta}</span></div>
+    </div>`).join('');
+</script>
+</body>
+</html>
