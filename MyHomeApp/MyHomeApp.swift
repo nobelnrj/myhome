@@ -31,6 +31,7 @@ struct MyHomeApp: App {
     var body: some Scene {
         WindowGroup {
             RootView(gmailSyncController: gmailSyncController)
+                .preferredColorScheme(.dark)   // DS-05: neumorphic dark-mode-only; applied once at root
                 .onAppear {
                     setupNotifications()
                 }

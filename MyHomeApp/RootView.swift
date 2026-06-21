@@ -95,6 +95,11 @@ struct RootView: View {
                 }
                 .tag(4)
         }
+        // DS-03: suppress native tab bar chrome; NeuTabBar overlay provides the visual replacement
+        .toolbar(.hidden, for: .tabBar)
+        .overlay(alignment: .bottom) {
+            NeuTabBar(selectedTab: $selectedTab)
+        }
         .onAppear {
             // Inject the SwiftData context into the sync controller so sync() can persist
             // ingested expenses. Called here (not in init) so the @Environment is populated.
