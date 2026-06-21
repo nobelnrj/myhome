@@ -63,7 +63,10 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
   4. The `RollingMoneyText` component animates hero rupee figures from old to new value in ~780ms; with Reduce Motion enabled the value snaps to the target immediately with zero intermediate frames.
   5. Running Xcode Accessibility Inspector on `NeuSurface`, `NeuTabBar`, and their previews produces zero contrast warnings; the WCAG 1.4.11 (3:1) non-text contrast requirement is satisfied by construction (canary yellow `#FFD60A` used for all active/selected states; shadow depth is never the sole affordance).
   6. `xcodebuild clean build` succeeds after all new `DesignSystem/` files are registered in `project.pbxproj` (all 4 manual pbxproj edits per file completed).
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 13-01-PLAN.md — Scaffold DesignSystem/ + pbxproj G_DS group; DesignTokens.swift + token tests (DS-01, DS-05)
+- [ ] 13-02-PLAN.md — NeuSurface (raised/floating/recessed) + RollingMoneyText; deprecate CardStyle (DS-02, DS-04, DS-06)
+- [ ] 13-03-PLAN.md — NeuTabBar floating capsule + RootView/MyHomeApp integration + accessibility gate (DS-03, DS-05, DS-06)
 **UI hint**: yes
 
 ### Phase 14: Restyle Existing Screens + Overview Donut
