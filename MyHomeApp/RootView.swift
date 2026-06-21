@@ -69,6 +69,7 @@ struct RootView: View {
                     Label("Home", systemImage: "house")
                 }
                 .tag(0)
+                .toolbar(.hidden, for: .tabBar)
 
             ExpenseListView(reviewBadgeCount: $reviewBadgeCount)
                 .tabItem {
@@ -76,27 +77,30 @@ struct RootView: View {
                 }
                 .badge(reviewBadgeCount)
                 .tag(1)
+                .toolbar(.hidden, for: .tabBar)
 
             BudgetsView()
                 .tabItem {
                     Label("Budgets", systemImage: "chart.bar")
                 }
                 .tag(2)
+                .toolbar(.hidden, for: .tabBar)
 
             NotesHomeView(deepLinkNoteID: $deepLinkNoteID, deepLinkBlockID: $deepLinkBlockID)
                 .tabItem {
                     Label("Notes", systemImage: "note.text")
                 }
                 .tag(3)
+                .toolbar(.hidden, for: .tabBar)
 
             SettingsView(selectedTab: $selectedTab, lockController: lockController, gmailSyncController: gmailSyncController, transferScanService: transferScanService)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape")
                 }
                 .tag(4)
+                .toolbar(.hidden, for: .tabBar)
         }
-        // DS-03: suppress native tab bar chrome; NeuTabBar overlay provides the visual replacement
-        .toolbar(.hidden, for: .tabBar)
+        // DS-03: native tab bar chrome suppressed per-tab above; NeuTabBar overlay provides the visual replacement
         .overlay(alignment: .bottom) {
             NeuTabBar(selectedTab: $selectedTab)
         }
