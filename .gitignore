@@ -15,3 +15,6 @@ DerivedData/
 
 # Raw, un-anonymized bank email originals (local only — PII, never commit)
 MyHomeTests/Fixtures/_raw/
+
+# Scratch simulator screenshots (local only)
+.shots/
