@@ -25,6 +25,9 @@ struct CardStyle: ViewModifier {
 
 extension View {
     /// Wraps the view in the standard card surface (padding + secondary bg + rounded + shadow).
+    ///
+    /// - Deprecated: Use `.neuSurface(.raised)` instead. `CardStyle` is removed in Phase 14.
+    @available(*, deprecated, renamed: "neuSurface")
     func cardStyle(cornerRadius: CGFloat = 16, padding: CGFloat? = 16) -> some View {
         modifier(CardStyle(cornerRadius: cornerRadius, padding: padding))
     }
