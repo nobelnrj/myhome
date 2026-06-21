@@ -209,4 +209,5 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Run /gsd-plan-phase 14 to plan Phase 14: Restyle Existing Screens + Overview Donut (native tab bar retained; match reference mockup)
+- Phase 14 RESUME POINT (2026-06-21): 14-CONTEXT.md committed (skin=Neomorphism, native tab bar, donut). 14-UI-SPEC.md drafted by ui-researcher. UI-checker returned BLOCKED but ONLY on a Dimension-4 typography technicality (named scale has 5 sizes / 5 weights vs the checker's max 4/2) — these are the LOCKED Phase-13 DesignTokens type roles, not sprawl. FIX = doc reframe only (split the type table into ≤4 primary roles + the rest as "contextual overrides" e.g. heroMoney 46/ultraLight, statNumber 21/light; no DesignTokens change). UI-SPEC typography section is at 14-UI-SPEC.md lines ~61-79. After reframe, re-run ui-checker, then /gsd-plan-phase 14.
+- Note: NeuTabBar.swift is orphaned (delete in Phase 14, needs pbxproj edits). CardStyle.swift deprecated, 14 call-sites migrate to .neuSurface in Phase 14.
