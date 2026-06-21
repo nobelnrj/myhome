@@ -647,22 +647,24 @@ A13DS1 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13D
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Inset shadow fidelity**
+All three open questions are operationally resolved within the Phase 13 plans; each resolves via a `#Preview` and/or the end-of-phase human-verify gate in 13-03.
+
+1. **Inset shadow fidelity** — RESOLVED in plan 13-02 Task 1 (default to overlay-gradient inset per PATTERNS, with a `#Preview` of all three NeuSurface states) and confirmed at the 13-03 human-verify checkpoint step 6.
    - What we know: SwiftUI has no native inset shadow; overlay-gradient is an approximation.
    - What's unclear: Whether the visual approximation satisfies the design at the values in the spec (blur 5, ±2 offset, 50% black / 3.5% white).
-   - Recommendation: The planner should create a Wave 0 task that builds a quick preview test of both approaches (overlay vs UIViewRepresentable), and the executor makes the call after a visual check. Default to overlay unless it looks wrong.
+   - Resolution: Plan 13-02 implements the `.recessed` state via overlay-gradient (the `fillRecessed3` color carries most of the sunken look); the 13-03 checkpoint visually confirms it at spec values.
 
-2. **`TabView` behavior with `.toolbar(.hidden, for: .tabBar)` on iPhone 17 / Xcode 26.5**
+2. **`TabView` behavior with `.toolbar(.hidden, for: .tabBar)` on iPhone 17 / Xcode 26.5** — RESOLVED in plan 13-03 Task 2 (Pitfall 3 note on restoring NavigationStack toolbars) and exercised at the human-verify checkpoint step 2 (navigate all 5 tabs).
    - What we know: The modifier is documented as available iOS 16+.
    - What's unclear: Edge cases with `TabView` + per-tab NavigationStack in Xcode 26.5 / iOS 26-era SDK.
-   - Recommendation: Plan a Wave 0 smoke test: apply the modifier, navigate to each of the 5 tabs, verify NavigationStack title appears and back buttons function.
+   - Resolution: Fallback `UITabBar.appearance().isHidden` documented; the manual gate validates per-tab NavigationStack titles + back buttons.
 
-3. **NeuTabBar home indicator positioning**
+3. **NeuTabBar home indicator positioning** — RESOLVED in plan 13-03 Task 1 (acceptance criterion requires reading `geometry.safeAreaInsets.bottom` via GeometryReader, Pitfall 5 — not a bare 24pt literal).
    - What we know: Tab bar must not overlap home indicator. The spec says "24pt from screen bottom (safe area aware)".
    - What's unclear: The exact SwiftUI idiom that correctly reads safe area in a `.overlay(alignment: .bottom)` context on iPhone 17.
-   - Recommendation: Use `GeometryReader` inside the overlay and read `geometry.safeAreaInsets.bottom` — this is a standard iOS pattern and should work. Confirm in the first preview task.
+   - Resolution: Plan 13-03 mandates `GeometryReader` + `geometry.safeAreaInsets.bottom`, confirmed in the NeuTabBar preview task.
 
 ---
 
