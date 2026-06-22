@@ -94,7 +94,28 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
   5. The `DonutChart` in `DonutChart.swift` has all segments fully visible inside its card container (no clipping at card edges); segment colors match the neumorphic category palette used everywhere else.
   6. Every new `.swift` file added during the restyle is registered in `project.pbxproj`; `xcodebuild clean build` succeeds with zero "cannot find type" errors.
 
-**Plans**: TBD
+**Plans**: 8 plans
+
+**Wave 1** *(foundation — unblocks all restyle waves)*
+
+- [ ] 14-01-PLAN.md — CategoryStyle → DesignTokens.cat* rewrite; native tab-bar canary tint; TDD SpendDonutAggregation helper (SKIN-01, SKIN-09, OVR-05)
+
+**Wave 2** *(blocked on 14-01; all five run in parallel — disjoint files)*
+
+- [ ] 14-02-PLAN.md — Overview restyle + NET CASH FLOW hero + SpendDonutCard (new file + pbxproj) + OVR-06 tap-to-filter wiring (SKIN-01, OVR-05, OVR-06, SKIN-09)
+- [ ] 14-03-PLAN.md — Budgets group restyle (summary-ring hero, category cards, StackBar) (SKIN-03, SKIN-09)
+- [ ] 14-04-PLAN.md — Notes / calendar / agenda / reminder / routine restyle (SKIN-04, SKIN-09)
+- [ ] 14-05-PLAN.md — Settings + UnlockView + MigrationReviewSheet restyle (icon-tile color map) (SKIN-05, SKIN-08, SKIN-09)
+- [ ] 14-06-PLAN.md — Accounts + Assets / Net-worth restyle (floating detail heros, donut segment recolor) (SKIN-06, SKIN-07, SKIN-09)
+
+**Wave 3** *(blocked on 14-02 — shares ExpenseListView.swift)*
+
+- [ ] 14-07-PLAN.md — Activity / Expenses + Gmail Review + Transfer Inbox rows restyle (SKIN-02, SKIN-08, SKIN-09)
+
+**Wave 4** *(blocked on all restyle plans — deletion must come last)*
+
+- [ ] 14-08-PLAN.md — Delete CardStyle.swift + NeuTabBar.swift (pbxproj removals); full clean-build + test gate; end-of-phase human-verify (SKIN-09)
+
 **UI hint**: yes
 
 ### Phase 15: Analytics Screen
@@ -145,6 +166,6 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete | 2026-06-12 |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 5/5 | Complete | 2026-06-20 |
 | 13. Design System Foundation | v1.2 | 2/3 | In Progress|  |
-| 14. Restyle Existing Screens + Overview Donut | v1.2 | 0/? | Not started | - |
+| 14. Restyle Existing Screens + Overview Donut | v1.2 | 0/8 | Not started | - |
 | 15. Analytics Screen | v1.2 | 0/? | Not started | - |
 | 16. AI Insight Card | v1.2 | 0/? | Not started | - |
