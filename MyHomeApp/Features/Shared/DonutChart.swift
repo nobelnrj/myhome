@@ -63,8 +63,10 @@ struct ActivityRing<Center: View>: View {
     var colors: [Color]
     var size: CGFloat = 170
     var lineWidth: CGFloat = 16
-    /// Show the rounded leading tip + its shadow once the ring is nearly full (overlap depth).
+    /// Show the bright glowing leading tip ("comet head") — the WHOOP luminous edge.
     var showTip: Bool = true
+    /// Render the blurred bloom behind the arc for the luminous WHOOP glow.
+    var glow: Bool = true
     @ViewBuilder var center: () -> Center
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -72,32 +74,48 @@ struct ActivityRing<Center: View>: View {
 
     private var clamped: Double { min(max(progress, 0), 1) }
 
+    private var ringGradient: AngularGradient {
+        AngularGradient(
+            gradient: Gradient(colors: colors),
+            center: .center,
+            startAngle: .degrees(0),
+            endAngle: .degrees(360)
+        )
+    }
+
+    private var radius: CGFloat { size / 2 - lineWidth / 2 }
+    private var tipColor: Color { colors.last ?? .white }
+
     var body: some View {
         ZStack {
             Circle()
                 .stroke(DesignTokens.fillRecessed2, lineWidth: lineWidth)
 
+            // Luminous bloom — a blurred copy of the arc behind the crisp stroke.
+            if glow {
+                Circle()
+                    .trim(from: 0, to: max(0.0001, animated))
+                    .stroke(ringGradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .blur(radius: lineWidth * 0.6)
+                    .opacity(0.85)
+            }
+
+            // Crisp arc.
             Circle()
                 .trim(from: 0, to: max(0.0001, animated))
-                .stroke(
-                    AngularGradient(
-                        gradient: Gradient(colors: colors),
-                        center: .center,
-                        startAngle: .degrees(0),
-                        endAngle: .degrees(360)
-                    ),
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                )
+                .stroke(ringGradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
 
-            // Leading-tip shadow — only near completion, to fake the ring overlapping itself.
-            if showTip && clamped > 0.94 {
+            // Bright glowing leading tip (comet head) at the arc's leading edge.
+            if showTip && animated > 0.02 {
                 Circle()
-                    .fill(colors.last ?? Color.white)
-                    .frame(width: lineWidth, height: lineWidth)
-                    .offset(y: -(size / 2 - lineWidth / 2))
+                    .fill(tipColor)
+                    .frame(width: lineWidth * 0.92, height: lineWidth * 0.92)
+                    .shadow(color: tipColor.opacity(0.9), radius: 9)
+                    .shadow(color: tipColor.opacity(0.5), radius: 18)
+                    .offset(y: -radius)
                     .rotationEffect(.degrees(360 * animated))
-                    .shadow(color: .black.opacity(0.28), radius: 3, x: 3, y: 0)
             }
 
             center()
@@ -120,12 +138,13 @@ struct ActivityRing<Center: View>: View {
 }
 
 extension ActivityRing where Center == EmptyView {
-    init(progress: Double, colors: [Color], size: CGFloat = 170, lineWidth: CGFloat = 16, showTip: Bool = true) {
+    init(progress: Double, colors: [Color], size: CGFloat = 170, lineWidth: CGFloat = 16, showTip: Bool = true, glow: Bool = true) {
         self.progress = progress
         self.colors = colors
         self.size = size
         self.lineWidth = lineWidth
         self.showTip = showTip
+        self.glow = glow
         self.center = { EmptyView() }
     }
 }

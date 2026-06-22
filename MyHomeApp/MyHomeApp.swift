@@ -34,6 +34,9 @@ struct MyHomeApp: App {
                 .preferredColorScheme(.dark)   // DS-05: neumorphic dark-mode-only; applied once at root
                 .onAppear {
                     setupNotifications()
+                    #if DEBUG
+                    seedSampleDataIfRequested()
+                    #endif
                 }
         }
         .modelContainer(container)
@@ -87,6 +90,41 @@ struct MyHomeApp: App {
         request.earliestBeginDate = Date(timeIntervalSinceNow: 3600) // 1 hour
         try? BGTaskScheduler.shared.submit(request)
     }
+
+    #if DEBUG
+    // MARK: - Sample data seeder (DEBUG only, launch-arg gated — for visual verification)
+
+    /// Seeds budgets + a month of expenses + income when launched with `-seedSampleData`.
+    /// Never runs in release builds and only when the flag is explicitly passed.
+    @MainActor
+    private func seedSampleDataIfRequested() {
+        guard ProcessInfo.processInfo.arguments.contains("-seedSampleData") else { return }
+        let ctx = container.mainContext
+        let cats = (try? ctx.fetch(FetchDescriptor<Category>())) ?? []
+        guard cats.count >= 4 else { return }
+
+        // Idempotent-ish: if a sample-tagged expense already exists, skip.
+        let existing = (try? ctx.fetch(FetchDescriptor<Expense>())) ?? []
+        if existing.contains(where: { $0.note == "SAMPLE" }) { return }
+
+        let cal = Calendar.current
+        let now = Date()
+        // Budgets on the first four categories.
+        let budgets: [Decimal] = [18000, 12000, 8000, 6000]
+        for (i, c) in cats.prefix(4).enumerated() { c.monthlyBudget = budgets[i] }
+
+        // Spend across categories this month (positive = spend). Spends-only so totalSpend
+        // stays clean-positive for the demo (uncategorised negatives would net it down).
+        let spends: [(Int, Decimal)] = [(0, 14200), (1, 9300), (2, 5100), (3, 3800), (0, 2600), (1, 1900)]
+        for (idx, (catIndex, amount)) in spends.enumerated() {
+            let day = cal.date(byAdding: .day, value: -(idx * 3 + 1), to: now) ?? now
+            let e = Expense(amount: amount, date: day, note: "SAMPLE")
+            e.categories = [cats[catIndex]]
+            ctx.insert(e)
+        }
+        try? ctx.save()
+    }
+    #endif
 
     // MARK: - Notification setup (idempotent — safe to call on every launch)
 

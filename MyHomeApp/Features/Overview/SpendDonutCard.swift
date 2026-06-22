@@ -41,43 +41,46 @@ struct SpendDonutCard: View {
     // MARK: - Donut + legend content
 
     private var donutContent: some View {
-        HStack(spacing: 20) {
-            // Concentric animated category rings (top-3) — replaces the static pie donut.
-            CategoryRings(items: ringItems, size: 152, lineWidth: 13, gap: 5)
-
-            VStack(alignment: .leading, spacing: 14) {
-                ForEach(legendItems) { item in
-                    Button {
-                        onCategoryTap(item.categoryID)
-                    } label: {
-                        HStack(spacing: 10) {
-                            Circle()
-                                .fill(item.color)
-                                .frame(width: 11, height: 11)
-                                .shadow(color: item.color.opacity(0.6), radius: 5)
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(item.label)
-                                    .font(.system(size: 15, weight: .medium))
-                                    .foregroundStyle(DesignTokens.label)
-                                    .lineLimit(1)
-                                Text("\(item.sharePct)% of spend")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(DesignTokens.label3)
-                            }
-                            Spacer(minLength: 6)
-                            Text(item.amount.formattedINRWhole())
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundStyle(DesignTokens.label)
-                                .monospacedDigit()
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("\(item.label): \(item.sharePct) percent, \(item.amount.formattedINRWhole())")
+        // WHOOP-style 3-up: one thick glowing ring per top category, bold % centre, name +
+        // amount below. Each tile is tappable → Activity pre-filtered to that category (OVR-06).
+        HStack(spacing: 12) {
+            ForEach(legendItems) { item in
+                Button { onCategoryTap(item.categoryID) } label: {
+                    categoryRingTile(item)
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(item.label): \(item.sharePct) percent, \(item.amount.formattedINRWhole())")
             }
         }
         .neuSurface(.raised, padding: 18)
         // NOTE: no clip modifier here — shadow must remain visible (Pitfall 2)
+    }
+
+    @ViewBuilder
+    private func categoryRingTile(_ item: LegendItem) -> some View {
+        VStack(spacing: 9) {
+            ActivityRing(
+                progress: Double(item.sharePct) / 100.0,
+                colors: [item.color.opacity(0.5), item.color],
+                size: 86,
+                lineWidth: 11
+            ) {
+                Text("\(item.sharePct)%")
+                    .font(.system(size: 19, weight: .bold, design: .default))
+                    .foregroundStyle(DesignTokens.label)
+                    .monospacedDigit()
+            }
+            Text(item.label)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(DesignTokens.label)
+                .lineLimit(1)
+            Text(item.amount.formattedINRWhole())
+                .font(.system(size: 13))
+                .foregroundStyle(DesignTokens.label2)
+                .monospacedDigit()
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Empty state
@@ -98,11 +101,6 @@ struct SpendDonutCard: View {
     // MARK: - Ring + legend data (top-3, so rings and legend stay in lock-step)
 
     private var topRanked: [(category: Category, spent: Decimal)] { Array(ranked.prefix(3)) }
-
-    /// Concentric ring inputs: each category's colour + its share of total spend (0…1).
-    private var ringItems: [(color: Color, fraction: Double)] {
-        topRanked.map { (CategoryStyle.color(for: $0.category), shareFraction($0.spent)) }
-    }
 
     private struct LegendItem: Identifiable {
         let id: String

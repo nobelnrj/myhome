@@ -87,8 +87,8 @@ struct SpendBudgetCard: View {
                 ActivityRing(
                     progress: fractionUsed ?? 0,
                     colors: [ringColor.opacity(0.5), ringColor],
-                    size: 176,
-                    lineWidth: 17
+                    size: 188,
+                    lineWidth: 24
                 ) {
                     VStack(spacing: 4) {
                         Text("NET FLOW")
@@ -96,14 +96,14 @@ struct SpendBudgetCard: View {
                             .tracking(0.8)
                             .foregroundStyle(DesignTokens.label2)
                         Text(signedNet)
-                            .font(.system(size: 27, weight: .semibold, design: .default))
-                            .foregroundStyle(statusColor)
+                            .font(.system(size: 29, weight: .bold, design: .default))
+                            .foregroundStyle(DesignTokens.label)
                             .monospacedDigit()
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                             .contentTransition(.numericText())
                             .animation(.smooth(duration: 0.78), value: net)
-                            .frame(width: 176 - 2 * 17 - 12)
+                            .frame(width: 188 - 2 * 24 - 14)
                         Text(percentUsedLabel)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(DesignTokens.label2)
