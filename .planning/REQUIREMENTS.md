@@ -45,7 +45,7 @@
 <!-- Continues OVR numbering from v1.0 (OVR-01..04). Wired to existing SwiftData expense queries. -->
 
 - [x] **OVR-05**: A "where it's going" spend donut on Overview shows current-month spend by category via Swift Charts `SectorMark` — center total, top-4 categories + "Others" roll-up legend, and a grow-in animation; reuses the existing expense query with the confirmed-self-transfer exclusion.
-- [ ] **OVR-06**: Tapping a donut segment opens Activity filtered to that category (tap-to-filter).
+- [x] **OVR-06**: Tapping a donut segment opens Activity filtered to that category (tap-to-filter).
 
 ### Analytics Screen (ANL)
 
@@ -106,7 +106,7 @@
 | SKIN-08 | Phase 14 | Pending |
 | SKIN-09 | Phase 14 | Complete |
 | OVR-05 | Phase 14 | Complete |
-| OVR-06 | Phase 14 | Pending |
+| OVR-06 | Phase 14 | Complete |
 | ANL-01 | Phase 15 | Pending |
 | ANL-02 | Phase 15 | Pending |
 | ANL-03 | Phase 15 | Pending |
