@@ -189,40 +189,41 @@ struct GlowParticleRing<Center: View>: View {
         }
     }()
 
+    /// Direction of peak brightness (top-right, like the WHOOP orb).
+    private let brightDir = -Double.pi / 4
+
     var body: some View {
-        ZStack {
+        // The orb's RADIUS encodes budget used: tight glow when little is spent, expanding to
+        // a full sphere near/over budget. No angular gap. `animated` (0→1) grows it on appear.
+        let pc = min(max(progress, 0), 1)
+        // Min 0.42 so the glow always frames the centred readout; grows to full at 100%.
+        let spreadFrac = 0.42 + 0.58 * pc
+
+        return ZStack {
             // Dark well so the centred readout stays legible over the glow.
             Circle()
                 .fill(RadialGradient(
                     colors: [Color.black.opacity(0.55), .clear],
-                    center: .center, startRadius: 0, endRadius: size * 0.34
+                    center: .center, startRadius: 0, endRadius: size * 0.30
                 ))
 
             Canvas { ctx, sz in
                 let c = CGPoint(x: sz.width / 2, y: sz.height / 2)
                 let outer = sz.width / 2 - 2
-                let inner = outer * 0.34
-                // `animated` sweeps 0 → progress on appear: the lit arc IS the budget %.
-                let fill = max(animated, 0.0001)
+                let well = outer * 0.30
+                let grow = max(animated, 0.0001)
+                let bandOuter = well + (outer - well) * CGFloat(spreadFrac) * grow
 
                 for p in particles {
-                    let lit = p.angle <= fill
-                    let headDist = fill - p.angle        // 0 at the leading edge
-                    let nearHead = lit && headDist < 0.10
-
                     let ang = p.angle * 2 * .pi - .pi / 2
-                    // Particles near the leading edge spray slightly outward (comet head).
-                    let spray = nearHead ? CGFloat(p.radialT) * 0.18 : 0
-                    let r = inner + (outer - inner) * (CGFloat(p.radialT) + spray)
+                    let r = well + (bandOuter - well) * CGFloat(p.radialT)
                     let pt = CGPoint(x: c.x + r * CGFloat(cos(ang)), y: c.y + r * CGFloat(sin(ang)))
 
-                    // The WHOLE orb stays present (no blank wedge); the spent portion simply
-                    // glows brighter than the remaining portion, so the bright region reads as
-                    // "how much budget is used" without an ugly empty gap.
-                    var factor = lit ? (0.55 + 0.45 * (1 - min(headDist, 1))) : 0.30
-                    var dot = CGFloat(p.dot)
-                    if nearHead { factor = min(1, factor + 0.35); dot += 1.3 }
-                    let op = p.opacity * factor
+                    // Brightness gradient across the orb (brightest toward top-right) + a small
+                    // lift with how full the budget is, so a fuller orb also reads brighter.
+                    let dir = 0.45 + 0.55 * (0.5 + 0.5 * cos(ang - brightDir))
+                    let op = p.opacity * dir * (0.7 + 0.3 * pc) * Double(grow)
+                    let dot = CGFloat(p.dot)
 
                     let halo = dot * 2.8
                     ctx.fill(
@@ -246,12 +247,11 @@ struct GlowParticleRing<Center: View>: View {
     }
 
     private func animate() {
-        let target = min(max(progress, 0), 1)
         if reduceMotion {
-            animated = target
+            animated = 1
         } else {
             animated = 0
-            withAnimation(.easeOut(duration: 1.2)) { animated = target }
+            withAnimation(.easeOut(duration: 1.2)) { animated = 1 }
         }
     }
 }
