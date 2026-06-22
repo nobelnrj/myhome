@@ -48,8 +48,10 @@ struct SpendBucket: Identifiable {
 /// **Pure contract:** operates on already-fetched arrays; no SwiftData access,
 /// no @Query, no SwiftUI, no Charts import. Mirrors the CalendarAggregator discipline.
 ///
-/// Bucketing uses `Calendar.current` + `TimeZone.current` (device timezone) so displayed
-/// dates match the user's clock (Pitfall 5 / T-04-02).
+/// Bucketing uses the **injected** calendar's timezone (defaults to `Calendar.current`,
+/// which inherits `TimeZone.current` — device timezone). Pass a calendar with
+/// `timeZone = TimeZone(identifier: "Asia/Kolkata")` to force IST bucketing in tests
+/// or for IST-aware aggregation (ANL-03 / T-15-02).
 ///
 /// Money stays `Decimal` throughout the accumulation loop; the `Decimal → Double` conversion
 /// happens only at `SpendBucket` construction via `NSDecimalNumber(decimal:).doubleValue`
@@ -58,20 +60,16 @@ enum SpendOverTimeAggregator {
 
     // MARK: - Private helpers
 
-    /// Returns the start-of-day `Date` for a given `Date` in the device timezone.
-    /// Copied verbatim from CalendarAggregator (device-timezone bucketing pattern).
+    /// Returns the start-of-day `Date` for a given `Date` in the injected calendar's timezone.
+    /// The caller owns the timezone — no override to `TimeZone.current`.
     private static func startOfDay(_ date: Date, calendar: Calendar) -> Date {
-        var cal = calendar
-        cal.timeZone = TimeZone.current
-        return cal.startOfDay(for: date)
+        return calendar.startOfDay(for: date)
     }
 
-    /// Returns the start-of-month `Date` for a given `Date` in the device timezone.
+    /// Returns the start-of-month `Date` for a given `Date` in the injected calendar's timezone.
     private static func startOfMonth(_ date: Date, calendar: Calendar) -> Date {
-        var cal = calendar
-        cal.timeZone = TimeZone.current
-        let components = cal.dateComponents([.year, .month], from: date)
-        return cal.date(from: components) ?? date
+        let components = calendar.dateComponents([.year, .month], from: date)
+        return calendar.date(from: components) ?? date
     }
 
     // MARK: - Per-range helpers
@@ -81,15 +79,12 @@ enum SpendOverTimeAggregator {
         expenses: [Expense],
         calendar: Calendar
     ) -> [SpendBucket] {
-        var cal = calendar
-        cal.timeZone = TimeZone.current
-
-        let today = startOfDay(Date(), calendar: cal)
+        let today = startOfDay(Date(), calendar: calendar)
 
         // Generate all 7 day slots: today-6 … today
         var slots: [Date] = []
         for offset in -6...0 {
-            if let day = cal.date(byAdding: .day, value: offset, to: today) {
+            if let day = calendar.date(byAdding: .day, value: offset, to: today) {
                 slots.append(day)
             }
         }
@@ -97,7 +92,7 @@ enum SpendOverTimeAggregator {
         // Accumulate Decimal totals per slot
         var totals: [Date: Decimal] = [:]
         for expense in expenses {
-            let dayKey = startOfDay(expense.date, calendar: cal)
+            let dayKey = startOfDay(expense.date, calendar: calendar)
             totals[dayKey, default: .zero] += expense.amount
         }
 
@@ -115,20 +110,17 @@ enum SpendOverTimeAggregator {
         expenses: [Expense],
         calendar: Calendar
     ) -> [SpendBucket] {
-        var cal = calendar
-        cal.timeZone = TimeZone.current
-
         let today = Date()
-        let monthStart = startOfMonth(today, calendar: cal)
+        let monthStart = startOfMonth(today, calendar: calendar)
 
         // Number of days in the current month
-        let dayRange = cal.range(of: .day, in: .month, for: today) ?? 1..<29
+        let dayRange = calendar.range(of: .day, in: .month, for: today) ?? 1..<29
         let daysInMonth = dayRange.count
 
         // Generate all day slots for the month
         var slots: [Date] = []
         for offset in 0..<daysInMonth {
-            if let day = cal.date(byAdding: .day, value: offset, to: monthStart) {
+            if let day = calendar.date(byAdding: .day, value: offset, to: monthStart) {
                 slots.append(day)
             }
         }
@@ -136,7 +128,7 @@ enum SpendOverTimeAggregator {
         // Accumulate Decimal totals per slot
         var totals: [Date: Decimal] = [:]
         for expense in expenses {
-            let dayKey = startOfDay(expense.date, calendar: cal)
+            let dayKey = startOfDay(expense.date, calendar: calendar)
             totals[dayKey, default: .zero] += expense.amount
         }
 
@@ -153,11 +145,8 @@ enum SpendOverTimeAggregator {
         expenses: [Expense],
         calendar: Calendar
     ) -> [SpendBucket] {
-        var cal = calendar
-        cal.timeZone = TimeZone.current
-
         let today = Date()
-        let year = cal.component(.year, from: today)
+        let year = calendar.component(.year, from: today)
 
         // Generate all 12 month-start dates for this year
         var slots: [Date] = []
@@ -166,7 +155,7 @@ enum SpendOverTimeAggregator {
             components.year = year
             components.month = month
             components.day = 1
-            if let monthStart = cal.date(from: components) {
+            if let monthStart = calendar.date(from: components) {
                 slots.append(monthStart)
             }
         }
@@ -174,7 +163,7 @@ enum SpendOverTimeAggregator {
         // Accumulate Decimal totals keyed by start-of-month
         var totals: [Date: Decimal] = [:]
         for expense in expenses {
-            let monthKey = startOfMonth(expense.date, calendar: cal)
+            let monthKey = startOfMonth(expense.date, calendar: calendar)
             totals[monthKey, default: .zero] += expense.amount
         }
 
