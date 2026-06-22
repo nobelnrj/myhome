@@ -110,7 +110,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 3** *(blocked on 14-02 — shares ExpenseListView.swift)*
 
-- [ ] 14-07-PLAN.md — Activity / Expenses + Gmail Review + Transfer Inbox rows restyle (SKIN-02, SKIN-08, SKIN-09)
+- [x] 14-07-PLAN.md — Activity / Expenses + Gmail Review + Transfer Inbox rows restyle (SKIN-02, SKIN-08, SKIN-09)
 
 **Wave 4** *(blocked on all restyle plans — deletion must come last)*
 
@@ -166,6 +166,6 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete | 2026-06-12 |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 5/5 | Complete | 2026-06-20 |
 | 13. Design System Foundation | v1.2 | 2/3 | In Progress|  |
-| 14. Restyle Existing Screens + Overview Donut | v1.2 | 6/8 | In Progress|  |
+| 14. Restyle Existing Screens + Overview Donut | v1.2 | 7/8 | In Progress|  |
 | 15. Analytics Screen | v1.2 | 0/? | Not started | - |
 | 16. AI Insight Card | v1.2 | 0/? | Not started | - |
