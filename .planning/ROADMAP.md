@@ -98,7 +98,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 1** *(foundation — unblocks all restyle waves)*
 
-- [ ] 14-01-PLAN.md — CategoryStyle → DesignTokens.cat* rewrite; native tab-bar canary tint; TDD SpendDonutAggregation helper (SKIN-01, SKIN-09, OVR-05)
+- [x] 14-01-PLAN.md — CategoryStyle → DesignTokens.cat* rewrite; native tab-bar canary tint; TDD SpendDonutAggregation helper (SKIN-01, SKIN-09, OVR-05)
 
 **Wave 2** *(blocked on 14-01; all five run in parallel — disjoint files)*
 
@@ -166,6 +166,6 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete | 2026-06-12 |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 5/5 | Complete | 2026-06-20 |
 | 13. Design System Foundation | v1.2 | 2/3 | In Progress|  |
-| 14. Restyle Existing Screens + Overview Donut | v1.2 | 0/8 | Not started | - |
+| 14. Restyle Existing Screens + Overview Donut | v1.2 | 1/8 | In Progress|  |
 | 15. Analytics Screen | v1.2 | 0/? | Not started | - |
 | 16. AI Insight Card | v1.2 | 0/? | Not started | - |

@@ -30,7 +30,7 @@
 
 <!-- Mechanical application of DS tokens across every screen; highest regression surface (~118 files). -->
 
-- [ ] **SKIN-01**: Overview restyled to the neumorphic look.
+- [x] **SKIN-01**: Overview restyled to the neumorphic look.
 - [ ] **SKIN-02**: Activity / Expenses (list + add/edit) restyled.
 - [ ] **SKIN-03**: Budgets restyled.
 - [ ] **SKIN-04**: Notes, calendar, and day-agenda restyled.
@@ -38,13 +38,13 @@
 - [ ] **SKIN-06**: Accounts restyled.
 - [ ] **SKIN-07**: Assets / Net-worth (incl. existing `DonutChart`) restyled to the neumorphic palette.
 - [ ] **SKIN-08**: Transfer Inbox and Gmail / ingestion Review Inbox restyled.
-- [ ] **SKIN-09**: No regression — existing flows (expense/account/asset/note CRUD, Gmail sync, self-transfer confirm, Face ID gate, navigation/deep-links) continue to work after restyle, and every new `.swift` file is registered in `project.pbxproj` so the target builds clean.
+- [x] **SKIN-09**: No regression — existing flows (expense/account/asset/note CRUD, Gmail sync, self-transfer confirm, Face ID gate, navigation/deep-links) continue to work after restyle, and every new `.swift` file is registered in `project.pbxproj` so the target builds clean.
 
 ### Overview Spend Donut (OVR)
 
 <!-- Continues OVR numbering from v1.0 (OVR-01..04). Wired to existing SwiftData expense queries. -->
 
-- [ ] **OVR-05**: A "where it's going" spend donut on Overview shows current-month spend by category via Swift Charts `SectorMark` — center total, top-4 categories + "Others" roll-up legend, and a grow-in animation; reuses the existing expense query with the confirmed-self-transfer exclusion.
+- [x] **OVR-05**: A "where it's going" spend donut on Overview shows current-month spend by category via Swift Charts `SectorMark` — center total, top-4 categories + "Others" roll-up legend, and a grow-in animation; reuses the existing expense query with the confirmed-self-transfer exclusion.
 - [ ] **OVR-06**: Tapping a donut segment opens Activity filtered to that category (tap-to-filter).
 
 ### Analytics Screen (ANL)
@@ -96,7 +96,7 @@
 | DS-04 | Phase 13 | Complete |
 | DS-05 | Phase 13 | Complete |
 | DS-06 | Phase 13 | Complete |
-| SKIN-01 | Phase 14 | Pending |
+| SKIN-01 | Phase 14 | Complete |
 | SKIN-02 | Phase 14 | Pending |
 | SKIN-03 | Phase 14 | Pending |
 | SKIN-04 | Phase 14 | Pending |
@@ -104,8 +104,8 @@
 | SKIN-06 | Phase 14 | Pending |
 | SKIN-07 | Phase 14 | Pending |
 | SKIN-08 | Phase 14 | Pending |
-| SKIN-09 | Phase 14 | Pending |
-| OVR-05 | Phase 14 | Pending |
+| SKIN-09 | Phase 14 | Complete |
+| OVR-05 | Phase 14 | Complete |
 | OVR-06 | Phase 14 | Pending |
 | ANL-01 | Phase 15 | Pending |
 | ANL-02 | Phase 15 | Pending |
