@@ -77,7 +77,7 @@ struct AMFISchemePickerView: View {
             Button("Fetch Now") {
                 amfiNavService.forceRefresh()
             }
-            .tint(.accentColor)
+            .tint(DesignTokens.accent)
             Spacer()
         }
     }
@@ -97,22 +97,22 @@ struct AMFISchemePickerView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(scheme.name)  // T-11-10: plain Text — no AttributedString
                                 .font(.body)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(DesignTokens.label)
                                 .lineLimit(2)
                             Text(scheme.code)
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(DesignTokens.label2)
                         }
                         Spacer()
                         if selectedSchemeCode == scheme.code {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(Color.accentColor)
+                                .foregroundStyle(DesignTokens.accent)
                         }
                     }
                     .frame(minHeight: 44)
                     .background(
                         selectedSchemeCode == scheme.code
-                            ? Color.accentColor.opacity(0.12)
+                            ? DesignTokens.accent.opacity(0.12)
                             : Color.clear
                     )
                 }
@@ -120,6 +120,8 @@ struct AMFISchemePickerView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(DesignTokens.bgCanvas)
         .searchable(
             text: $query,
             placement: .navigationBarDrawer(displayMode: .always)

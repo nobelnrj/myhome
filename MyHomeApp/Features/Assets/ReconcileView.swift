@@ -47,7 +47,7 @@ struct ReconcileView: View {
                 Section {
                     Text("Enter the total units shown on your latest statement — this overwrites the running estimate.")
                         .font(.body)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .frame(minHeight: 44)
                 }
 
@@ -58,11 +58,11 @@ struct ReconcileView: View {
                         HStack {
                             Text("Current estimate")
                                 .font(.body)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(DesignTokens.label)
                             Spacer()
                             Text(formattedUnits(current))
                                 .font(.body)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(DesignTokens.label2)
                         }
                         .frame(minHeight: 44)
                     }
@@ -70,7 +70,7 @@ struct ReconcileView: View {
                     HStack {
                         Text("Statement total units")
                             .font(.body)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(DesignTokens.label)
                         Spacer()
                         TextField("0.0000", text: $unitsText)
                             .keyboardType(.decimalPad)
@@ -92,7 +92,7 @@ struct ReconcileView: View {
                         reconcile()
                     }
                     .disabled(!isValid)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
             }
             .onAppear {

@@ -66,7 +66,7 @@ struct EditAssetView: View {
                         if let error = nameError {
                             Text(error)
                                 .font(.subheadline)
-                                .foregroundStyle(Color(.systemRed))
+                                .foregroundStyle(DesignTokens.negative)
                         }
                     }
 
@@ -88,17 +88,17 @@ struct EditAssetView: View {
                             HStack {
                                 Text("Scheme")
                                     .font(.body)
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(DesignTokens.label)
                                 Spacer()
                                 if let name = selectedSchemeName {
                                     Text(name)  // T-11-10: plain Text — no AttributedString
                                         .font(.body)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(DesignTokens.label2)
                                         .lineLimit(1)
                                 } else {
                                     Text("Tap to choose a scheme")
                                         .font(.body)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(DesignTokens.label2)
                                 }
                             }
                             .frame(minHeight: 44)
@@ -116,17 +116,17 @@ struct EditAssetView: View {
                             HStack {
                                 Text("NPS Scheme")
                                     .font(.body)
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(DesignTokens.label)
                                 Spacer()
                                 if let code = npsSchemeCode {
                                     Text(code)  // T-11-10: plain Text — no AttributedString
                                         .font(.body)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(DesignTokens.label2)
                                         .lineLimit(1)
                                 } else {
                                     Text("Tap to choose a scheme")
                                         .font(.body)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(DesignTokens.label2)
                                 }
                             }
                             .frame(minHeight: 44)
@@ -169,11 +169,11 @@ struct EditAssetView: View {
                     HStack {
                         Text("Total cost")
                             .font(.body)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                         Spacer()
                         Text(totalCost.formattedINRWhole())
                             .font(.body)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                     }
                 }
 
@@ -196,7 +196,7 @@ struct EditAssetView: View {
                     if assetClassRaw == "mutual_fund" && amfiSchemeCode != nil {
                         Text("NAV auto-updates daily from AMFI")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                     }
                 }
 
@@ -206,7 +206,7 @@ struct EditAssetView: View {
                         Button("Delete Holding") {
                             showDeleteConfirmation = true
                         }
-                        .foregroundStyle(Color(.systemRed))
+                        .foregroundStyle(DesignTokens.negative)
                         .frame(minHeight: 44)
                     }
                 }
@@ -222,7 +222,7 @@ struct EditAssetView: View {
                         saveAsset()
                     }
                     .disabled(!isValid)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
             }
             .onAppear {

@@ -44,6 +44,8 @@ struct ContributionLogView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+                .background(DesignTokens.bgCanvas)
             }
         }
         .navigationTitle("Contributions")
@@ -58,7 +60,7 @@ struct ContributionLogView: View {
             HStack {
                 Text(contribution.date, style: .date)
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
                 Spacer()
                 estimateBadge(isEstimate: contribution.isEstimate)
             }
@@ -67,31 +69,31 @@ struct ContributionLogView: View {
             HStack {
                 Text("Amount")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                 Spacer()
                 Text(contribution.amount.formattedINRWhole())   // T-11-10: plain Text
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
             }
 
             HStack {
                 Text("Units added")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                 Spacer()
                 Text(formattedUnits(contribution.unitsAdded))  // T-11-10: plain Text
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
             }
 
             HStack {
                 Text("NAV used")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                 Spacer()
                 Text(contribution.navUsed.formattedINR())       // T-11-10: plain Text
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
             }
         }
         .padding(.vertical, 4)
@@ -104,12 +106,12 @@ struct ContributionLogView: View {
         if isEstimate {
             Label("Estimate", systemImage: "chart.line.uptrend.xyaxis.circle")
                 .font(.caption)
-                .foregroundStyle(.orange)
+                .foregroundStyle(DesignTokens.orange)
                 .labelStyle(.titleAndIcon)
         } else {
             Label("Reconciled", systemImage: "checkmark.circle.fill")
                 .font(.caption)
-                .foregroundStyle(.green)
+                .foregroundStyle(DesignTokens.positive)
                 .labelStyle(.titleAndIcon)
         }
     }

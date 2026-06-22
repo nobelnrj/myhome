@@ -65,7 +65,7 @@ struct NetWorthCard: View {
                 NetWorthTrendChart(snapshots: snapshots)
             }
         }
-        .cardStyle(cornerRadius: 16, padding: 18)
+        .neuSurface(.floating, radius: 26, padding: 18)
     }
 
     // MARK: - Donut center overlay
@@ -76,10 +76,10 @@ struct NetWorthCard: View {
             Text("NET WORTH")
                 .font(.caption2)
                 .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
             Text(total.formattedINRWhole())
                 .font(.headline)
-                .foregroundStyle(.primary)
+                .foregroundStyle(DesignTokens.label)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 // Accessibility: expose the full formatted value for VoiceOver
@@ -92,10 +92,10 @@ struct NetWorthCard: View {
     @ViewBuilder
     private func legend(breakdown: NetWorthBreakdown) -> some View {
         VStack(alignment: .leading, spacing: 11) {
-            legendRow(label: "Mutual Funds", color: Color(.systemBlue),  value: breakdown.mfValue)
-            legendRow(label: "Stocks",       color: Color(.systemGreen), value: breakdown.stockValue)
-            legendRow(label: "NPS",          color: Color(.systemOrange), value: breakdown.npsValue)
-            legendRow(label: "Cash",         color: Color(.systemTeal),  value: breakdown.cashValue)
+            legendRow(label: "Mutual Funds", color: DesignTokens.catSubscriptions, value: breakdown.mfValue)
+            legendRow(label: "Stocks",       color: DesignTokens.positive,         value: breakdown.stockValue)
+            legendRow(label: "NPS",          color: DesignTokens.orange,           value: breakdown.npsValue)
+            legendRow(label: "Cash",         color: DesignTokens.catAuto,          value: breakdown.cashValue)
         }
     }
 
@@ -107,12 +107,13 @@ struct NetWorthCard: View {
                 .frame(width: 10, height: 10)
             Text(label)
                 .font(.subheadline)
+                .foregroundStyle(DesignTokens.label)
                 .lineLimit(1)
             Spacer(minLength: 6)
             Text(value.formattedINRWhole())
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
         }
     }
 
@@ -131,10 +132,10 @@ struct NetWorthCard: View {
             NSDecimalNumber(decimal: max(v, 0)).doubleValue
         }
         return [
-            DonutSegment(id: "mf",    label: "Mutual Funds", value: toDouble(mf),    color: Color(.systemBlue)),
-            DonutSegment(id: "stock", label: "Stocks",       value: toDouble(stock), color: Color(.systemGreen)),
-            DonutSegment(id: "nps",   label: "NPS",          value: toDouble(nps),   color: Color(.systemOrange)),
-            DonutSegment(id: "cash",  label: "Cash",         value: toDouble(cash),  color: Color(.systemTeal)),
+            DonutSegment(id: "mf",    label: "Mutual Funds", value: toDouble(mf),    color: DesignTokens.catSubscriptions),
+            DonutSegment(id: "stock", label: "Stocks",       value: toDouble(stock), color: DesignTokens.positive),
+            DonutSegment(id: "nps",   label: "NPS",          value: toDouble(nps),   color: DesignTokens.orange),
+            DonutSegment(id: "cash",  label: "Cash",         value: toDouble(cash),  color: DesignTokens.catAuto),
         ]
     }
 }

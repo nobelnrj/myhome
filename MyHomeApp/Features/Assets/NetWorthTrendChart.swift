@@ -40,13 +40,13 @@ struct NetWorthTrendChart: View {
                 x: .value("Date", point.date),
                 y: .value("Net Worth", point.value)
             )
-            .foregroundStyle(Color.accentColor.opacity(0.15))
+            .foregroundStyle(DesignTokens.positive.opacity(0.15))
 
             LineMark(
                 x: .value("Date", point.date),
                 y: .value("Net Worth", point.value)
             )
-            .foregroundStyle(Color.accentColor)
+            .foregroundStyle(DesignTokens.positive)
             .lineStyle(StrokeStyle(lineWidth: 2))
         }
         .chartYAxis {
@@ -79,7 +79,7 @@ struct NetWorthTrendChart: View {
     private var emptyStateView: some View {
         Text("No history yet.")
             .font(.subheadline)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(DesignTokens.label2)
             .frame(maxWidth: .infinity, alignment: .center)
             .frame(height: 80)
     }

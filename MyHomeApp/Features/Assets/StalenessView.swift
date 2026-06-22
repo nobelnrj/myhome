@@ -87,9 +87,9 @@ struct StalenessView: View {
         if isStale {
             HStack(spacing: 2) {
                 Image(systemName: "clock.badge.exclamationmark")
-                    .foregroundStyle(Color(.systemOrange))
+                    .foregroundStyle(DesignTokens.orange)
                 Text("Stale")
-                    .foregroundStyle(Color(.systemOrange))
+                    .foregroundStyle(DesignTokens.orange)
             }
             .font(.caption)
             .accessibilityElement(children: .combine)

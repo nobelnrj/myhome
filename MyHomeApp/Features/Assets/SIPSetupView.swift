@@ -200,7 +200,7 @@ struct SIPSetupView: View {
                         .frame(minHeight: 44)
 
                         let allocationSum = npsAllocationE + npsAllocationC + npsAllocationG
-                        let sumColor: Color = allocationSum == 100 ? .secondary : .red
+                        let sumColor: Color = allocationSum == 100 ? DesignTokens.label2 : DesignTokens.negative
                         Text("Total: \(allocationSum)% (must total 100%)")
                             .font(.caption)
                             .foregroundStyle(sumColor)
@@ -250,7 +250,7 @@ struct SIPSetupView: View {
                         saveSIP()
                     }
                     .disabled(!isValid)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
             }
             .onAppear {

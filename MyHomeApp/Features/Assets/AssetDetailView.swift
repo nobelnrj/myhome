@@ -47,9 +47,9 @@ struct AssetDetailView: View {
     }
 
     private var gainColor: Color {
-        if absoluteGain > 0 { return Color(.systemGreen) }
-        if absoluteGain < 0 { return Color(.systemRed) }
-        return .primary
+        if absoluteGain > 0 { return DesignTokens.positive }
+        if absoluteGain < 0 { return DesignTokens.negative }
+        return DesignTokens.label
     }
 
     private var assetClassLabel: String {
@@ -90,18 +90,20 @@ struct AssetDetailView: View {
                 NavigationLink(destination: ContributionLogView(asset: asset)) {
                     Text("Contributions")
                         .font(.body)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(DesignTokens.label)
                         .frame(minHeight: 44)
                 }
                 NavigationLink(destination: ReconcileView(asset: asset)) {
                     Text("Reconcile units")
                         .font(.body)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(DesignTokens.label)
                         .frame(minHeight: 44)
                 }
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(DesignTokens.bgCanvas)
         .navigationTitle(asset.name ?? "Holding")  // T-11-10: plain string access
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -120,37 +122,38 @@ struct AssetDetailView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(assetClassLabel)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
 
             if asset.currentNAV != nil {
                 Text(currentValue.formattedINRWhole())
                     .font(.largeTitle.weight(.semibold))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
+                    .contentTransition(.numericText())
                     .accessibilityValue(currentValue.formattedINRWhole())
             } else {
                 Text("—")
                     .font(.largeTitle.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
             }
 
             Text(asset.name ?? "—")  // T-11-10: plain Text — no AttributedString
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
 
             HStack(spacing: 6) {
                 StalenessView(navAsOfDate: asset.navAsOfDate)
                 if let navDate = asset.navAsOfDate {
                     Text("as of \(navDate.formatted(.dateTime.day().month(.abbreviated).year()))")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 } else {
                     Text("price not set")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 }
             }
         }
-        .cardStyle()
+        .neuSurface(.floating)
     }
 
     // MARK: - Gain/Loss Row
@@ -159,7 +162,7 @@ struct AssetDetailView: View {
         HStack {
             Text("Gain / Loss")
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(DesignTokens.label)
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
                 HStack(spacing: 4) {
@@ -175,7 +178,7 @@ struct AssetDetailView: View {
                         // T-11-11: zero cost basis — show "—" for %, never crash
                         Text("(—)")
                             .font(.body)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                     }
                 }
             }
@@ -190,11 +193,11 @@ struct AssetDetailView: View {
         HStack {
             Text(label)
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(DesignTokens.label)
             Spacer()
             Text(value)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
                 .multilineTextAlignment(.trailing)
         }
         .frame(minHeight: 44)

@@ -59,6 +59,8 @@ struct AssetsListView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+                .background(DesignTokens.bgCanvas)
                 .refreshable {
                     amfiNavService.forceRefresh()
                     npsNavService.forceRefresh()
@@ -111,22 +113,22 @@ struct AssetsListView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text(asset.name ?? "—")  // T-11-10: plain Text — never AttributedString(markdown:)
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
                     .lineLimit(1)
                 Text("\(assetClassLabel(asset.assetClassRaw)) · \(formattedUnits(units)) units")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
             }
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 2) {
                 if let value = currentValue {
                     Text(value.formattedINRWhole())
                         .font(.body)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(DesignTokens.label)
                 } else {
                     Text("—")
                         .font(.body)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 }
                 StalenessView(navAsOfDate: asset.navAsOfDate)
             }
@@ -147,10 +149,10 @@ struct AssetsListView: View {
 
     private func assetColor(_ classRaw: String?) -> Color {
         switch classRaw {
-        case "mutual_fund": return Color(.systemBlue)
-        case "stock":       return Color(.systemGreen)
-        case "nps":         return Color(.systemOrange)
-        default:            return Color(.systemBlue)
+        case "mutual_fund": return DesignTokens.catSubscriptions
+        case "stock":       return DesignTokens.positive
+        case "nps":         return DesignTokens.orange
+        default:            return DesignTokens.catSubscriptions
         }
     }
 
