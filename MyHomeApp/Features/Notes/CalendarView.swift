@@ -89,6 +89,7 @@ struct CalendarView: View {
 
             Spacer()
         }
+        .background(DesignTokens.bgCanvas)
         .sheet(item: Binding(
             get: { selectedDay.map { SelectedDay(date: $0) } },
             set: { val in selectedDay = val?.date }
@@ -142,7 +143,7 @@ struct CalendarView: View {
             ForEach(ordered, id: \.self) { name in
                 Text(name)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .frame(maxWidth: .infinity, minHeight: 28)
                     .multilineTextAlignment(.center)
             }
@@ -177,17 +178,17 @@ struct CalendarView: View {
                 Text(day.formattedAsCalendarDay())
                     .font(.body)
                     .fontWeight(isToday ? .bold : .regular)
-                    .foregroundStyle(isToday ? Color.accentColor : .primary)
+                    .foregroundStyle(isToday ? DesignTokens.accent : DesignTokens.label)
                     .frame(width: 32, height: 32)
                     .background(
                         Circle()
-                            .fill(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
+                            .fill(isSelected ? DesignTokens.accent.opacity(0.15) : Color.clear)
                     )
 
                 // Dot badge when there are reminders
                 if count > 0 {
                     Circle()
-                        .fill(Color.accentColor)
+                        .fill(DesignTokens.accent)
                         .frame(width: 6, height: 6)
                 } else {
                     Color.clear.frame(width: 6, height: 6)
@@ -356,6 +357,7 @@ struct DayAgendaView: View {
                             Section("Daily Routines") {
                                 ForEach(routineNotes) { note in
                                     RoutineAgendaRow(note: note, onTap: { editingRoutineNote = note })
+                                        .listRowBackground(DesignTokens.surfaceRaised)
                                 }
                             }
                         }
@@ -366,15 +368,16 @@ struct DayAgendaView: View {
                                 HStack {
                                     Text("Progress")
                                         .font(.subheadline)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(DesignTokens.label2)
                                     Spacer()
                                     Text("\(progress.done) of \(progress.total) complete")
                                         .font(.subheadline)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(DesignTokens.label2)
                                 }
                                 ProgressView(value: progress.fraction)
-                                    .tint(.accentColor)
+                                    .tint(DesignTokens.accent)
                             }
+                            .listRowBackground(DesignTokens.surfaceRaised)
                         }
 
                         // Reminder items with actionable checkboxes
@@ -387,7 +390,7 @@ struct DayAgendaView: View {
                                             toggleCompletion(item)
                                         } label: {
                                             Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
-                                                .foregroundStyle(item.isChecked ? .secondary : Color.accentColor)
+                                                .foregroundStyle(item.isChecked ? DesignTokens.accent : DesignTokens.label3)
                                                 .font(.body)
                                                 .frame(minWidth: 44, minHeight: 44)
                                         }
@@ -398,20 +401,23 @@ struct DayAgendaView: View {
                                             Text(item.title)
                                                 .font(.body)
                                                 .strikethrough(item.isChecked)
-                                                .foregroundStyle(item.isChecked ? .secondary : .primary)
+                                                .foregroundStyle(item.isChecked ? DesignTokens.label3 : DesignTokens.label)
 
                                             Text(item.date.formattedAsReminderDate(isAllDay: item.isAllDay))
                                                 .font(.caption)
-                                                .foregroundStyle(.secondary)
+                                                .foregroundStyle(DesignTokens.label2)
                                         }
                                     }
                                     .padding(.vertical, 2)
+                                    .listRowBackground(DesignTokens.surfaceRaised)
                                     .accessibilityLabel("\(item.title), \(item.isChecked ? "complete" : "pending")")
                                 }
                             }
                         }
                     }
                     .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
+                    .background(DesignTokens.bgCanvas)
                 }
             }
             .navigationTitle(day.formattedAsReminderDate(isAllDay: true))
@@ -555,7 +561,7 @@ private struct RoutineAgendaRow: View {
                 toggleAllBlocks()
             } label: {
                 Image(systemName: isCompleteToday ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isCompleteToday ? .secondary : Color.accentColor)
+                    .foregroundStyle(isCompleteToday ? DesignTokens.accent : DesignTokens.label3)
                     .font(.body)
                     .frame(minWidth: 44, minHeight: 44)
             }
@@ -566,17 +572,17 @@ private struct RoutineAgendaRow: View {
                 Text(note.title)
                     .font(.body)
                     .strikethrough(isCompleteToday)
-                    .foregroundStyle(isCompleteToday ? .secondary : .primary)
+                    .foregroundStyle(isCompleteToday ? DesignTokens.label3 : DesignTokens.label)
 
                 // Status subtitle
                 if let time = note.routineDailyReminderTime {
                     Text("Daily at \(time.formatted(.dateTime.hour().minute()))")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 } else {
                     Text("Daily routine")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 }
 
                 // "Done today" inline button for text-only routines (D-06)

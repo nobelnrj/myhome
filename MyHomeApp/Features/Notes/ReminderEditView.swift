@@ -212,6 +212,8 @@ struct ReminderEditView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(DesignTokens.bgCanvas)
             .navigationTitle("Set Reminder")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -223,7 +225,7 @@ struct ReminderEditView: View {
                         Task { await saveReminder() }
                     }
                     .disabled(isSaving)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
             }
             // Permission denied hint (D3-12)
@@ -283,13 +285,13 @@ struct ReminderEditView: View {
             } label: {
                 HStack {
                     Text("Date")
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(DesignTokens.label)
                     Spacer()
                     Text(reminderDate.formattedAsReminderDate(isAllDay: isAllDay))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.accent)
                         .font(.subheadline)
                     Image(systemName: showDatePicker ? "chevron.up" : "chevron.down")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .font(.caption)
                 }
             }
@@ -346,7 +348,7 @@ struct ReminderEditView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("On days")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
             HStack(spacing: 6) {
                 ForEach(weekdayData, id: \.int) { day in
                     let selected = selectedWeekdays.contains(day.int)
@@ -360,11 +362,11 @@ struct ReminderEditView: View {
                         Text(day.short)
                             .font(.caption)
                             .fontWeight(selected ? .semibold : .regular)
-                            .foregroundStyle(selected ? Color.white : Color.primary)
+                            .foregroundStyle(selected ? DesignTokens.accentOnYellow : DesignTokens.label)
                             .frame(width: 36, height: 36)
                             .background(
                                 Circle()
-                                    .fill(selected ? Color.accentColor : Color(.tertiarySystemFill))
+                                    .fill(selected ? DesignTokens.accent : DesignTokens.fillRecessed)
                             )
                     }
                     .buttonStyle(.plain)
@@ -392,13 +394,13 @@ struct ReminderEditView: View {
                 } label: {
                     HStack {
                         Text("End Date")
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(DesignTokens.label)
                         Spacer()
                         Text(endDate.formattedAsReminderDate(isAllDay: true))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.accent)
                             .font(.subheadline)
                         Image(systemName: showEndDatePicker ? "chevron.up" : "chevron.down")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .font(.caption)
                     }
                 }

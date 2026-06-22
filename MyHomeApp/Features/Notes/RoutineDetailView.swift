@@ -68,7 +68,7 @@ struct RoutineDetailView: View {
             Section {
                 headerCard
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    .listRowBackground(Color.clear)
+                    .listRowBackground(DesignTokens.surfaceRaised)
                     .listRowSeparator(.hidden)
             }
 
@@ -78,7 +78,7 @@ struct RoutineDetailView: View {
                     // Empty state per UI-SPEC Surface 4
                     Text("No completions recorded yet. Complete this routine to start your streak.")
                         .font(.body)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .padding(.vertical, 8)
                 } else {
                     ForEach(streakResult.history, id: \.dayKey) { dayStatus in
@@ -88,6 +88,8 @@ struct RoutineDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(DesignTokens.bgCanvas)
         .navigationTitle(note.title)   // T-12-10 / T-11-10: plain string — no AttributedString
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -101,25 +103,26 @@ struct RoutineDetailView: View {
             // T-12-10: plain Text — no AttributedString
             Text("Daily Routine")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
 
             // Streak hero number (mirrors currentValue largeTitle in AssetDetailView)
             // T-12-10: plain Text
             Text("🔥 \(currentStreak)")
                 .font(.largeTitle.weight(.semibold))
-                .foregroundStyle(.primary)
+                .foregroundStyle(DesignTokens.label)
 
             // Unit label
             Text(currentStreak == 1 ? "day streak" : "days streak")
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
 
             // Streak status line (UI-SPEC Surface 4 copy)
             Text(streakStatusLine)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
         }
-        .cardStyle()   // corner 16pt, secondarySystemBackground, shadow — mirrors AssetDetailView
+        .padding(16)
+        .neuSurface(.raised)
     }
 
     // MARK: - History Row
@@ -133,7 +136,7 @@ struct RoutineDetailView: View {
         HStack {
             // Left: completion indicator (non-interactive, consistent sizing)
             Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(isCompleted ? Color(.systemGreen) : .secondary)
+                .foregroundStyle(isCompleted ? DesignTokens.positive : DesignTokens.label3)
                 .font(.body)
                 .frame(minWidth: 44, minHeight: 44)
 
@@ -141,11 +144,11 @@ struct RoutineDetailView: View {
             if isToday {
                 Text("Today")
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
             } else {
                 Text(dayStatus.dayKey.formatted(.dateTime.weekday(.wide).day().month(.abbreviated)))
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
             }
 
             Spacer()
@@ -153,7 +156,7 @@ struct RoutineDetailView: View {
             // Right: "Done" or "—" label
             Text(isCompleted ? "Done" : "—")
                 .font(.caption)
-                .foregroundStyle(isCompleted ? Color(.systemGreen) : .secondary)
+                .foregroundStyle(isCompleted ? DesignTokens.positive : DesignTokens.label3)
         }
         .frame(minHeight: 44)
     }
