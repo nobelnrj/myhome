@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Neumorphic Redesign
-status: completed
-stopped_at: Phase 12 UI-SPEC approved
-last_updated: "2026-06-22T20:22:42.772Z"
-last_activity: 2026-06-22 -- Phase 14 marked complete
+status: executing
+last_updated: "2026-06-22T20:54:14.964Z"
+last_activity: 2026-06-22
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
   percent: 40
 ---
 
@@ -21,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 14 — restyle-existing-screens-overview-donut
+**Current focus:** Phase 15 — analytics-screen
 
 ## Current Position
 
-Phase: 14 — COMPLETE
-Plan: 6 of 8
-Status: Phase 14 complete
-Last activity: 2026-06-22 -- Phase 14 marked complete
+Phase: 15 (analytics-screen) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-06-22
 
 ## Performance Metrics
 
@@ -207,7 +206,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ## Session Continuity
 
-Last session: 2026-06-22T09:51:46.047Z
+Last session: 2026-06-22T20:54:14.960Z
 Stopped at: Phase 12 UI-SPEC approved
 Resume file: None
 
