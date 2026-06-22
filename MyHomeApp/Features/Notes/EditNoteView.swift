@@ -120,6 +120,7 @@ struct EditNoteView: View {
                     }
                     .padding(.horizontal, 16)
                 }
+                .background(DesignTokens.bgCanvas)
                 // CR-03: scroll to + briefly highlight the deep-linked block row.
                 .onAppear { focusDeepLinkedBlock(using: proxy) }
             }
@@ -220,7 +221,7 @@ struct EditNoteView: View {
         if blocks.isEmpty {
             Text("Tap below to add a note or checklist item.")
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
         } else if editMode.isEditing {
             // Phase 12: nested List required for .onMove (Open Question #2 resolved)
             // Wrap in a List only when in edit mode; keep ScrollView+VStack path when not editing.
@@ -252,7 +253,7 @@ struct EditNoteView: View {
                 } label: {
                     Image(systemName: block.isChecked ? "checkmark.square.fill" : "square")
                         .font(.body)
-                        .foregroundStyle(block.isChecked ? Color.secondary : Color.accentColor)
+                        .foregroundStyle(block.isChecked ? DesignTokens.accent : DesignTokens.label3)
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
@@ -272,7 +273,7 @@ struct EditNoteView: View {
                 axis: .vertical
             )
             .font(.body)
-            .foregroundStyle(block.isChecked ? Color.secondary.opacity(0.6) : .primary)
+            .foregroundStyle(block.isChecked ? DesignTokens.label3 : DesignTokens.label)
             .strikethrough(block.isChecked)
             .opacity(block.isChecked ? 0.6 : 1.0)
             .lineLimit(1...10)
@@ -302,7 +303,7 @@ struct EditNoteView: View {
         .listRowBackground(Color.clear)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(focusedBlockID == block.id ? Color.accentColor.opacity(0.15) : Color.clear)
+                .fill(focusedBlockID == block.id ? DesignTokens.accent.opacity(0.15) : Color.clear)
         )
     }
 

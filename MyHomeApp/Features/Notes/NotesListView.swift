@@ -70,7 +70,7 @@ struct NotesListView: View {
                 Button(action: { showingAddSheet = true }) {
                     Image(systemName: "plus")
                 }
-                .tint(.accentColor)
+                .tint(DesignTokens.accent)
                 .accessibilityLabel("Add Note")
             }
         }
@@ -133,6 +133,9 @@ struct NotesListView: View {
                 Section {
                     ForEach(s.dailyRoutine) { note in
                         NoteRow(note: note)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                             .contentShape(Rectangle())
                             .onTapGesture { editingNote = note }
                     }
@@ -141,8 +144,9 @@ struct NotesListView: View {
                     }
                 } header: {
                     Text("Daily Routine")
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(DesignTokens.label2)
+                        .textCase(.uppercase)
                         .padding(.top, 24)
                 }
             }
@@ -152,6 +156,9 @@ struct NotesListView: View {
                 Section {
                     ForEach(s.pinned) { note in
                         NoteRow(note: note)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                             .contentShape(Rectangle())
                             .onTapGesture { editingNote = note }
                     }
@@ -160,8 +167,9 @@ struct NotesListView: View {
                     }
                 } header: {
                     Text("Pinned")
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(DesignTokens.label2)
+                        .textCase(.uppercase)
                         .padding(.top, 24)
                 }
             }
@@ -171,6 +179,9 @@ struct NotesListView: View {
                 Section {
                     ForEach(s.other) { note in
                         NoteRow(note: note)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                             .contentShape(Rectangle())
                             .onTapGesture { editingNote = note }
                     }
@@ -179,9 +190,10 @@ struct NotesListView: View {
                     }
                 } header: {
                     if !s.dailyRoutine.isEmpty || !s.pinned.isEmpty {
-                        Text("Other Notes")
-                            .font(.headline)
-                            .fontWeight(.semibold)
+                        Text("All Notes")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(DesignTokens.label2)
+                            .textCase(.uppercase)
                             .padding(.top, 24)
                     }
                 }
@@ -193,6 +205,8 @@ struct NotesListView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(DesignTokens.bgCanvas)
     }
 
     // MARK: - Actions
