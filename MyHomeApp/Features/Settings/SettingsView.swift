@@ -59,9 +59,18 @@ struct SettingsView: View {
                             }
                         }
                     )) {
-                        rowLabel("Face ID Lock", symbol: "faceid", color: Color(.systemGreen))
+                        rowLabel("Face ID Lock", symbol: "faceid", color: DesignTokens.positive)
                     }
+                    .tint(DesignTokens.accent)
                 }
+                .listRowBackground(DesignTokens.surfaceRaised)
+
+                // MARK: Notifications Section
+
+                Section("Notifications") {
+                    rowLabel("Notifications", symbol: "bell", color: DesignTokens.negative)
+                }
+                .listRowBackground(DesignTokens.surfaceRaised)
 
                 // MARK: Gmail Section (multi-account, D-MA-05)
 
@@ -82,7 +91,7 @@ struct SettingsView: View {
                             Button {
                                 Task { await gmailSyncController.signIn() }
                             } label: {
-                                rowLabel("Connect Gmail", symbol: "envelope", color: Color(.systemRed))
+                                rowLabel("Connect Gmail", symbol: "envelope", color: DesignTokens.negative)
                             }
                         }
 
@@ -91,7 +100,7 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(msg)
                                     .font(.subheadline)
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(DesignTokens.negative)
                                 Button("Try again") {
                                     Task { await gmailSyncController.signIn() }
                                 }
@@ -120,7 +129,7 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(msg)
                                     .font(.subheadline)
-                                    .foregroundStyle(.red)
+                                    .foregroundStyle(DesignTokens.negative)
                                 Button("Try again") {
                                     Task { await gmailSyncController.sync() }
                                 }
@@ -132,7 +141,7 @@ struct SettingsView: View {
                         Button {
                             Task { await gmailSyncController.signIn() }
                         } label: {
-                            rowLabel("Add account", symbol: "plus.circle", color: Color(.systemBlue))
+                            rowLabel("Add account", symbol: "plus.circle", color: DesignTokens.accent)
                         }
                         .disabled(gmailSyncController.syncStatus == .authorizing ||
                                   gmailSyncController.syncStatus == .syncing)
@@ -141,6 +150,7 @@ struct SettingsView: View {
                         Button("Sync now") {
                             Task { await gmailSyncController.sync() }
                         }
+                        .foregroundStyle(DesignTokens.accent)
                         .disabled(gmailSyncController.syncStatus == .syncing)
                     }
                 }
@@ -162,6 +172,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                .listRowBackground(DesignTokens.surfaceRaised)
 
                 // MARK: Data Section
 
@@ -171,72 +182,83 @@ struct SettingsView: View {
                         transferScanService.scan()
                     } label: {
                         HStack {
-                            rowLabel("Scan for Transfers", symbol: "arrow.left.arrow.right", color: Color.purple)
+                            rowLabel("Scan for Transfers", symbol: "arrow.left.arrow.right", color: DesignTokens.catRent)
                             Spacer()
                             // First-run hint: surface when the initial full scan hasn't been done yet
                             if !UserDefaults.standard.bool(forKey: "transferScanFirstRunDone") {
                                 Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundStyle(Color(.systemOrange))
+                                    .foregroundStyle(DesignTokens.orange)
                                     .font(.subheadline)
                             }
                         }
                     }
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label2)
 
                     // Accounts management row (D-06) with optional review badge (D-02)
                     NavigationLink(destination: AccountsListView()) {
                         HStack {
-                            rowLabel("Accounts", symbol: "creditcard", color: Color(.systemBlue))
+                            rowLabel("Accounts", symbol: "creditcard", color: DesignTokens.catSubscriptions)
                             Spacer()
                             // D-02: badge when review is pending AND auto-created accounts
                             // actually exist (guards against a stale flag — see hasAutoCreatedAccounts)
                             if accountReviewPending && hasAutoCreatedAccounts {
                                 Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundStyle(Color(.systemOrange))
+                                    .foregroundStyle(DesignTokens.orange)
                                     .font(.subheadline)
                             }
                         }
                     }
-                    .foregroundStyle(.primary)
 
                     // Assets holdings management (D-05, Phase 11)
                     NavigationLink(destination: AssetsListView()) {
-                        rowLabel("Assets", symbol: "chart.bar", color: Color(.systemPurple))
+                        rowLabel("Assets", symbol: "chart.bar", color: DesignTokens.catHealth)
                     }
-                    .foregroundStyle(.primary)
 
                     Button {
                         showManageCategories = true
                     } label: {
-                        rowLabel("Manage Categories", symbol: "square.grid.2x2", color: Color(.systemIndigo))
+                        rowLabel("Manage Categories", symbol: "square.grid.2x2", color: DesignTokens.catRent)
                     }
 
                     Button {
                         selectedTab = 2
                     } label: {
                         HStack {
-                            rowLabel("Budgets", symbol: "chart.pie", color: .accentColor)
+                            rowLabel("Budgets", symbol: "chart.pie", color: DesignTokens.accent)
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.tertiary)
+                                .foregroundStyle(DesignTokens.label3)
                         }
                     }
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label2)
                 }
+                .listRowBackground(DesignTokens.surfaceRaised)
+
+                // MARK: Preferences Section
+
+                Section("Preferences") {
+                    rowLabel("Currency", symbol: "indianrupeesign.circle", color: DesignTokens.positive)
+                    rowLabel("Budget period", symbol: "calendar", color: DesignTokens.orange)
+                }
+                .listRowBackground(DesignTokens.surfaceRaised)
 
                 // MARK: About Section (footer)
 
                 Section {
                     HStack {
-                        rowLabel("About MyHome", symbol: "house", color: .accentColor)
+                        rowLabel("About MyHome", symbol: "house", color: DesignTokens.accent)
                         Spacer()
                         Text(versionString)
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label3)
                     }
                 }
+                .listRowBackground(DesignTokens.surfaceRaised)
             }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(DesignTokens.bgCanvas)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -252,7 +274,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Image(systemName: "envelope.circle.fill")
-                    .foregroundStyle(Color(.systemRed))
+                    .foregroundStyle(DesignTokens.negative)
                     .font(.title3)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(account.email)
@@ -262,11 +284,11 @@ struct SettingsView: View {
                     if let lastSynced = account.lastSyncedAt {
                         Text("Last synced \(lastSynced.relativeToNow)")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                     } else {
                         Text("Never synced")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                     }
                 }
                 Spacer()
@@ -277,13 +299,13 @@ struct SettingsView: View {
                             Task { await gmailSyncController.signIn() }
                         }
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(DesignTokens.negative)
                     }
                     Button("Disconnect") {
                         pendingDisconnectEmail = account.email
                     }
                     .font(.caption)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(DesignTokens.negative)
                 }
             }
         }
@@ -297,7 +319,7 @@ struct SettingsView: View {
             Circle()
                 .fill(
                     LinearGradient(
-                        colors: [.accentColor, .accentColor.opacity(0.55)],
+                        colors: [DesignTokens.accent, DesignTokens.accent.opacity(0.55)],
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     )
                 )
@@ -307,11 +329,11 @@ struct SettingsView: View {
                         if let initial = avatarInitial {
                             Text(initial)
                                 .font(.title2.weight(.semibold))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(DesignTokens.accentOnYellow)
                         } else {
                             Image(systemName: "person.fill")
                                 .font(.title2)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(DesignTokens.accentOnYellow)
                         }
                     }
                 )
@@ -325,20 +347,20 @@ struct SettingsView: View {
                 if accountCount == 0 {
                     Text("Not connected")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 } else if accountCount == 1 {
                     Text("Gmail connected")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 } else {
                     Text("\(accountCount) Gmail accounts")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 }
             }
             Spacer(minLength: 0)
         }
-        .cardStyle(cornerRadius: 14)
+        .neuSurface(.raised, radius: 20)
     }
 
     private var avatarInitial: String? {
@@ -352,7 +374,7 @@ struct SettingsView: View {
         HStack(spacing: 12) {
             IconTile(symbol: symbol, color: color, size: 29)
             Text(title)
-                .foregroundStyle(.primary)
+                .foregroundStyle(DesignTokens.label2)
         }
     }
 
