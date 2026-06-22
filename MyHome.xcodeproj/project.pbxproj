@@ -203,6 +203,8 @@
 		A13RMT /* RollingMoneyText.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMT /* RollingMoneyText.swift */; };
 		A13DST /* DesignTokensTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DST /* DesignTokensTests.swift */; };
 		A13RMTT /* RollingMoneyTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMTT /* RollingMoneyTextTests.swift */; };
+		AANL01 /* AnalyticsAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL01 /* AnalyticsAggregator.swift */; };
+		AANL07 /* AnalyticsAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL07 /* AnalyticsAggregatorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -416,6 +418,8 @@
 		F13RMT /* RollingMoneyText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyText.swift; sourceTree = "<group>"; };
 		F13DST /* DesignTokensTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokensTests.swift; sourceTree = "<group>"; };
 		F13RMTT /* RollingMoneyTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyTextTests.swift; sourceTree = "<group>"; };
+		FANL01 /* AnalyticsAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsAggregator.swift; sourceTree = "<group>"; };
+		FANL07 /* AnalyticsAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsAggregatorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -696,6 +700,7 @@
 				F1102NWSS /* NetWorthSnapshotService.swift */,
 				F1101NNS /* NPSNavService.swift */,
 				F1101SAS /* SIPAccrualService.swift */,
+				FANL01 /* AnalyticsAggregator.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -789,6 +794,7 @@
 				F1101SSVT /* SIPSetupValidationTests.swift */,
 				F13DST /* DesignTokensTests.swift */,
 				F13RMTT /* RollingMoneyTextTests.swift */,
+				FANL07 /* AnalyticsAggregatorTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -1057,6 +1063,7 @@
 				A13DS1 /* DesignTokens.swift in Sources */,
 				A13NS /* NeuSurface.swift in Sources */,
 				A13RMT /* RollingMoneyText.swift in Sources */,
+				AANL01 /* AnalyticsAggregator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1133,6 +1140,7 @@
 				A1101SSVT /* SIPSetupValidationTests.swift in Sources */,
 				A13DST /* DesignTokensTests.swift in Sources */,
 				A13RMTT /* RollingMoneyTextTests.swift in Sources */,
+				AANL07 /* AnalyticsAggregatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
