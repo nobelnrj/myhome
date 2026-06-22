@@ -85,7 +85,7 @@ struct SpendByCategoryChart: View {
                     .foregroundStyle(DesignTokens.label)
                     .lineLimit(1)
                 Spacer(minLength: 8)
-                Text(item.spentDecimal.formattedINRWhole())
+                Text(item.spentDecimal.formattedINRWords())
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(DesignTokens.label2)
                     .monospacedDigit()

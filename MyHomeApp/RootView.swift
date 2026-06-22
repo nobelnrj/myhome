@@ -31,7 +31,13 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.modelContext) private var modelContext
 
-    @State private var selectedTab: Int = 0
+    @State private var selectedTab: Int = {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        if let i = args.firstIndex(of: "-startTab"), i + 1 < args.count, let t = Int(args[i + 1]) { return t }
+        #endif
+        return 0
+    }()
     @State private var deepLinkNoteID: UUID? = nil
     /// OVR-06: Category filter deep-link from Overview donut tap → pre-filters Activity tab.
     /// Set by SpendDonutCard's onCategoryTap closure; cleared by ExpenseListView on appear.

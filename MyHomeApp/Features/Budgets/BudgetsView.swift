@@ -294,7 +294,7 @@ private struct BudgetSummaryCard: View {
                         .foregroundStyle(remaining >= 0 ? DesignTokens.label : DesignTokens.negative)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
-                    Text("\(totalSpent.formattedINRWhole()) of \(totalLimit.formattedINRWhole())")
+                    Text("\(totalSpent.formattedINRWords()) of \(totalLimit.formattedINRWords())")
                         .font(.subheadline)
                         .foregroundStyle(DesignTokens.label2)
                     if overCount > 0 {

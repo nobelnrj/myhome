@@ -64,7 +64,8 @@ struct SpendDonutCard: View {
                 colors: [item.color.opacity(0.5), item.color],
                 size: 86,
                 lineWidth: 11,
-                showTip: false
+                showTip: false,
+                roundCap: false
             ) {
                 Text("\(item.sharePct)%")
                     .font(.system(size: 19, weight: .bold, design: .default))
@@ -75,7 +76,7 @@ struct SpendDonutCard: View {
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(DesignTokens.label)
                 .lineLimit(1)
-            Text(item.amount.formattedINRWhole())
+            Text(item.amount.formattedINRWords())
                 .font(.system(size: 13))
                 .foregroundStyle(DesignTokens.label2)
                 .monospacedDigit()

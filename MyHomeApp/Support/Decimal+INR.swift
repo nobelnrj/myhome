@@ -50,4 +50,30 @@ extension Decimal {
         if a >= 1_000   { return "\(sign)₹\(Int(a / 1_000))k" }
         return "\(sign)₹\(Int(a))"
     }
+
+    /// Rounded "word" INR for compact card readouts (e.g. donut amounts), per the user's
+    /// "3 Lakhs" preference. Indian scale words; one decimal, trailing ".0" trimmed.
+    ///
+    ///   ≥ 1 crore  → "₹1.2 Cr"
+    ///   ≥ 1 lakh   → "₹3 Lakhs" / "₹1.5 Lakhs" (singular "Lakh" at exactly 1)
+    ///   ≥ 1,000    → "₹17K"
+    ///   else       → "₹500"
+    func formattedINRWords() -> String {
+        let d = NSDecimalNumber(decimal: self).doubleValue
+        let sign = d < 0 ? "-" : ""
+        let a = abs(d)
+
+        func trim(_ v: Double) -> String {
+            let r = (v * 10).rounded() / 10
+            return r == r.rounded() ? String(Int(r)) : String(format: "%.1f", r)
+        }
+
+        if a >= 10_000_000 { return "\(sign)₹\(trim(a / 10_000_000)) Cr" }
+        if a >= 100_000 {
+            let lakhs = trim(a / 100_000)
+            return "\(sign)₹\(lakhs) \(lakhs == "1" ? "Lakh" : "Lakhs")"
+        }
+        if a >= 1_000 { return "\(sign)₹\(Int((a / 1_000).rounded()))K" }
+        return "\(sign)₹\(Int(a.rounded()))"
+    }
 }

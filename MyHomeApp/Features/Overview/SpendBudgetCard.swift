@@ -23,10 +23,6 @@ struct SpendBudgetCard: View {
     let totalBudget: Decimal
     @Binding var selectedTab: Int
 
-    /// Live frames of the orb + the two tiles (in the "heroFlow" space), used to animate
-    /// particles streaming from the orb into the INCOME / SPENT boxes.
-    @State private var anchors: [String: CGRect] = [:]
-
     // MARK: - Computed
 
     private var net: Decimal { income - spent }
@@ -71,29 +67,6 @@ struct SpendBudgetCard: View {
     // MARK: - Body
 
     var body: some View {
-        ZStack {
-            heroContent
-
-            // Particle stream: green dots flow from the orb into INCOME, red into SPENT.
-            if let orb = anchors["orb"], let inc = anchors["income"], let exp = anchors["spent"] {
-                MoneyFlowCanvas(
-                    source: CGPoint(x: orb.midX, y: orb.maxY - orb.height * 0.16),
-                    incomeTarget: CGPoint(x: inc.midX, y: inc.minY + 8),
-                    expenseTarget: CGPoint(x: exp.midX, y: exp.minY + 8),
-                    incomeColor: DesignTokens.positive,
-                    expenseColor: DesignTokens.negative
-                )
-                .allowsHitTesting(false)
-            }
-        }
-        .coordinateSpace(name: "heroFlow")
-        .onPreferenceChange(HeroAnchorKey.self) { anchors = $0 }
-        .neuSurface(.floating, padding: 18)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityLabel)
-    }
-
-    private var heroContent: some View {
         VStack(alignment: .leading, spacing: DesignTokens.spacing16) {
             // Header row: "NET CASH FLOW" + status chip
             HStack {
@@ -142,14 +115,11 @@ struct SpendBudgetCard: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 2)
-            .heroAnchor("orb")
 
             // Income + Spent split tiles
             HStack(spacing: DesignTokens.spacing12) {
                 splitTile(label: "INCOME", amount: income, color: DesignTokens.positive)
-                    .heroAnchor("income")
                 splitTile(label: "SPENT", amount: spent, color: DesignTokens.negative)
-                    .heroAnchor("spent")
             }
 
             // Budget context (secondary): a thin strip when a budget exists, else a CTA.
@@ -166,6 +136,9 @@ struct SpendBudgetCard: View {
                 .tint(DesignTokens.accent)
             }
         }
+        .neuSurface(.floating, padding: 18)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityLabel)
     }
 
     // MARK: - Split tile
@@ -227,102 +200,6 @@ struct SpendBudgetCard: View {
         let netStr = abs(net).formattedINR()
         let direction = netIsPositive ? "positive" : "negative"
         return "Net cash flow \(netStr) \(direction). Income \(income.formattedINR()), spent \(spent.formattedINR())."
-    }
-}
-
-// MARK: - Money flow overlay (dots stream from the orb into the boxes)
-
-/// Captures named child frames in the "heroFlow" coordinate space.
-private struct HeroAnchorKey: PreferenceKey {
-    static let defaultValue: [String: CGRect] = [:]
-    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
-        value.merge(nextValue()) { _, new in new }
-    }
-}
-
-private extension View {
-    /// Publishes this view's frame (in the "heroFlow" space) under `id` for the flow overlay.
-    func heroAnchor(_ id: String) -> some View {
-        background(
-            GeometryReader { proxy in
-                Color.clear.preference(key: HeroAnchorKey.self, value: [id: proxy.frame(in: .named("heroFlow"))])
-            }
-        )
-    }
-}
-
-/// Continuously streams small glowing dots from `source` (the orb) down into the two target
-/// boxes — green toward income, red toward spend — along a gentle curve, fading in and out.
-private struct MoneyFlowCanvas: View {
-    let source: CGPoint
-    let incomeTarget: CGPoint
-    let expenseTarget: CGPoint
-    let incomeColor: Color
-    let expenseColor: Color
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private struct Streamer { let lane: Int; let phase, curve, speed: Double; let spread, dot: CGFloat }
-
-    private let streamers: [Streamer] = {
-        var rng = SeededRNG2(seed: 0xBEEF)
-        return (0..<28).map { i in
-            Streamer(
-                lane: i % 2,
-                phase: Double.random(in: 0...1, using: &rng),
-                curve: Double.random(in: -1...1, using: &rng),
-                speed: Double.random(in: 0.16...0.28, using: &rng),
-                spread: CGFloat.random(in: -16...16, using: &rng),
-                dot: CGFloat.random(in: 1.3...2.6, using: &rng)
-            )
-        }
-    }()
-
-    var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reduceMotion)) { timeline in
-            let t = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
-            Canvas { ctx, _ in
-                for s in streamers {
-                    let frac = reduceMotion ? 0.5 : (t * s.speed + s.phase).truncatingRemainder(dividingBy: 1)
-                    let target = s.lane == 0 ? incomeTarget : expenseTarget
-                    let col = s.lane == 0 ? incomeColor : expenseColor
-                    let src = CGPoint(x: source.x + s.spread, y: source.y)
-                    let mid = CGPoint(x: (src.x + target.x) / 2, y: (src.y + target.y) / 2)
-                    let ctrl = CGPoint(x: mid.x + CGFloat(s.curve) * 34, y: mid.y - 10)
-                    let pt = quadBezier(src, ctrl, target, frac)
-
-                    let op = sin(frac * .pi) * 0.9   // fade in near the orb, out at the box
-                    let halo = s.dot * 2.6
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
-                        with: .color(col.opacity(op * 0.18))
-                    )
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: pt.x - s.dot, y: pt.y - s.dot, width: s.dot * 2, height: s.dot * 2)),
-                        with: .color(col.opacity(op))
-                    )
-                }
-            }
-        }
-    }
-
-    private func quadBezier(_ p0: CGPoint, _ p1: CGPoint, _ p2: CGPoint, _ tt: Double) -> CGPoint {
-        let u = 1 - tt
-        let x = u * u * Double(p0.x) + 2 * u * tt * Double(p1.x) + tt * tt * Double(p2.x)
-        let y = u * u * Double(p0.y) + 2 * u * tt * Double(p1.y) + tt * tt * Double(p2.y)
-        return CGPoint(x: x, y: y)
-    }
-}
-
-/// Local deterministic RNG (mirrors the one in DonutChart.swift, which is fileprivate there).
-private struct SeededRNG2: RandomNumberGenerator {
-    private var state: UInt64
-    init(seed: UInt64) { state = seed == 0 ? 0x9E3779B97F4A7C15 : seed }
-    mutating func next() -> UInt64 {
-        state ^= state << 13
-        state ^= state >> 7
-        state ^= state << 17
-        return state
     }
 }
 

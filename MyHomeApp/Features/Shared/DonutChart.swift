@@ -67,12 +67,16 @@ struct ActivityRing<Center: View>: View {
     var showTip: Bool = true
     /// Render the blurred bloom behind the arc for the luminous WHOOP glow.
     var glow: Bool = true
+    /// Rounded end caps. Set `false` (butt caps) to avoid the small "dot" the round cap leaves
+    /// at the arc start on thin rings.
+    var roundCap: Bool = true
     @ViewBuilder var center: () -> Center
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animated: Double = 0
 
     private var clamped: Double { min(max(progress, 0), 1) }
+    private var lineCap: CGLineCap { roundCap ? .round : .butt }
 
     private var ringGradient: AngularGradient {
         AngularGradient(
@@ -95,7 +99,7 @@ struct ActivityRing<Center: View>: View {
             if glow {
                 Circle()
                     .trim(from: 0, to: max(0.0001, animated))
-                    .stroke(ringGradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .stroke(ringGradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: lineCap))
                     .rotationEffect(.degrees(-90))
                     .blur(radius: lineWidth * 0.6)
                     .opacity(0.85)
@@ -104,7 +108,7 @@ struct ActivityRing<Center: View>: View {
             // Crisp arc.
             Circle()
                 .trim(from: 0, to: max(0.0001, animated))
-                .stroke(ringGradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(ringGradient, style: StrokeStyle(lineWidth: lineWidth, lineCap: lineCap))
                 .rotationEffect(.degrees(-90))
 
             // Bright glowing leading tip (comet head) at the arc's leading edge.
