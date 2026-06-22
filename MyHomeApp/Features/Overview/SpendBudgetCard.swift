@@ -84,11 +84,10 @@ struct SpendBudgetCard: View {
             if fractionUsed != nil {
                 // WHOOP-style budget ring hero: ring fill = budget consumed (green→orange→red);
                 // centre shows the net cash flow (solid semibold) + % of budget used.
-                ActivityRing(
+                GlowParticleRing(
                     progress: fractionUsed ?? 0,
-                    colors: [ringColor.opacity(0.5), ringColor],
-                    size: 188,
-                    lineWidth: 24
+                    color: ringColor,
+                    size: 208
                 ) {
                     VStack(spacing: 4) {
                         Text("NET FLOW")
@@ -103,7 +102,7 @@ struct SpendBudgetCard: View {
                             .minimumScaleFactor(0.5)
                             .contentTransition(.numericText())
                             .animation(.smooth(duration: 0.78), value: net)
-                            .frame(width: 188 - 2 * 24 - 14)
+                            .frame(width: 130)
                         Text(percentUsedLabel)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(DesignTokens.label2)

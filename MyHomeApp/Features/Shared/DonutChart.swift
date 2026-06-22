@@ -149,6 +149,107 @@ extension ActivityRing where Center == EmptyView {
     }
 }
 
+// MARK: - GlowParticleRing (WHOOP-age-style particle sphere)
+
+/// Deterministic xorshift RNG so the particle field is stable across redraws (no reshuffle).
+private struct SeededRNG: RandomNumberGenerator {
+    private var state: UInt64
+    init(seed: UInt64) { state = seed == 0 ? 0x9E3779B97F4A7C15 : seed }
+    mutating func next() -> UInt64 {
+        state ^= state << 13
+        state ^= state >> 7
+        state ^= state << 17
+        return state
+    }
+}
+
+/// A luminous particle sphere (à la WHOOP "Whoop Age"): a Canvas-drawn field of glowing
+/// dots in an annular band that lights up to `progress`, brightest at the leading edge with
+/// a soft outward spray. The dark centre hosts the readout. Springs up from zero on appear.
+struct GlowParticleRing<Center: View>: View {
+    var progress: Double
+    var color: Color
+    var size: CGFloat = 208
+    @ViewBuilder var center: () -> Center
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animated: Double = 0
+
+    private struct Particle { let angle, radialT, dot, opacity: Double }
+
+    private let particles: [Particle] = {
+        var rng = SeededRNG(seed: 0xC0FFEE)
+        return (0..<320).map { _ in
+            Particle(
+                angle: Double.random(in: 0...1, using: &rng),
+                radialT: pow(Double.random(in: 0...1, using: &rng), 0.55), // bias toward the outer band
+                dot: Double.random(in: 0.5...2.3, using: &rng),
+                opacity: Double.random(in: 0.18...1.0, using: &rng)
+            )
+        }
+    }()
+
+    /// Direction of peak brightness (top-right, like the WHOOP orb).
+    private let brightDir = -Double.pi / 4
+
+    var body: some View {
+        ZStack {
+            // Dark well so the centred readout stays legible over the glow.
+            Circle()
+                .fill(RadialGradient(
+                    colors: [Color.black.opacity(0.55), .clear],
+                    center: .center, startRadius: 0, endRadius: size * 0.34
+                ))
+
+            Canvas { ctx, sz in
+                let c = CGPoint(x: sz.width / 2, y: sz.height / 2)
+                let outer = sz.width / 2 - 2
+                let inner = outer * 0.34
+                // Global intensity: appear fade × a subtle tie to the metric (fuller → brighter).
+                let intensity = animated * (0.6 + 0.4 * min(max(progress, 0), 1))
+
+                for p in particles {
+                    let ang = p.angle * 2 * .pi - .pi / 2
+                    let r = inner + (outer - inner) * CGFloat(p.radialT)
+                    let pt = CGPoint(x: c.x + r * CGFloat(cos(ang)), y: c.y + r * CGFloat(sin(ang)))
+
+                    // Brightness gradient across the orb (brightest toward top-right).
+                    let dir = 0.42 + 0.58 * (0.5 + 0.5 * cos(ang - brightDir))
+                    let op = p.opacity * dir * intensity
+                    let dot = CGFloat(p.dot)
+
+                    // Soft halo then bright core for the luminous bloom.
+                    let halo = dot * 2.8
+                    ctx.fill(
+                        Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
+                        with: .color(color.opacity(op * 0.16))
+                    )
+                    ctx.fill(
+                        Path(ellipseIn: CGRect(x: pt.x - dot, y: pt.y - dot, width: dot * 2, height: dot * 2)),
+                        with: .color(color.opacity(op))
+                    )
+                }
+            }
+            .blur(radius: 0.4)
+
+            center()
+        }
+        .frame(width: size, height: size)
+        .onAppear { animate() }
+        .onChange(of: progress) { _, _ in animate() }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func animate() {
+        if reduceMotion {
+            animated = 1
+        } else {
+            animated = 0
+            withAnimation(.easeOut(duration: 1.2)) { animated = 1 }
+        }
+    }
+}
+
 // MARK: - CategoryRings (concentric activity rings)
 
 /// Concentric activity rings — one per item, largest item outermost. Each ring's fill is the

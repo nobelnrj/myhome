@@ -63,7 +63,8 @@ struct SpendDonutCard: View {
                 progress: Double(item.sharePct) / 100.0,
                 colors: [item.color.opacity(0.5), item.color],
                 size: 86,
-                lineWidth: 11
+                lineWidth: 11,
+                showTip: false
             ) {
                 Text("\(item.sharePct)%")
                     .font(.system(size: 19, weight: .bold, design: .default))
