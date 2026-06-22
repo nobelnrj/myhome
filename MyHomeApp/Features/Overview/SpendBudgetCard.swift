@@ -38,6 +38,19 @@ struct SpendBudgetCard: View {
     private var statusChipLabel: String { netIsPositive ? "Positive" : "Negative" }
     private var statusColor: Color { netIsPositive ? DesignTokens.positive : DesignTokens.negative }
 
+    /// Budget-health colour for the ring (independent of net sign): green under budget,
+    /// orange near the limit, red once over.
+    private var ringColor: Color {
+        if spent > totalBudget { return DesignTokens.negative }
+        if let f = fractionUsed, f >= 0.85 { return DesignTokens.orange }
+        return DesignTokens.positive
+    }
+
+    private var percentUsedLabel: String {
+        guard let f = fractionUsed else { return "" }
+        return f >= 1.0 ? "100%+ of budget" : "\(Int(f * 100))% of budget"
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -63,50 +76,53 @@ struct SpendBudgetCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
             }
 
-            // Net total — RollingMoneyText 46pt (hero)
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                if !netIsPositive {
-                    Text("−")
-                        .font(.system(size: 30, weight: .semibold, design: .default))
-                        .foregroundStyle(statusColor)
+            if fractionUsed != nil {
+                // WHOOP-style budget ring hero: ring fill = budget consumed (green→orange→red);
+                // centre shows the net cash flow (solid semibold) + % of budget used.
+                BudgetRing(fraction: fractionUsed ?? 0, color: ringColor, size: 172, lineWidth: 16) {
+                    VStack(spacing: 3) {
+                        Text(netIsPositive ? "NET +" : "NET −")
+                            .font(.system(size: 10.5, weight: .semibold))
+                            .tracking(0.8)
+                            .foregroundStyle(DesignTokens.label2)
+                        Text(abs(net).formattedINRWhole())
+                            .font(.system(size: 25, weight: .semibold, design: .default))
+                            .foregroundStyle(statusColor)
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                            .contentTransition(.numericText())
+                            .animation(.smooth(duration: 0.78), value: net)
+                            .frame(width: 172 - 2 * 16 - 14)
+                        Text(percentUsedLabel)
+                            .font(.caption)
+                            .foregroundStyle(DesignTokens.label3)
+                    }
                 }
-                // Solid system numeral (weight .semibold, design .default) — brings the hero
-                // closer to the previous bold look the user preferred, away from the thin
-                // ultraLight-rounded face.
-                RollingMoneyText(amount: abs(net), color: statusColor, weight: .semibold, design: .default)
-            }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 2)
 
-            // Income + Spent split tiles
-            HStack(spacing: DesignTokens.spacing12) {
-                splitTile(label: "INCOME", amount: income, color: DesignTokens.positive)
-                splitTile(label: "SPENT", amount: spent, color: DesignTokens.negative)
-            }
-
-            // Budget progress strip (only when budget is set)
-            if let fraction = fractionUsed {
-                VStack(alignment: .leading, spacing: 4) {
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule()
-                                .fill(DesignTokens.fillRecessed2)
-                            Capsule()
-                                .fill(spent > totalBudget ? DesignTokens.negative : DesignTokens.positive)
-                                .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
-                        }
-                    }
-                    .frame(height: 8)
-
-                    HStack {
-                        Text("of \(totalBudget.formattedINRWhole()) budget")
-                            .font(.caption)
-                            .foregroundStyle(DesignTokens.label3)
-                        Spacer()
-                        Text(fraction >= 1.0 ? "100%+ used" : "\(Int(fraction * 100))% used")
-                            .font(.caption)
-                            .foregroundStyle(DesignTokens.label3)
-                    }
+                // Income + Spent split tiles
+                HStack(spacing: DesignTokens.spacing12) {
+                    splitTile(label: "INCOME", amount: income, color: DesignTokens.positive)
+                    splitTile(label: "SPENT", amount: spent, color: DesignTokens.negative)
                 }
             } else {
+                // No budget set — keep the solid-number hero the user preferred.
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    if !netIsPositive {
+                        Text("−")
+                            .font(.system(size: 30, weight: .semibold, design: .default))
+                            .foregroundStyle(statusColor)
+                    }
+                    RollingMoneyText(amount: abs(net), color: statusColor, weight: .semibold, design: .default)
+                }
+
+                HStack(spacing: DesignTokens.spacing12) {
+                    splitTile(label: "INCOME", amount: income, color: DesignTokens.positive)
+                    splitTile(label: "SPENT", amount: spent, color: DesignTokens.negative)
+                }
+
                 Button {
                     selectedTab = 2
                 } label: {
@@ -154,6 +170,37 @@ struct SpendBudgetCard: View {
         let netStr = abs(net).formattedINR()
         let direction = netIsPositive ? "positive" : "negative"
         return "Net cash flow \(netStr) \(direction). Income \(income.formattedINR()), spent \(spent.formattedINR())."
+    }
+}
+
+// MARK: - Budget ring (WHOOP-style)
+
+/// A single-value progress ring with a recessed track, gradient stroke, and rounded cap.
+/// `fraction` may exceed 1.0 (over budget); the ring trims at a full turn while the caller's
+/// colour/label convey the overflow.
+private struct BudgetRing<Center: View>: View {
+    let fraction: Double
+    let color: Color
+    var size: CGFloat = 172
+    var lineWidth: CGFloat = 16
+    @ViewBuilder var center: () -> Center
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(DesignTokens.fillRecessed2, lineWidth: lineWidth)
+            Circle()
+                .trim(from: 0, to: max(0.001, min(fraction, 1)))
+                .stroke(
+                    color.gradient,
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+                .animation(.smooth(duration: 0.7), value: fraction)
+            center()
+        }
+        .frame(width: size, height: size)
+        .accessibilityElement(children: .combine)
     }
 }
 

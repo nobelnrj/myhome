@@ -41,14 +41,19 @@ struct SpendByCategoryChart: View {
     /// the empty state.
     let categoryItems: [CategorySpendItem]
 
+    /// Top categories shown as track-backed bars (no inner scroll).
+    private var topItems: [CategorySpendItem] { Array(categoryItems.prefix(6)) }
+    /// Largest spend in the visible set — bars are scaled relative to this.
+    private var maxSpent: Double { max(topItems.first?.spent ?? 0, 1) }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             // Row A — Card title
             Text("Spend by Category")
                 .font(.title2)
                 .foregroundStyle(DesignTokens.label)
 
-            // Row B — Chart or empty state
+            // Row B — Track-backed bar list (WHOOP-style) or empty state
             if categoryItems.isEmpty {
                 // D4-07 empty state
                 Text("No spend yet this month.")
@@ -57,34 +62,46 @@ struct SpendByCategoryChart: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .frame(height: 80)
             } else {
-                Chart(categoryItems) { item in
-                    BarMark(
-                        x: .value("Amount", item.spent),
-                        y: .value("Category", item.name)
-                    )
-                    .cornerRadius(5)
-                    .foregroundStyle(item.color)
-                    .annotation(position: .trailing) {
-                        Text(item.spentDecimal.formattedINRCompact())
-                            .font(.caption)
-                            .foregroundStyle(DesignTokens.label2)
-                    }
-                    .accessibilityLabel("\(item.name), \(item.spentDecimal.formattedINR())")
-                }
-                .chartXAxis(.hidden)
-                .chartYAxis {
-                    AxisMarks(values: .automatic) { _ in
-                        AxisValueLabel()
-                            .font(.caption)
+                VStack(spacing: 13) {
+                    ForEach(topItems) { item in
+                        categoryBar(item)
                     }
                 }
-                .frame(height: 220)
-                .chartScrollableAxes(.vertical)
-                .accessibilityLabel("Spend by category chart")
             }
         }
         .neuSurface(.raised)
         .accessibilityElement(children: .combine)
+        .accessibilityLabel("Spend by category")
+    }
+
+    // MARK: - Track-backed bar row
+
+    @ViewBuilder
+    private func categoryBar(_ item: CategorySpendItem) -> some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 8) {
+                Text(item.name)
+                    .font(.subheadline)
+                    .foregroundStyle(DesignTokens.label)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                Text(item.spentDecimal.formattedINRWhole())
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(DesignTokens.label2)
+                    .monospacedDigit()
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(DesignTokens.fillRecessed2)
+                    Capsule()
+                        .fill(item.color.gradient)
+                        .frame(width: max(6, CGFloat(item.spent / maxSpent) * geo.size.width))
+                }
+            }
+            .frame(height: 9)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(item.name), \(item.spentDecimal.formattedINR())")
     }
 }
 

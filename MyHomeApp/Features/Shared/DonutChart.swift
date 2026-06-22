@@ -28,7 +28,8 @@ struct DonutChart<Center: View>: View {
                 angularInset: 1.5
             )
             .cornerRadius(5)
-            .foregroundStyle(seg.color)
+            // WHOOP-style depth: each segment fades from its full colour to a darker shade.
+            .foregroundStyle(seg.color.gradient)
         }
         .chartLegend(.hidden)
         .frame(width: size, height: size)

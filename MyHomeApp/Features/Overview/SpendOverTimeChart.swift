@@ -74,20 +74,13 @@ struct SpendOverTimeChart: View {
                     .frame(height: 80)
             } else {
                 Chart(bucketedData) { point in
-                    AreaMark(
+                    // WHOOP-style trend bars: rounded, color-coded, gradient fill.
+                    BarMark(
                         x: .value("Date", point.date),
                         y: .value("Spend", point.spent)
                     )
-                    .foregroundStyle(DesignTokens.accent.opacity(0.15))
-
-                    LineMark(
-                        x: .value("Date", point.date),
-                        y: .value("Spend", point.spent)
-                    )
-                    .foregroundStyle(DesignTokens.accent)
-                    .lineStyle(StrokeStyle(lineWidth: 2))
-                    .symbol(.circle)
-                    .symbolSize(30)
+                    .cornerRadius(4)
+                    .foregroundStyle(DesignTokens.accent.gradient)
                     .accessibilityLabel("\(point.dateLabel), \(point.spentDecimal.formattedINR())")
                 }
                 .chartXAxis {
