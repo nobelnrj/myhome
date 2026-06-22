@@ -59,9 +59,12 @@ struct FilteredExpenseListView: View {
                 List {
                     ForEach(expenses) { expense in
                         ExpenseRow(expense: expense)
+                            .listRowBackground(DesignTokens.surfaceRaised)
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+                .background(DesignTokens.bgCanvas)
             }
         }
         .navigationTitle(category.name ?? "Uncategorized")
@@ -113,9 +116,12 @@ struct UncategorizedExpenseListView: View {
                 List {
                     ForEach(expenses) { expense in
                         ExpenseRow(expense: expense)
+                            .listRowBackground(DesignTokens.surfaceRaised)
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+                .background(DesignTokens.bgCanvas)
             }
         }
         .navigationTitle("Uncategorized")

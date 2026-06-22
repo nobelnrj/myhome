@@ -36,7 +36,7 @@ struct ManageCategoriesView: View {
                         HStack {
                             Image(systemName: "tag")
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(DesignTokens.label2)
                                 .frame(width: 24)
                                 .accessibilityHidden(true)
                             TextField("Category name", text: $newCategoryName)
@@ -49,13 +49,13 @@ struct ManageCategoriesView: View {
                                 addCategory(name: newCategoryName)
                             }
                             .font(.body)
-                            .tint(.accentColor)
+                            .tint(DesignTokens.accent)
                         }
                         .frame(minHeight: 44)
                         if let error = nameError {
                             Text(error)
                                 .font(.caption)
-                                .foregroundStyle(Color(.systemRed))
+                                .foregroundStyle(DesignTokens.negative)
                         }
                     }
                 }
@@ -72,6 +72,8 @@ struct ManageCategoriesView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(DesignTokens.bgCanvas)
             .navigationTitle("Categories")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -120,7 +122,7 @@ struct ManageCategoriesView: View {
                     if let symbol = category.symbolName {
                         Image(systemName: symbol)
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .frame(width: 24)
                             .accessibilityHidden(true)
                     }
@@ -134,13 +136,13 @@ struct ManageCategoriesView: View {
                         saveRename(for: category)
                     }
                     .font(.body)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
                 .frame(minHeight: 44)
                 if let error = nameError {
                     Text(error)
                         .font(.caption)
-                        .foregroundStyle(Color(.systemRed))
+                        .foregroundStyle(DesignTokens.negative)
                 }
             }
         } else {
@@ -155,13 +157,13 @@ struct ManageCategoriesView: View {
                     if let symbol = category.symbolName {
                         Image(systemName: symbol)
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .frame(width: 24)
                             .accessibilityHidden(true)
                     }
                     Text(category.name ?? "")
                         .font(.body)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(DesignTokens.label)
                     Spacer()
                 }
                 .frame(minHeight: 44)

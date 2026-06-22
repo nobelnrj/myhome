@@ -24,8 +24,8 @@ struct BudgetCategoryCard: View {
     /// Progress-bar fill: category color normally, orange ≥85%, red when over.
     private var barColor: Color {
         switch progressData.colorThreshold {
-        case .overBudget: return Color(.systemRed)
-        case .warning:    return Color(.systemOrange)
+        case .overBudget: return DesignTokens.negative
+        case .warning:    return DesignTokens.orange
         case .normal:     return CategoryStyle.color(for: progressData.category)
         }
     }
@@ -50,18 +50,19 @@ struct BudgetCategoryCard: View {
                 VStack(alignment: .trailing, spacing: 1) {
                     Text(progressData.spent.formattedINRWhole())
                         .font(.headline)
+                        .foregroundStyle(DesignTokens.label)
                         .lineLimit(1)
                     if let budget = progressData.budget {
                         Text("of \(budget.formattedINRWhole())")
                             .font(.caption)
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(DesignTokens.label3)
                             .lineLimit(1)
                     }
                 }
 
                 Button(action: { showEditBudget = true }) {
                     Image(systemName: "pencil")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label3)
                         .frame(width: 28, height: 44)
                         .contentShape(Rectangle())
                 }
@@ -73,7 +74,7 @@ struct BudgetCategoryCard: View {
             if hasBudget, let fraction = progressData.fractionUsed {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(Color(.tertiarySystemFill))
+                        Capsule().fill(DesignTokens.fillRecessed2)
                         Capsule().fill(barColor)
                             .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
                             .animation(.easeInOut(duration: 0.3), value: fraction)
@@ -83,7 +84,7 @@ struct BudgetCategoryCard: View {
                 .accessibilityHidden(true)
             }
         }
-        .cardStyle(cornerRadius: 14, padding: 15)
+        .neuSurface(.raised, radius: 20, padding: 15, isInteractive: true)
         .accessibilityElement(children: .combine)
         .sheet(isPresented: $showEditBudget) {
             EditBudgetSheet(category: progressData.category)
@@ -101,7 +102,7 @@ struct BudgetCategoryCard: View {
     }
 
     private var subtitleColor: Color {
-        guard hasBudget else { return Color(.tertiaryLabel) }
-        return isOver ? Color(.systemRed) : Color(.secondaryLabel)
+        guard hasBudget else { return DesignTokens.label3 }
+        return isOver ? DesignTokens.negative : DesignTokens.label2
     }
 }

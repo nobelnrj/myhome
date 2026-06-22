@@ -54,7 +54,7 @@ struct EditBudgetSheet: View {
                     // T-02-11: plain Text — never AttributedString(markdown:)
                     Text("for \(category.name ?? "")")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 8)
                         .padding(.bottom, 4)
@@ -70,6 +70,7 @@ struct EditBudgetSheet: View {
                 }
                 .padding(.horizontal, 16)
             }
+            .background(DesignTokens.bgCanvas)
             .navigationTitle("Set Budget")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -83,7 +84,7 @@ struct EditBudgetSheet: View {
                         saveBudget()
                     }
                     .disabled(!isSaveEnabled)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
             }
             .confirmationDialog(
@@ -120,7 +121,7 @@ struct EditBudgetSheet: View {
             Text(displayAmount)
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundStyle(amountIsError ? Color(.systemRed) : .primary)
+                .foregroundStyle(amountIsError ? DesignTokens.negative : DesignTokens.label)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .offset(x: amountShakeOffset)
                 .animation(.default, value: amountShakeOffset)
@@ -128,9 +129,7 @@ struct EditBudgetSheet: View {
             // Always-visible custom decimal keypad (Pitfall 6 — no system keyboard)
             DecimalKeypadView(displayString: $amountString)
         }
-        .padding(16)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .neuSurface(.recessed, radius: DesignTokens.radiusInner)
     }
 
     // MARK: - Remove Budget Section
@@ -144,7 +143,7 @@ struct EditBudgetSheet: View {
                 .padding(.vertical, 12)
         }
         .buttonStyle(.bordered)
-        .tint(Color(.systemRed))
+        .tint(DesignTokens.negative)
         .frame(minHeight: 44)
     }
 

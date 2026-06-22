@@ -16,9 +16,9 @@ struct BudgetProgressView: View {
 
     private var fillColor: Color {
         switch data.colorThreshold {
-        case .normal:     return .accentColor
-        case .warning:    return Color(.systemOrange)
-        case .overBudget: return Color(.systemRed)
+        case .normal:     return DesignTokens.accent
+        case .warning:    return DesignTokens.orange
+        case .overBudget: return DesignTokens.negative
         }
     }
 
@@ -29,15 +29,15 @@ struct BudgetProgressView: View {
             // No-budget branch: single label + edit affordance provided by the parent card
             Text("No budget set")
                 .font(.subheadline)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(DesignTokens.label3)
         } else {
             VStack(alignment: .leading, spacing: 8) {
                 // Progress bar — GeometryReader caps fill at 100% track width (D2-09)
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
-                        // Track (always rendered — secondarySystemBackground, 8pt, cornerRadius 4)
+                        // Track (always rendered — fillRecessed2, 8pt, cornerRadius 4)
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(Color(.secondarySystemBackground))
+                            .fill(DesignTokens.fillRecessed2)
                             .frame(height: 8)
                         // Fill — only rendered when fractionUsed is available
                         if let fraction = data.fractionUsed {
@@ -65,13 +65,13 @@ struct BudgetProgressView: View {
                         } else {
                             Text("\((-remaining).formattedINR()) over budget")
                                 .font(.subheadline)
-                                .foregroundStyle(Color(.systemRed))
+                                .foregroundStyle(DesignTokens.negative)
                         }
                         Spacer()
                         // % used — "100%+" when fully consumed, integer % otherwise
                         Text(fraction >= 1.0 ? "100%+" : "\(Int(fraction * 100))% used")
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                     }
                 }
             }
@@ -82,9 +82,9 @@ struct BudgetProgressView: View {
 
     private var remainingTextColor: Color {
         switch data.colorThreshold {
-        case .normal:     return .secondary
-        case .warning:    return Color(.systemOrange)
-        case .overBudget: return Color(.systemRed)
+        case .normal:     return DesignTokens.label2
+        case .warning:    return DesignTokens.orange
+        case .overBudget: return DesignTokens.negative
         }
     }
 }
