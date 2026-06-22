@@ -104,7 +104,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 - [x] 14-02-PLAN.md — Overview restyle + NET CASH FLOW hero + SpendDonutCard (new file + pbxproj) + OVR-06 tap-to-filter wiring (SKIN-01, OVR-05, OVR-06, SKIN-09)
 - [x] 14-03-PLAN.md — Budgets group restyle (summary-ring hero, category cards, StackBar) (SKIN-03, SKIN-09)
-- [ ] 14-04-PLAN.md — Notes / calendar / agenda / reminder / routine restyle (SKIN-04, SKIN-09)
+- [x] 14-04-PLAN.md — Notes / calendar / agenda / reminder / routine restyle (SKIN-04, SKIN-09)
 - [ ] 14-05-PLAN.md — Settings + UnlockView + MigrationReviewSheet restyle (icon-tile color map) (SKIN-05, SKIN-08, SKIN-09)
 - [ ] 14-06-PLAN.md — Accounts + Assets / Net-worth restyle (floating detail heros, donut segment recolor) (SKIN-06, SKIN-07, SKIN-09)
 
@@ -166,6 +166,6 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete | 2026-06-12 |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 5/5 | Complete | 2026-06-20 |
 | 13. Design System Foundation | v1.2 | 2/3 | In Progress|  |
-| 14. Restyle Existing Screens + Overview Donut | v1.2 | 3/8 | In Progress|  |
+| 14. Restyle Existing Screens + Overview Donut | v1.2 | 4/8 | In Progress|  |
 | 15. Analytics Screen | v1.2 | 0/? | Not started | - |
 | 16. AI Insight Card | v1.2 | 0/? | Not started | - |
