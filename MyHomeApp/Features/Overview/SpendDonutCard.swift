@@ -52,7 +52,7 @@ struct SpendDonutCard: View {
                     // Whole-rupee + width cap + scale-to-fit so the total stays inside the
                     // donut hole and never spills over the ring (fixes center overflow).
                     Text(total.formattedINRWhole())
-                        .font(.system(size: 19, weight: .medium, design: .rounded))
+                        .font(.system(size: 19, weight: .semibold, design: .default))
                         .foregroundStyle(DesignTokens.label)
                         .monospacedDigit()
                         .lineLimit(1)

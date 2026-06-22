@@ -67,10 +67,13 @@ struct SpendBudgetCard: View {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 if !netIsPositive {
                     Text("−")
-                        .font(.system(size: 28, weight: .ultraLight, design: .rounded))
+                        .font(.system(size: 30, weight: .semibold, design: .default))
                         .foregroundStyle(statusColor)
                 }
-                RollingMoneyText(amount: abs(net), color: statusColor)
+                // Solid system numeral (weight .semibold, design .default) — brings the hero
+                // closer to the previous bold look the user preferred, away from the thin
+                // ultraLight-rounded face.
+                RollingMoneyText(amount: abs(net), color: statusColor, weight: .semibold, design: .default)
             }
 
             // Income + Spent split tiles
@@ -128,9 +131,10 @@ struct SpendBudgetCard: View {
                 .font(.system(size: 10, weight: .semibold))
                 .tracking(0.5)
                 .foregroundStyle(DesignTokens.label3)
-            // 21pt stat pattern (not RollingMoneyText — Pitfall 5)
-            Text(amount.formatted(.currency(code: "INR").locale(Locale(identifier: "en_IN"))))
-                .font(.system(size: 21, weight: .light, design: .rounded))
+            // Stat pattern (not RollingMoneyText — Pitfall 5). Solid system face to match
+            // the heavier hero numeral above.
+            Text(amount.formattedINRWhole())
+                .font(.system(size: 20, weight: .semibold, design: .default))
                 .foregroundStyle(color)
                 .monospacedDigit()
                 .contentTransition(.numericText())

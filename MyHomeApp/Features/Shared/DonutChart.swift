@@ -25,9 +25,9 @@ struct DonutChart<Center: View>: View {
             SectorMark(
                 angle: .value(seg.label, seg.value),
                 innerRadius: .ratio(innerRatio),
-                angularInset: 1.0
+                angularInset: 1.5
             )
-            .cornerRadius(3)
+            .cornerRadius(5)
             .foregroundStyle(seg.color)
         }
         .chartLegend(.hidden)

@@ -34,6 +34,12 @@ struct RollingMoneyText: View {
     /// negative/spent amounts (Phase 14 pattern). Defaults to `DesignTokens.label` (#ECEDF4).
     var color: Color = DesignTokens.label
     var animationDuration: Double = 0.78
+    /// Font weight for the readout. Defaults to `.ultraLight` (DS hero spec). The Overview
+    /// hero overrides this to a heavier weight to read as solid (closer to the pre-v1.2 look).
+    var weight: Font.Weight = .ultraLight
+    /// Font design. Defaults to `.rounded`; the Overview hero passes `.default` for a more
+    /// solid, less delicate numeral matching the previous version.
+    var design: Font.Design = .rounded
 
     // DS-06 Dynamic Type: @ScaledMetric instance property (NOT static) anchored to .largeTitle.
     // This satisfies the heroMoney typography spec (46pt base) while scaling with the user's
@@ -48,7 +54,7 @@ struct RollingMoneyText: View {
 
     var body: some View {
         Text(formatted)
-            .font(.system(size: baseSize, weight: .ultraLight, design: .rounded))
+            .font(.system(size: baseSize, weight: weight, design: design))
             .foregroundStyle(color)
             .monospacedDigit()
             // contentTransition + animation MUST be paired (RESEARCH Pitfall 6):
