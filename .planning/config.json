@@ -33,7 +33,7 @@
     "text_mode": false,
     "research_before_questions": false,
     "discuss_mode": "discuss",
-    "skip_discuss": false,
+    "skip_discuss": true,
     "max_discuss_passes": 3,
     "subagent_timeout": 300000,
     "context_coverage_gate": true,
