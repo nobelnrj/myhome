@@ -32,7 +32,7 @@
 
 - [x] **SKIN-01**: Overview restyled to the neumorphic look.
 - [ ] **SKIN-02**: Activity / Expenses (list + add/edit) restyled.
-- [ ] **SKIN-03**: Budgets restyled.
+- [x] **SKIN-03**: Budgets restyled.
 - [ ] **SKIN-04**: Notes, calendar, and day-agenda restyled.
 - [ ] **SKIN-05**: Settings restyled.
 - [ ] **SKIN-06**: Accounts restyled.
@@ -98,7 +98,7 @@
 | DS-06 | Phase 13 | Complete |
 | SKIN-01 | Phase 14 | Complete |
 | SKIN-02 | Phase 14 | Pending |
-| SKIN-03 | Phase 14 | Pending |
+| SKIN-03 | Phase 14 | Complete |
 | SKIN-04 | Phase 14 | Pending |
 | SKIN-05 | Phase 14 | Pending |
 | SKIN-06 | Phase 14 | Pending |
