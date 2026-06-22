@@ -2,49 +2,57 @@ import SwiftUI
 
 /// Presentation-only mapping from a `Category` to a display color.
 ///
-/// The refreshed design (`MyHome.html`) gives each category a stable color from the iOS system
-/// palette. The data model only stores `symbolName`, so the color is **derived here at render
+/// Phase 14 (D-03): rewired to the neumorphic category palette from `DesignTokens.cat*`.
+/// The data model only stores `symbolName`, so the color is **derived here at render
 /// time** — no schema field is added (feature-preservation constraint). Unknown symbols fall
 /// back to a stable hashed palette slot so custom categories still get a consistent color.
 ///
-/// All colors are iOS system colors, so light/dark adaptation is automatic.
+/// All colors are DesignTokens.cat* values — no stock system colors (D-01 no-translucent rule).
 enum CategoryStyle {
 
-    /// Ordered palette used for the hashed fallback.
+    /// Ordered palette used for the hashed fallback — all DesignTokens.cat* values (D-03).
     private static let palette: [Color] = [
-        Color(.systemGreen), Color(.systemOrange), Color(.systemRed),
-        Color(.systemYellow), Color(.systemIndigo), Color(.systemTeal),
-        Color(.systemPink), Color(.systemPurple), Color(.systemBlue),
-        Color(.systemBrown), Color(.systemCyan), Color(.systemMint),
+        DesignTokens.catGroceries,
+        DesignTokens.catDining,
+        DesignTokens.catFuel,
+        DesignTokens.catUtilities,
+        DesignTokens.catRent,
+        DesignTokens.catAuto,
+        DesignTokens.catShopping,
+        DesignTokens.catHealth,
+        DesignTokens.catSubscriptions,
+        DesignTokens.catEntertainment,
+        DesignTokens.catOther,
     ]
 
-    /// Direct symbol → color map for the seeded categories (mirrors the design palette).
+    /// Direct symbol → color map for seeded categories (DesignTokens.cat* palette, D-03).
     private static let bySymbol: [String: Color] = [
-        "cart": Color(.systemGreen),                              // Groceries
-        "fork.knife": Color(.systemOrange),                       // Dining
-        "fuelpump": Color(.systemRed),                            // Fuel
-        "bolt": Color(.systemYellow),                             // Utilities
-        "house": Color(.systemIndigo),                            // Rent
-        "house.fill": Color(.systemIndigo),
-        "car": Color(.systemTeal),                                // Auto/Cab
-        "bag": Color(.systemPink),                                // Shopping
-        "cross.case": Color(.systemPurple),                       // Health/Pharmacy
-        "film": Color(.systemMint),                               // Entertainment
-        "antenna.radiowaves.left.and.right": Color(.systemCyan),  // Recharge/DTH
-        "person.2": Color(.systemBrown),                          // Maid/Help
-        "arrow.up.right": Color(.systemBlue),                     // UPI to Person
-        "banknote": Color(.systemGreen),                          // ATM
-        "tray": Color(.systemGray),                               // Misc
+        "cart":                               DesignTokens.catGroceries,
+        "fork.knife":                         DesignTokens.catDining,
+        "fuelpump":                           DesignTokens.catFuel,
+        "bolt":                               DesignTokens.catUtilities,
+        "house":                              DesignTokens.catRent,
+        "house.fill":                         DesignTokens.catRent,
+        "car":                                DesignTokens.catAuto,
+        "bag":                                DesignTokens.catShopping,
+        "cross.case":                         DesignTokens.catHealth,
+        "film":                               DesignTokens.catEntertainment,
+        "antenna.radiowaves.left.and.right":  DesignTokens.catSubscriptions,
+        "person.2":                           DesignTokens.catOther,
+        "arrow.up.right":                     DesignTokens.catOther,
+        "banknote":                           DesignTokens.catGroceries,
+        "tray":                               DesignTokens.catOther,
     ]
 
-    /// Stable display color for a category (nil → neutral gray, e.g. Uncategorized).
+    /// Stable display color for a category (nil → catOther, unknown symbol → hashed palette slot).
+    /// All returned colors are DesignTokens.cat* values — never a stock system color (D-03).
     static func color(for category: Category?) -> Color {
-        guard let category else { return Color(.systemGray) }
+        guard let category else { return DesignTokens.catOther }
         if let symbol = category.symbolName, let mapped = bySymbol[symbol] { return mapped }
         // Stable hashed fallback keyed on the category name (deterministic across launches).
         let key = category.name ?? category.symbolName ?? "?"
         let idx = abs(stableHash(key)) % palette.count
-        return palette[idx]
+        return palette[idx]   // always a DesignTokens.cat* color (D-03)
     }
 
     /// SF Symbol to render for a category (falls back to a neutral tag glyph).
