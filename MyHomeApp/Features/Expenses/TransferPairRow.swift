@@ -40,28 +40,28 @@ struct TransferPairRow: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Color.purple, in: Capsule())
+                    .background(DesignTokens.accent, in: Capsule())
             }
 
             // Two-leg route: debit account → arrow → credit account
             HStack(spacing: 4) {
                 Text(accountName(for: debit.accountID))
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .lineLimit(1)
                 Image(systemName: "arrow.right")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                 Text(accountName(for: credit.accountID))
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .lineLimit(1)
             }
 
             // Date
             Text(debit.date.formattedForExpenseList())
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(DesignTokens.label3)
         }
         .padding(.vertical, 2)
         .accessibilityElement(children: .combine)
@@ -80,7 +80,7 @@ struct TransferPairRow: View {
             } label: {
                 Label("Confirm", systemImage: "checkmark")
             }
-            .tint(.green)
+            .tint(DesignTokens.positive)
         }
     }
 

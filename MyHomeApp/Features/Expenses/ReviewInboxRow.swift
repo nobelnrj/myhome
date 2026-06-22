@@ -47,7 +47,8 @@ struct ReviewInboxRow: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(expense.amount.formattedINR())
                         .font(.headline)
-                        .foregroundStyle(expense.amount < 0 ? Color(.systemGreen) : Color(.label))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(expense.amount < 0 ? DesignTokens.positive : DesignTokens.negative)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                     if expense.ingestionStateRaw == "possibleDuplicate" {
@@ -56,14 +57,14 @@ struct ReviewInboxRow: View {
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.orange, in: Capsule())
+                            .background(DesignTokens.orange, in: Capsule())
                     } else {
                         Text("Review")
                             .font(.caption2)
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.accentColor, in: Capsule())
+                            .background(DesignTokens.accent, in: Capsule())
                     }
                 }
             }
@@ -72,7 +73,7 @@ struct ReviewInboxRow: View {
             if expense.ingestionStateRaw == "possibleDuplicate" {
                 Text("Possible duplicate — review before accepting")
                     .font(.caption)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(DesignTokens.orange)
                     .lineLimit(2)
             }
         }
@@ -92,7 +93,7 @@ struct ReviewInboxRow: View {
             } label: {
                 Label("Accept", systemImage: "checkmark")
             }
-            .tint(.green)
+            .tint(DesignTokens.positive)
         }
     }
 

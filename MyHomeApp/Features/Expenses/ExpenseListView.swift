@@ -157,8 +157,13 @@ struct ExpenseListView: View {
                                 } header: {
                                     HStack {
                                         Text(section.title)
+                                            .font(.footnote)
+                                            .foregroundStyle(DesignTokens.label2)
                                         Spacer()
                                         Text(section.total.formattedINR())
+                                            .font(.footnote)
+                                            .fontWeight(.semibold)
+                                            .foregroundStyle(section.total >= 0 ? DesignTokens.positive : DesignTokens.label3)
                                     }
                                 }
                             }
@@ -179,7 +184,7 @@ struct ExpenseListView: View {
                     Button(action: { showingAddSheet = true }) {
                         Image(systemName: "plus")
                     }
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                     .accessibilityLabel("Add Expense")
                 }
             }

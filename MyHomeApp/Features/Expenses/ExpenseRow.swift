@@ -2,10 +2,10 @@ import SwiftUI
 
 /// Single row in the expense list.
 ///
-/// Restyled to the `MyHome.html` design: a colored category `IconTile`, the merchant (note) as
+/// Restyled to the neumorphic design system: a colored category `IconTile`, the merchant (note) as
 /// the title, a "category · account" subtitle (with an envelope glyph for email-ingested rows),
-/// and the amount trailing. Negative amounts stay systemGreen with the leading minus from
-/// `formattedINR()` so color is never the sole differentiator.
+/// and the amount trailing. Income amounts (negative) show `DesignTokens.positive`; spend amounts
+/// show `DesignTokens.negative` — both `.semibold` for legibility.
 struct ExpenseRow: View {
 
     let expense: Expense
@@ -19,7 +19,7 @@ struct ExpenseRow: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 HStack(spacing: 4) {
@@ -31,14 +31,15 @@ struct ExpenseRow: View {
                     }
                 }
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
             }
 
             Spacer(minLength: 8)
 
             Text(expense.amount.formattedINR())
                 .font(.body)
-                .foregroundStyle(expense.amount < 0 ? Color(.systemGreen) : Color(.label))
+                .fontWeight(.semibold)
+                .foregroundStyle(expense.amount < 0 ? DesignTokens.positive : DesignTokens.negative)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
