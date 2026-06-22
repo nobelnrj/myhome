@@ -49,11 +49,11 @@ struct AccountDetailView: View {
     }
 
     private var balanceColor: Color {
-        // D-09: CC is always red (amount owed is negative); savings/current green/red/.primary
-        if account.typeRaw == "credit_card" { return Color(.systemRed) }
-        if liveBalance > 0 { return Color(.systemGreen) }
-        if liveBalance < 0 { return Color(.systemRed) }
-        return .primary
+        // D-09: CC is always red (amount owed is negative); savings/current green/red/label
+        if account.typeRaw == "credit_card" { return DesignTokens.negative }
+        if liveBalance > 0 { return DesignTokens.positive }
+        if liveBalance < 0 { return DesignTokens.negative }
+        return DesignTokens.label
     }
 
     private var typeLabel: String {
@@ -112,6 +112,8 @@ struct AccountDetailView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+                .background(DesignTokens.bgCanvas)
             }
         }
         .navigationTitle(account.name ?? "Account")  // T-09-06: plain Text access
@@ -133,11 +135,12 @@ struct AccountDetailView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(typeLabel)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
 
             Text(liveBalance.formattedINR())
                 .font(.largeTitle.weight(.semibold))
                 .foregroundStyle(balanceColor)
+                .contentTransition(.numericText())
                 .accessibilityValue(liveBalance.formattedINR())
 
             HStack(spacing: 4) {
@@ -149,10 +152,10 @@ struct AccountDetailView: View {
                 if let asOf = account.balanceAsOfDate {
                     Text("as of \(asOf.formattedForDatePickerRow())")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 }
             }
         }
-        .cardStyle()
+        .neuSurface(.floating)
     }
 }

@@ -81,10 +81,10 @@ struct EditAccountView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Icon & Color")
                                     .font(.body)
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(DesignTokens.label)
                                 Text("Tap to change")
                                     .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(DesignTokens.label2)
                             }
                             Spacer()
                         }
@@ -100,7 +100,7 @@ struct EditAccountView: View {
                         if let error = nameError {
                             Text(error)
                                 .font(.subheadline)
-                                .foregroundStyle(Color(.systemRed))
+                                .foregroundStyle(DesignTokens.negative)
                         }
                     }
 
@@ -131,7 +131,7 @@ struct EditAccountView: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .font(.body)
-                            .foregroundStyle(typeRaw == "credit_card" ? Color(.systemRed) : .primary)
+                            .foregroundStyle(typeRaw == "credit_card" ? DesignTokens.negative : DesignTokens.label)
                     }
                     .frame(minHeight: 44)
 
@@ -147,7 +147,7 @@ struct EditAccountView: View {
                             try? context.save()  // CR-01
                             dismiss()
                         }
-                        .foregroundStyle(Color(.systemOrange))
+                        .foregroundStyle(DesignTokens.orange)
                         .frame(minHeight: 44)
                     }
                 }
@@ -160,11 +160,11 @@ struct EditAccountView: View {
                                 Button(action: { symbolName = sym }) {
                                     ZStack {
                                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                            .fill(symbolName == sym ? Color.accentColor.opacity(0.15) : Color(.secondarySystemBackground))
+                                            .fill(symbolName == sym ? DesignTokens.accent.opacity(0.15) : DesignTokens.fillRecessed)
                                             .frame(width: 48, height: 48)
                                         Image(systemName: sym)
                                             .font(.title3)
-                                            .foregroundStyle(symbolName == sym ? Color.accentColor : .secondary)
+                                            .foregroundStyle(symbolName == sym ? DesignTokens.accent : DesignTokens.label2)
                                     }
                                 }
                                 .buttonStyle(.plain)
@@ -206,7 +206,7 @@ struct EditAccountView: View {
                         saveAccount()
                     }
                     .disabled(!isValid)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
             }
             .onAppear {

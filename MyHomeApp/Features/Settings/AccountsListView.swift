@@ -58,7 +58,7 @@ struct AccountsListView: View {
                         Section {
                             HStack(alignment: .top, spacing: 12) {
                                 Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundStyle(Color(.systemOrange))
+                                    .foregroundStyle(DesignTokens.orange)
                                     .font(.title3)
                                     .accessibilityHidden(true)
                                 VStack(alignment: .leading, spacing: 4) {
@@ -66,14 +66,14 @@ struct AccountsListView: View {
                                         .font(.body.weight(.semibold))
                                     Text("These accounts were created from your transaction history. Rename, change type, or delete before they're finalized.")
                                         .font(.subheadline)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(DesignTokens.label2)
                                 }
                             }
                             Button("Review Now →") {
                                 showReviewSheet = true
                             }
                             .font(.body)
-                            .tint(.accentColor)
+                            .tint(DesignTokens.accent)
                         }
                     }
 
@@ -98,7 +98,7 @@ struct AccountsListView: View {
                                 } label: {
                                     Label("Archive", systemImage: "archivebox")
                                 }
-                                .tint(Color(.systemOrange))
+                                .tint(DesignTokens.orange)
                             }
                         }
                     }
@@ -121,7 +121,7 @@ struct AccountsListView: View {
                                             } label: {
                                                 Label("Unarchive", systemImage: "arrow.uturn.left")
                                             }
-                                            .tint(Color(.systemBlue))
+                                            .tint(DesignTokens.catSubscriptions)
                                         }
                                 }
                             }
@@ -129,6 +129,8 @@ struct AccountsListView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+                .background(DesignTokens.bgCanvas)
             }
         }
         .navigationTitle("Accounts")
@@ -194,10 +196,10 @@ struct AccountsListView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text(account.name ?? "")  // T-09-06: plain Text — never AttributedString(markdown:)
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
                 Text(displayType(account.typeRaw))
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
             }
             Spacer(minLength: 8)
             Text(balance.formattedINR())
@@ -205,7 +207,7 @@ struct AccountsListView: View {
                 .foregroundStyle(balanceColor(balance: balance, typeRaw: account.typeRaw))
             Image(systemName: "chevron.right")
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(DesignTokens.label3)
         }
         .frame(minHeight: 44)
     }
@@ -222,11 +224,11 @@ struct AccountsListView: View {
     }
 
     private func balanceColor(balance: Decimal, typeRaw: String?) -> Color {
-        // D-09: CC balance is always red (negative = amount owed); savings/current green/primary
-        if typeRaw == "credit_card" { return Color(.systemRed) }
-        if balance > 0 { return Color(.systemGreen) }
-        if balance < 0 { return Color(.systemRed) }
-        return .primary
+        // D-09: CC balance is always red (negative = amount owed); savings/current green/label2
+        if typeRaw == "credit_card" { return DesignTokens.negative }
+        if balance > 0 { return DesignTokens.positive }
+        if balance < 0 { return DesignTokens.negative }
+        return DesignTokens.label2
     }
 
     // MARK: - CRUD Actions
