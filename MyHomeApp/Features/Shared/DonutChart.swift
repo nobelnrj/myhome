@@ -189,9 +189,6 @@ struct GlowParticleRing<Center: View>: View {
         }
     }()
 
-    /// Direction of peak brightness (top-right, like the WHOOP orb).
-    private let brightDir = -Double.pi / 4
-
     var body: some View {
         ZStack {
             // Dark well so the centred readout stays legible over the glow.
@@ -205,25 +202,34 @@ struct GlowParticleRing<Center: View>: View {
                 let c = CGPoint(x: sz.width / 2, y: sz.height / 2)
                 let outer = sz.width / 2 - 2
                 let inner = outer * 0.34
-                // Global intensity: appear fade × a subtle tie to the metric (fuller → brighter).
-                let intensity = animated * (0.6 + 0.4 * min(max(progress, 0), 1))
+                // `animated` sweeps 0 → progress on appear: the lit arc IS the budget %.
+                let fill = max(animated, 0.0001)
 
                 for p in particles {
+                    let lit = p.angle <= fill
+                    let headDist = fill - p.angle        // 0 at the leading edge
+                    let nearHead = lit && headDist < 0.10
+
                     let ang = p.angle * 2 * .pi - .pi / 2
-                    let r = inner + (outer - inner) * CGFloat(p.radialT)
+                    // Particles near the leading edge spray slightly outward (comet head).
+                    let spray = nearHead ? CGFloat(p.radialT) * 0.18 : 0
+                    let r = inner + (outer - inner) * (CGFloat(p.radialT) + spray)
                     let pt = CGPoint(x: c.x + r * CGFloat(cos(ang)), y: c.y + r * CGFloat(sin(ang)))
 
-                    // Brightness gradient across the orb (brightest toward top-right).
-                    let dir = 0.42 + 0.58 * (0.5 + 0.5 * cos(ang - brightDir))
-                    let op = p.opacity * dir * intensity
-                    let dot = CGFloat(p.dot)
+                    // Lit particles glow (brightest near the head); unlit stay dim — so the
+                    // ARC LENGTH and brightness both read as "how much budget is used".
+                    var factor = lit ? (0.40 + 0.60 * (1 - min(headDist, 1))) : 0.06
+                    var dot = CGFloat(p.dot)
+                    if nearHead { factor = min(1, factor + 0.40); dot += 1.3 }
+                    let op = p.opacity * factor
 
-                    // Soft halo then bright core for the luminous bloom.
-                    let halo = dot * 2.8
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
-                        with: .color(color.opacity(op * 0.16))
-                    )
+                    if lit {
+                        let halo = dot * 2.8
+                        ctx.fill(
+                            Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
+                            with: .color(color.opacity(op * 0.16))
+                        )
+                    }
                     ctx.fill(
                         Path(ellipseIn: CGRect(x: pt.x - dot, y: pt.y - dot, width: dot * 2, height: dot * 2)),
                         with: .color(color.opacity(op))
@@ -241,11 +247,12 @@ struct GlowParticleRing<Center: View>: View {
     }
 
     private func animate() {
+        let target = min(max(progress, 0), 1)
         if reduceMotion {
-            animated = 1
+            animated = target
         } else {
             animated = 0
-            withAnimation(.easeOut(duration: 1.2)) { animated = 1 }
+            withAnimation(.easeOut(duration: 1.2)) { animated = target }
         }
     }
 }
