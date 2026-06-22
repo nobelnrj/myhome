@@ -83,6 +83,7 @@ struct EditExpenseView: View {
                 }
                 .padding(.horizontal, 16)
             }
+            .background(DesignTokens.bgCanvas)
             .navigationTitle("Edit Expense")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -97,7 +98,7 @@ struct EditExpenseView: View {
                         saveExpense()
                     }
                     .disabled(!isSaveEnabled)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
             }
             .confirmationDialog(
@@ -134,7 +135,7 @@ struct EditExpenseView: View {
                 Text(displayAmount)
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundStyle(amountIsError ? Color(.systemRed) : (isNegative && parsedAmount != nil ? Color(.systemGreen) : .primary))
+                    .foregroundStyle(amountIsError ? DesignTokens.negative : (isNegative && parsedAmount != nil ? DesignTokens.positive : DesignTokens.label))
                     .frame(maxWidth: .infinity, alignment: .center)
                     .accessibilityValue(displayAmount)
                     .offset(x: amountShakeOffset)
@@ -145,7 +146,7 @@ struct EditExpenseView: View {
             DecimalKeypadView(displayString: $amountString)
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground))
+        .background(DesignTokens.surfaceRaised)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
@@ -158,13 +159,13 @@ struct EditExpenseView: View {
                 Button(action: { showDatePicker.toggle() }) {
                     HStack {
                         Text("Date")
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(DesignTokens.label)
                         Spacer()
                         Text(date.formattedForDatePickerRow())
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .font(.subheadline)
                         Image(systemName: showDatePicker ? "chevron.up" : "chevron.down")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .font(.caption)
                     }
                     .padding(.vertical, 12)
@@ -187,32 +188,32 @@ struct EditExpenseView: View {
                     .labelsHidden()
                 }
             }
-            .background(Color(.secondarySystemBackground))
+            .background(DesignTokens.surfaceRaised)
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
             // Category row (Section 2, optional — off the ≤3-tap critical path; D2-12)
             Button(action: { showCategoryPicker = true }) {
                 HStack {
                     Text("Category")
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(DesignTokens.label)
                     Spacer()
                     if let cat = selectedCategory, let name = cat.name {
                         if let symbol = cat.symbolName {
                             Image(systemName: symbol)
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(DesignTokens.label2)
                         }
                         // T-02-07: plain Text — never AttributedString(markdown:)
                         Text(name)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .font(.subheadline)
                     } else {
                         Text("None")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .font(.subheadline)
                     }
                     Image(systemName: "chevron.right")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .font(.caption)
                 }
                 .padding(.vertical, 12)
@@ -220,7 +221,7 @@ struct EditExpenseView: View {
                 .frame(minHeight: 44)
             }
             .buttonStyle(.plain)
-            .background(Color(.secondarySystemBackground))
+            .background(DesignTokens.surfaceRaised)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.top, 8)
             .sheet(isPresented: $showCategoryPicker) {
@@ -231,25 +232,25 @@ struct EditExpenseView: View {
             Button(action: { showAccountPicker = true }) {
                 HStack {
                     Text("Account")
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(DesignTokens.label)
                     Spacer()
                     if let acc = selectedAccount, let name = acc.name {
                         if let symbol = acc.symbolName {
                             Image(systemName: symbol)
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(DesignTokens.label2)
                         }
                         // T-02-15: plain Text — never AttributedString(markdown:)
                         Text(name)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .font(.subheadline)
                     } else {
                         Text("Unassigned")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                             .font(.subheadline)
                     }
                     Image(systemName: "chevron.right")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .font(.caption)
                 }
                 .padding(.vertical, 12)
@@ -257,7 +258,7 @@ struct EditExpenseView: View {
                 .frame(minHeight: 44)
             }
             .buttonStyle(.plain)
-            .background(Color(.secondarySystemBackground))
+            .background(DesignTokens.surfaceRaised)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.top, 8)
             .sheet(isPresented: $showAccountPicker) {
@@ -267,29 +268,29 @@ struct EditExpenseView: View {
             // Note field (T-01-06: plain TextField — never AttributedString(markdown:))
             HStack {
                 Text("Note")
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
                 Spacer()
                 TextField("Merchant or memo", text: $note)
                     .multilineTextAlignment(.trailing)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
             .frame(minHeight: 44)
-            .background(Color(.secondarySystemBackground))
+            .background(DesignTokens.surfaceRaised)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.top, 8)
 
             // Transfer toggle (XFER-05, D-14): marks a solo transfer or unmarks with cascade-unlink
             Toggle(isOn: $isMarkedTransfer) {
                 Text("Mark as Transfer")
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
             }
             .toggleStyle(.switch)
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
             .frame(minHeight: 44)
-            .background(Color(.secondarySystemBackground))
+            .background(DesignTokens.surfaceRaised)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.top, 8)
         }
@@ -306,7 +307,7 @@ struct EditExpenseView: View {
                 .padding(.vertical, 12)
         }
         .buttonStyle(.bordered)
-        .tint(Color(.systemRed))
+        .tint(DesignTokens.negative)
         .frame(minHeight: 44)
     }
 

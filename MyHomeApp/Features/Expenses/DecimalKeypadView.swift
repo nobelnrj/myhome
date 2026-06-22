@@ -39,7 +39,7 @@ struct DecimalKeypadView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, minHeight: 64)
-                    .background(Color(.secondarySystemBackground))
+                    .background(DesignTokens.surfaceElevatedControl)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
