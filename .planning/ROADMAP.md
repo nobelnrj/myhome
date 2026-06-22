@@ -44,7 +44,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 ### v1.2: Neumorphic Redesign
 
 - [ ] **Phase 13: Design System Foundation** — Tokens, NeuSurface, NeuTabBar, RollingMoneyText, accessibility infrastructure
-- [ ] **Phase 14: Restyle Existing Screens + Overview Donut** — Full neumorphic restyle of every existing screen; spend donut with tap-to-filter added to Overview
+- [x] **Phase 14: Restyle Existing Screens + Overview Donut** — Full neumorphic restyle of every existing screen; spend donut with tap-to-filter added to Overview (completed 2026-06-22)
 - [ ] **Phase 15: Analytics Screen** — New screen pushed from Overview; AnalyticsAggregator, area chart, category bars, delta chips
 - [ ] **Phase 16: AI Insight Card** — On-device FoundationModels card on Analytics screen; availability gating, streaming typewriter, numeric integrity
 
@@ -114,7 +114,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 4** *(blocked on all restyle plans — deletion must come last)*
 
-- [ ] 14-08-PLAN.md — Delete CardStyle.swift + NeuTabBar.swift (pbxproj removals); full clean-build + test gate; end-of-phase human-verify (SKIN-09)
+- [x] 14-08-PLAN.md — Delete CardStyle.swift + NeuTabBar.swift (pbxproj removals); full clean-build + test gate; end-of-phase human-verify (SKIN-09)
 
 **UI hint**: yes
 
@@ -166,6 +166,6 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 11.1 SIP Automation & NPS NAV (INSERTED) | v1.1 | 5/5 | Complete | 2026-06-12 |
 | 12. Notes & Daily Routine Enhancement | v1.1 | 5/5 | Complete | 2026-06-20 |
 | 13. Design System Foundation | v1.2 | 2/3 | In Progress|  |
-| 14. Restyle Existing Screens + Overview Donut | v1.2 | 7/8 | In Progress|  |
+| 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 0/? | Not started | - |
 | 16. AI Insight Card | v1.2 | 0/? | Not started | - |
