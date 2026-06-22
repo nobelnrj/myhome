@@ -73,6 +73,8 @@
 		A403 /* DecimalINRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F403 /* DecimalINRTests.swift */; };
 		A404 /* SpendOverTimeAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F404 /* SpendOverTimeAggregator.swift */; };
 		A405 /* OverviewAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F405 /* OverviewAggregation.swift */; };
+		A1401SDA /* SpendDonutAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1401SDA /* SpendDonutAggregation.swift */; };
+		A1401SDAT /* SpendDonutAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1401SDAT /* SpendDonutAggregationTests.swift */; };
 		A406 /* SpendBudgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F406 /* SpendBudgetCard.swift */; };
 		A407 /* TopCategoriesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F407 /* TopCategoriesCard.swift */; };
 		A408 /* PinnedNoteCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F408 /* PinnedNoteCard.swift */; };
@@ -284,6 +286,8 @@
 		F403 /* DecimalINRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalINRTests.swift; sourceTree = "<group>"; };
 		F404 /* SpendOverTimeAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeAggregator.swift; sourceTree = "<group>"; };
 		F405 /* OverviewAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewAggregation.swift; sourceTree = "<group>"; };
+		F1401SDA /* SpendDonutAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutAggregation.swift; sourceTree = "<group>"; };
+		F1401SDAT /* SpendDonutAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutAggregationTests.swift; sourceTree = "<group>"; };
 		F406 /* SpendBudgetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendBudgetCard.swift; sourceTree = "<group>"; };
 		F407 /* TopCategoriesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCategoriesCard.swift; sourceTree = "<group>"; };
 		F408 /* PinnedNoteCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedNoteCard.swift; sourceTree = "<group>"; };
@@ -685,6 +689,7 @@
 				F145NA /* NotificationActions.swift */,
 				F404 /* SpendOverTimeAggregator.swift */,
 				F405 /* OverviewAggregation.swift */,
+				F1401SDA /* SpendDonutAggregation.swift */,
 				F907ABS /* AccountBalance.swift */,
 				F908CHX /* Color+Hex.swift */,
 				F1102ANS /* AMFINavService.swift */,
@@ -737,6 +742,7 @@
 				F308 /* CalendarAggregationTests.swift */,
 				F401 /* SpendOverTimeAggregatorTests.swift */,
 				F402 /* OverviewAggregationTests.swift */,
+				F1401SDAT /* SpendDonutAggregationTests.swift */,
 				F403 /* DecimalINRTests.swift */,
 				F503 /* LockStateTests.swift */,
 				F603 /* LockSettingsTests.swift */,
@@ -977,6 +983,7 @@
 				A145NA /* NotificationActions.swift in Sources */,
 				A404 /* SpendOverTimeAggregator.swift in Sources */,
 				A405 /* OverviewAggregation.swift in Sources */,
+				A1401SDA /* SpendDonutAggregation.swift in Sources */,
 				A411 /* OverviewView.swift in Sources */,
 				A801SH /* CategoryStyle.swift in Sources */,
 				A802SH /* IconTile.swift in Sources */,
@@ -1075,6 +1082,7 @@
 				A308 /* CalendarAggregationTests.swift in Sources */,
 				A401 /* SpendOverTimeAggregatorTests.swift in Sources */,
 				A402 /* OverviewAggregationTests.swift in Sources */,
+				A1401SDAT /* SpendDonutAggregationTests.swift in Sources */,
 				A403 /* DecimalINRTests.swift in Sources */,
 				A502 /* SpyBiometricAuth.swift in Sources */,
 				A503 /* LockStateTests.swift in Sources */,
