@@ -48,14 +48,19 @@ struct SpendDonutCard: View {
                         .font(.system(size: 10.5, weight: .semibold))
                         .tracking(0.6)
                         .foregroundStyle(DesignTokens.label2)
-                    // 21pt stat pattern (Pitfall 5: hero money text is 46pt only; use Text here)
-                    Text(total.formatted(.currency(code: "INR").locale(Locale(identifier: "en_IN"))))
-                        .font(.system(size: 21, weight: .light, design: .rounded))
+                    // Stat pattern (Pitfall 5: hero money text is 46pt only; use Text here).
+                    // Whole-rupee + width cap + scale-to-fit so the total stays inside the
+                    // donut hole and never spills over the ring (fixes center overflow).
+                    Text(total.formattedINRWhole())
+                        .font(.system(size: 19, weight: .medium, design: .rounded))
                         .foregroundStyle(DesignTokens.label)
                         .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                         .contentTransition(.numericText())
                         .animation(.smooth(duration: 0.78), value: total)
                 }
+                .frame(width: 132 * 0.62 - 6)
             }
 
             VStack(alignment: .leading, spacing: 11) {

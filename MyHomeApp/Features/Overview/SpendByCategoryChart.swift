@@ -21,6 +21,9 @@ struct CategorySpendItem: Identifiable {
     /// the exact value — never reconstruct `Decimal(spent)` from the lossy Double (WR-03,
     /// Pitfall B: no float drift in displayed money).
     let spentDecimal: Decimal
+    /// Category accent color (CategoryStyle.color) — bars match the donut legend so the two
+    /// charts read as one palette instead of a flat single-hue bar list.
+    var color: Color = DesignTokens.accent
 }
 
 // MARK: - SpendByCategoryChart
@@ -59,7 +62,8 @@ struct SpendByCategoryChart: View {
                         x: .value("Amount", item.spent),
                         y: .value("Category", item.name)
                     )
-                    .foregroundStyle(DesignTokens.accent)
+                    .cornerRadius(5)
+                    .foregroundStyle(item.color)
                     .annotation(position: .trailing) {
                         Text(item.spentDecimal.formattedINRCompact())
                             .font(.caption)

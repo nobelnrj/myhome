@@ -167,7 +167,8 @@ private struct OverviewMonthContent: View {
                 id: item.category.persistentModelID,
                 name: item.category.name ?? "—",
                 spent: NSDecimalNumber(decimal: item.spent).doubleValue,
-                spentDecimal: item.spent
+                spentDecimal: item.spent,
+                color: CategoryStyle.color(for: item.category)
             )
         }
 
@@ -178,7 +179,7 @@ private struct OverviewMonthContent: View {
         let showNetWorth = !allAssets.isEmpty || netWorthBreakdown.cashValue != 0
 
         ScrollView(.vertical) {
-            LazyVStack(alignment: .leading, spacing: 22) {
+            LazyVStack(alignment: .leading, spacing: 16) {
                 // Month label
                 Text(monthLabel)
                     .font(.subheadline)
@@ -207,7 +208,6 @@ private struct OverviewMonthContent: View {
                         allExpenses: allGlobalExpenses,
                         snapshots: netWorthSnapshots
                     )
-                    .padding(.horizontal, 16)
                 }
 
                 // Where it’s going — donut + legend (OVR-05/06)
@@ -221,21 +221,18 @@ private struct OverviewMonthContent: View {
                             selectedTab = 1
                         }
                     )
-                    .padding(.horizontal, DesignTokens.spacing16)
                 }
 
                 // Spend by category chart (D-05 — restyled, retained on Overview)
                 if !categoryItems.isEmpty {
                     sectionHeader("By Category")
                     SpendByCategoryChart(categoryItems: categoryItems)
-                        .padding(.horizontal, DesignTokens.spacing16)
                 }
 
                 // Spend over time chart (D-05 — restyled, retained on Overview)
                 if !allGlobalExpenses.isEmpty {
                     sectionHeader("Over Time")
                     SpendOverTimeChart(expenses: allGlobalExpenses)
-                        .padding(.horizontal, DesignTokens.spacing16)
                 }
 
                 // Budgets glance
