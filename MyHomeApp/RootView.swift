@@ -33,6 +33,9 @@ struct RootView: View {
 
     @State private var selectedTab: Int = 0
     @State private var deepLinkNoteID: UUID? = nil
+    /// OVR-06: Category filter deep-link from Overview donut tap → pre-filters Activity tab.
+    /// Set by SpendDonutCard's onCategoryTap closure; cleared by ExpenseListView on appear.
+    @State private var activityCategoryFilter: UUID? = nil
     /// CR-03: Thread blockID deep-link through the view hierarchy so EditNoteView can
     /// scroll to and highlight the target block row when a block-level reminder is tapped.
     @State private var deepLinkBlockID: UUID? = nil
@@ -64,12 +67,12 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID)
+            OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID, activityCategoryFilter: $activityCategoryFilter)
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
                 .tag(0)
-            ExpenseListView(reviewBadgeCount: $reviewBadgeCount)
+            ExpenseListView(reviewBadgeCount: $reviewBadgeCount, deepLinkCategoryFilter: $activityCategoryFilter)
                 .tabItem {
                     Label("Expenses", systemImage: "list.bullet")
                 }

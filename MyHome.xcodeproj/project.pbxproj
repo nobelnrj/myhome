@@ -81,6 +81,8 @@
 		A409 /* SpendByCategoryChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F409 /* SpendByCategoryChart.swift */; };
 		A410 /* SpendOverTimeChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410 /* SpendOverTimeChart.swift */; };
 		A411 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F411 /* OverviewView.swift */; };
+		A1402SDC /* SpendDonutCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1402SDC /* SpendDonutCard.swift */; };
+		A1402SDCT /* SpendDonutCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1402SDCT /* SpendDonutCardTests.swift */; };
 		A801SH /* CategoryStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F801SH /* CategoryStyle.swift */; };
 		A802SH /* IconTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F802SH /* IconTile.swift */; };
 		A803SH /* CardStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F803SH /* CardStyle.swift */; };
@@ -294,6 +296,8 @@
 		F409 /* SpendByCategoryChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendByCategoryChart.swift; sourceTree = "<group>"; };
 		F410 /* SpendOverTimeChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeChart.swift; sourceTree = "<group>"; };
 		F411 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
+		F1402SDC /* SpendDonutCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutCard.swift; sourceTree = "<group>"; };
+		F1402SDCT /* SpendDonutCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutCardTests.swift; sourceTree = "<group>"; };
 		F501 /* BiometricAuthPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuthPort.swift; sourceTree = "<group>"; };
 		F502 /* SpyBiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyBiometricAuth.swift; sourceTree = "<group>"; };
 		F503 /* LockStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockStateTests.swift; sourceTree = "<group>"; };
@@ -568,6 +572,7 @@
 			isa = PBXGroup;
 			children = (
 				F411 /* OverviewView.swift */,
+				F1402SDC /* SpendDonutCard.swift */,
 				F406 /* SpendBudgetCard.swift */,
 				F407 /* TopCategoriesCard.swift */,
 				F408 /* PinnedNoteCard.swift */,
@@ -743,6 +748,7 @@
 				F401 /* SpendOverTimeAggregatorTests.swift */,
 				F402 /* OverviewAggregationTests.swift */,
 				F1401SDAT /* SpendDonutAggregationTests.swift */,
+				F1402SDCT /* SpendDonutCardTests.swift */,
 				F403 /* DecimalINRTests.swift */,
 				F503 /* LockStateTests.swift */,
 				F603 /* LockSettingsTests.swift */,
@@ -985,6 +991,7 @@
 				A405 /* OverviewAggregation.swift in Sources */,
 				A1401SDA /* SpendDonutAggregation.swift in Sources */,
 				A411 /* OverviewView.swift in Sources */,
+				A1402SDC /* SpendDonutCard.swift in Sources */,
 				A801SH /* CategoryStyle.swift in Sources */,
 				A802SH /* IconTile.swift in Sources */,
 				A803SH /* CardStyle.swift in Sources */,
@@ -1083,6 +1090,7 @@
 				A401 /* SpendOverTimeAggregatorTests.swift in Sources */,
 				A402 /* OverviewAggregationTests.swift in Sources */,
 				A1401SDAT /* SpendDonutAggregationTests.swift in Sources */,
+				A1402SDCT /* SpendDonutCardTests.swift in Sources */,
 				A403 /* DecimalINRTests.swift in Sources */,
 				A502 /* SpyBiometricAuth.swift in Sources */,
 				A503 /* LockStateTests.swift in Sources */,

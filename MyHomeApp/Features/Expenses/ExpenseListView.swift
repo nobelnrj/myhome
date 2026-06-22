@@ -49,7 +49,7 @@ struct ExpenseListView: View {
     @State private var editingExpense: Expense? = nil
 
     /// Active category filter for the main list. Defaults to showing everything.
-    @State private var categoryFilter: CategoryFilter = .all
+    @State private var activeCategoryFilter: CategoryFilter = .all
 
     /// Active account filter for the main list. Defaults to showing all accounts (ACCT-06/D-07).
     @State private var accountFilter: AccountFilter = .all
@@ -63,6 +63,10 @@ struct ExpenseListView: View {
 
     /// Bound to RootView so it can drive the Expenses tab badge (D7-04).
     @Binding var reviewBadgeCount: Int
+    /// OVR-06: Optional deep-link category filter from Overview donut tap.
+    /// When non-nil on appear, sets the internal activeCategoryFilter to .category(uuid) and clears the binding.
+    /// Renamed to deepLinkCategoryFilter to avoid collision with internal activeCategoryFilter @State.
+    @Binding var deepLinkCategoryFilter: UUID?
 
     /// Single-selection filter for the main expense list.
     private enum CategoryFilter: Hashable {
@@ -193,8 +197,19 @@ struct ExpenseListView: View {
         .onChange(of: actionableBadgeCount) { _, newCount in
             reviewBadgeCount = newCount
         }
+        // OVR-06: respond to category filter taps from Overview donut when already on the Activity tab
+        .onChange(of: deepLinkCategoryFilter) { _, uuid in
+            guard let uuid else { return }
+            deepLinkCategoryFilter = nil   // consume and clear
+            activeCategoryFilter = CategoryFilter.category(uuid)
+        }
         .onAppear {
             reviewBadgeCount = actionableBadgeCount
+            // OVR-06: consume incoming deep-link category filter from Overview donut tap
+            if let uuid = deepLinkCategoryFilter {
+                deepLinkCategoryFilter = nil   // consume and clear the binding
+                activeCategoryFilter = CategoryFilter.category(uuid)
+            }
         }
     }
 
@@ -203,7 +218,7 @@ struct ExpenseListView: View {
     private var filterMenu: some View {
         Menu {
             // Category filter section
-            Picker("Category", selection: $categoryFilter) {
+            Picker("Category", selection: $activeCategoryFilter) {
                 Label("All Categories", systemImage: "tray.full").tag(CategoryFilter.all)
                 ForEach(categories) { category in
                     Label(category.name ?? "Untitled", systemImage: category.symbolName ?? "tag")
@@ -235,7 +250,7 @@ struct ExpenseListView: View {
             }
         } label: {
             // Filled icon signals any active (non-default) filter — category, account, or transfer.
-            Image(systemName: (categoryFilter == .all && accountFilter == .all && transferFilter == .normal)
+            Image(systemName: (activeCategoryFilter == .all && accountFilter == .all && transferFilter == .normal)
                   ? "line.3.horizontal.decrease.circle"
                   : "line.3.horizontal.decrease.circle.fill")
         }
@@ -277,7 +292,7 @@ struct ExpenseListView: View {
     private var filteredExpenses: [Expense] {
         // 1. Category filter (existing)
         let categoryFiltered: [Expense]
-        switch categoryFilter {
+        switch activeCategoryFilter {
         case .all:
             categoryFiltered = expenses
         case .uncategorized:
@@ -340,7 +355,7 @@ struct ExpenseListView: View {
                 return name
             }
         }
-        switch categoryFilter {
+        switch activeCategoryFilter {
         case .all:
             return "this filter"
         case .uncategorized:
