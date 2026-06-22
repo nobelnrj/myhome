@@ -133,7 +133,11 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
   6. `AnalyticsAggregatorTests.testMidnightISTBucketBoundary` passes: expenses timestamped 18:29Z and 18:31Z on the same UTC date are assigned to different IST day buckets.
   7. `xcodebuild clean build` succeeds after all new `Features/Analytics/` and `Support/` files are registered in `project.pbxproj`.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+- [ ] 15-01-PLAN.md — AnalyticsAggregator + SpendSummary + IST-boundary tests (ANL-03, ANL-07)
+- [ ] 15-02-PLAN.md — Analytics screen shell, push nav, AreaMark trend + category bars (ANL-01, ANL-02, ANL-03, ANL-04)
+- [ ] 15-03-PLAN.md — Inverted-color delta chips + drill-down sheet + full clean-build gate + human-verify (ANL-05, ANL-06, ANL-07)
 **UI hint**: yes
 
 ### Phase 16: AI Insight Card
