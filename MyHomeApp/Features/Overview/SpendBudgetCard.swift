@@ -48,13 +48,21 @@ struct SpendBudgetCard: View {
 
     private var percentUsedLabel: String {
         guard let f = fractionUsed else { return "" }
-        return f >= 1.0 ? "100%+ of budget" : "\(Int(f * 100))% of budget"
+        return f >= 1.0 ? "100%+ used" : "\(Int(f * 100))% used"
     }
 
-    /// Net amount with an explicit leading minus for negative flow (whole rupees).
-    private var signedNet: String {
-        (netIsPositive ? "" : "−") + abs(net).formattedINRWhole()
+    /// Fraction of the orb coloured as income (green); the rest is expense (red).
+    /// Falls back to a half-and-half split when there's no activity yet.
+    private var incomeShare: Double {
+        let i = NSDecimalNumber(decimal: max(income, 0)).doubleValue
+        let s = NSDecimalNumber(decimal: max(spent, 0)).doubleValue
+        let total = i + s
+        return total > 0 ? i / total : 0.5
     }
+
+    /// Expense share of cash flow as a percent — the red portion of the orb. The single
+    /// centred readout (user asked for just the spend percentage, nothing else).
+    private var spendPct: Int { Int(((1 - incomeShare) * 100).rounded()) }
 
     // MARK: - Body
 
@@ -81,57 +89,43 @@ struct SpendBudgetCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
             }
 
-            if fractionUsed != nil {
-                // WHOOP-style budget ring hero: ring fill = budget consumed (green→orange→red);
-                // centre shows the net cash flow (solid semibold) + % of budget used.
-                GlowParticleRing(
-                    progress: fractionUsed ?? 0,
-                    color: ringColor,
-                    size: 208
-                ) {
-                    VStack(spacing: 4) {
-                        Text("NET FLOW")
-                            .font(.system(size: 11.5, weight: .semibold))
-                            .tracking(0.8)
-                            .foregroundStyle(DesignTokens.label2)
-                        Text(signedNet)
-                            .font(.system(size: 29, weight: .bold, design: .default))
-                            .foregroundStyle(DesignTokens.label)
-                            .monospacedDigit()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-                            .contentTransition(.numericText())
-                            .animation(.smooth(duration: 0.78), value: net)
-                            .frame(width: 130)
-                        Text(percentUsedLabel)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(DesignTokens.label2)
-                    }
+            // Two-tone WHOOP orb: green particles = income share, red = expense share (always a
+            // full sphere, no gap). Centre frames the net outcome as SAVED / OVERSPENT (no minus).
+            GlowParticleRing(
+                incomeShare: incomeShare,
+                incomeColor: DesignTokens.positive,
+                expenseColor: DesignTokens.negative,
+                size: 208
+            ) {
+                VStack(spacing: 2) {
+                    Text("\(spendPct)%")
+                        .font(.system(size: 44, weight: .bold, design: .default))
+                        .foregroundStyle(DesignTokens.label)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .contentTransition(.numericText())
+                        .animation(.smooth(duration: 0.6), value: spendPct)
+                        .frame(width: 140)
+                    Text("spent")
+                        .font(.system(size: 12.5, weight: .medium))
+                        .tracking(0.5)
+                        .foregroundStyle(DesignTokens.label2)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 2)
 
-                // Income + Spent split tiles
-                HStack(spacing: DesignTokens.spacing12) {
-                    splitTile(label: "INCOME", amount: income, color: DesignTokens.positive)
-                    splitTile(label: "SPENT", amount: spent, color: DesignTokens.negative)
-                }
+            // Income + Spent split tiles
+            HStack(spacing: DesignTokens.spacing12) {
+                splitTile(label: "INCOME", amount: income, color: DesignTokens.positive)
+                splitTile(label: "SPENT", amount: spent, color: DesignTokens.negative)
+            }
+
+            // Budget context (secondary): a thin strip when a budget exists, else a CTA.
+            if let fraction = fractionUsed {
+                budgetStrip(fraction: fraction)
             } else {
-                // No budget set — keep the solid-number hero the user preferred.
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    if !netIsPositive {
-                        Text("−")
-                            .font(.system(size: 30, weight: .semibold, design: .default))
-                            .foregroundStyle(statusColor)
-                    }
-                    RollingMoneyText(amount: abs(net), color: statusColor, weight: .semibold, design: .default)
-                }
-
-                HStack(spacing: DesignTokens.spacing12) {
-                    splitTile(label: "INCOME", amount: income, color: DesignTokens.positive)
-                    splitTile(label: "SPENT", amount: spent, color: DesignTokens.negative)
-                }
-
                 Button {
                     selectedTab = 2
                 } label: {
@@ -171,6 +165,33 @@ struct SpendBudgetCard: View {
         .padding(.vertical, 11)
         .frame(maxWidth: .infinity, alignment: .leading)
         .neuSurface(.recessed, radius: DesignTokens.radiusInner)
+    }
+
+    // MARK: - Budget strip (secondary context)
+
+    @ViewBuilder
+    private func budgetStrip(fraction: Double) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(DesignTokens.fillRecessed2)
+                    Capsule()
+                        .fill(ringColor)
+                        .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
+                }
+            }
+            .frame(height: 7)
+
+            HStack {
+                Text("of \(totalBudget.formattedINRWhole()) budget")
+                    .font(.caption)
+                    .foregroundStyle(DesignTokens.label3)
+                Spacer()
+                Text(percentUsedLabel)
+                    .font(.caption)
+                    .foregroundStyle(DesignTokens.label3)
+            }
+        }
     }
 
     // MARK: - Accessibility

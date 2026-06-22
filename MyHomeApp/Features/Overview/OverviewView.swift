@@ -215,7 +215,9 @@ private struct OverviewMonthContent: View {
                     sectionHeader("Where it’s going")
                     SpendDonutCard(
                         ranked: Array(rankedSpend.prefix(4)),
-                        total: totalSpend,
+                        // Share denominator = total categorised spend (gross), so per-category
+                        // %s are stable regardless of income netting `totalSpend` down.
+                        total: rankedSpend.reduce(Decimal.zero) { $0 + $1.spent },
                         onCategoryTap: { uuid in
                             activityCategoryFilter = uuid
                             selectedTab = 1

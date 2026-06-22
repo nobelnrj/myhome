@@ -163,28 +163,32 @@ private struct SeededRNG: RandomNumberGenerator {
     }
 }
 
-/// A luminous particle sphere (à la WHOOP "Whoop Age"): a Canvas-drawn field of glowing
-/// dots in an annular band that lights up to `progress`, brightest at the leading edge with
-/// a soft outward spray. The dark centre hosts the readout. Springs up from zero on appear.
+/// A luminous two-tone particle sphere (à la WHOOP "Whoop Age"): a Canvas-drawn full orb whose
+/// particles are split by `incomeShare` — `incomeColor` (green) for the income portion,
+/// `expenseColor` (red) for the expense portion. Always a full sphere (no gap). The dots twinkle
+/// and slowly drift (TimelineView) so the orb feels alive. Fades up on appear.
 struct GlowParticleRing<Center: View>: View {
-    var progress: Double
-    var color: Color
+    /// Fraction of the orb coloured as income (0…1); the remainder is expense.
+    var incomeShare: Double
+    var incomeColor: Color
+    var expenseColor: Color
     var size: CGFloat = 208
     @ViewBuilder var center: () -> Center
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animated: Double = 0
 
-    private struct Particle { let angle, radialT, dot, opacity: Double }
+    private struct Particle { let angle, radialT, dot, opacity, phase: Double }
 
     private let particles: [Particle] = {
         var rng = SeededRNG(seed: 0xC0FFEE)
-        return (0..<320).map { _ in
+        return (0..<300).map { _ in
             Particle(
                 angle: Double.random(in: 0...1, using: &rng),
                 radialT: pow(Double.random(in: 0...1, using: &rng), 0.55), // bias toward the outer band
                 dot: Double.random(in: 0.5...2.3, using: &rng),
-                opacity: Double.random(in: 0.18...1.0, using: &rng)
+                opacity: Double.random(in: 0.18...1.0, using: &rng),
+                phase: Double.random(in: 0...(2 * .pi), using: &rng)
             )
         }
     }()
@@ -193,11 +197,7 @@ struct GlowParticleRing<Center: View>: View {
     private let brightDir = -Double.pi / 4
 
     var body: some View {
-        // The orb's RADIUS encodes budget used: tight glow when little is spent, expanding to
-        // a full sphere near/over budget. No angular gap. `animated` (0→1) grows it on appear.
-        let pc = min(max(progress, 0), 1)
-        // Min 0.42 so the glow always frames the centred readout; grows to full at 100%.
-        let spreadFrac = 0.42 + 0.58 * pc
+        let share = min(max(incomeShare, 0), 1)
 
         return ZStack {
             // Dark well so the centred readout stays legible over the glow.
@@ -207,42 +207,47 @@ struct GlowParticleRing<Center: View>: View {
                     center: .center, startRadius: 0, endRadius: size * 0.30
                 ))
 
-            Canvas { ctx, sz in
-                let c = CGPoint(x: sz.width / 2, y: sz.height / 2)
-                let outer = sz.width / 2 - 2
-                let well = outer * 0.30
-                let grow = max(animated, 0.0001)
-                let bandOuter = well + (outer - well) * CGFloat(spreadFrac) * grow
+            TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reduceMotion)) { timeline in
+                let t = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
+                let drift = t * 0.05  // slow orbital drift (radians)
 
-                for p in particles {
-                    let ang = p.angle * 2 * .pi - .pi / 2
-                    let r = well + (bandOuter - well) * CGFloat(p.radialT)
-                    let pt = CGPoint(x: c.x + r * CGFloat(cos(ang)), y: c.y + r * CGFloat(sin(ang)))
+                Canvas { ctx, sz in
+                    let c = CGPoint(x: sz.width / 2, y: sz.height / 2)
+                    let outer = sz.width / 2 - 2
+                    let well = outer * 0.30
+                    let grow = max(animated, 0.0001)
 
-                    // Brightness gradient across the orb (brightest toward top-right) + a small
-                    // lift with how full the budget is, so a fuller orb also reads brighter.
-                    let dir = 0.45 + 0.55 * (0.5 + 0.5 * cos(ang - brightDir))
-                    let op = p.opacity * dir * (0.7 + 0.3 * pc) * Double(grow)
-                    let dot = CGFloat(p.dot)
+                    for p in particles {
+                        let ang = p.angle * 2 * .pi - .pi / 2 + drift
+                        let r = well + (outer - well) * CGFloat(p.radialT)
+                        let pt = CGPoint(x: c.x + r * CGFloat(cos(ang)), y: c.y + r * CGFloat(sin(ang)))
 
-                    let halo = dot * 2.8
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
-                        with: .color(color.opacity(op * 0.16))
-                    )
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: pt.x - dot, y: pt.y - dot, width: dot * 2, height: dot * 2)),
-                        with: .color(color.opacity(op))
-                    )
+                        // Income (green) vs expense (red), split by share.
+                        let col = p.angle < share ? incomeColor : expenseColor
+                        // Aesthetic brightness gradient + a per-particle twinkle so the field feels alive.
+                        let dir = 0.5 + 0.5 * (0.5 + 0.5 * cos(ang - brightDir))
+                        let twinkle = reduceMotion ? 1.0 : (0.78 + 0.22 * sin(t * 1.7 + p.phase))
+                        let op = p.opacity * dir * twinkle * Double(grow)
+                        let dot = CGFloat(p.dot)
+
+                        let halo = dot * 2.8
+                        ctx.fill(
+                            Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
+                            with: .color(col.opacity(op * 0.16))
+                        )
+                        ctx.fill(
+                            Path(ellipseIn: CGRect(x: pt.x - dot, y: pt.y - dot, width: dot * 2, height: dot * 2)),
+                            with: .color(col.opacity(op))
+                        )
+                    }
                 }
+                .blur(radius: 0.4)
             }
-            .blur(radius: 0.4)
 
             center()
         }
         .frame(width: size, height: size)
         .onAppear { animate() }
-        .onChange(of: progress) { _, _ in animate() }
         .accessibilityElement(children: .combine)
     }
 

@@ -122,6 +122,9 @@ struct MyHomeApp: App {
             e.categories = [cats[catIndex]]
             ctx.insert(e)
         }
+        // Income (negative amount, uncategorised) so the two-tone orb shows green + red.
+        let income = Expense(amount: Decimal(-14000), date: cal.date(byAdding: .day, value: -2, to: now) ?? now, note: "SAMPLE")
+        ctx.insert(income)
         try? ctx.save()
     }
     #endif
