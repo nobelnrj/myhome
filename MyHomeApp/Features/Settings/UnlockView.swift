@@ -11,7 +11,7 @@ struct UnlockView: View {
 
     var body: some View {
         ZStack {
-            Color(.systemBackground)
+            DesignTokens.bgCanvas
                 .ignoresSafeArea()
 
             VStack(spacing: 32) {
@@ -24,13 +24,14 @@ struct UnlockView: View {
                 Text("MyHome")
                     .font(.title2)
                     .fontWeight(.semibold)
+                    .foregroundStyle(DesignTokens.label2)
                     .accessibilityAddTraits(.isHeader)
 
                 // Error message — shown only when authError != nil
                 if let error = lockController.authError {
                     Text(errorMessage(for: error))
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                 }
@@ -41,12 +42,13 @@ struct UnlockView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
+                .tint(DesignTokens.accent)
 
                 // No-passcode guidance — shown only when authError == .noPasscode (D5-05)
                 if lockController.authError == .noPasscode {
                     Text("Open the Settings app, then Face ID & Passcode, to set a device passcode. Then return here.")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                 }
@@ -68,7 +70,7 @@ struct UnlockView: View {
             Image(systemName: "house.circle.fill")
                 .resizable()
                 .frame(width: 80, height: 80)
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(DesignTokens.accent)
         }
     }
 

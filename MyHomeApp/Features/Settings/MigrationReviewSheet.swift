@@ -30,13 +30,16 @@ struct MigrationReviewSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section(footer: Text("Changes here are permanent. Tap Done when finished.")) {
+                Section(footer: Text("Changes here are permanent. Tap Done when finished.")
+                    .foregroundStyle(DesignTokens.label2)) {
                     ForEach(autoCreatedAccounts) { account in
                         accountReviewRow(account)
                     }
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(DesignTokens.bgCanvas)
             .navigationTitle("Review Accounts")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -48,6 +51,7 @@ struct MigrationReviewSheet: View {
                         UserDefaults.standard.set(false, forKey: "accountReviewPending")
                         dismiss()
                     }
+                    .foregroundStyle(DesignTokens.accent)
                 }
             }
             .confirmationDialog(
@@ -83,13 +87,13 @@ struct MigrationReviewSheet: View {
                             .onSubmit { saveRename(for: account) }
                         Button("Done") { saveRename(for: account) }
                             .font(.body)
-                            .tint(.accentColor)
+                            .tint(DesignTokens.accent)
                     }
                     .frame(minHeight: 44)
                     if let error = nameError {
                         Text(error)
                             .font(.subheadline)
-                            .foregroundStyle(Color(.systemRed))
+                            .foregroundStyle(DesignTokens.negative)
                     }
                 }
             } else {
@@ -102,7 +106,7 @@ struct MigrationReviewSheet: View {
                     HStack {
                         Text(account.name ?? "")  // T-09-06: plain Text
                             .font(.body)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(DesignTokens.label2)
                         Spacer()
                     }
                     .frame(minHeight: 44)
@@ -123,6 +127,7 @@ struct MigrationReviewSheet: View {
                 Text("Credit Card").tag("credit_card")
             }
             .pickerStyle(.segmented)
+            .tint(DesignTokens.accent)
         }
         .swipeActions(edge: .trailing) {
             Button(role: .destructive) {
@@ -132,6 +137,7 @@ struct MigrationReviewSheet: View {
                 Label("Delete", systemImage: "trash")
             }
         }
+        .listRowBackground(DesignTokens.surfaceRaised)
     }
 
     // MARK: - Rename
