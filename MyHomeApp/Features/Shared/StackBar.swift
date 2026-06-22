@@ -14,7 +14,7 @@ struct StackBar: View {
         GeometryReader { geo in
             if total <= 0 {
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(.tertiarySystemFill))
+                    .fill(DesignTokens.fillRecessed)
             } else {
                 let gaps = CGFloat(max(positives.count - 1, 0)) * spacing
                 let usable = max(geo.size.width - gaps, 0)

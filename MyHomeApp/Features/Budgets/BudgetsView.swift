@@ -89,7 +89,7 @@ struct BudgetsView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(Color(.systemBackground))
+        .background(DesignTokens.bgCanvas)
         Divider()
     }
 
@@ -190,6 +190,8 @@ private struct BudgetsMonthView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(DesignTokens.bgCanvas)
     }
 
     @ViewBuilder
@@ -197,18 +199,18 @@ private struct BudgetsMonthView: View {
         HStack {
             Image(systemName: "tray")
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
                 .frame(width: 28, height: 28)
                 .accessibilityHidden(true)
             Text("Uncategorized")
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(DesignTokens.label)
             Spacer()
             Text(total.formattedINR())
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(DesignTokens.label2)
         }
-        .cardStyle(cornerRadius: 12)
+        .neuSurface(.raised, radius: 20)
     }
 }
 
@@ -233,29 +235,30 @@ private struct BudgetSummaryCard: View {
     }
 
     private var ringColor: Color {
-        if remaining < 0 { return Color(.systemRed) }
-        if fraction > 0.85 { return Color(.systemOrange) }
-        return Color(.systemGreen)
+        if remaining < 0 { return DesignTokens.negative }
+        if fraction > 0.85 { return DesignTokens.orange }
+        return DesignTokens.positive
     }
 
     var body: some View {
         if budgeted.isEmpty {
             VStack(spacing: 10) {
                 Image(systemName: "chart.pie")
-                    .font(.title)
-                    .foregroundStyle(.tint)
+                    .font(.system(size: 28))
+                    .foregroundStyle(DesignTokens.accent)
                     .frame(width: 52, height: 52)
-                    .background(Color(.tertiarySystemFill), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(DesignTokens.fillRecessed, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 Text("Set a budget to track spending")
                     .font(.headline)
+                    .foregroundStyle(DesignTokens.label)
                     .multilineTextAlignment(.center)
                 Text("Tap any category below to set a monthly limit.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
-            .cardStyle(cornerRadius: 16, padding: 22)
+            .neuSurface(.floating, padding: 22)
         } else {
             HStack(spacing: 20) {
                 DonutChart(
@@ -266,7 +269,7 @@ private struct BudgetSummaryCard: View {
                                      color: ringColor),
                         DonutSegment(id: "left", label: "Left",
                                      value: max(0, NSDecimalNumber(decimal: remaining).doubleValue),
-                                     color: Color(.tertiarySystemFill)),
+                                     color: DesignTokens.fillRecessed2),
                     ],
                     innerRatio: 0.7,
                     size: 120
@@ -274,9 +277,10 @@ private struct BudgetSummaryCard: View {
                     VStack(spacing: 0) {
                         Text("\(Int(fraction * 100))%")
                             .font(.title.weight(.bold))
+                            .foregroundStyle(DesignTokens.label)
                         Text("used")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                     }
                 }
 
@@ -284,24 +288,24 @@ private struct BudgetSummaryCard: View {
                     Text(remaining >= 0 ? "LEFT TO SPEND" : "OVER BUDGET")
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                     Text(abs(remaining).formattedINRWhole())
                         .font(.title.weight(.bold))
-                        .foregroundStyle(remaining >= 0 ? .primary : Color(.systemRed))
+                        .foregroundStyle(remaining >= 0 ? DesignTokens.label : DesignTokens.negative)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Text("\(totalSpent.formattedINRWhole()) of \(totalLimit.formattedINRWhole())")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                     if overCount > 0 {
                         Label("\(overCount) over limit", systemImage: "flag.fill")
                             .font(.subheadline)
-                            .foregroundStyle(Color(.systemRed))
+                            .foregroundStyle(DesignTokens.negative)
                             .padding(.top, 4)
                     }
                 }
             }
-            .cardStyle(cornerRadius: 16, padding: 20)
+            .neuSurface(.floating, padding: 20)
         }
     }
 }
