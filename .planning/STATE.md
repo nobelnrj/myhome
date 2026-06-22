@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Neumorphic Redesign
-status: executing
-last_updated: "2026-06-22T09:51:46.052Z"
-last_activity: 2026-06-22
+status: completed
+stopped_at: Phase 12 UI-SPEC approved
+last_updated: "2026-06-22T20:22:42.772Z"
+last_activity: 2026-06-22 -- Phase 14 marked complete
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 2
   total_plans: 11
   completed_plans: 11
-  percent: 50
+  percent: 40
 ---
 
 # Project State
@@ -24,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 
 ## Current Position
 
-Phase: 14 (restyle-existing-screens-overview-donut) — EXECUTING
+Phase: 14 — COMPLETE
 Plan: 6 of 8
-Status: Ready to execute
-Last activity: 2026-06-22
+Status: Phase 14 complete
+Last activity: 2026-06-22 -- Phase 14 marked complete
 
 ## Performance Metrics
 
