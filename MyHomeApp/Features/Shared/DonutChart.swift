@@ -216,20 +216,19 @@ struct GlowParticleRing<Center: View>: View {
                     let r = inner + (outer - inner) * (CGFloat(p.radialT) + spray)
                     let pt = CGPoint(x: c.x + r * CGFloat(cos(ang)), y: c.y + r * CGFloat(sin(ang)))
 
-                    // Lit particles glow (brightest near the head); unlit stay dim — so the
-                    // ARC LENGTH and brightness both read as "how much budget is used".
-                    var factor = lit ? (0.40 + 0.60 * (1 - min(headDist, 1))) : 0.06
+                    // The WHOLE orb stays present (no blank wedge); the spent portion simply
+                    // glows brighter than the remaining portion, so the bright region reads as
+                    // "how much budget is used" without an ugly empty gap.
+                    var factor = lit ? (0.55 + 0.45 * (1 - min(headDist, 1))) : 0.30
                     var dot = CGFloat(p.dot)
-                    if nearHead { factor = min(1, factor + 0.40); dot += 1.3 }
+                    if nearHead { factor = min(1, factor + 0.35); dot += 1.3 }
                     let op = p.opacity * factor
 
-                    if lit {
-                        let halo = dot * 2.8
-                        ctx.fill(
-                            Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
-                            with: .color(color.opacity(op * 0.16))
-                        )
-                    }
+                    let halo = dot * 2.8
+                    ctx.fill(
+                        Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
+                        with: .color(color.opacity(op * 0.16))
+                    )
                     ctx.fill(
                         Path(ellipseIn: CGRect(x: pt.x - dot, y: pt.y - dot, width: dot * 2, height: dot * 2)),
                         with: .color(color.opacity(op))
