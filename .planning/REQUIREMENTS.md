@@ -35,8 +35,8 @@
 - [x] **SKIN-03**: Budgets restyled.
 - [x] **SKIN-04**: Notes, calendar, and day-agenda restyled.
 - [x] **SKIN-05**: Settings restyled.
-- [ ] **SKIN-06**: Accounts restyled.
-- [ ] **SKIN-07**: Assets / Net-worth (incl. existing `DonutChart`) restyled to the neumorphic palette.
+- [x] **SKIN-06**: Accounts restyled.
+- [x] **SKIN-07**: Assets / Net-worth (incl. existing `DonutChart`) restyled to the neumorphic palette.
 - [x] **SKIN-08**: Transfer Inbox and Gmail / ingestion Review Inbox restyled.
 - [x] **SKIN-09**: No regression — existing flows (expense/account/asset/note CRUD, Gmail sync, self-transfer confirm, Face ID gate, navigation/deep-links) continue to work after restyle, and every new `.swift` file is registered in `project.pbxproj` so the target builds clean.
 
@@ -101,8 +101,8 @@
 | SKIN-03 | Phase 14 | Complete |
 | SKIN-04 | Phase 14 | Complete |
 | SKIN-05 | Phase 14 | Complete |
-| SKIN-06 | Phase 14 | Pending |
-| SKIN-07 | Phase 14 | Pending |
+| SKIN-06 | Phase 14 | Complete |
+| SKIN-07 | Phase 14 | Complete |
 | SKIN-08 | Phase 14 | Complete |
 | SKIN-09 | Phase 14 | Complete |
 | OVR-05 | Phase 14 | Complete |
