@@ -54,6 +54,7 @@ struct SpendOverTimeChart: View {
             // Row A — Card title
             Text("Spend Over Time")
                 .font(.title2)
+                .foregroundStyle(DesignTokens.label)
 
             // Row B — Range segmented control (always visible, even in empty state)
             Picker("Range", selection: $selectedRange) {
@@ -68,7 +69,7 @@ struct SpendOverTimeChart: View {
                 // D4-07 empty state — Picker stays visible above (per UI-SPEC)
                 Text("No spend yet for this period.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .frame(height: 80)
             } else {
@@ -77,13 +78,13 @@ struct SpendOverTimeChart: View {
                         x: .value("Date", point.date),
                         y: .value("Spend", point.spent)
                     )
-                    .foregroundStyle(Color.accentColor.opacity(0.15))
+                    .foregroundStyle(DesignTokens.accent.opacity(0.15))
 
                     LineMark(
                         x: .value("Date", point.date),
                         y: .value("Spend", point.spent)
                     )
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(DesignTokens.accent)
                     .lineStyle(StrokeStyle(lineWidth: 2))
                     .symbol(.circle)
                     .symbolSize(30)
@@ -111,10 +112,7 @@ struct SpendOverTimeChart: View {
                 .accessibilityLabel("Spend over time chart, \(selectedRange.label) view")
             }
         }
-        .padding(16)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+        .neuSurface(.raised)
         .accessibilityElement(children: .combine)
     }
 }

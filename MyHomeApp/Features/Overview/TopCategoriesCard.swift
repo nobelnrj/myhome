@@ -26,12 +26,13 @@ struct TopCategoriesCard: View {
             Text("Top Categories")
                 .font(.title2)
                 .bold()
+                .foregroundStyle(DesignTokens.label)
 
             if top3.isEmpty {
                 // Empty state — no spend this month
                 Text("No spend yet this month.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .frame(maxWidth: .infinity, alignment: .center)
             } else {
                 // Rows B–D — one row per ranked category
@@ -41,14 +42,14 @@ struct TopCategoriesCard: View {
                             // Rank label
                             Text("#\(index + 1)")
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(DesignTokens.label2)
                                 .frame(width: 20, alignment: .leading)
 
                             // SF Symbol icon
                             if let symbol = item.category.symbolName {
                                 Image(systemName: symbol)
                                     .font(.body)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(DesignTokens.label2)
                                     .frame(width: 28, height: 28)
                                     .accessibilityHidden(true)
                             } else {
@@ -60,7 +61,7 @@ struct TopCategoriesCard: View {
                             // Category name
                             Text(item.category.name ?? "")
                                 .font(.body)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(DesignTokens.label)
                                 .lineLimit(1)
 
                             Spacer()
@@ -68,7 +69,7 @@ struct TopCategoriesCard: View {
                             // ₹ amount (full formattedINR per UI-SPEC)
                             Text(item.spent.formattedINR())
                                 .font(.body)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(DesignTokens.label)
                         }
                         .frame(minHeight: 44)
                         .accessibilityAddTraits(.isStaticText)
@@ -76,10 +77,7 @@ struct TopCategoriesCard: View {
                 }
             }
         }
-        .padding(16)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+        .neuSurface(.raised)
         .accessibilityElement(children: .combine)
     }
 }

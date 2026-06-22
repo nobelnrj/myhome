@@ -17,6 +17,8 @@ struct OverviewView: View {
 
     @Binding var selectedTab: Int
     @Binding var deepLinkNoteID: UUID?
+    /// OVR-06: Category filter binding — written by SpendDonutCard tap, read by ExpenseListView.
+    @Binding var activityCategoryFilter: UUID?
 
     @State private var showAddExpense = false
 
@@ -37,6 +39,7 @@ struct OverviewView: View {
                     monthLabel: start.formattedAsMonthYear(),
                     selectedTab: $selectedTab,
                     deepLinkNoteID: $deepLinkNoteID,
+                    activityCategoryFilter: $activityCategoryFilter,
                     showAddExpense: $showAddExpense
                 )
             } else {
@@ -83,6 +86,7 @@ private struct OverviewMonthContent: View {
     let monthLabel: String
     @Binding var selectedTab: Int
     @Binding var deepLinkNoteID: UUID?
+    @Binding var activityCategoryFilter: UUID?
     @Binding var showAddExpense: Bool
 
     @Query(sort: \Category.sortOrder) private var categories: [Category]
@@ -107,12 +111,14 @@ private struct OverviewMonthContent: View {
     init(start: Date, end: Date, monthLabel: String,
          selectedTab: Binding<Int>,
          deepLinkNoteID: Binding<UUID?>,
+         activityCategoryFilter: Binding<UUID?>,
          showAddExpense: Binding<Bool>) {
         self.start = start
         self.end = end
         self.monthLabel = monthLabel
         self._selectedTab = selectedTab
         self._deepLinkNoteID = deepLinkNoteID
+        self._activityCategoryFilter = activityCategoryFilter
         self._showAddExpense = showAddExpense
 
         let lo = start
@@ -132,6 +138,11 @@ private struct OverviewMonthContent: View {
         let totalSpend = spendByCategory.values.reduce(.zero, +)
             + BudgetCalculator.uncategorizedSpend(for: monthExpenses)
 
+        // Income this month (expenses with negative amounts = refunds/income, negated to positive display)
+        let totalIncome = monthExpenses
+            .filter { $0.amount < 0 && $0.isTransfer != true }
+            .reduce(Decimal.zero) { $0 + abs($1.amount) }
+
         // Category spend, sorted descending — feeds the stacked bar + donut + legend.
         let rankedSpend: [(category: Category, spent: Decimal)] = categories
             .compactMap { category in
@@ -150,6 +161,16 @@ private struct OverviewMonthContent: View {
 
         let recent = Array(monthExpenses.prefix(5))
 
+        // CategorySpendItem for SpendByCategoryChart (D-05: keep chart on Overview, restyled)
+        let categoryItems: [CategorySpendItem] = rankedSpend.map { item in
+            CategorySpendItem(
+                id: item.category.persistentModelID,
+                name: item.category.name ?? "—",
+                spent: NSDecimalNumber(decimal: item.spent).doubleValue,
+                spentDecimal: item.spent
+            )
+        }
+
         // Net-worth suppression test: compute cashValue outside ScrollView (Pitfall A guard)
         let netWorthBreakdown = NetWorthCalculator.breakdown(
             assets: allAssets, accounts: allAccounts, expenses: allGlobalExpenses
@@ -161,14 +182,14 @@ private struct OverviewMonthContent: View {
                 // Month label
                 Text(monthLabel)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .padding(.bottom, -8)
 
                 // Hero
                 SpendBudgetCard(
-                    totalSpend: totalSpend,
+                    income: totalIncome,
+                    spent: totalSpend,
                     totalBudget: totalBudget,
-                    segments: rankedSpend.map { (double($0.spent), CategoryStyle.color(for: $0.category)) },
                     selectedTab: $selectedTab
                 )
 
@@ -189,10 +210,32 @@ private struct OverviewMonthContent: View {
                     .padding(.horizontal, 16)
                 }
 
-                // Where it’s going — donut + legend
+                // Where it’s going — donut + legend (OVR-05/06)
                 if !rankedSpend.isEmpty {
                     sectionHeader("Where it’s going")
-                    WhereItsGoingCard(ranked: rankedSpend, total: totalSpend)
+                    SpendDonutCard(
+                        ranked: Array(rankedSpend.prefix(4)),
+                        total: totalSpend,
+                        onCategoryTap: { uuid in
+                            activityCategoryFilter = uuid
+                            selectedTab = 1
+                        }
+                    )
+                    .padding(.horizontal, DesignTokens.spacing16)
+                }
+
+                // Spend by category chart (D-05 — restyled, retained on Overview)
+                if !categoryItems.isEmpty {
+                    sectionHeader("By Category")
+                    SpendByCategoryChart(categoryItems: categoryItems)
+                        .padding(.horizontal, DesignTokens.spacing16)
+                }
+
+                // Spend over time chart (D-05 — restyled, retained on Overview)
+                if !allGlobalExpenses.isEmpty {
+                    sectionHeader("Over Time")
+                    SpendOverTimeChart(expenses: allGlobalExpenses)
+                        .padding(.horizontal, DesignTokens.spacing16)
                 }
 
                 // Budgets glance
@@ -206,7 +249,7 @@ private struct OverviewMonthContent: View {
                             }
                         }
                     }
-                    .cardStyle(cornerRadius: 16, padding: 16)
+                    .neuSurface(.raised)
                 }
 
                 // Recent
@@ -225,13 +268,14 @@ private struct OverviewMonthContent: View {
                             }
                         }
                     }
-                    .cardStyle(cornerRadius: 16, padding: nil)
+                    .neuSurface(.raised, padding: nil)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
         }
-        .background(Color(.systemGroupedBackground))
+        .scrollContentBackground(.hidden)
+        .background(DesignTokens.bgCanvas)
         .sheet(item: $editingExpense) { expense in
             EditExpenseView(expense: expense)
         }
@@ -252,7 +296,7 @@ private struct OverviewMonthContent: View {
             if let action {
                 Button(action.label, action: action.run)
                     .font(.subheadline)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
             }
         }
         .padding(.bottom, -8)
@@ -276,80 +320,25 @@ private struct ReviewBanner: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                IconTile(symbol: "envelope", color: .accentColor, size: 38, cornerRadius: 10)
+                IconTile(symbol: "envelope", color: DesignTokens.accent, size: 38, cornerRadius: 10)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("\(count) \(count == 1 ? "expense" : "expenses") to review")
                         .font(.headline)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(DesignTokens.label)
                     Text("Imported from Gmail · tap to confirm")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                 }
                 Spacer(minLength: 8)
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(DesignTokens.label3)
             }
-            .cardStyle(cornerRadius: 14, padding: 14)
+            .neuSurface(.raised, radius: 20, padding: 14, isInteractive: true)
         }
         .buttonStyle(.plain)
     }
 }
-
-// MARK: - Where it's going (donut + legend)
-
-private struct WhereItsGoingCard: View {
-    let ranked: [(category: Category, spent: Decimal)]
-    let total: Decimal
-
-    var body: some View {
-        HStack(spacing: 18) {
-            DonutChart(
-                segments: ranked.map {
-                    DonutSegment(
-                        id: $0.category.id.uuidString,
-                        label: $0.category.name ?? "—",
-                        value: NSDecimalNumber(decimal: $0.spent).doubleValue,
-                        color: CategoryStyle.color(for: $0.category)
-                    )
-                },
-                size: 132
-            ) {
-                VStack(spacing: 0) {
-                    Text("TOTAL")
-                        .font(.caption2)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.secondary)
-                    Text(total.formattedINRWhole())
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 11) {
-                ForEach(ranked.prefix(4), id: \.category.id) { item in
-                    HStack(spacing: 9) {
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(CategoryStyle.color(for: item.category))
-                            .frame(width: 10, height: 10)
-                        Text(item.category.name ?? "—")
-                            .font(.subheadline)
-                            .lineLimit(1)
-                        Spacer(minLength: 6)
-                        Text(item.spent.formattedINRWhole())
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-        .cardStyle(cornerRadius: 16, padding: 18)
-    }
-}
-
 // MARK: - Budgets glance row
 
 private struct BudgetGlanceRow: View {
@@ -363,8 +352,8 @@ private struct BudgetGlanceRow: View {
     }
     private var isOver: Bool { spent > limit }
     private var barColor: Color {
-        if isOver { return Color(.systemRed) }
-        if fraction >= 0.85 { return Color(.systemOrange) }
+        if isOver { return DesignTokens.negative }
+        if fraction >= 0.85 { return DesignTokens.orange }
         return CategoryStyle.color(for: category)
     }
 
@@ -378,9 +367,9 @@ private struct BudgetGlanceRow: View {
                 Spacer(minLength: 6)
                 HStack(spacing: 4) {
                     Text(spent.formattedINRWhole())
-                        .foregroundStyle(isOver ? Color(.systemRed) : .secondary)
+                        .foregroundStyle(isOver ? DesignTokens.negative : DesignTokens.label2)
                     Text("/ \(limit.formattedINRWhole())")
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(DesignTokens.label3)
                 }
                 .font(.subheadline)
                 .fontWeight(.medium)
@@ -400,7 +389,7 @@ private struct ProgressBarLine: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color(.tertiarySystemFill))
+                Capsule().fill(DesignTokens.fillRecessed2)
                 Capsule().fill(color)
                     .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
             }
@@ -423,17 +412,17 @@ private struct RecentExpenseRow: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
                     .lineLimit(1)
                 Text(subtitle)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
             Text(expense.amount.formattedINR())
                 .font(.body)
-                .foregroundStyle(expense.amount < 0 ? Color(.systemGreen) : .primary)
+                .foregroundStyle(expense.amount < 0 ? DesignTokens.positive : DesignTokens.label)
                 .lineLimit(1)
         }
         .padding(.horizontal, 16)

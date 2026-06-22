@@ -43,13 +43,14 @@ struct SpendByCategoryChart: View {
             // Row A — Card title
             Text("Spend by Category")
                 .font(.title2)
+                .foregroundStyle(DesignTokens.label)
 
             // Row B — Chart or empty state
             if categoryItems.isEmpty {
                 // D4-07 empty state
                 Text("No spend yet this month.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .frame(height: 80)
             } else {
@@ -58,11 +59,11 @@ struct SpendByCategoryChart: View {
                         x: .value("Amount", item.spent),
                         y: .value("Category", item.name)
                     )
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(DesignTokens.accent)
                     .annotation(position: .trailing) {
                         Text(item.spentDecimal.formattedINRCompact())
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.label2)
                     }
                     .accessibilityLabel("\(item.name), \(item.spentDecimal.formattedINR())")
                 }
@@ -78,10 +79,7 @@ struct SpendByCategoryChart: View {
                 .accessibilityLabel("Spend by category chart")
             }
         }
-        .padding(16)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+        .neuSurface(.raised)
         .accessibilityElement(children: .combine)
     }
 }

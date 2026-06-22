@@ -60,7 +60,7 @@ struct PinnedNoteCard: View {
                 } else {
                     Image(systemName: "pin.fill")
                         .font(.caption)
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(DesignTokens.accent)
                         .accessibilityHidden(true)
                 }
             }
@@ -69,14 +69,14 @@ struct PinnedNoteCard: View {
                 // Row B — Note title (plain Text — T-04-06)
                 Text(note.title)
                     .font(.body)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(DesignTokens.label)
                     .lineLimit(1)
 
                 // Row C — First block preview (plain Text — T-04-06)
                 if let preview = firstBlockPreview(note) {
                     Text(preview)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(DesignTokens.label2)
                         .lineLimit(2)
                 }
 
@@ -88,14 +88,14 @@ struct PinnedNoteCard: View {
                         selectedTab = 3
                     }
                     .font(.subheadline)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                     .accessibilityLabel("Open \(note.title) in Notes tab")
                 }
             } else {
                 // Empty state — no pinned note and no checklist note
                 Text("Pin a note to see it here.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DesignTokens.label2)
                     .frame(maxWidth: .infinity, alignment: .center)
 
                 HStack {
@@ -104,14 +104,11 @@ struct PinnedNoteCard: View {
                         selectedTab = 3
                     }
                     .font(.subheadline)
-                    .tint(.accentColor)
+                    .tint(DesignTokens.accent)
                 }
             }
         }
-        .padding(16)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+        .neuSurface(.raised, isInteractive: true)
         .accessibilityElement(children: .combine)
     }
 }
