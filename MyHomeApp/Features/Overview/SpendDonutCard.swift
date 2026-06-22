@@ -41,50 +41,38 @@ struct SpendDonutCard: View {
     // MARK: - Donut + legend content
 
     private var donutContent: some View {
-        HStack(spacing: 18) {
-            DonutChart(segments: segments, size: 132) {
-                VStack(spacing: 2) {
-                    Text("SPENT")
-                        .font(.system(size: 10.5, weight: .semibold))
-                        .tracking(0.6)
-                        .foregroundStyle(DesignTokens.label2)
-                    // Stat pattern (Pitfall 5: hero money text is 46pt only; use Text here).
-                    // Whole-rupee + width cap + scale-to-fit so the total stays inside the
-                    // donut hole and never spills over the ring (fixes center overflow).
-                    Text(total.formattedINRWhole())
-                        .font(.system(size: 19, weight: .semibold, design: .default))
-                        .foregroundStyle(DesignTokens.label)
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                        .contentTransition(.numericText())
-                        .animation(.smooth(duration: 0.78), value: total)
-                }
-                .frame(width: 132 * 0.62 - 6)
-            }
+        HStack(spacing: 20) {
+            // Concentric animated category rings (top-3) — replaces the static pie donut.
+            CategoryRings(items: ringItems, size: 152, lineWidth: 13, gap: 5)
 
-            VStack(alignment: .leading, spacing: 11) {
+            VStack(alignment: .leading, spacing: 14) {
                 ForEach(legendItems) { item in
                     Button {
                         onCategoryTap(item.categoryID)
                     } label: {
-                        HStack(spacing: 8) {
-                            RoundedRectangle(cornerRadius: 3)
+                        HStack(spacing: 10) {
+                            Circle()
                                 .fill(item.color)
-                                .frame(width: 9, height: 9)
+                                .frame(width: 11, height: 11)
                                 .shadow(color: item.color.opacity(0.6), radius: 5)
-                            Text(item.label)
-                                .font(.system(size: 14))
-                                .foregroundStyle(DesignTokens.label)
-                                .lineLimit(1)
-                            Spacer(minLength: 4)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(item.label)
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundStyle(DesignTokens.label)
+                                    .lineLimit(1)
+                                Text("\(item.sharePct)% of spend")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(DesignTokens.label3)
+                            }
+                            Spacer(minLength: 6)
                             Text(item.amount.formattedINRWhole())
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(DesignTokens.label2)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(DesignTokens.label)
+                                .monospacedDigit()
                         }
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("\(item.label): \(item.amount.formattedINRWhole())")
+                    .accessibilityLabel("\(item.label): \(item.sharePct) percent, \(item.amount.formattedINRWhole())")
                 }
             }
         }
@@ -107,42 +95,45 @@ struct SpendDonutCard: View {
         .neuSurface(.raised, padding: 18)
     }
 
-    // MARK: - Segment builder
+    // MARK: - Ring + legend data (top-3, so rings and legend stay in lock-step)
 
-    private var segments: [DonutSegment] {
-        ranked.map { item in
-            DonutSegment(
-                id: item.category.id.uuidString,
-                label: item.category.name ?? "—",
-                value: toDouble(item.spent),
-                color: CategoryStyle.color(for: item.category)
-            )
-        }
+    private var topRanked: [(category: Category, spent: Decimal)] { Array(ranked.prefix(3)) }
+
+    /// Concentric ring inputs: each category's colour + its share of total spend (0…1).
+    private var ringItems: [(color: Color, fraction: Double)] {
+        topRanked.map { (CategoryStyle.color(for: $0.category), shareFraction($0.spent)) }
     }
-
-    // MARK: - Legend items
 
     private struct LegendItem: Identifiable {
         let id: String
         let label: String
         let color: Color
         let amount: Decimal
+        let sharePct: Int
         let categoryID: UUID?  // nil = Others row
     }
 
     private var legendItems: [LegendItem] {
-        ranked.map { item in
+        topRanked.map { item in
             LegendItem(
                 id: item.category.id.uuidString,
                 label: item.category.name ?? "—",
                 color: CategoryStyle.color(for: item.category),
                 amount: item.spent,
+                sharePct: Int((shareFraction(item.spent) * 100).rounded()),
                 categoryID: item.category.id
             )
         }
     }
 
     // MARK: - Helpers
+
+    /// Share of total spend (0…1), guarded against a zero total.
+    private func shareFraction(_ v: Decimal) -> Double {
+        let t = toDouble(total)
+        guard t > 0 else { return 0 }
+        return toDouble(v) / t
+    }
 
     /// Safe Decimal → Double conversion (T-11-13 pattern from NetWorthCard lines 130-132).
     private func toDouble(_ v: Decimal) -> Double {

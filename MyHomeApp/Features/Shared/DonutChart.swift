@@ -46,3 +46,113 @@ extension DonutChart where Center == EmptyView {
         self.center = { EmptyView() }
     }
 }
+
+// MARK: - ActivityRing (Apple / WHOOP-style animated ring)
+
+/// A single animated progress ring: recessed track + angular-gradient stroke with a rounded
+/// cap that sweeps up from zero on appear (spring), plus a leading-tip shadow near completion
+/// that gives the iconic Apple-Activity "overlap" depth.
+///
+/// `progress` may exceed 1.0 (e.g. over budget); the arc clamps at a full turn while the
+/// caller's colour conveys the overflow. Honors Reduce Motion (snaps instead of sweeping).
+struct ActivityRing<Center: View>: View {
+    /// Target fill 0…1+ (clamped to 1 for the arc).
+    var progress: Double
+    /// Gradient colours swept around the ring (low → high). Pass `[base.opacity(0.5), base]`
+    /// for a single-hue brightness fade, or distinct colours for a spectrum.
+    var colors: [Color]
+    var size: CGFloat = 170
+    var lineWidth: CGFloat = 16
+    /// Show the rounded leading tip + its shadow once the ring is nearly full (overlap depth).
+    var showTip: Bool = true
+    @ViewBuilder var center: () -> Center
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animated: Double = 0
+
+    private var clamped: Double { min(max(progress, 0), 1) }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(DesignTokens.fillRecessed2, lineWidth: lineWidth)
+
+            Circle()
+                .trim(from: 0, to: max(0.0001, animated))
+                .stroke(
+                    AngularGradient(
+                        gradient: Gradient(colors: colors),
+                        center: .center,
+                        startAngle: .degrees(0),
+                        endAngle: .degrees(360)
+                    ),
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+
+            // Leading-tip shadow — only near completion, to fake the ring overlapping itself.
+            if showTip && clamped > 0.94 {
+                Circle()
+                    .fill(colors.last ?? Color.white)
+                    .frame(width: lineWidth, height: lineWidth)
+                    .offset(y: -(size / 2 - lineWidth / 2))
+                    .rotationEffect(.degrees(360 * animated))
+                    .shadow(color: .black.opacity(0.28), radius: 3, x: 3, y: 0)
+            }
+
+            center()
+        }
+        .frame(width: size, height: size)
+        .onAppear { animate(to: clamped) }
+        .onChange(of: progress) { _, _ in animate(to: clamped) }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func animate(to value: Double) {
+        if reduceMotion {
+            animated = value
+        } else {
+            withAnimation(.spring(response: 0.85, dampingFraction: 0.85)) {
+                animated = value
+            }
+        }
+    }
+}
+
+extension ActivityRing where Center == EmptyView {
+    init(progress: Double, colors: [Color], size: CGFloat = 170, lineWidth: CGFloat = 16, showTip: Bool = true) {
+        self.progress = progress
+        self.colors = colors
+        self.size = size
+        self.lineWidth = lineWidth
+        self.showTip = showTip
+        self.center = { EmptyView() }
+    }
+}
+
+// MARK: - CategoryRings (concentric activity rings)
+
+/// Concentric activity rings — one per item, largest item outermost. Each ring's fill is the
+/// item's share of the whole, so the rings read as "how the spend splits" without a pie.
+struct CategoryRings: View {
+    /// Pre-sorted (largest first) colour + share-of-total (0…1) pairs. Up to 3 are drawn.
+    let items: [(color: Color, fraction: Double)]
+    var size: CGFloat = 150
+    var lineWidth: CGFloat = 13
+    var gap: CGFloat = 5
+
+    var body: some View {
+        ZStack {
+            ForEach(Array(items.prefix(3).enumerated()), id: \.offset) { index, item in
+                ActivityRing(
+                    progress: item.fraction,
+                    colors: [item.color.opacity(0.5), item.color],
+                    size: size - CGFloat(index) * (lineWidth * 2 + gap),
+                    lineWidth: lineWidth,
+                    showTip: false
+                )
+            }
+        }
+        .frame(width: size, height: size)
+    }
+}

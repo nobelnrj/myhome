@@ -51,6 +51,11 @@ struct SpendBudgetCard: View {
         return f >= 1.0 ? "100%+ of budget" : "\(Int(f * 100))% of budget"
     }
 
+    /// Net amount with an explicit leading minus for negative flow (whole rupees).
+    private var signedNet: String {
+        (netIsPositive ? "" : "−") + abs(net).formattedINRWhole()
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -79,24 +84,29 @@ struct SpendBudgetCard: View {
             if fractionUsed != nil {
                 // WHOOP-style budget ring hero: ring fill = budget consumed (green→orange→red);
                 // centre shows the net cash flow (solid semibold) + % of budget used.
-                BudgetRing(fraction: fractionUsed ?? 0, color: ringColor, size: 172, lineWidth: 16) {
-                    VStack(spacing: 3) {
-                        Text(netIsPositive ? "NET +" : "NET −")
-                            .font(.system(size: 10.5, weight: .semibold))
+                ActivityRing(
+                    progress: fractionUsed ?? 0,
+                    colors: [ringColor.opacity(0.5), ringColor],
+                    size: 176,
+                    lineWidth: 17
+                ) {
+                    VStack(spacing: 4) {
+                        Text("NET FLOW")
+                            .font(.system(size: 11.5, weight: .semibold))
                             .tracking(0.8)
                             .foregroundStyle(DesignTokens.label2)
-                        Text(abs(net).formattedINRWhole())
-                            .font(.system(size: 25, weight: .semibold, design: .default))
+                        Text(signedNet)
+                            .font(.system(size: 27, weight: .semibold, design: .default))
                             .foregroundStyle(statusColor)
                             .monospacedDigit()
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                             .contentTransition(.numericText())
                             .animation(.smooth(duration: 0.78), value: net)
-                            .frame(width: 172 - 2 * 16 - 14)
+                            .frame(width: 176 - 2 * 17 - 12)
                         Text(percentUsedLabel)
-                            .font(.caption)
-                            .foregroundStyle(DesignTokens.label3)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(DesignTokens.label2)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -144,9 +154,9 @@ struct SpendBudgetCard: View {
     private func splitTile(label: String, amount: Decimal, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold))
                 .tracking(0.5)
-                .foregroundStyle(DesignTokens.label3)
+                .foregroundStyle(DesignTokens.label2)
             // Stat pattern (not RollingMoneyText — Pitfall 5). Solid system face to match
             // the heavier hero numeral above.
             Text(amount.formattedINRWhole())
@@ -170,37 +180,6 @@ struct SpendBudgetCard: View {
         let netStr = abs(net).formattedINR()
         let direction = netIsPositive ? "positive" : "negative"
         return "Net cash flow \(netStr) \(direction). Income \(income.formattedINR()), spent \(spent.formattedINR())."
-    }
-}
-
-// MARK: - Budget ring (WHOOP-style)
-
-/// A single-value progress ring with a recessed track, gradient stroke, and rounded cap.
-/// `fraction` may exceed 1.0 (over budget); the ring trims at a full turn while the caller's
-/// colour/label convey the overflow.
-private struct BudgetRing<Center: View>: View {
-    let fraction: Double
-    let color: Color
-    var size: CGFloat = 172
-    var lineWidth: CGFloat = 16
-    @ViewBuilder var center: () -> Center
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(DesignTokens.fillRecessed2, lineWidth: lineWidth)
-            Circle()
-                .trim(from: 0, to: max(0.001, min(fraction, 1)))
-                .stroke(
-                    color.gradient,
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .animation(.smooth(duration: 0.7), value: fraction)
-            center()
-        }
-        .frame(width: size, height: size)
-        .accessibilityElement(children: .combine)
     }
 }
 
