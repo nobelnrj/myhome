@@ -85,7 +85,6 @@
 		A1402SDCT /* SpendDonutCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1402SDCT /* SpendDonutCardTests.swift */; };
 		A801SH /* CategoryStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F801SH /* CategoryStyle.swift */; };
 		A802SH /* IconTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F802SH /* IconTile.swift */; };
-		A803SH /* CardStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F803SH /* CardStyle.swift */; };
 		A804SH /* DonutChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F804SH /* DonutChart.swift */; };
 		A805SH /* StackBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F805SH /* StackBar.swift */; };
 		A501 /* BiometricAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F501 /* BiometricAuthPort.swift */; };
@@ -201,7 +200,6 @@
 		A1203RDV /* RoutineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RDV /* RoutineDetailView.swift */; };
 		A13DS1 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DS1 /* DesignTokens.swift */; };
 		A13NS /* NeuSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13NS /* NeuSurface.swift */; };
-		A13NTB /* NeuTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13NTB /* NeuTabBar.swift */; };
 		A13RMT /* RollingMoneyText.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMT /* RollingMoneyText.swift */; };
 		A13DST /* DesignTokensTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DST /* DesignTokensTests.swift */; };
 		A13RMTT /* RollingMoneyTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMTT /* RollingMoneyTextTests.swift */; };
@@ -386,7 +384,6 @@
 		F711FIX /* Fixtures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fixtures; sourceTree = "<group>"; };
 		F801SH /* CategoryStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryStyle.swift; sourceTree = "<group>"; };
 		F802SH /* IconTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconTile.swift; sourceTree = "<group>"; };
-		F803SH /* CardStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStyle.swift; sourceTree = "<group>"; };
 		F804SH /* DonutChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonutChart.swift; sourceTree = "<group>"; };
 		F805SH /* StackBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackBar.swift; sourceTree = "<group>"; };
 		F1101SV8 /* SchemaV8.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV8.swift; sourceTree = "<group>"; };
@@ -416,7 +413,6 @@
 		F1101SSVT /* SIPSetupValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPSetupValidationTests.swift; sourceTree = "<group>"; };
 		F13DS1 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		F13NS /* NeuSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuSurface.swift; sourceTree = "<group>"; };
-		F13NTB /* NeuTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuTabBar.swift; sourceTree = "<group>"; };
 		F13RMT /* RollingMoneyText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyText.swift; sourceTree = "<group>"; };
 		F13DST /* DesignTokensTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokensTests.swift; sourceTree = "<group>"; };
 		F13RMTT /* RollingMoneyTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyTextTests.swift; sourceTree = "<group>"; };
@@ -472,7 +468,6 @@
 			children = (
 				F13DS1 /* DesignTokens.swift */,
 				F13NS /* NeuSurface.swift */,
-				F13NTB /* NeuTabBar.swift */,
 				F13RMT /* RollingMoneyText.swift */,
 			);
 			path = DesignSystem;
@@ -627,7 +622,6 @@
 			children = (
 				F801SH /* CategoryStyle.swift */,
 				F802SH /* IconTile.swift */,
-				F803SH /* CardStyle.swift */,
 				F804SH /* DonutChart.swift */,
 				F805SH /* StackBar.swift */,
 			);
@@ -994,7 +988,6 @@
 				A1402SDC /* SpendDonutCard.swift in Sources */,
 				A801SH /* CategoryStyle.swift in Sources */,
 				A802SH /* IconTile.swift in Sources */,
-				A803SH /* CardStyle.swift in Sources */,
 				A804SH /* DonutChart.swift in Sources */,
 				A805SH /* StackBar.swift in Sources */,
 				A406 /* SpendBudgetCard.swift in Sources */,
@@ -1063,7 +1056,6 @@
 				A703CUB /* CUBParser.swift in Sources */,
 				A13DS1 /* DesignTokens.swift in Sources */,
 				A13NS /* NeuSurface.swift in Sources */,
-				A13NTB /* NeuTabBar.swift in Sources */,
 				A13RMT /* RollingMoneyText.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
