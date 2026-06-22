@@ -169,3 +169,21 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 0/? | Not started | - |
 | 16. AI Insight Card | v1.2 | 0/? | Not started | - |
+
+---
+
+## Backlog
+
+### Phase 999.1: Light mode support for the neumorphic redesign (BACKLOG)
+
+**Goal:** [Captured for future planning] Add a light-mode theme to the v1.2 neumorphic redesign. Today the app is dark-only by decision (DS-05): `MyHomeApp.swift` forces `.preferredColorScheme(.dark)` at the root, and every `DesignTokens` color is a single static dark hex with no adaptive `Color(light:dark:)` variants.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Why it's a phase, not a toggle:
+- Needs a full light-tuned palette (canvas, surfaces, fills, label tiers).
+- Neumorphic shadows must be reworked — soft inner/outer shadow directions and opacities are calibrated for a dark canvas.
+- The WHOOP-style particle orb + activity rings need a non-glow / adjusted treatment; the bloom only reads against darkness.
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
