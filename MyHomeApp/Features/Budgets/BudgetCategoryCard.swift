@@ -77,6 +77,7 @@ struct BudgetCategoryCard: View {
                         Capsule().fill(DesignTokens.fillRecessed2)
                         Capsule().fill(barColor)
                             .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
+                            .neonGlow(barColor, radius: 6)
                             .animation(.easeInOut(duration: 0.3), value: fraction)
                     }
                 }

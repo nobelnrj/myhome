@@ -21,7 +21,7 @@ struct DonutChart<Center: View>: View {
     var size: CGFloat = 132
     @ViewBuilder var center: () -> Center
 
-    var body: some View {
+    private var donut: some View {
         Chart(segments) { seg in
             // Borderless: no angular inset / corner radius, so segments butt into one seamless
             // ring (the older "gapped slices" look is gone).
@@ -34,6 +34,17 @@ struct DonutChart<Center: View>: View {
         }
         .chartLegend(.hidden)
         .frame(width: size, height: size)
+    }
+
+    var body: some View {
+        // Neon donut: a blurred copy behind the crisp ring blooms each segment in its OWN colour
+        // (a single drop-shadow can't — it would muddy multi-colour rings). Matches the orb vibe.
+        ZStack {
+            donut
+                .blur(radius: size * 0.045)
+                .opacity(0.9)
+            donut
+        }
         .overlay { center() }
         .accessibilityHidden(true)
     }

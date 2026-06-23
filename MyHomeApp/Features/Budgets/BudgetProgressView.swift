@@ -47,6 +47,7 @@ struct BudgetProgressView: View {
                                     width: min(CGFloat(fraction), 1.0) * geo.size.width,
                                     height: 8
                                 )
+                                .neonGlow(fillColor, radius: 6)
                                 .animation(.easeInOut(duration: 0.3), value: fraction)
                         }
                     }
