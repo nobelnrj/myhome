@@ -1,5 +1,6 @@
 import SwiftUI
 import Charts
+import UIKit
 
 /// A single donut segment.
 struct DonutSegment: Identifiable {
@@ -167,10 +168,44 @@ private struct SeededRNG: RandomNumberGenerator {
     }
 }
 
-/// A luminous two-tone particle sphere (à la WHOOP "Whoop Age"): a Canvas-drawn full orb whose
-/// particles are split by `incomeShare` — `incomeColor` (green) for the income portion,
-/// `expenseColor` (red) for the expense portion. Always a full sphere (no gap). The dots twinkle
-/// and slowly drift (TimelineView) so the orb feels alive. Fades up on appear.
+/// Linear-interpolation helpers for blending the two-tone rim colour by income share.
+private extension Color {
+    func rgba() -> (r: Double, g: Double, b: Double, a: Double) {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a)
+        return (Double(r), Double(g), Double(b), Double(a))
+    }
+
+    /// Linear blend from `c1` (t=0) toward `c2` (t=1).
+    static func blend(_ c1: Color, _ c2: Color, t: Double) -> Color {
+        let a = c1.rgba(), b = c2.rgba()
+        let k = min(max(t, 0), 1)
+        return Color(red: a.r + (b.r - a.r) * k,
+                     green: a.g + (b.g - a.g) * k,
+                     blue: a.b + (b.b - a.b) * k)
+    }
+
+    /// Push the colour toward white by `amount` — the bright inner rim highlight.
+    func lightened(_ amount: Double = 0.45) -> Color {
+        let c = rgba()
+        return Color(red: c.r + (1 - c.r) * amount,
+                     green: c.g + (1 - c.g) * amount,
+                     blue: c.b + (1 - c.b) * amount)
+    }
+}
+
+/// A luminous two-tone particle sphere (à la WHOOP "Whoop Age"). Ported from the `Whoop Age Orb`
+/// dc-runtime sample into native SwiftUI Canvas:
+/// - An organic **morphing blob** outline (16 control points, three layered sines + a breathing
+///   scale, Catmull-Rom→Bézier smoothed) replaces the plain circle.
+/// - Particles **flow outward** from the centre to the rim and respawn (size grows, opacity fades
+///   in at the core / out at the rim) while the whole field **rotates 360°** + drifts + shimmers.
+/// - The field is **clipped to the blob**, sat over a dark radial fill + centre vignette (keeps the
+///   readout legible), and ringed by a **blurred glow rim + thin bright rim**.
+///
+/// Two-tone meaning is preserved: particles are split by `incomeShare` — `incomeColor` for the
+/// income portion, `expenseColor` for the expense portion (always a full sphere, no gap). The rim
+/// blends the two by share. Honors Reduce Motion (freezes the clock) and fades up on appear.
 struct GlowParticleRing<Center: View>: View {
     /// Fraction of the orb coloured as income (0…1); the remainder is expense.
     var incomeShare: Double
@@ -182,70 +217,151 @@ struct GlowParticleRing<Center: View>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animated: Double = 0
 
-    private struct Particle { let angle, radialT, dot, opacity, phase: Double }
+    // MARK: Particle field (outward-flow emission model, ported from the sample)
+
+    private struct Particle {
+        let baseAng, radSpeed, radPhase, maxSize, baseOp, angDrift: Double
+        let samp, sax, say, spx, spy: Double
+        let big: Bool
+    }
 
     private let particles: [Particle] = {
         var rng = SeededRNG(seed: 0xC0FFEE)
-        return (0..<300).map { _ in
-            Particle(
-                angle: Double.random(in: 0...1, using: &rng),
-                radialT: pow(Double.random(in: 0...1, using: &rng), 0.55), // bias toward the outer band
-                dot: Double.random(in: 0.5...2.3, using: &rng),
-                opacity: Double.random(in: 0.18...1.0, using: &rng),
-                phase: Double.random(in: 0...(2 * .pi), using: &rng)
+        func r() -> Double { Double.random(in: 0...1, using: &rng) }
+        return (0..<520).map { _ in
+            let big = r() > 0.955
+            return Particle(
+                baseAng: r() * 2 * .pi,
+                radSpeed: 0.07 + r() * 0.17,           // outward progress per second
+                radPhase: r(),                         // staggered start so the flow is continuous
+                maxSize: 1.6 + pow(r(), 1.5) * 3.2 + (big ? 2.6 : 0),
+                baseOp: 0.5 + r() * 0.5,
+                angDrift: (r() - 0.5) * 0.10,          // per-dot drift atop the global spin
+                samp: 0.8 + r() * 1.8,                 // shimmer amplitude
+                sax: 6 + r() * 12,
+                say: 6 + r() * 12,
+                spx: r() * 2 * .pi,
+                spy: r() * 2 * .pi,
+                big: big
             )
         }
     }()
 
-    /// Direction of peak brightness (top-right, like the WHOOP orb).
-    private let brightDir = -Double.pi / 4
+    // MARK: Blob outline phases (stable per-instance)
+
+    private let blobPhase: (a: [Double], b: [Double], c: [Double]) = {
+        var rng = SeededRNG(seed: 0x5EED)
+        func r() -> Double { Double.random(in: 0...1, using: &rng) }
+        var a = [Double](), b = [Double](), c = [Double]()
+        for _ in 0..<16 { a.append(r() * 2 * .pi); b.append(r() * 2 * .pi); c.append(r() * 2 * .pi) }
+        return (a, b, c)
+    }()
+
+    /// Organic, slowly-morphing orb edge. `t` is seconds; `dim` is the square side in points.
+    private func blobPath(t: Double, dim: Double) -> Path {
+        let n = 16
+        let half = dim / 2
+        let baseR = half * 0.80
+        let breathe = 1 + 0.014 * sin(t * 0.45)
+        var pts = [CGPoint]()
+        for i in 0..<n {
+            let ang = Double(i) / Double(n) * 2 * .pi
+            var r = baseR * (1
+                + 0.058 * sin(t * 0.55 + blobPhase.a[i])
+                + 0.040 * sin(t * 0.40 + Double(i) * 1.7 + blobPhase.b[i])
+                + 0.024 * sin(t * 0.92 - Double(i) * 1.1 + blobPhase.c[i]))
+            r *= breathe
+            pts.append(CGPoint(x: half + cos(ang) * r, y: half + sin(ang) * r))
+        }
+        var path = Path()
+        path.move(to: pts[0])
+        for i in 0..<n {
+            let p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n]
+            let c1 = CGPoint(x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6)
+            let c2 = CGPoint(x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6)
+            path.addCurve(to: p2, control1: c1, control2: c2)
+        }
+        path.closeSubpath()
+        return path
+    }
 
     var body: some View {
         let share = min(max(incomeShare, 0), 1)
+        // Luminous single-hue rim in the dominant tone (avoids the muddy red+green average) —
+        // glows green when income-led, red when spend-led, echoing the status chip.
+        let rimAccent = share >= 0.5 ? incomeColor : expenseColor
+        let rimBright = rimAccent.lightened(0.55)
 
         return ZStack {
-            // Dark well so the centred readout stays legible over the glow.
-            Circle()
-                .fill(RadialGradient(
-                    colors: [Color.black.opacity(0.55), .clear],
-                    center: .center, startRadius: 0, endRadius: size * 0.30
-                ))
-
-            TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reduceMotion)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: reduceMotion)) { timeline in
                 let t = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
-                let drift = t * 0.05  // slow orbital drift (radians)
 
                 Canvas { ctx, sz in
-                    let c = CGPoint(x: sz.width / 2, y: sz.height / 2)
-                    let outer = sz.width / 2 - 2
-                    let well = outer * 0.30
+                    let dim = Double(min(sz.width, sz.height))
+                    let half = dim / 2
+                    let center = CGPoint(x: half, y: half)
+                    let outerR = sz.width / 2
+                    let scale = dim / 600.0       // sample magnitudes are in a 600pt viewBox
                     let grow = max(animated, 0.0001)
+                    let blob = blobPath(t: t, dim: dim)
 
-                    for p in particles {
-                        let ang = p.angle * 2 * .pi - .pi / 2 + drift
-                        let r = well + (outer - well) * CGFloat(p.radialT)
-                        let pt = CGPoint(x: c.x + r * CGFloat(cos(ang)), y: c.y + r * CGFloat(sin(ang)))
+                    // 1. Dark radial body — gives the orb depth without colour bias.
+                    ctx.fill(blob, with: .radialGradient(
+                        Gradient(stops: [
+                            .init(color: .black.opacity(0.45), location: 0),
+                            .init(color: .black.opacity(0.30), location: 0.55),
+                            .init(color: .black.opacity(0.0), location: 1.0)
+                        ]),
+                        center: center, startRadius: 0, endRadius: outerR))
 
-                        // Income (green) vs expense (red), split by share.
-                        let col = p.angle < share ? incomeColor : expenseColor
-                        // Aesthetic brightness gradient + a per-particle twinkle so the field feels alive.
-                        let dir = 0.5 + 0.5 * (0.5 + 0.5 * cos(ang - brightDir))
-                        let twinkle = reduceMotion ? 1.0 : (0.78 + 0.22 * sin(t * 1.7 + p.phase))
-                        let op = p.opacity * dir * twinkle * Double(grow)
-                        let dot = CGFloat(p.dot)
+                    // 2. Particles + centre vignette, clipped to the blob.
+                    ctx.drawLayer { layer in
+                        layer.clip(to: blob)
+                        let dotRmax = half * 0.92
 
-                        let halo = dot * 2.8
-                        ctx.fill(
-                            Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
-                            with: .color(col.opacity(op * 0.16))
-                        )
-                        ctx.fill(
-                            Path(ellipseIn: CGRect(x: pt.x - dot, y: pt.y - dot, width: dot * 2, height: dot * 2)),
-                            with: .color(col.opacity(op))
-                        )
+                        for p in particles {
+                            var prog = (p.radPhase + t * p.radSpeed).truncatingRemainder(dividingBy: 1)
+                            if prog < 0 { prog += 1 }
+                            let radius = dotRmax * pow(prog, 0.62)
+                            let ang = p.baseAng + t * (0.22 + p.angDrift)
+                            let x = half + cos(ang) * radius + p.samp * scale * sin(t * p.sax + p.spx)
+                            let y = half + sin(ang) * radius + p.samp * scale * cos(t * p.say + p.spy)
+                            let dot = (0.4 + p.maxSize * pow(prog, 0.8)) * scale
+                            let fadeIn = prog < 0.12 ? prog / 0.12 : 1
+                            let fadeOut = prog > 0.9 ? (1 - prog) / 0.10 : 1
+                            let op = min(p.baseOp * fadeIn * fadeOut * (0.45 + 0.55 * prog) * grow, 1)
+                            let col = p.baseAng < share * 2 * .pi ? incomeColor : expenseColor
+                            let pt = CGPoint(x: x, y: y)
+
+                            if p.big {
+                                let halo = dot * 2.8
+                                layer.fill(
+                                    Path(ellipseIn: CGRect(x: pt.x - halo, y: pt.y - halo, width: halo * 2, height: halo * 2)),
+                                    with: .color(col.opacity(op * 0.18)))
+                            }
+                            layer.fill(
+                                Path(ellipseIn: CGRect(x: pt.x - dot, y: pt.y - dot, width: dot * 2, height: dot * 2)),
+                                with: .color(col.opacity(op)))
+                        }
+
+                        // Centre vignette so the readout stays legible over the flow.
+                        layer.fill(blob, with: .radialGradient(
+                            Gradient(stops: [
+                                .init(color: .black.opacity(0.92), location: 0),
+                                .init(color: .black.opacity(0.78), location: 0.34),
+                                .init(color: .black.opacity(0.0), location: 0.60)
+                            ]),
+                            center: center, startRadius: 0, endRadius: outerR))
                     }
+
+                    // 3. Blurred glow rim.
+                    var glow = ctx
+                    glow.addFilter(.blur(radius: CGFloat(7 * scale)))
+                    glow.stroke(blob, with: .color(rimAccent.opacity(0.7)), lineWidth: CGFloat(6 * scale))
+
+                    // 4. Thin bright rim.
+                    ctx.stroke(blob, with: .color(rimBright.opacity(0.95)), lineWidth: max(1, CGFloat(1.6 * scale)))
                 }
-                .blur(radius: 0.4)
             }
 
             center()
