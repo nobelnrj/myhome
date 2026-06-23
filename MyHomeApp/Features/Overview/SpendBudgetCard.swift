@@ -23,6 +23,10 @@ struct SpendBudgetCard: View {
     let totalBudget: Decimal
     @Binding var selectedTab: Int
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Drives the count-up: amounts render as ₹0 until `appeared` flips true on first appear.
+    @State private var appeared = false
+
     // MARK: - Computed
 
     private var net: Decimal { income - spent }
@@ -95,7 +99,8 @@ struct SpendBudgetCard: View {
                 incomeShare: incomeShare,
                 incomeColor: DesignTokens.positive,
                 expenseColor: DesignTokens.negative,
-                size: 280
+                size: 280,
+                pulse: totalBudget > 0 && spent > totalBudget
             ) {
                 VStack(spacing: 2) {
                     Text("\(spendPct)%")
@@ -116,10 +121,10 @@ struct SpendBudgetCard: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 2)
 
-            // Income + Spent split tiles
+            // Income + Spent split tiles — count up from ₹0 on first appear.
             HStack(spacing: DesignTokens.spacing12) {
-                splitTile(label: "INCOME", amount: income, color: DesignTokens.positive)
-                splitTile(label: "SPENT", amount: spent, color: DesignTokens.negative)
+                splitTile(label: "INCOME", amount: appeared ? income : 0, color: DesignTokens.positive)
+                splitTile(label: "SPENT", amount: appeared ? spent : 0, color: DesignTokens.negative)
             }
 
             // Budget context (secondary): a thin strip when a budget exists, else a CTA.
@@ -137,6 +142,11 @@ struct SpendBudgetCard: View {
             }
         }
         .neuSurface(.floating, padding: 18)
+        .onAppear {
+            guard !appeared else { return }
+            if reduceMotion { appeared = true }
+            else { withAnimation(.smooth(duration: 0.9)) { appeared = true } }
+        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel)
     }

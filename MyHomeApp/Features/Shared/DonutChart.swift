@@ -223,10 +223,13 @@ struct GlowParticleRing<Center: View>: View {
     var incomeColor: Color
     var expenseColor: Color
     var size: CGFloat = 208
+    /// When true (e.g. over budget), the aura bloom breathes to draw attention.
+    var pulse: Bool = false
     @ViewBuilder var center: () -> Center
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var animated: Double = 0
+    @State private var pulsing = false
 
     // MARK: Particle field (outward-flow emission model, ported from the sample)
 
@@ -304,11 +307,13 @@ struct GlowParticleRing<Center: View>: View {
         let rimBright = rimAccent.lightened(0.55)
 
         return ZStack {
-            // Colored aura bloom so the orb glows off the card and pulls the eye.
+            // Colored aura bloom so the orb glows off the card and pulls the eye. Breathes when
+            // `pulse` is set (over budget) to draw attention.
             Circle()
-                .fill(rimAccent.opacity(0.22))
+                .fill(rimAccent.opacity(pulse ? 0.30 : 0.22))
                 .blur(radius: size * 0.18)
                 .frame(width: size * 0.96, height: size * 0.96)
+                .scaleEffect(pulsing ? 1.07 : 1.0)
                 .opacity(animated)
 
             TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: reduceMotion)) { timeline in
@@ -386,8 +391,16 @@ struct GlowParticleRing<Center: View>: View {
             center()
         }
         .frame(width: size, height: size)
-        .onAppear { animate() }
+        .onAppear { animate(); startPulse() }
+        .onChange(of: pulse) { _, _ in startPulse() }
         .accessibilityElement(children: .combine)
+    }
+
+    private func startPulse() {
+        guard pulse, !reduceMotion else { pulsing = false; return }
+        withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
+            pulsing = true
+        }
     }
 
     private func animate() {

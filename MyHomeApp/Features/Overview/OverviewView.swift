@@ -185,6 +185,7 @@ private struct OverviewMonthContent: View {
                     .font(.subheadline)
                     .foregroundStyle(DesignTokens.label2)
                     .padding(.bottom, -8)
+                    .entrance(0)
 
                 // Hero
                 SpendBudgetCard(
@@ -193,10 +194,12 @@ private struct OverviewMonthContent: View {
                     totalBudget: totalBudget,
                     selectedTab: $selectedTab
                 )
+                .entrance(1)
 
                 // Gmail review banner — only when there are items to triage
                 if !reviewItems.isEmpty {
                     ReviewBanner(count: reviewItems.count) { selectedTab = 1 }
+                        .entrance(2)
                 }
 
                 // Net Worth card — suppressed when no assets and cash is 0 (D-04 / ASSET-05)
@@ -208,6 +211,7 @@ private struct OverviewMonthContent: View {
                         allExpenses: allGlobalExpenses,
                         snapshots: netWorthSnapshots
                     )
+                    .entrance(3)
                 }
 
                 // Where it’s going — donut + legend (OVR-05/06)
@@ -223,18 +227,21 @@ private struct OverviewMonthContent: View {
                             selectedTab = 1
                         }
                     )
+                    .entrance(4)
                 }
 
                 // Spend by category chart (D-05 — restyled, retained on Overview)
                 if !categoryItems.isEmpty {
                     sectionHeader("By Category")
                     SpendByCategoryChart(categoryItems: categoryItems)
+                        .entrance(5)
                 }
 
                 // Spend over time chart (D-05 — restyled, retained on Overview)
                 if !allGlobalExpenses.isEmpty {
                     sectionHeader("Over Time")
                     SpendOverTimeChart(expenses: allGlobalExpenses)
+                        .entrance(6)
                 }
 
                 // Budgets glance
@@ -249,6 +256,7 @@ private struct OverviewMonthContent: View {
                         }
                     }
                     .neuSurface(.raised)
+                    .entrance(7)
                 }
 
                 // Recent
@@ -268,6 +276,7 @@ private struct OverviewMonthContent: View {
                         }
                     }
                     .neuSurface(.raised, padding: nil)
+                    .entrance(8)
                 }
             }
             .padding(.horizontal, 16)

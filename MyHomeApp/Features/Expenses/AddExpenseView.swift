@@ -300,6 +300,8 @@ struct AddExpenseView: View {
         if let acc = selectedAccount, !acc.isArchived {
             UserDefaults.standard.set(acc.id.uuidString, forKey: "lastUsedAccountID")
         }
+        // Premium tactile confirmation on a successful add.
+        Haptics.success()
         // T-01-07: dismiss cleanly after insert (Pitfall 19 — no same-tick navigation race)
         dismiss()
     }

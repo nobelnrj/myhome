@@ -45,7 +45,7 @@ struct SpendDonutCard: View {
         // amount below. Each tile is tappable → Activity pre-filtered to that category (OVR-06).
         HStack(spacing: 12) {
             ForEach(legendItems) { item in
-                Button { onCategoryTap(item.categoryID) } label: {
+                Button { Haptics.tap(); onCategoryTap(item.categoryID) } label: {
                     categoryRingTile(item)
                 }
                 .buttonStyle(.plain)

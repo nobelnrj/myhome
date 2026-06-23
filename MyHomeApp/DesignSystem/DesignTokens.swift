@@ -4,6 +4,7 @@
 // Phase 13: DS-01
 
 import SwiftUI
+import UIKit
 
 enum DesignTokens {
 
@@ -121,4 +122,46 @@ extension View {
             .shadow(color: color.opacity(0.55 * intensity), radius: radius * 0.55)
             .shadow(color: color.opacity(0.32 * intensity), radius: radius * 1.5)
     }
+}
+
+// MARK: - Motion: staggered entrance
+
+/// Fade + rise as the view appears, delayed by its position so a stack of cards cascades in.
+/// Honors Reduce Motion (snaps visible). Theme-agnostic (no colour assumptions).
+private struct EntranceModifier: ViewModifier {
+    let index: Int
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown ? 0 : 16)
+            .onAppear {
+                guard !shown else { return }
+                if reduceMotion { shown = true; return }
+                // Cap the cascade so far-down rows don't wait forever.
+                let delay = Double(min(index, 6)) * 0.06
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.85).delay(delay)) {
+                    shown = true
+                }
+            }
+    }
+}
+
+extension View {
+    /// Staggered fade+rise entrance; pass the item's position in its stack.
+    func entrance(_ index: Int) -> some View { modifier(EntranceModifier(index: index)) }
+}
+
+// MARK: - Haptics
+
+/// Thin wrapper over UIKit feedback generators for premium tactile micro-interactions.
+enum Haptics {
+    static func tap(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {
+        UIImpactFeedbackGenerator(style: style).impactOccurred()
+    }
+    static func selection() { UISelectionFeedbackGenerator().selectionChanged() }
+    static func success() { UINotificationFeedbackGenerator().notificationOccurred(.success) }
+    static func warning() { UINotificationFeedbackGenerator().notificationOccurred(.warning) }
 }
