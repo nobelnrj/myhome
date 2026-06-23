@@ -72,6 +72,7 @@ struct SpendDonutCard: View {
                     .foregroundStyle(DesignTokens.label)
                     .monospacedDigit()
             }
+            .neonGlow(item.color, radius: 8)
             Text(item.label)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(DesignTokens.label)

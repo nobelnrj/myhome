@@ -74,13 +74,32 @@ struct SpendOverTimeChart: View {
                     .frame(height: 80)
             } else {
                 Chart(bucketedData) { point in
-                    // WHOOP-style trend bars: rounded, color-coded, gradient fill.
-                    BarMark(
+                    // Neon trend: gradient area fade + a soft wide glow line under a bright thin
+                    // line (the "same vibe" as the orb — emitted light, no flat fills).
+                    AreaMark(
                         x: .value("Date", point.date),
                         y: .value("Spend", point.spent)
                     )
-                    .cornerRadius(4)
-                    .foregroundStyle(DesignTokens.accent.gradient)
+                    .interpolationMethod(.catmullRom)
+                    .foregroundStyle(LinearGradient(
+                        colors: [DesignTokens.accent.opacity(0.35), DesignTokens.accent.opacity(0.02)],
+                        startPoint: .top, endPoint: .bottom))
+
+                    LineMark(
+                        x: .value("Date", point.date),
+                        y: .value("Spend", point.spent)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
+                    .foregroundStyle(DesignTokens.accent.opacity(0.18))   // glow underlay
+
+                    LineMark(
+                        x: .value("Date", point.date),
+                        y: .value("Spend", point.spent)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    .foregroundStyle(DesignTokens.accent)                 // crisp neon line
                     .accessibilityLabel("\(point.dateLabel), \(point.spentDecimal.formattedINR())")
                 }
                 .chartXAxis {

@@ -23,12 +23,12 @@ struct DonutChart<Center: View>: View {
 
     var body: some View {
         Chart(segments) { seg in
+            // Borderless: no angular inset / corner radius, so segments butt into one seamless
+            // ring (the older "gapped slices" look is gone).
             SectorMark(
                 angle: .value(seg.label, seg.value),
-                innerRadius: .ratio(innerRatio),
-                angularInset: 1.5
+                innerRadius: .ratio(innerRatio)
             )
-            .cornerRadius(5)
             // WHOOP-style depth: each segment fades from its full colour to a darker shade.
             .foregroundStyle(seg.color.gradient)
         }

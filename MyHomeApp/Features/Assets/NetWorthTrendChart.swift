@@ -36,18 +36,31 @@ struct NetWorthTrendChart: View {
         }
 
         Chart(points, id: \.date) { point in
+            // Neon area+line — same emitted-light vibe as the Overview orb and spend trend.
             AreaMark(
                 x: .value("Date", point.date),
                 y: .value("Net Worth", point.value)
             )
-            .foregroundStyle(DesignTokens.positive.opacity(0.15))
+            .interpolationMethod(.catmullRom)
+            .foregroundStyle(LinearGradient(
+                colors: [DesignTokens.positive.opacity(0.35), DesignTokens.positive.opacity(0.02)],
+                startPoint: .top, endPoint: .bottom))
 
             LineMark(
                 x: .value("Date", point.date),
                 y: .value("Net Worth", point.value)
             )
-            .foregroundStyle(DesignTokens.positive)
-            .lineStyle(StrokeStyle(lineWidth: 2))
+            .interpolationMethod(.catmullRom)
+            .lineStyle(StrokeStyle(lineWidth: 6, lineCap: .round, lineJoin: .round))
+            .foregroundStyle(DesignTokens.positive.opacity(0.18))   // glow underlay
+
+            LineMark(
+                x: .value("Date", point.date),
+                y: .value("Net Worth", point.value)
+            )
+            .interpolationMethod(.catmullRom)
+            .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+            .foregroundStyle(DesignTokens.positive)                 // crisp neon line
         }
         .chartYAxis {
             AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in

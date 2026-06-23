@@ -94,8 +94,11 @@ struct SpendByCategoryChart: View {
                 ZStack(alignment: .leading) {
                     Capsule().fill(DesignTokens.fillRecessed2)
                     Capsule()
-                        .fill(item.color.gradient)
+                        .fill(LinearGradient(
+                            colors: [item.color.opacity(0.7), item.color],
+                            startPoint: .leading, endPoint: .trailing))
                         .frame(width: max(6, CGFloat(item.spent / maxSpent) * geo.size.width))
+                        .neonGlow(item.color, radius: 7)
                 }
             }
             .frame(height: 9)

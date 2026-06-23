@@ -110,3 +110,15 @@ enum DesignTokens {
     /// Soft spring — matches handoff cubic-bezier(.32,.72,0,1); used for sheet slide-up / push
     static let springSoft:   Animation = .spring(response: 0.4, dampingFraction: 0.90)
 }
+
+// MARK: - Neon Glow
+
+extension View {
+    /// Layered coloured bloom — the neon vibe shared with the Overview orb. Two soft shadows in
+    /// the source colour (tight + wide) make strokes, bars, and rings appear to emit light.
+    func neonGlow(_ color: Color, radius: CGFloat = 8, intensity: Double = 1) -> some View {
+        self
+            .shadow(color: color.opacity(0.55 * intensity), radius: radius * 0.55)
+            .shadow(color: color.opacity(0.32 * intensity), radius: radius * 1.5)
+    }
+}
