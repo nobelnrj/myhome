@@ -295,7 +295,9 @@ private struct OverviewMonthContent: View {
             if let action {
                 Button(action.label, action: action.run)
                     .font(.subheadline)
+                    .foregroundStyle(DesignTokens.accent)
                     .tint(DesignTokens.accent)
+                    .neonGlow(DesignTokens.accent, radius: 5, intensity: 0.7)
             }
         }
         .padding(.bottom, -8)
@@ -320,6 +322,7 @@ private struct ReviewBanner: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 IconTile(symbol: "envelope", color: DesignTokens.accent, size: 38, cornerRadius: 10)
+                    .neonGlow(DesignTokens.accent, radius: 6, intensity: 0.8)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("\(count) \(count == 1 ? "expense" : "expenses") to review")
                         .font(.headline)

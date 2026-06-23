@@ -248,6 +248,7 @@ private struct BudgetSummaryCard: View {
                     .foregroundStyle(DesignTokens.accent)
                     .frame(width: 52, height: 52)
                     .background(DesignTokens.fillRecessed, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .neonGlow(DesignTokens.accent, radius: 7, intensity: 0.8)
                 Text("Set a budget to track spending")
                     .font(.headline)
                     .foregroundStyle(DesignTokens.label)
