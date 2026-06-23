@@ -228,8 +228,8 @@ struct GlowParticleRing<Center: View>: View {
     private let particles: [Particle] = {
         var rng = SeededRNG(seed: 0xC0FFEE)
         func r() -> Double { Double.random(in: 0...1, using: &rng) }
-        return (0..<520).map { _ in
-            let big = r() > 0.955
+        return (0..<720).map { _ in
+            let big = r() > 0.93
             return Particle(
                 baseAng: r() * 2 * .pi,
                 radSpeed: 0.07 + r() * 0.17,           // outward progress per second
@@ -293,6 +293,13 @@ struct GlowParticleRing<Center: View>: View {
         let rimBright = rimAccent.lightened(0.55)
 
         return ZStack {
+            // Colored aura bloom so the orb glows off the card and pulls the eye.
+            Circle()
+                .fill(rimAccent.opacity(0.22))
+                .blur(radius: size * 0.18)
+                .frame(width: size * 0.96, height: size * 0.96)
+                .opacity(animated)
+
             TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: reduceMotion)) { timeline in
                 let t = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
 
@@ -317,7 +324,7 @@ struct GlowParticleRing<Center: View>: View {
                     // 2. Particles + centre vignette, clipped to the blob.
                     ctx.drawLayer { layer in
                         layer.clip(to: blob)
-                        let dotRmax = half * 0.92
+                        let dotRmax = half * 0.96
 
                         for p in particles {
                             var prog = (p.radPhase + t * p.radSpeed).truncatingRemainder(dividingBy: 1)
@@ -344,12 +351,13 @@ struct GlowParticleRing<Center: View>: View {
                                 with: .color(col.opacity(op)))
                         }
 
-                        // Centre vignette so the readout stays legible over the flow.
+                        // Centre vignette — tight, dark core just behind the readout, clearing
+                        // quickly so the surrounding particle field stays bright and visible.
                         layer.fill(blob, with: .radialGradient(
                             Gradient(stops: [
-                                .init(color: .black.opacity(0.92), location: 0),
-                                .init(color: .black.opacity(0.78), location: 0.34),
-                                .init(color: .black.opacity(0.0), location: 0.60)
+                                .init(color: .black.opacity(0.88), location: 0),
+                                .init(color: .black.opacity(0.62), location: 0.24),
+                                .init(color: .black.opacity(0.0), location: 0.46)
                             ]),
                             center: center, startRadius: 0, endRadius: outerR))
                     }

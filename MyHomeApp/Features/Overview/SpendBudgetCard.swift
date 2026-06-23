@@ -95,20 +95,20 @@ struct SpendBudgetCard: View {
                 incomeShare: incomeShare,
                 incomeColor: DesignTokens.positive,
                 expenseColor: DesignTokens.negative,
-                size: 208
+                size: 280
             ) {
                 VStack(spacing: 2) {
                     Text("\(spendPct)%")
-                        .font(.system(size: 44, weight: .bold, design: .default))
+                        .font(.system(size: 58, weight: .bold, design: .default))
                         .foregroundStyle(DesignTokens.label)
                         .monospacedDigit()
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                         .contentTransition(.numericText())
                         .animation(.smooth(duration: 0.6), value: spendPct)
-                        .frame(width: 140)
+                        .frame(width: 180)
                     Text("spent")
-                        .font(.system(size: 12.5, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                         .tracking(0.5)
                         .foregroundStyle(DesignTokens.label2)
                 }
