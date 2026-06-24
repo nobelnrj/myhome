@@ -205,6 +205,8 @@
 		A13RMTT /* RollingMoneyTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMTT /* RollingMoneyTextTests.swift */; };
 		AANL01 /* AnalyticsAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL01 /* AnalyticsAggregator.swift */; };
 		AANL07 /* AnalyticsAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL07 /* AnalyticsAggregatorTests.swift */; };
+		AANL02 /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL02 /* AnalyticsView.swift */; };
+		AANL03 /* AnalyticsTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL03 /* AnalyticsTrendChart.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -420,6 +422,8 @@
 		F13RMTT /* RollingMoneyTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyTextTests.swift; sourceTree = "<group>"; };
 		FANL01 /* AnalyticsAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsAggregator.swift; sourceTree = "<group>"; };
 		FANL07 /* AnalyticsAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsAggregatorTests.swift; sourceTree = "<group>"; };
+		FANL02 /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
+		FANL03 /* AnalyticsTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsTrendChart.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -498,8 +502,18 @@
 				G127 /* Ingestion */,
 				G128 /* Shared */,
 				G1103 /* Assets */,
+				G_ANL /* Analytics */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		G_ANL /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				FANL02 /* AnalyticsView.swift */,
+				FANL03 /* AnalyticsTrendChart.swift */,
+			);
+			path = Analytics;
 			sourceTree = "<group>";
 		};
 		G1103 /* Assets */ = {
@@ -1064,6 +1078,8 @@
 				A13NS /* NeuSurface.swift in Sources */,
 				A13RMT /* RollingMoneyText.swift in Sources */,
 				AANL01 /* AnalyticsAggregator.swift in Sources */,
+				AANL02 /* AnalyticsView.swift in Sources */,
+				AANL03 /* AnalyticsTrendChart.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
