@@ -71,10 +71,9 @@ struct AnalyticsView: View {
                 }
                 .neuSurface(.raised)
 
-                // 4. By-category breakdown (ANL-04)
-                // INSERTION POINT: AnalyticsCategoryBars — mounted in Task 2
-                // AnalyticsCategoryBars(items: summary.categoryBreakdown)
-                //   is mounted below in Task 2 inside a .neuSurface(.raised) section.
+                // 4. By-category breakdown (ANL-04) — all categories, sorted descending
+                AnalyticsCategoryBars(items: summary.categoryBreakdown)
+                    .neuSurface(.raised)
 
                 // 5. Delta chips insertion point (Phase 15-03 — deferred)
                 // DeltaChip(summary: summary) goes here in 15-03.
