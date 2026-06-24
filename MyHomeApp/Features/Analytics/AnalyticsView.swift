@@ -30,6 +30,11 @@ struct AnalyticsView: View {
     /// Selected time range. Changing this triggers a body re-render → summarize re-runs.
     @State private var selectedRange: SpendRange = .month
 
+    // MARK: - Sheet state (ANL-06)
+
+    /// Controls presentation of the per-category delta drill-down sheet.
+    @State private var showDeltaDrillDown = false
+
     // MARK: - Body
 
     var body: some View {
@@ -54,8 +59,11 @@ struct AnalyticsView: View {
                 .pickerStyle(.segmented)
                 .padding(.bottom, 4)
 
-                // 2. Headline card
+                // 2. Headline card (includes DeltaChip — ANL-05)
                 headlineCard(summary: summary)
+                    .sheet(isPresented: $showDeltaDrillDown) {
+                        DeltaDrillDownSheet(summary: summary)
+                    }
 
                 // 3. Trend chart (ANL-03) — receives pre-aggregated buckets only (Pitfall A)
                 VStack(alignment: .leading, spacing: 10) {
@@ -74,9 +82,6 @@ struct AnalyticsView: View {
                 // 4. By-category breakdown (ANL-04) — all categories, sorted descending
                 AnalyticsCategoryBars(items: summary.categoryBreakdown)
                     .neuSurface(.raised)
-
-                // 5. Delta chips insertion point (Phase 15-03 — deferred)
-                // DeltaChip(summary: summary) goes here in 15-03.
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -107,7 +112,7 @@ struct AnalyticsView: View {
             }
 
             // Hero number — solid .bold .default (NOT thin ultraLight-rounded per v1.2 hero rule)
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(summary.totalSpend.formattedINRWords())
                     .font(.system(size: 34, weight: .bold, design: .default))
                     .monospacedDigit()
@@ -115,6 +120,10 @@ struct AnalyticsView: View {
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
                 Spacer()
+                // ANL-05: delta chip with inverted color semantics; tap opens drill-down sheet (ANL-06)
+                DeltaChip(delta: summary.delta, priorTotal: summary.priorTotalSpend) {
+                    showDeltaDrillDown = true
+                }
             }
         }
         .padding(20)
