@@ -51,10 +51,10 @@
 
 <!-- New screen, pushed from Overview. Shared AnalyticsAggregator feeds charts AND the AI card. -->
 
-- [ ] **ANL-01**: A dedicated Analytics screen is reachable by push from Overview (slide-in), not as a tab.
-- [ ] **ANL-02**: Time-range tabs (week / month / year) scope all analytics content; no custom date-range picker.
+- [x] **ANL-01**: A dedicated Analytics screen is reachable by push from Overview (slide-in), not as a tab.
+- [x] **ANL-02**: Time-range tabs (week / month / year) scope all analytics content; no custom date-range picker.
 - [x] **ANL-03**: A spending-trend area chart (`AreaMark`) over the selected range, with IST-correct date bucketing that reuses the existing `SpendOverTimeAggregator` (no re-implementation).
-- [ ] **ANL-04**: A by-category bar breakdown (`BarMark`) for the selected range.
+- [x] **ANL-04**: A by-category bar breakdown (`BarMark`) for the selected range.
 - [ ] **ANL-05**: Period-over-period delta chips using the inverted color convention — green = spent less than the prior period (good), coral = spent more (bad).
 - [ ] **ANL-06**: Tapping a delta chip drills into the underlying category/period breakdown.
 - [x] **ANL-07**: All analytics aggregation is computed by a single pure/testable `AnalyticsAggregator` that produces a `SpendSummary` value type reused by the AI Insight card; an IST-midnight-boundary bucketing test is a required exit criterion.
@@ -107,10 +107,10 @@
 | SKIN-09 | Phase 14 | Complete |
 | OVR-05 | Phase 14 | Complete |
 | OVR-06 | Phase 14 | Complete |
-| ANL-01 | Phase 15 | Pending |
-| ANL-02 | Phase 15 | Pending |
+| ANL-01 | Phase 15 | Complete |
+| ANL-02 | Phase 15 | Complete |
 | ANL-03 | Phase 15 | Complete |
-| ANL-04 | Phase 15 | Pending |
+| ANL-04 | Phase 15 | Complete |
 | ANL-05 | Phase 15 | Pending |
 | ANL-06 | Phase 15 | Pending |
 | ANL-07 | Phase 15 | Complete |
