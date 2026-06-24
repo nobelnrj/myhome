@@ -107,6 +107,7 @@ private struct OverviewMonthContent: View {
 
     @State private var editingExpense: Expense?
     @State private var navigateToAssets = false
+    @State private var navigateToAnalytics = false
 
     init(start: Date, end: Date, monthLabel: String,
          selectedTab: Binding<Int>,
@@ -239,7 +240,7 @@ private struct OverviewMonthContent: View {
 
                 // Spend over time chart (D-05 — restyled, retained on Overview)
                 if !allGlobalExpenses.isEmpty {
-                    sectionHeader("Over Time")
+                    sectionHeader("Over Time", action: ("See analytics", { navigateToAnalytics = true }))
                     SpendOverTimeChart(expenses: allGlobalExpenses)
                         .entrance(6)
                 }
@@ -289,6 +290,9 @@ private struct OverviewMonthContent: View {
         }
         .navigationDestination(isPresented: $navigateToAssets) {
             AssetsListView()
+        }
+        .navigationDestination(isPresented: $navigateToAnalytics) {
+            AnalyticsView(expenses: allGlobalExpenses, categories: categories)
         }
     }
 
