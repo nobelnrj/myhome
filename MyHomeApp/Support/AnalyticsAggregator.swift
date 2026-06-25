@@ -115,15 +115,28 @@ enum AnalyticsAggregator {
             }
         }
 
-        // (e) Headline totals.
-        let totalSpend = currentExpenses.reduce(Decimal.zero) { $0 + $1.amount }
-        let priorTotalSpend = priorExpenses.reduce(Decimal.zero) { $0 + $1.amount }
-
-        // (f) Per-category breakdown for current period.
+        // (e) Per-category totals for both periods — single source of truth for the
+        // headline AND the bars, so the two can never silently disagree.
         let currentCategoryTotals = BudgetCalculator.monthlySpend(
             for: currentExpenses,
             categories: categories
         )
+        let priorCategoryTotals = BudgetCalculator.monthlySpend(
+            for: priorExpenses,
+            categories: categories
+        )
+
+        // (f) Headline totals — composed identically to OverviewView (CR-01): categorized
+        // spend + uncategorized spend. This matches the app-wide spend convention and keeps
+        // the headline reconciled with the category bars (their sum + the uncategorized
+        // remainder). The previous raw `reduce` was wrong: it subtracted refund/income
+        // (negative-amount) rows and counted orphaned-category spend the bars exclude.
+        let totalSpend = currentCategoryTotals.values.reduce(Decimal.zero, +)
+            + BudgetCalculator.uncategorizedSpend(for: currentExpenses)
+        let priorTotalSpend = priorCategoryTotals.values.reduce(Decimal.zero, +)
+            + BudgetCalculator.uncategorizedSpend(for: priorExpenses)
+
+        // (g) Per-category breakdown for current period.
         // Map PersistentIdentifier → CategorySpendItem, resolving name + color from categories.
         let catLookup: [PersistentIdentifier: Category] = Dictionary(
             uniqueKeysWithValues: categories.map { ($0.persistentModelID, $0) }
@@ -144,19 +157,15 @@ enum AnalyticsAggregator {
             }
             .sorted { $0.spentDecimal > $1.spentDecimal }
 
-        // (g) Prior-period per-category totals (for drill-down delta chips).
-        let priorCategorySpend = BudgetCalculator.monthlySpend(
-            for: priorExpenses,
-            categories: categories
-        )
-
+        // (h) Prior-period per-category totals feed the drill-down delta chips (ANL-06).
+        // Reuses the totals already computed in (e) — no second monthlySpend pass.
         return SpendSummary(
             range: range,
             totalSpend: totalSpend,
             priorTotalSpend: priorTotalSpend,
             trendBuckets: trendBuckets,
             categoryBreakdown: categoryBreakdown,
-            priorCategorySpend: priorCategorySpend
+            priorCategorySpend: priorCategoryTotals
         )
     }
 

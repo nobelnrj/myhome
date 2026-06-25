@@ -61,9 +61,6 @@ struct AnalyticsView: View {
 
                 // 2. Headline card (includes DeltaChip — ANL-05)
                 headlineCard(summary: summary)
-                    .sheet(isPresented: $showDeltaDrillDown) {
-                        DeltaDrillDownSheet(summary: summary)
-                    }
 
                 // 3. Trend chart (ANL-03) — receives pre-aggregated buckets only (Pitfall A)
                 VStack(alignment: .leading, spacing: 10) {
@@ -91,6 +88,11 @@ struct AnalyticsView: View {
         .background(DesignTokens.bgCanvas)
         .navigationTitle("Analytics")
         .navigationBarTitleDisplayMode(.inline)
+        // WR-01: sheet anchored at the ScrollView level, not on a LazyVStack child —
+        // lazy containers can recycle child views and silently drop the presentation.
+        .sheet(isPresented: $showDeltaDrillDown) {
+            DeltaDrillDownSheet(summary: summary)
+        }
     }
 
     // MARK: - Subviews
