@@ -45,7 +45,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 - [x] **Phase 13: Design System Foundation** — Tokens, NeuSurface, NeuTabBar, RollingMoneyText, accessibility infrastructure
 - [x] **Phase 14: Restyle Existing Screens + Overview Donut** — Full neumorphic restyle of every existing screen; spend donut with tap-to-filter added to Overview (completed 2026-06-22)
-- [ ] **Phase 15: Analytics Screen** — New screen pushed from Overview; AnalyticsAggregator, area chart, category bars, delta chips
+- [x] **Phase 15: Analytics Screen** — New screen pushed from Overview; AnalyticsAggregator, area chart, category bars, delta chips (completed 2026-06-25)
 - [ ] **Phase 16: AI Insight Card** — On-device FoundationModels card on Analytics screen; availability gating, streaming typewriter, numeric integrity
 
 ---
@@ -137,7 +137,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 - [x] 15-01-PLAN.md — AnalyticsAggregator + SpendSummary + IST-boundary tests (ANL-03, ANL-07)
 - [x] 15-02-PLAN.md — Analytics screen shell, push nav, AreaMark trend + category bars (ANL-01, ANL-02, ANL-03, ANL-04)
-- [ ] 15-03-PLAN.md — Inverted-color delta chips + drill-down sheet + full clean-build gate + human-verify (ANL-05, ANL-06, ANL-07)
+- [x] 15-03-PLAN.md — Inverted-color delta chips + drill-down sheet + full clean-build gate + human-verify (ANL-05, ANL-06, ANL-07)
 **UI hint**: yes
 
 ### Phase 16: AI Insight Card
@@ -171,7 +171,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 12. Notes & Daily Routine Enhancement | v1.1 | 5/5 | Complete | 2026-06-20 |
 | 13. Design System Foundation | v1.2 | 3/3 | Complete | 2026-06-22 |
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
-| 15. Analytics Screen | v1.2 | 2/3 | In Progress|  |
+| 15. Analytics Screen | v1.2 | 3/3 | Complete   | 2026-06-25 |
 | 16. AI Insight Card | v1.2 | 0/? | Not started | - |
 
 ---
