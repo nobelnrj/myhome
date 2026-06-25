@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Neumorphic Redesign
-status: executing
-last_updated: "2026-06-25T15:36:08.149Z"
+status: ready_to_plan
+last_updated: 2026-06-25T15:51:45.387Z
 last_activity: 2026-06-24
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 72
   percent: 40
+stopped_at: Phase 15 complete (3/3) — ready to discuss Phase 16
 ---
 
 # Project State
@@ -20,20 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 15 — analytics-screen
+**Current focus:** Phase 16 — ai insight card
 
 ## Current Position
 
-Phase: 15 (analytics-screen) — EXECUTING
-Plan: 2 of 3
-Status: Ready to execute
-Last activity: 2026-06-24
+Phase: 16
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-06-25
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 30
+- Total plans completed: 33
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -48,6 +49,7 @@ Last activity: 2026-06-24
 | 10 | 4 | - | - |
 | 11 | 4 | - | - |
 | 11.1 | 5 | - | - |
+| 15 | 3 | - | - |
 
 **Recent Trend:**
 
