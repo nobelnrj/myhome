@@ -161,8 +161,8 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 2** *(blocked on 16-01; parallel — disjoint files)*
 
-- [ ] 16-02-PLAN.md — InsightVerifier numeric integrity + templated fallback; TDD (AI-04)
-- [ ] 16-03-PLAN.md — isInsightAvailable (4 branches) + token-budgeted InsightPromptBuilder + InsightService.generate + error routing; TDD (AI-02, AI-03)
+- [x] 16-02-PLAN.md — InsightVerifier numeric integrity + templated fallback; TDD (AI-04)
+- [x] 16-03-PLAN.md — isInsightAvailable (4 branches) + token-budgeted InsightPromptBuilder + InsightService.generate + error routing; TDD (AI-02, AI-03)
 
 **Wave 3** *(blocked on 16-02 + 16-03)*
 
@@ -190,7 +190,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 13. Design System Foundation | v1.2 | 3/3 | Complete | 2026-06-22 |
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
-| 16. AI Insight Card | v1.2 | 1/5 | In Progress|  |
+| 16. AI Insight Card | v1.2 | 3/5 | In Progress|  |
 
 ---
 
