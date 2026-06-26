@@ -25,6 +25,14 @@ enum DesignTokens {
     static let negative      = Color(hex: "#FF6B6B")
     static let orange        = Color(hex: "#FFB020")
 
+    // MARK: - AI Insight accent (Phase 16 — localized; not a general accent)
+    // Scoped exclusively to AIInsightCard. DO NOT use on any other surface.
+    // The primary app accent (#FFD60A canary) is unchanged and continues to govern
+    // all Overview, tab bar, and budget UI.
+    static let aiVioletTop    = Color(hex: "#C4A6FF")  // edge gradient — top
+    static let aiVioletBottom = Color(hex: "#7C5CFF")  // edge gradient — bottom
+    static let aiVioletGlow   = Color(hex: "#8B5CF6")  // shadow / orb / wash
+
     // MARK: - Labels
     // Base: #ECEDF4 for primary; #DCDFEE (rgb 220,223,238) with opacity for secondary tiers
     static let label  = Color(hex: "#ECEDF4")
