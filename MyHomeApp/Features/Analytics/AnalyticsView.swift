@@ -79,6 +79,17 @@ struct AnalyticsView: View {
                 // 4. By-category breakdown (ANL-04) — all categories, sorted descending
                 AnalyticsCategoryBars(items: summary.categoryBreakdown)
                     .neuSurface(.raised)
+
+                // 5. AI Insight card (AI-01/D-01/D-02):
+                //    - #available(iOS 26, *) keeps this file compiling at iOS 17.0 target (Pitfall 1/2)
+                //    - AIInsightCard does its own runtime availability check; returns EmptyView on
+                //      any unavailable branch so pre-iOS-26 and AI-ineligible devices see nothing (SC-2)
+                //    - summary is re-computed at top of body on every selectedRange change, so range
+                //      switches flow through to the card's .task(id:) for re-generation (D-08)
+                if #available(iOS 26, *) {
+                    AIInsightCard(summary: summary)
+                        .padding(.top, 8)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
