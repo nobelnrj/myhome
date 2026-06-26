@@ -107,8 +107,25 @@ enum InsightPromptBuilder {
 /// This file-scope function is the unit-testable seam: tests inject known
 /// `SystemLanguageModel.Availability` values and assert the return value.
 ///
-/// Stub: always returns `false`. Plan 03 Task 1 implements the real switch.
+/// Returns `true` only when the system model is `.available`; `false` for every
+/// unavailability reason (D-01). The switch is exhaustive over all three
+/// `UnavailableReason` cases so a future SDK reason surfaces as a compile error
+/// rather than silently falling through a `default:`.
 @available(iOS 26, *)
 func isInsightAvailable(_ availability: SystemLanguageModel.Availability) -> Bool {
-    return false  // stub — Plan 03 implements the four-branch switch
+    switch availability {
+    case .available:
+        return true
+    case .unavailable(let reason):
+        switch reason {
+        case .deviceNotEligible:
+            return false
+        case .appleIntelligenceNotEnabled:
+            return false
+        case .modelNotReady:
+            return false
+        @unknown default:
+            return false
+        }
+    }
 }
