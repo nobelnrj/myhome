@@ -745,22 +745,24 @@ Circle()
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All three questions are resolved into concrete plan-task contingencies during Phase 16 planning — each carries a committed implementation path, so no question leaves an unhandled code path.
 
 1. **`@Generable` + memberwise init compatibility**
    - What we know: `@Generable` attaches `@attached(member, ...)` macros that add conformance members. Standard memberwise `init` may or may not be preserved.
    - What's unclear: Can `InsightFallbackBuilder` construct a `SpendInsight(observation:suggestion:)` directly, or must it use `GeneratedContent`?
-   - Recommendation: Planner should add a Wave 0 build-check task that confirms memberwise init compiles after applying `@Generable`. If not, `InsightFallbackBuilder` returns a plain struct `FallbackInsight { let observation: String; let suggestion: String? }` and the View uses a union type or protocol.
+   - RESOLVED: Plan 16-01 Task 2 adds a Wave 0 compile-check that confirms memberwise init compiles after applying `@Generable`, and records the outcome in 16-01-SUMMARY. Plan 16-02 reads that outcome before implementing the fallback. If memberwise init is not preserved, `InsightFallbackBuilder` returns a plain `FallbackInsight { let observation: String; let suggestion: String? }` and the View uses a union type or protocol.
 
 2. **Verifier regex for Indian number format**
    - What we know: Indian formatting uses `₹12,45,000` (lakh grouping). The prompt formatter uses standard `12,450`. The model may use either.
    - What's unclear: Will the model respect the exact formatting in the prompt or adopt Indian lakh separators?
-   - Recommendation: The verifier normalises by stripping ALL commas and ₹ before Decimal comparison, which handles both formats.
+   - RESOLVED: Plan 16-02 Task 1 normalises by stripping ALL commas and `₹` before Decimal comparison, so both grouping formats pass. The system prompt (16-03 Task 2) additionally instructs "use exactly the rupee format shown above."
 
 3. **`LanguageModelSession.GenerationError` init for mock**
    - What we know: `GenerationError` has a `Context` associated value. The public `Context` init signature is not confirmed in the swiftinterface snippet above.
    - What's unclear: Can tests construct `GenerationError.guardrailViolation(.init())` directly, or is `Context` opaque?
-   - Recommendation: If `Context` is not publicly constructible, wrap the error in a local error type for test stubs, and match on the error type in `catch` blocks using `is LanguageModelSession.GenerationError`.
+   - RESOLVED: Plan 16-03 Task 2 matches errors via type (`is LanguageModelSession.GenerationError`) rather than constructing `Context`. If `Context` is not publicly constructible, the mock wraps a local error type for test stubs and the production `catch` matches on the error type.
 
 ---
 
