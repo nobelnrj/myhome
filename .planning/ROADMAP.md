@@ -157,7 +157,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 1** (foundation — unblocks all)
 
-- [ ] 16-01-PLAN.md — Contracts + scaffolds: SpendInsight @Generable, InsightGenerating seam, isInsightAvailable + verifier/prompt stubs, violet DesignTokens, pbxproj registration of all 5 files, RED test scaffolds (AI-02, AI-03, AI-04, AI-05)
+- [x] 16-01-PLAN.md — Contracts + scaffolds: SpendInsight @Generable, InsightGenerating seam, isInsightAvailable + verifier/prompt stubs, violet DesignTokens, pbxproj registration of all 5 files, RED test scaffolds (AI-02, AI-03, AI-04, AI-05)
 
 **Wave 2** *(blocked on 16-01; parallel — disjoint files)*
 
@@ -190,7 +190,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 13. Design System Foundation | v1.2 | 3/3 | Complete | 2026-06-22 |
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
-| 16. AI Insight Card | v1.2 | 0/5 | Planned | - |
+| 16. AI Insight Card | v1.2 | 1/5 | In Progress|  |
 
 ---
 
