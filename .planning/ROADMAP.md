@@ -166,7 +166,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 3** *(blocked on 16-02 + 16-03)*
 
-- [ ] 16-04-PLAN.md — AIInsightCard view (availability switch, violet glow/orb, streaming typewriter, ReduceMotion, verifier) + AnalyticsView integration + full-suite gate (AI-01, AI-02, AI-05)
+- [x] 16-04-PLAN.md — AIInsightCard view (availability switch, violet glow/orb, streaming typewriter, ReduceMotion, verifier) + AnalyticsView integration + full-suite gate (AI-01, AI-02, AI-05)
 
 **Wave 4** *(blocked on 16-04)*
 
@@ -190,7 +190,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 13. Design System Foundation | v1.2 | 3/3 | Complete | 2026-06-22 |
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
-| 16. AI Insight Card | v1.2 | 3/5 | In Progress|  |
+| 16. AI Insight Card | v1.2 | 4/5 | In Progress|  |
 
 ---
 
