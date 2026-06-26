@@ -210,6 +210,11 @@
 		AANL04 /* AnalyticsCategoryBars.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL04 /* AnalyticsCategoryBars.swift */; };
 		AANL05 /* DeltaChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL05 /* DeltaChip.swift */; };
 		AANL06 /* DeltaDrillDownSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL06 /* DeltaDrillDownSheet.swift */; };
+		A1601IS /* InsightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IS /* InsightService.swift */; };
+		A1601IV /* InsightVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IV /* InsightVerifier.swift */; };
+		A1601AIC /* AIInsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601AIC /* AIInsightCard.swift */; };
+		A1601IST /* InsightServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IST /* InsightServiceTests.swift */; };
+		A1601IVT /* InsightVerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IVT /* InsightVerifierTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -430,6 +435,11 @@
 		FANL04 /* AnalyticsCategoryBars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsCategoryBars.swift; sourceTree = "<group>"; };
 		FANL05 /* DeltaChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeltaChip.swift; sourceTree = "<group>"; };
 		FANL06 /* DeltaDrillDownSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeltaDrillDownSheet.swift; sourceTree = "<group>"; };
+		F1601IS /* InsightService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightService.swift; sourceTree = "<group>"; };
+		F1601IV /* InsightVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightVerifier.swift; sourceTree = "<group>"; };
+		F1601AIC /* AIInsightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIInsightCard.swift; sourceTree = "<group>"; };
+		F1601IST /* InsightServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightServiceTests.swift; sourceTree = "<group>"; };
+		F1601IVT /* InsightVerifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightVerifierTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -521,6 +531,7 @@
 				FANL04 /* AnalyticsCategoryBars.swift */,
 				FANL05 /* DeltaChip.swift */,
 				FANL06 /* DeltaDrillDownSheet.swift */,
+				F1601AIC /* AIInsightCard.swift */,
 			);
 			path = Analytics;
 			sourceTree = "<group>";
@@ -724,6 +735,8 @@
 				F1101NNS /* NPSNavService.swift */,
 				F1101SAS /* SIPAccrualService.swift */,
 				FANL01 /* AnalyticsAggregator.swift */,
+				F1601IS /* InsightService.swift */,
+				F1601IV /* InsightVerifier.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -818,6 +831,8 @@
 				F13DST /* DesignTokensTests.swift */,
 				F13RMTT /* RollingMoneyTextTests.swift */,
 				FANL07 /* AnalyticsAggregatorTests.swift */,
+				F1601IST /* InsightServiceTests.swift */,
+				F1601IVT /* InsightVerifierTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -1092,6 +1107,9 @@
 				AANL04 /* AnalyticsCategoryBars.swift in Sources */,
 				AANL05 /* DeltaChip.swift in Sources */,
 				AANL06 /* DeltaDrillDownSheet.swift in Sources */,
+				A1601IS /* InsightService.swift in Sources */,
+				A1601IV /* InsightVerifier.swift in Sources */,
+				A1601AIC /* AIInsightCard.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1169,6 +1187,8 @@
 				A13DST /* DesignTokensTests.swift in Sources */,
 				A13RMTT /* RollingMoneyTextTests.swift in Sources */,
 				AANL07 /* AnalyticsAggregatorTests.swift in Sources */,
+				A1601IST /* InsightServiceTests.swift in Sources */,
+				A1601IVT /* InsightVerifierTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
