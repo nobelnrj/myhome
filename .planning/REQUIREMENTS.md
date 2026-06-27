@@ -63,11 +63,11 @@
 
 <!-- FoundationModels, iOS 26, gated behind availability. Finance-AI safety is non-negotiable. -->
 
-- [ ] **AI-01**: An AI Insight card on the Analytics screen produces a natural-language spending insight from on-device Apple FoundationModels (iOS 26 / Apple Intelligence) — fully on-device and offline; finance data never leaves the device.
-- [ ] **AI-02**: Two-layer availability gating — `#available(iOS 26, *)` plus runtime `SystemLanguageModel.default.availability` — with all unavailability cases handled (`deviceNotEligible`, `appleIntelligenceNotEnabled`, `modelNotReady`); on ineligible devices the card degrades to a graceful "insights available on Apple Intelligence devices" shell with no error noise, and no non-gated code is affected.
-- [ ] **AI-03**: The insight uses guided generation — a `@Generable` struct (`observation` + optional `suggestion`) with a structured prompt kept under the model's token budget — and handles `guardrailViolation` and `exceededContextWindowSize`.
-- [ ] **AI-04**: Numeric integrity — all rupee amounts, percentages, and deltas are pre-computed in Swift (`Decimal`) and injected as literal context; the model never computes figures, and its output is verified against the injected facts before display (no invented numbers).
-- [ ] **AI-05**: Insights are generated on demand and discarded after the session (no persisted insight history), revealed with a streaming typewriter animation that honors Reduce Motion.
+- [x] **AI-01**: An AI Insight card on the Analytics screen produces a natural-language spending insight from on-device Apple FoundationModels (iOS 26 / Apple Intelligence) — fully on-device and offline; finance data never leaves the device.
+- [x] **AI-02**: Two-layer availability gating — `#available(iOS 26, *)` plus runtime `SystemLanguageModel.default.availability` — with all unavailability cases handled (`deviceNotEligible`, `appleIntelligenceNotEnabled`, `modelNotReady`); on ineligible devices the card degrades to a graceful "insights available on Apple Intelligence devices" shell with no error noise, and no non-gated code is affected.
+- [x] **AI-03**: The insight uses guided generation — a `@Generable` struct (`observation` + optional `suggestion`) with a structured prompt kept under the model's token budget — and handles `guardrailViolation` and `exceededContextWindowSize`.
+- [x] **AI-04**: Numeric integrity — all rupee amounts, percentages, and deltas are pre-computed in Swift (`Decimal`) and injected as literal context; the model never computes figures, and its output is verified against the injected facts before display (no invented numbers).
+- [x] **AI-05**: Insights are generated on demand and discarded after the session (no persisted insight history), revealed with a streaming typewriter animation that honors Reduce Motion.
 
 ---
 
@@ -114,8 +114,8 @@
 | ANL-05 | Phase 15 | Complete |
 | ANL-06 | Phase 15 | Complete |
 | ANL-07 | Phase 15 | Complete |
-| AI-01 | Phase 16 | Pending |
-| AI-02 | Phase 16 | Pending |
-| AI-03 | Phase 16 | Pending |
-| AI-04 | Phase 16 | Pending |
-| AI-05 | Phase 16 | Pending |
+| AI-01 | Phase 16 | Complete |
+| AI-02 | Phase 16 | Complete |
+| AI-03 | Phase 16 | Complete |
+| AI-04 | Phase 16 | Complete |
+| AI-05 | Phase 16 | Complete |
