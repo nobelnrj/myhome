@@ -46,7 +46,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 - [x] **Phase 13: Design System Foundation** â Tokens, NeuSurface, NeuTabBar, RollingMoneyText, accessibility infrastructure
 - [x] **Phase 14: Restyle Existing Screens + Overview Donut** â Full neumorphic restyle of every existing screen; spend donut with tap-to-filter added to Overview (completed 2026-06-22)
 - [x] **Phase 15: Analytics Screen** â New screen pushed from Overview; AnalyticsAggregator, area chart, category bars, delta chips (completed 2026-06-25)
-- [ ] **Phase 16: AI Insight Card** â On-device FoundationModels card on Analytics screen; availability gating, streaming typewriter, numeric integrity
+- [x] **Phase 16: AI Insight Card** â On-device FoundationModels card on Analytics screen; availability gating, streaming typewriter, numeric integrity (completed 2026-06-27)
 
 ---
 
@@ -170,7 +170,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Wave 4** *(blocked on 16-04)*
 
-- [ ] 16-05-PLAN.md — On-device human-verify: live insight, typewriter, silent absence (AI-01, AI-05)
+- [x] 16-05-PLAN.md — On-device human-verify: live insight, typewriter, silent absence (AI-01, AI-05)
 
 **UI hint**: yes
 
@@ -190,7 +190,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 | 13. Design System Foundation | v1.2 | 3/3 | Complete | 2026-06-22 |
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
-| 16. AI Insight Card | v1.2 | 4/5 | In Progress|  |
+| 16. AI Insight Card | v1.2 | 5/5 | Complete   | 2026-06-27 |
 
 ---
 
