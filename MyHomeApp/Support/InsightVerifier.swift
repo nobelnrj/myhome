@@ -26,9 +26,9 @@ import Foundation
 /// Guarded numbers are:
 ///   - Those with a ₹ prefix (rupee amounts)
 ///   - Those with a % suffix (percentages)
-///   - Bare integers or decimals with magnitude ≥ 100 (large standalone numbers — safety net)
 ///
-/// Bare integers < 100 with no ₹ prefix and no % suffix are skipped (Pitfall 5).
+/// Bare numbers with no ₹ prefix and no % suffix are prose (years, counts, ordinals) and are
+/// never checked (revised Pitfall 5, 16-RESEARCH.md).
 @available(iOS 26, *)
 enum InsightVerifier {
 
@@ -51,15 +51,28 @@ enum InsightVerifier {
     /// Includes: `totalSpend`, `priorTotalSpend`, `abs(delta)`, the whole-number percentage
     /// `Decimal(abs(Int(deltaFraction * 100)))`, every `categoryBreakdown[].spentDecimal`,
     /// and every `priorCategorySpend.values`.
+    ///
+    /// Every rupee amount is inserted BOTH raw and rounded to whole rupees. The prompt
+    /// (`InsightPromptBuilder`) formats amounts with `maximumFractionDigits: 0`, so the model
+    /// only ever sees whole-rupee figures; for any user whose data contains paise (bank-parsed
+    /// expenses carry fractional amounts), the raw fact would never match the model's rounded
+    /// echo and the insight would fall back forever (WR-01). Inserting the rounded value closes
+    /// that gap; the raw value is retained so internally-formatted fallback text also verifies.
     static func buildCanonicalSet(from summary: SpendSummary) -> Set<Decimal> {
         var facts = Set<Decimal>()
 
+        // Insert a rupee amount both raw and rounded to whole rupees (matches prompt formatting).
+        func insertRupee(_ amount: Decimal) {
+            facts.insert(amount)
+            facts.insert(roundedToWholeRupees(amount))
+        }
+
         // Headline totals
-        facts.insert(summary.totalSpend)
-        facts.insert(summary.priorTotalSpend)
+        insertRupee(summary.totalSpend)
+        insertRupee(summary.priorTotalSpend)
 
         // Absolute delta (direction-agnostic: e.g. ₹2,000 whether up or down)
-        facts.insert(abs(summary.delta))
+        insertRupee(abs(summary.delta))
 
         // Whole-number percentage (e.g. Decimal(20) for "20%" when deltaFraction ≈ 0.2)
         let pct = Decimal(abs(Int(summary.deltaFraction * 100)))
@@ -67,15 +80,24 @@ enum InsightVerifier {
 
         // Per-category current-period spend
         for item in summary.categoryBreakdown {
-            facts.insert(item.spentDecimal)
+            insertRupee(item.spentDecimal)
         }
 
         // Per-category prior-period spend
         for value in summary.priorCategorySpend.values {
-            facts.insert(value)
+            insertRupee(value)
         }
 
         return facts
+    }
+
+    /// Rounds a `Decimal` to whole rupees (0 fraction digits), matching the
+    /// `maximumFractionDigits: 0` formatting used when amounts are placed into the prompt.
+    private static func roundedToWholeRupees(_ amount: Decimal) -> Decimal {
+        var input = amount
+        var result = Decimal()
+        NSDecimalRound(&result, &input, 0, .plain)
+        return result
     }
 
     // MARK: - Number Extraction
@@ -86,8 +108,8 @@ enum InsightVerifier {
     /// suffix). Each match is normalised by stripping the ₹ prefix and all commas before
     /// `Decimal(string:)` conversion, making standard and lakh grouping equivalent.
     ///
-    /// Guard rule (Pitfall 5): a bare number with no ₹ prefix and no % suffix is only flagged
-    /// if its magnitude is ≥ 100; smaller prose integers ("skipping 2 orders") are ignored.
+    /// Guard rule (revised Pitfall 5): only ₹-prefixed and %-suffixed tokens are financial
+    /// figures; bare numbers (years, counts, ordinals) are prose and are never checked.
     static func allNumbersVerified(in text: String, against facts: Set<Decimal>) -> Bool {
         // Regex captures:
         //   Group 1 (₹)?   — optional Indian rupee sign prefix
@@ -100,8 +122,11 @@ enum InsightVerifier {
             let raw = String(match.output.2).replacingOccurrences(of: ",", with: "")
             guard let value = Decimal(string: raw) else { continue }
 
-            // Apply guard rule: skip bare numbers < 100 with no ₹ or % marker
-            guard hasRupeePrefix || hasPercentSuffix || value >= 100 else { continue }
+            // Guard rule (revised Pitfall 5, 16-RESEARCH.md): only ₹-prefixed and %-suffixed
+            // tokens are financial figures the model must not invent. Bare standalone numbers
+            // (years, counts, ordinals) are prose, never checked — the earlier magnitude≥100
+            // clause false-rejected legitimate large prose numbers (WR-03).
+            guard hasRupeePrefix || hasPercentSuffix else { continue }
 
             if !facts.contains(value) {
                 return false

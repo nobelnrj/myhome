@@ -134,6 +134,37 @@ struct InsightVerifierTests {
                 "Insight with only small integers must be returned unchanged")
     }
 
+    /// AI-04 (WR-01 regression): a user whose data carries paise must still get the live insight.
+    ///
+    /// The prompt formats amounts at `maximumFractionDigits: 0`, so the model only ever sees
+    /// whole-rupee figures. With a paise-bearing total (₹12,500.75 → model echoes ₹12,501), the
+    /// raw fact ₹12,500.75 would never match and the insight would fall back forever. The
+    /// canonical set now also stores the whole-rupee rounding, so the echoed ₹12,501 verifies.
+    @Test("InsightVerifier passes model's whole-rupee echo when the underlying fact has paise")
+    @available(iOS 26, *)
+    func testVerifierPassesRoundedPaiseAmount() {
+        let summary = SpendSummary(
+            range: .month,
+            totalSpend: Decimal(string: "12500.75")!,
+            priorTotalSpend: 10_000,
+            trendBuckets: [],
+            categoryBreakdown: [],
+            priorCategorySpend: [:]
+        )
+        // Model echoes the rounded figure it was shown in the prompt (₹12,501), not the paise value.
+        let insight = SpendInsight(
+            observation: "You spent ₹12,501 this month, up 25% vs last period.",
+            suggestion: nil
+        )
+
+        let result = InsightVerifier.verify(insight, against: summary)
+
+        #expect(result.passed == true,
+                "The model's whole-rupee echo of a paise-bearing total must verify (WR-01)")
+        #expect(result.observation == insight.observation,
+                "A verified insight must be returned unchanged, not replaced by the fallback")
+    }
+
     // MARK: AI-04: Fallback Builder
 
     /// AI-04 self-consistency: the fallback output must itself pass verification.
