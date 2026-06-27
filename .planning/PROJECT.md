@@ -64,6 +64,7 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 - ✓ Face ID app lock with full LAError handling + passcode fallback; Settings shell — v1.0 (Phase 5)
 - ✓ Gmail read-only OAuth (ASWebAuthenticationSession + PKCE, no SDK), Keychain token, 30-day backfill, Sync now, last-synced, reconnect CTA — v1.0 (Phase 6)
 - ✓ Automated bank-email ingestion — HDFC + ICICI parsers, 0.85-confidence triage, Review Inbox, dedup, reversal/refund handling, merchant normalization, parser provenance, best-effort BGAppRefreshTask — v1.0 (Phase 7)
+- ✓ On-device AI Insight card on Analytics — FoundationModels (Apple Intelligence) natural-language spending insight, silent absence on unavailable devices, streaming typewriter + Reduce-Motion degradation, numeric-integrity verifier (no model-invented figures), templated fallback — v1.2 (Phase 16; on-device sign-off 2026-06-27) [AI-01..AI-05]
 
 ### Active
 
@@ -168,4 +169,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-08 — started milestone v1.1 (Accounts, Assets & Household Polish)*
+*Last updated: 2026-06-27 — Phase 16 (AI Insight Card) complete; v1.2 Neumorphic Redesign phases 13–16 all shipped.*
