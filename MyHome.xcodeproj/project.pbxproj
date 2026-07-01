@@ -7,10 +7,51 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1001TDS /* TransferDetectionScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1001TDS /* TransferDetectionScorer.swift */; };
+		A1002TSS /* TransferScanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1002TSS /* TransferScanService.swift */; };
+		A1003TDST /* TransferDetectionScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1003TDST /* TransferDetectionScorerTests.swift */; };
+		A1004TSST /* TransferScanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1004TSST /* TransferScanServiceTests.swift */; };
+		A1005ABTT /* AccountBalanceTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1005ABTT /* AccountBalanceTransferTests.swift */; };
+		A1006EETT /* EditExpenseTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1006EETT /* EditExpenseTransferTests.swift */; };
 		A101 /* MyHomeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F101 /* MyHomeApp.swift */; };
 		A102 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F102 /* RootView.swift */; };
 		A103 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F103 /* Assets.xcassets */; };
+		A1030TPR /* TransferPairRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1030TPR /* TransferPairRow.swift */; };
 		A104 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F104 /* PrivacyInfo.xcprivacy */; };
+		A1101CLV /* ContributionLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101CLV /* ContributionLogView.swift */; };
+		A1101CON /* Contribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101CON /* Contribution.swift */; };
+		A1101NNS /* NPSNavService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNS /* NPSNavService.swift */; };
+		A1101NNST /* NPSNavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNST /* NPSNavServiceTests.swift */; };
+		A1101NSP /* NPSSchemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NSP /* NPSSchemePickerView.swift */; };
+		A1101RCT /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCT /* ReconcileTests.swift */; };
+		A1101RCV /* ReconcileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCV /* ReconcileView.swift */; };
+		A1101SAC /* SIPAmountChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAC /* SIPAmountChange.swift */; };
+		A1101SAS /* SIPAccrualService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAS /* SIPAccrualService.swift */; };
+		A1101SAST /* SIPAccrualServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAST /* SIPAccrualServiceTests.swift */; };
+		A1101SIP /* SIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SIP /* SIP.swift */; };
+		A1101SSV /* SIPSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SSV /* SIPSetupView.swift */; };
+		A1101SSVT /* SIPSetupValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SSVT /* SIPSetupValidationTests.swift */; };
+		A1101SV7MT /* SchemaV7MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV7MT /* SchemaV7MigrationTests.swift */; };
+		A1101SV8 /* SchemaV8.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV8 /* SchemaV8.swift */; };
+		A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV8MT /* SchemaV8MigrationTests.swift */; };
+		A1102ACRT /* AssetCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ACRT /* AssetCRUDTests.swift */; };
+		A1102ANS /* AMFINavService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANS /* AMFINavService.swift */; };
+		A1102ANST /* AMFINavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANST /* AMFINavServiceTests.swift */; };
+		A1102NWAT /* NetWorthAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWAT /* NetWorthAggregationTests.swift */; };
+		A1102NWC /* NetWorthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWC /* NetWorthCalculator.swift */; };
+		A1102NWSS /* NetWorthSnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWSS /* NetWorthSnapshotService.swift */; };
+		A1103ADV /* AssetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ADV /* AssetDetailView.swift */; };
+		A1103AGLT /* AssetGainLossTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103AGLT /* AssetGainLossTests.swift */; };
+		A1103ALV /* AssetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ALV /* AssetsListView.swift */; };
+		A1103ASPV /* AMFISchemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ASPV /* AMFISchemePickerView.swift */; };
+		A1103AVT /* AssetValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103AVT /* AssetValueTests.swift */; };
+		A1103EAV /* EditAssetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103EAV /* EditAssetView.swift */; };
+		A1103SBT /* StalenessBadgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103SBT /* StalenessBadgeTests.swift */; };
+		A1103SV /* StalenessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103SV /* StalenessView.swift */; };
+		A1104AST /* AllocationSegmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104AST /* AllocationSegmentTests.swift */; };
+		A1104NWC /* NetWorthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWC /* NetWorthCard.swift */; };
+		A1104NWST /* NetWorthSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWST /* NetWorthSnapshotTests.swift */; };
+		A1104NWTC /* NetWorthTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWTC /* NetWorthTrendChart.swift */; };
 		A111 /* SchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = F111 /* SchemaV1.swift */; };
 		A112 /* MigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F112 /* MigrationPlan.swift */; };
 		A113 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = F113 /* Expense.swift */; };
@@ -21,6 +62,16 @@
 		A118 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F118 /* Category.swift */; };
 		A119 /* BudgetCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119 /* BudgetCalculator.swift */; };
 		A119V3 /* SchemaV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = F119V3 /* SchemaV3.swift */; };
+		A1201NRT /* NoteReorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201NRT /* NoteReorderTests.swift */; };
+		A1201RC /* RoutineCompletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201RC /* RoutineCompletion.swift */; };
+		A1201RNST /* RoutineNotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201RNST /* RoutineNotificationServiceTests.swift */; };
+		A1201SCT /* StreakCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SCT /* StreakCalculatorTests.swift */; };
+		A1201SV9 /* SchemaV9.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9 /* SchemaV9.swift */; };
+		A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9MT /* SchemaV9MigrationTests.swift */; };
+		A1202SC /* StreakCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1202SC /* StreakCalculator.swift */; };
+		A1203RDV /* RoutineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RDV /* RoutineDetailView.swift */; };
+		A1203RNS /* RoutineNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RNS /* RoutineNotificationService.swift */; };
+		A1204RCT /* RoutineCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1204RCT /* RoutineCalendarTests.swift */; };
 		A120RV /* ReminderValueTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F120RV /* ReminderValueTypes.swift */; };
 		A121 /* DecimalKeypadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F121 /* DecimalKeypadView.swift */; };
 		A122 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F122 /* AddExpenseView.swift */; };
@@ -28,7 +79,6 @@
 		A124 /* ExpenseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F124 /* ExpenseRow.swift */; };
 		A125 /* EditExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F125 /* EditExpenseView.swift */; };
 		A126 /* CategoryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F126 /* CategoryPickerView.swift */; };
-		A903APV /* AccountPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903APV /* AccountPickerView.swift */; };
 		A127 /* BudgetProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F127 /* BudgetProgressView.swift */; };
 		A128 /* BudgetCategoryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F128 /* BudgetCategoryCard.swift */; };
 		A129 /* EditBudgetSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F129 /* EditBudgetSheet.swift */; };
@@ -37,6 +87,15 @@
 		A132 /* BudgetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F132 /* BudgetsView.swift */; };
 		A133N /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = F133N /* Note.swift */; };
 		A134NB /* NoteBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = F134NB /* NoteBlock.swift */; };
+		A13DS1 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DS1 /* DesignTokens.swift */; };
+		A13DST /* DesignTokensTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DST /* DesignTokensTests.swift */; };
+		A13NS /* NeuSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13NS /* NeuSurface.swift */; };
+		A13RMT /* RollingMoneyText.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMT /* RollingMoneyText.swift */; };
+		A13RMTT /* RollingMoneyTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMTT /* RollingMoneyTextTests.swift */; };
+		A1401SDA /* SpendDonutAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1401SDA /* SpendDonutAggregation.swift */; };
+		A1401SDAT /* SpendDonutAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1401SDAT /* SpendDonutAggregationTests.swift */; };
+		A1402SDC /* SpendDonutCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1402SDC /* SpendDonutCard.swift */; };
+		A1402SDCT /* SpendDonutCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1402SDCT /* SpendDonutCardTests.swift */; };
 		A140NCP /* NotificationCenterPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F140NCP /* NotificationCenterPort.swift */; };
 		A141NS /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F141NS /* NotificationScheduler.swift */; };
 		A142NLO /* NoteListOrganizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F142NLO /* NoteListOrganizer.swift */; };
@@ -51,6 +110,11 @@
 		A156REV /* ReminderEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F156REV /* ReminderEditView.swift */; };
 		A157CV /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F157CV /* CalendarView.swift */; };
 		A158RRS /* RoutineResetService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F158RRS /* RoutineResetService.swift */; };
+		A1601AIC /* AIInsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601AIC /* AIInsightCard.swift */; };
+		A1601IS /* InsightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IS /* InsightService.swift */; };
+		A1601IST /* InsightServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IST /* InsightServiceTests.swift */; };
+		A1601IV /* InsightVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IV /* InsightVerifier.swift */; };
+		A1601IVT /* InsightVerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IVT /* InsightVerifierTests.swift */; };
 		A201 /* ExpenseModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F201 /* ExpenseModelTests.swift */; };
 		A202 /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F202 /* MigrationTests.swift */; };
 		A203 /* MyHomeV1Seed.store in Resources */ = {isa = PBXBuildFile; fileRef = F203 /* MyHomeV1Seed.store */; };
@@ -73,50 +137,31 @@
 		A403 /* DecimalINRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F403 /* DecimalINRTests.swift */; };
 		A404 /* SpendOverTimeAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F404 /* SpendOverTimeAggregator.swift */; };
 		A405 /* OverviewAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F405 /* OverviewAggregation.swift */; };
-		A1401SDA /* SpendDonutAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1401SDA /* SpendDonutAggregation.swift */; };
-		A1401SDAT /* SpendDonutAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1401SDAT /* SpendDonutAggregationTests.swift */; };
 		A406 /* SpendBudgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F406 /* SpendBudgetCard.swift */; };
 		A407 /* TopCategoriesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F407 /* TopCategoriesCard.swift */; };
 		A408 /* PinnedNoteCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F408 /* PinnedNoteCard.swift */; };
 		A409 /* SpendByCategoryChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F409 /* SpendByCategoryChart.swift */; };
 		A410 /* SpendOverTimeChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F410 /* SpendOverTimeChart.swift */; };
 		A411 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F411 /* OverviewView.swift */; };
-		A1402SDC /* SpendDonutCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1402SDC /* SpendDonutCard.swift */; };
-		A1402SDCT /* SpendDonutCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1402SDCT /* SpendDonutCardTests.swift */; };
-		A801SH /* CategoryStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F801SH /* CategoryStyle.swift */; };
-		A802SH /* IconTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F802SH /* IconTile.swift */; };
-		A804SH /* DonutChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F804SH /* DonutChart.swift */; };
-		A805SH /* StackBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F805SH /* StackBar.swift */; };
 		A501 /* BiometricAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F501 /* BiometricAuthPort.swift */; };
 		A502 /* SpyBiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F502 /* SpyBiometricAuth.swift */; };
 		A503 /* LockStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F503 /* LockStateTests.swift */; };
 		A504 /* LockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F504 /* LockController.swift */; };
 		A601 /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F601 /* UnlockView.swift */; };
 		A602 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602 /* SettingsView.swift */; };
-		A910ALV /* AccountsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F910ALV /* AccountsListView.swift */; };
-		A911EAV /* EditAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911EAV /* EditAccountView.swift */; };
-		A912ADV /* AccountDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F912ADV /* AccountDetailView.swift */; };
-		A913MRS /* MigrationReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F913MRS /* MigrationReviewSheet.swift */; };
 		A603 /* LockSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F603 /* LockSettingsTests.swift */; };
 		A610GAP /* GmailAuthPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F610GAP /* GmailAuthPort.swift */; };
 		A611KP /* KeychainPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F611KP /* KeychainPort.swift */; };
 		A612PKCE /* PKCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = F612PKCE /* PKCE.swift */; };
-		A613GSC /* GmailSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GSC /* GmailSyncController.swift */; };
 		A613GAS /* GmailAccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GAS /* GmailAccountStore.swift */; };
-		A903AAH /* AccountAttributionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903AAH /* AccountAttributionHelper.swift */; };
-		A1001TDS /* TransferDetectionScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1001TDS /* TransferDetectionScorer.swift */; };
-		A1002TSS /* TransferScanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1002TSS /* TransferScanService.swift */; };
-		A1003TDST /* TransferDetectionScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1003TDST /* TransferDetectionScorerTests.swift */; };
-		A1004TSST /* TransferScanServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1004TSST /* TransferScanServiceTests.swift */; };
-		A1005ABTT /* AccountBalanceTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1005ABTT /* AccountBalanceTransferTests.swift */; };
-		A1006EETT /* EditExpenseTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1006EETT /* EditExpenseTransferTests.swift */; };
-		A619MAGT /* MultiAccountGmailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619MAGT /* MultiAccountGmailTests.swift */; };
+		A613GSC /* GmailSyncController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F613GSC /* GmailSyncController.swift */; };
 		A614SGA /* SpyGmailAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614SGA /* SpyGmailAuth.swift */; };
 		A615SKS /* SpyKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F615SKS /* SpyKeychainStore.swift */; };
 		A616PT /* PKCETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F616PT /* PKCETests.swift */; };
 		A617GAUT /* GmailAuthURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F617GAUT /* GmailAuthURLTests.swift */; };
 		A618KPT /* KeychainPortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F618KPT /* KeychainPortTests.swift */; };
 		A619GSCT /* GmailSyncControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619GSCT /* GmailSyncControllerTests.swift */; };
+		A619MAGT /* MultiAccountGmailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619MAGT /* MultiAccountGmailTests.swift */; };
 		A620RTT /* RelativeTimestampTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F620RTT /* RelativeTimestampTests.swift */; };
 		A621RT /* RelativeTimestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F621RT /* RelativeTimestamp.swift */; };
 		A622GOC /* GmailOAuthConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F622GOC /* GmailOAuthConfig.swift */; };
@@ -124,97 +169,52 @@
 		A701SV5 /* SchemaV5.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV5 /* SchemaV5.swift */; };
 		A701SV6 /* SchemaV6.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV6 /* SchemaV6.swift */; };
 		A701SV7 /* SchemaV7.swift in Sources */ = {isa = PBXBuildFile; fileRef = F701SV7 /* SchemaV7.swift */; };
-		A901ACC /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = F901ACC /* Account.swift */; };
-		A902AST /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F902AST /* Asset.swift */; };
-		A911NWS /* NetWorthSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911NWS /* NetWorthSnapshot.swift */; };
-		A903SV6MT /* SchemaV6MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903SV6MT /* SchemaV6MigrationTests.swift */; };
-		A907ABS /* AccountBalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F907ABS /* AccountBalance.swift */; };
-		A908CHX /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F908CHX /* Color+Hex.swift */; };
-		A904ABT /* AccountBalanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F904ABT /* AccountBalanceTests.swift */; };
-		A1101SV7MT /* SchemaV7MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV7MT /* SchemaV7MigrationTests.swift */; };
-		A1102ACRT /* AssetCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ACRT /* AssetCRUDTests.swift */; };
-		A1103AVT /* AssetValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103AVT /* AssetValueTests.swift */; };
-		A1104NWST /* NetWorthSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWST /* NetWorthSnapshotTests.swift */; };
-		A1103SBT /* StalenessBadgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103SBT /* StalenessBadgeTests.swift */; };
-		A1103AGLT /* AssetGainLossTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103AGLT /* AssetGainLossTests.swift */; };
-		A1103SV /* StalenessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103SV /* StalenessView.swift */; };
-		A1103ALV /* AssetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ALV /* AssetsListView.swift */; };
-		A1103EAV /* EditAssetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103EAV /* EditAssetView.swift */; };
-		A1103ASPV /* AMFISchemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ASPV /* AMFISchemePickerView.swift */; };
-		A1103ADV /* AssetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1103ADV /* AssetDetailView.swift */; };
-		A1104NWC /* NetWorthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWC /* NetWorthCard.swift */; };
-		A1104NWTC /* NetWorthTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104NWTC /* NetWorthTrendChart.swift */; };
-		A1104AST /* AllocationSegmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1104AST /* AllocationSegmentTests.swift */; };
-		A1102ANS /* AMFINavService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANS /* AMFINavService.swift */; };
-		A1102ANST /* AMFINavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102ANST /* AMFINavServiceTests.swift */; };
-		A1102NWC /* NetWorthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWC /* NetWorthCalculator.swift */; };
-		A1102NWSS /* NetWorthSnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWSS /* NetWorthSnapshotService.swift */; };
-		A1102NWAT /* NetWorthAggregationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1102NWAT /* NetWorthAggregationTests.swift */; };
-		A905ATIT /* AccountTypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F905ATIT /* AccountTypeInferenceTests.swift */; };
-		A906ACCT /* AccountCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F906ACCT /* AccountCRUDTests.swift */; };
-		A903GAAT /* GmailAccountAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903GAAT /* GmailAccountAttributionTests.swift */; };
 		A702GFP /* GmailFetchPort.swift in Sources */ = {isa = PBXBuildFile; fileRef = F702GFP /* GmailFetchPort.swift */; };
 		A703BEP /* BankEmailParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703BEP /* BankEmailParser.swift */; };
 		A703CS /* ConfidenceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CS /* ConfidenceScorer.swift */; };
+		A703CUB /* CUBParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CUB /* CUBParser.swift */; };
 		A703DK /* DedupChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DK /* DedupChecker.swift */; };
 		A703DS /* DismissedMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DS /* DismissedMessageStore.swift */; };
 		A703HP /* HDFCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703HP /* HDFCParser.swift */; };
 		A703IP /* ICICIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703IP /* ICICIParser.swift */; };
-		A703CUB /* CUBParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CUB /* CUBParser.swift */; };
 		A703MN /* MerchantNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703MN /* MerchantNormalizer.swift */; };
 		A704SGF /* SpyGmailFetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = F704SGF /* SpyGmailFetch.swift */; };
 		A705HDFC /* HDFCParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F705HDFC /* HDFCParserTests.swift */; };
-		A706ICICI /* ICICIParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706ICICI /* ICICIParserTests.swift */; };
 		A706CUB /* CUBParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706CUB /* CUBParserTests.swift */; };
+		A706ICICI /* ICICIParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706ICICI /* ICICIParserTests.swift */; };
 		A706RIR /* ReviewInboxRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706RIR /* ReviewInboxRow.swift */; };
-		A1030TPR /* TransferPairRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1030TPR /* TransferPairRow.swift */; };
 		A707CS /* ConfidenceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F707CS /* ConfidenceScorerTests.swift */; };
 		A708DC /* DedupCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F708DC /* DedupCheckerTests.swift */; };
 		A709MN /* MerchantNormalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709MN /* MerchantNormalizerTests.swift */; };
 		A710IP /* IngestionPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F710IP /* IngestionPipelineTests.swift */; };
 		A711FIX /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = F711FIX /* Fixtures */; };
-		A1101SV8 /* SchemaV8.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV8 /* SchemaV8.swift */; };
-		A1101SIP /* SIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SIP /* SIP.swift */; };
-		A1101SAC /* SIPAmountChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAC /* SIPAmountChange.swift */; };
-		A1101CON /* Contribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101CON /* Contribution.swift */; };
-		A1201SV9 /* SchemaV9.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9 /* SchemaV9.swift */; };
-		A1201RC /* RoutineCompletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201RC /* RoutineCompletion.swift */; };
-		A1202SC /* StreakCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1202SC /* StreakCalculator.swift */; };
-		A1203RNS /* RoutineNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RNS /* RoutineNotificationService.swift */; };
-		A1101NNS /* NPSNavService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNS /* NPSNavService.swift */; };
-		A1101SAS /* SIPAccrualService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAS /* SIPAccrualService.swift */; };
-		A1101NSP /* NPSSchemePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NSP /* NPSSchemePickerView.swift */; };
-		A1101SSV /* SIPSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SSV /* SIPSetupView.swift */; };
-		A1101CLV /* ContributionLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101CLV /* ContributionLogView.swift */; };
-		A1101RCV /* ReconcileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCV /* ReconcileView.swift */; };
-		A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SV8MT /* SchemaV8MigrationTests.swift */; };
-		A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9MT /* SchemaV9MigrationTests.swift */; };
-		A1201SCT /* StreakCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SCT /* StreakCalculatorTests.swift */; };
-		A1201RNST /* RoutineNotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201RNST /* RoutineNotificationServiceTests.swift */; };
-		A1201NRT /* NoteReorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201NRT /* NoteReorderTests.swift */; };
-		A1204RCT /* RoutineCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1204RCT /* RoutineCalendarTests.swift */; };
-		A1101NNST /* NPSNavServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101NNST /* NPSNavServiceTests.swift */; };
-		A1101SAST /* SIPAccrualServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SAST /* SIPAccrualServiceTests.swift */; };
-		A1101RCT /* ReconcileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101RCT /* ReconcileTests.swift */; };
-		A1101SSVT /* SIPSetupValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1101SSVT /* SIPSetupValidationTests.swift */; };
-		A1203RDV /* RoutineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RDV /* RoutineDetailView.swift */; };
-		A13DS1 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DS1 /* DesignTokens.swift */; };
-		A13NS /* NeuSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13NS /* NeuSurface.swift */; };
-		A13RMT /* RollingMoneyText.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMT /* RollingMoneyText.swift */; };
-		A13DST /* DesignTokensTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DST /* DesignTokensTests.swift */; };
-		A13RMTT /* RollingMoneyTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMTT /* RollingMoneyTextTests.swift */; };
+		A801SH /* CategoryStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F801SH /* CategoryStyle.swift */; };
+		A802SH /* IconTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F802SH /* IconTile.swift */; };
+		A804SH /* DonutChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F804SH /* DonutChart.swift */; };
+		A805SH /* StackBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F805SH /* StackBar.swift */; };
+		A901ACC /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = F901ACC /* Account.swift */; };
+		A902AST /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F902AST /* Asset.swift */; };
+		A903AAH /* AccountAttributionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903AAH /* AccountAttributionHelper.swift */; };
+		A903APV /* AccountPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903APV /* AccountPickerView.swift */; };
+		A903GAAT /* GmailAccountAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903GAAT /* GmailAccountAttributionTests.swift */; };
+		A903SV6MT /* SchemaV6MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903SV6MT /* SchemaV6MigrationTests.swift */; };
+		A904ABT /* AccountBalanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F904ABT /* AccountBalanceTests.swift */; };
+		A905ATIT /* AccountTypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F905ATIT /* AccountTypeInferenceTests.swift */; };
+		A906ACCT /* AccountCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F906ACCT /* AccountCRUDTests.swift */; };
+		A907ABS /* AccountBalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F907ABS /* AccountBalance.swift */; };
+		A908CHX /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F908CHX /* Color+Hex.swift */; };
+		A910ALV /* AccountsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F910ALV /* AccountsListView.swift */; };
+		A911EAV /* EditAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911EAV /* EditAccountView.swift */; };
+		A911NWS /* NetWorthSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911NWS /* NetWorthSnapshot.swift */; };
+		A912ADV /* AccountDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F912ADV /* AccountDetailView.swift */; };
+		A913MRS /* MigrationReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F913MRS /* MigrationReviewSheet.swift */; };
 		AANL01 /* AnalyticsAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL01 /* AnalyticsAggregator.swift */; };
-		AANL07 /* AnalyticsAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL07 /* AnalyticsAggregatorTests.swift */; };
 		AANL02 /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL02 /* AnalyticsView.swift */; };
 		AANL03 /* AnalyticsTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL03 /* AnalyticsTrendChart.swift */; };
 		AANL04 /* AnalyticsCategoryBars.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL04 /* AnalyticsCategoryBars.swift */; };
 		AANL05 /* DeltaChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL05 /* DeltaChip.swift */; };
 		AANL06 /* DeltaDrillDownSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL06 /* DeltaDrillDownSheet.swift */; };
-		A1601IS /* InsightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IS /* InsightService.swift */; };
-		A1601IV /* InsightVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IV /* InsightVerifier.swift */; };
-		A1601AIC /* AIInsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601AIC /* AIInsightCard.swift */; };
-		A1601IST /* InsightServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IST /* InsightServiceTests.swift */; };
-		A1601IVT /* InsightVerifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1601IVT /* InsightVerifierTests.swift */; };
+		AANL07 /* AnalyticsAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FANL07 /* AnalyticsAggregatorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -230,12 +230,53 @@
 /* Begin PBXFileReference section */
 		F001 /* MyHome.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyHome.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F002 /* MyHomeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyHomeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1001TDS /* TransferDetectionScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorer.swift; sourceTree = "<group>"; };
+		F1002TSS /* TransferScanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanService.swift; sourceTree = "<group>"; };
+		F1003TDST /* TransferDetectionScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorerTests.swift; sourceTree = "<group>"; };
+		F1004TSST /* TransferScanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanServiceTests.swift; sourceTree = "<group>"; };
+		F1005ABTT /* AccountBalanceTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTransferTests.swift; sourceTree = "<group>"; };
+		F1006EETT /* EditExpenseTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseTransferTests.swift; sourceTree = "<group>"; };
 		F101 /* MyHomeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyHomeApp.swift; sourceTree = "<group>"; };
 		F102 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		F103 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F1030TPR /* TransferPairRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferPairRow.swift; sourceTree = "<group>"; };
 		F104 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F105 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F106 /* MyHome.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MyHome.entitlements; sourceTree = "<group>"; };
+		F1101CLV /* ContributionLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContributionLogView.swift; sourceTree = "<group>"; };
+		F1101CON /* Contribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contribution.swift; sourceTree = "<group>"; };
+		F1101NNS /* NPSNavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavService.swift; sourceTree = "<group>"; };
+		F1101NNST /* NPSNavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavServiceTests.swift; sourceTree = "<group>"; };
+		F1101NSP /* NPSSchemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSSchemePickerView.swift; sourceTree = "<group>"; };
+		F1101RCT /* ReconcileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileTests.swift; sourceTree = "<group>"; };
+		F1101RCV /* ReconcileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileView.swift; sourceTree = "<group>"; };
+		F1101SAC /* SIPAmountChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAmountChange.swift; sourceTree = "<group>"; };
+		F1101SAS /* SIPAccrualService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualService.swift; sourceTree = "<group>"; };
+		F1101SAST /* SIPAccrualServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualServiceTests.swift; sourceTree = "<group>"; };
+		F1101SIP /* SIP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIP.swift; sourceTree = "<group>"; };
+		F1101SSV /* SIPSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPSetupView.swift; sourceTree = "<group>"; };
+		F1101SSVT /* SIPSetupValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPSetupValidationTests.swift; sourceTree = "<group>"; };
+		F1101SV7MT /* SchemaV7MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV7MigrationTests.swift; sourceTree = "<group>"; };
+		F1101SV8 /* SchemaV8.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV8.swift; sourceTree = "<group>"; };
+		F1101SV8MT /* SchemaV8MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV8MigrationTests.swift; sourceTree = "<group>"; };
+		F1102ACRT /* AssetCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetCRUDTests.swift; sourceTree = "<group>"; };
+		F1102ANS /* AMFINavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavService.swift; sourceTree = "<group>"; };
+		F1102ANST /* AMFINavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavServiceTests.swift; sourceTree = "<group>"; };
+		F1102NWAT /* NetWorthAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthAggregationTests.swift; sourceTree = "<group>"; };
+		F1102NWC /* NetWorthCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCalculator.swift; sourceTree = "<group>"; };
+		F1102NWSS /* NetWorthSnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshotService.swift; sourceTree = "<group>"; };
+		F1103ADV /* AssetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetDetailView.swift; sourceTree = "<group>"; };
+		F1103AGLT /* AssetGainLossTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGainLossTests.swift; sourceTree = "<group>"; };
+		F1103ALV /* AssetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetsListView.swift; sourceTree = "<group>"; };
+		F1103ASPV /* AMFISchemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFISchemePickerView.swift; sourceTree = "<group>"; };
+		F1103AVT /* AssetValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetValueTests.swift; sourceTree = "<group>"; };
+		F1103EAV /* EditAssetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAssetView.swift; sourceTree = "<group>"; };
+		F1103SBT /* StalenessBadgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StalenessBadgeTests.swift; sourceTree = "<group>"; };
+		F1103SV /* StalenessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StalenessView.swift; sourceTree = "<group>"; };
+		F1104AST /* AllocationSegmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllocationSegmentTests.swift; sourceTree = "<group>"; };
+		F1104NWC /* NetWorthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCard.swift; sourceTree = "<group>"; };
+		F1104NWST /* NetWorthSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshotTests.swift; sourceTree = "<group>"; };
+		F1104NWTC /* NetWorthTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthTrendChart.swift; sourceTree = "<group>"; };
 		F111 /* SchemaV1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV1.swift; sourceTree = "<group>"; };
 		F112 /* MigrationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationPlan.swift; sourceTree = "<group>"; };
 		F113 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
@@ -246,6 +287,16 @@
 		F118 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		F119 /* BudgetCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCalculator.swift; sourceTree = "<group>"; };
 		F119V3 /* SchemaV3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV3.swift; sourceTree = "<group>"; };
+		F1201NRT /* NoteReorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteReorderTests.swift; sourceTree = "<group>"; };
+		F1201RC /* RoutineCompletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineCompletion.swift; sourceTree = "<group>"; };
+		F1201RNST /* RoutineNotificationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationServiceTests.swift; sourceTree = "<group>"; };
+		F1201SCT /* StreakCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculatorTests.swift; sourceTree = "<group>"; };
+		F1201SV9 /* SchemaV9.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9.swift; sourceTree = "<group>"; };
+		F1201SV9MT /* SchemaV9MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9MigrationTests.swift; sourceTree = "<group>"; };
+		F1202SC /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
+		F1203RDV /* RoutineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineDetailView.swift; sourceTree = "<group>"; };
+		F1203RNS /* RoutineNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationService.swift; sourceTree = "<group>"; };
+		F1204RCT /* RoutineCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineCalendarTests.swift; sourceTree = "<group>"; };
 		F120RV /* ReminderValueTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderValueTypes.swift; sourceTree = "<group>"; };
 		F121 /* DecimalKeypadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalKeypadView.swift; sourceTree = "<group>"; };
 		F122 /* AddExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseView.swift; sourceTree = "<group>"; };
@@ -253,7 +304,6 @@
 		F124 /* ExpenseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseRow.swift; sourceTree = "<group>"; };
 		F125 /* EditExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseView.swift; sourceTree = "<group>"; };
 		F126 /* CategoryPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPickerView.swift; sourceTree = "<group>"; };
-		F903APV /* AccountPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPickerView.swift; sourceTree = "<group>"; };
 		F127 /* BudgetProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressView.swift; sourceTree = "<group>"; };
 		F128 /* BudgetCategoryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCategoryCard.swift; sourceTree = "<group>"; };
 		F129 /* EditBudgetSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBudgetSheet.swift; sourceTree = "<group>"; };
@@ -262,6 +312,15 @@
 		F132 /* BudgetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsView.swift; sourceTree = "<group>"; };
 		F133N /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		F134NB /* NoteBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBlock.swift; sourceTree = "<group>"; };
+		F13DS1 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		F13DST /* DesignTokensTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokensTests.swift; sourceTree = "<group>"; };
+		F13NS /* NeuSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuSurface.swift; sourceTree = "<group>"; };
+		F13RMT /* RollingMoneyText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyText.swift; sourceTree = "<group>"; };
+		F13RMTT /* RollingMoneyTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyTextTests.swift; sourceTree = "<group>"; };
+		F1401SDA /* SpendDonutAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutAggregation.swift; sourceTree = "<group>"; };
+		F1401SDAT /* SpendDonutAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutAggregationTests.swift; sourceTree = "<group>"; };
+		F1402SDC /* SpendDonutCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutCard.swift; sourceTree = "<group>"; };
+		F1402SDCT /* SpendDonutCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutCardTests.swift; sourceTree = "<group>"; };
 		F140NCP /* NotificationCenterPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterPort.swift; sourceTree = "<group>"; };
 		F141NS /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
 		F142NLO /* NoteListOrganizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListOrganizer.swift; sourceTree = "<group>"; };
@@ -276,6 +335,11 @@
 		F156REV /* ReminderEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEditView.swift; sourceTree = "<group>"; };
 		F157CV /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		F158RRS /* RoutineResetService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineResetService.swift; sourceTree = "<group>"; };
+		F1601AIC /* AIInsightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIInsightCard.swift; sourceTree = "<group>"; };
+		F1601IS /* InsightService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightService.swift; sourceTree = "<group>"; };
+		F1601IST /* InsightServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightServiceTests.swift; sourceTree = "<group>"; };
+		F1601IV /* InsightVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightVerifier.swift; sourceTree = "<group>"; };
+		F1601IVT /* InsightVerifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightVerifierTests.swift; sourceTree = "<group>"; };
 		F201 /* ExpenseModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseModelTests.swift; sourceTree = "<group>"; };
 		F202 /* MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationTests.swift; sourceTree = "<group>"; };
 		F203 /* MyHomeV1Seed.store */ = {isa = PBXFileReference; lastKnownFileType = file; path = MyHomeV1Seed.store; sourceTree = "<group>"; };
@@ -298,40 +362,31 @@
 		F403 /* DecimalINRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalINRTests.swift; sourceTree = "<group>"; };
 		F404 /* SpendOverTimeAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeAggregator.swift; sourceTree = "<group>"; };
 		F405 /* OverviewAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewAggregation.swift; sourceTree = "<group>"; };
-		F1401SDA /* SpendDonutAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutAggregation.swift; sourceTree = "<group>"; };
-		F1401SDAT /* SpendDonutAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutAggregationTests.swift; sourceTree = "<group>"; };
 		F406 /* SpendBudgetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendBudgetCard.swift; sourceTree = "<group>"; };
 		F407 /* TopCategoriesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCategoriesCard.swift; sourceTree = "<group>"; };
 		F408 /* PinnedNoteCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedNoteCard.swift; sourceTree = "<group>"; };
 		F409 /* SpendByCategoryChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendByCategoryChart.swift; sourceTree = "<group>"; };
 		F410 /* SpendOverTimeChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeChart.swift; sourceTree = "<group>"; };
 		F411 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
-		F1402SDC /* SpendDonutCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutCard.swift; sourceTree = "<group>"; };
-		F1402SDCT /* SpendDonutCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutCardTests.swift; sourceTree = "<group>"; };
 		F501 /* BiometricAuthPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuthPort.swift; sourceTree = "<group>"; };
 		F502 /* SpyBiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyBiometricAuth.swift; sourceTree = "<group>"; };
 		F503 /* LockStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockStateTests.swift; sourceTree = "<group>"; };
 		F504 /* LockController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockController.swift; sourceTree = "<group>"; };
 		F601 /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
 		F602 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		F910ALV /* AccountsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsListView.swift; sourceTree = "<group>"; };
-		F911EAV /* EditAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccountView.swift; sourceTree = "<group>"; };
-		F912ADV /* AccountDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailView.swift; sourceTree = "<group>"; };
-		F913MRS /* MigrationReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationReviewSheet.swift; sourceTree = "<group>"; };
 		F603 /* LockSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockSettingsTests.swift; sourceTree = "<group>"; };
 		F610GAP /* GmailAuthPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAuthPort.swift; sourceTree = "<group>"; };
 		F611KP /* KeychainPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPort.swift; sourceTree = "<group>"; };
 		F612PKCE /* PKCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCE.swift; sourceTree = "<group>"; };
-		F613GSC /* GmailSyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailSyncController.swift; sourceTree = "<group>"; };
 		F613GAS /* GmailAccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountStore.swift; sourceTree = "<group>"; };
-		F903AAH /* AccountAttributionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAttributionHelper.swift; sourceTree = "<group>"; };
-		F619MAGT /* MultiAccountGmailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAccountGmailTests.swift; sourceTree = "<group>"; };
+		F613GSC /* GmailSyncController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailSyncController.swift; sourceTree = "<group>"; };
 		F614SGA /* SpyGmailAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailAuth.swift; sourceTree = "<group>"; };
 		F615SKS /* SpyKeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyKeychainStore.swift; sourceTree = "<group>"; };
 		F616PT /* PKCETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PKCETests.swift; sourceTree = "<group>"; };
 		F617GAUT /* GmailAuthURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAuthURLTests.swift; sourceTree = "<group>"; };
 		F618KPT /* KeychainPortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPortTests.swift; sourceTree = "<group>"; };
 		F619GSCT /* GmailSyncControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailSyncControllerTests.swift; sourceTree = "<group>"; };
+		F619MAGT /* MultiAccountGmailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiAccountGmailTests.swift; sourceTree = "<group>"; };
 		F620RTT /* RelativeTimestampTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTimestampTests.swift; sourceTree = "<group>"; };
 		F621RT /* RelativeTimestamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTimestamp.swift; sourceTree = "<group>"; };
 		F622GOC /* GmailOAuthConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailOAuthConfig.swift; sourceTree = "<group>"; };
@@ -339,56 +394,20 @@
 		F701SV5 /* SchemaV5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV5.swift; sourceTree = "<group>"; };
 		F701SV6 /* SchemaV6.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6.swift; sourceTree = "<group>"; };
 		F701SV7 /* SchemaV7.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV7.swift; sourceTree = "<group>"; };
-		F901ACC /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
-		F902AST /* Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
-		F911NWS /* NetWorthSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshot.swift; sourceTree = "<group>"; };
-		F903SV6MT /* SchemaV6MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6MigrationTests.swift; sourceTree = "<group>"; };
-		F907ABS /* AccountBalance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountBalance.swift"; sourceTree = "<group>"; };
-		F908CHX /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
-		F904ABT /* AccountBalanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTests.swift; sourceTree = "<group>"; };
-		F1101SV7MT /* SchemaV7MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV7MigrationTests.swift; sourceTree = "<group>"; };
-		F1102ACRT /* AssetCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetCRUDTests.swift; sourceTree = "<group>"; };
-		F1103AVT /* AssetValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetValueTests.swift; sourceTree = "<group>"; };
-		F1104NWST /* NetWorthSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshotTests.swift; sourceTree = "<group>"; };
-		F1103SBT /* StalenessBadgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StalenessBadgeTests.swift; sourceTree = "<group>"; };
-		F1103AGLT /* AssetGainLossTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGainLossTests.swift; sourceTree = "<group>"; };
-		F1103SV /* StalenessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StalenessView.swift; sourceTree = "<group>"; };
-		F1103ALV /* AssetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetsListView.swift; sourceTree = "<group>"; };
-		F1103EAV /* EditAssetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAssetView.swift; sourceTree = "<group>"; };
-		F1103ASPV /* AMFISchemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFISchemePickerView.swift; sourceTree = "<group>"; };
-		F1103ADV /* AssetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetDetailView.swift; sourceTree = "<group>"; };
-		F1104NWC /* NetWorthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCard.swift; sourceTree = "<group>"; };
-		F1104NWTC /* NetWorthTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthTrendChart.swift; sourceTree = "<group>"; };
-		F1104AST /* AllocationSegmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllocationSegmentTests.swift; sourceTree = "<group>"; };
-		F1102ANS /* AMFINavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavService.swift; sourceTree = "<group>"; };
-		F1102ANST /* AMFINavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AMFINavServiceTests.swift; sourceTree = "<group>"; };
-		F1102NWC /* NetWorthCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCalculator.swift; sourceTree = "<group>"; };
-		F1102NWSS /* NetWorthSnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshotService.swift; sourceTree = "<group>"; };
-		F1102NWAT /* NetWorthAggregationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthAggregationTests.swift; sourceTree = "<group>"; };
-		F905ATIT /* AccountTypeInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeInferenceTests.swift; sourceTree = "<group>"; };
-		F1001TDS /* TransferDetectionScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorer.swift; sourceTree = "<group>"; };
-		F1002TSS /* TransferScanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanService.swift; sourceTree = "<group>"; };
-		F1003TDST /* TransferDetectionScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetectionScorerTests.swift; sourceTree = "<group>"; };
-		F1004TSST /* TransferScanServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferScanServiceTests.swift; sourceTree = "<group>"; };
-		F1005ABTT /* AccountBalanceTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTransferTests.swift; sourceTree = "<group>"; };
-		F1006EETT /* EditExpenseTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseTransferTests.swift; sourceTree = "<group>"; };
-		F906ACCT /* AccountCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCRUDTests.swift; sourceTree = "<group>"; };
-		F903GAAT /* GmailAccountAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountAttributionTests.swift; sourceTree = "<group>"; };
 		F702GFP /* GmailFetchPort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailFetchPort.swift; sourceTree = "<group>"; };
 		F703BEP /* BankEmailParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankEmailParser.swift; sourceTree = "<group>"; };
 		F703CS /* ConfidenceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorer.swift; sourceTree = "<group>"; };
+		F703CUB /* CUBParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CUBParser.swift; sourceTree = "<group>"; };
 		F703DK /* DedupChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupChecker.swift; sourceTree = "<group>"; };
 		F703DS /* DismissedMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissedMessageStore.swift; sourceTree = "<group>"; };
 		F703HP /* HDFCParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParser.swift; sourceTree = "<group>"; };
 		F703IP /* ICICIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParser.swift; sourceTree = "<group>"; };
-		F703CUB /* CUBParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CUBParser.swift; sourceTree = "<group>"; };
 		F703MN /* MerchantNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizer.swift; sourceTree = "<group>"; };
 		F704SGF /* SpyGmailFetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyGmailFetch.swift; sourceTree = "<group>"; };
 		F705HDFC /* HDFCParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParserTests.swift; sourceTree = "<group>"; };
-		F706ICICI /* ICICIParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParserTests.swift; sourceTree = "<group>"; };
 		F706CUB /* CUBParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CUBParserTests.swift; sourceTree = "<group>"; };
+		F706ICICI /* ICICIParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParserTests.swift; sourceTree = "<group>"; };
 		F706RIR /* ReviewInboxRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewInboxRow.swift; sourceTree = "<group>"; };
-		F1030TPR /* TransferPairRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferPairRow.swift; sourceTree = "<group>"; };
 		F707CS /* ConfidenceScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorerTests.swift; sourceTree = "<group>"; };
 		F708DC /* DedupCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupCheckerTests.swift; sourceTree = "<group>"; };
 		F709MN /* MerchantNormalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizerTests.swift; sourceTree = "<group>"; };
@@ -398,48 +417,29 @@
 		F802SH /* IconTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconTile.swift; sourceTree = "<group>"; };
 		F804SH /* DonutChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DonutChart.swift; sourceTree = "<group>"; };
 		F805SH /* StackBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackBar.swift; sourceTree = "<group>"; };
-		F1101SV8 /* SchemaV8.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV8.swift; sourceTree = "<group>"; };
-		F1101SIP /* SIP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIP.swift; sourceTree = "<group>"; };
-		F1101SAC /* SIPAmountChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAmountChange.swift; sourceTree = "<group>"; };
-		F1101CON /* Contribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contribution.swift; sourceTree = "<group>"; };
-		F1201SV9 /* SchemaV9.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9.swift; sourceTree = "<group>"; };
-		F1201RC /* RoutineCompletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineCompletion.swift; sourceTree = "<group>"; };
-		F1202SC /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
-		F1203RNS /* RoutineNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationService.swift; sourceTree = "<group>"; };
-		F1203RDV /* RoutineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineDetailView.swift; sourceTree = "<group>"; };
-		F1101NNS /* NPSNavService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavService.swift; sourceTree = "<group>"; };
-		F1101SAS /* SIPAccrualService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualService.swift; sourceTree = "<group>"; };
-		F1101NSP /* NPSSchemePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSSchemePickerView.swift; sourceTree = "<group>"; };
-		F1101SSV /* SIPSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPSetupView.swift; sourceTree = "<group>"; };
-		F1101CLV /* ContributionLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContributionLogView.swift; sourceTree = "<group>"; };
-		F1101RCV /* ReconcileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileView.swift; sourceTree = "<group>"; };
-		F1101SV8MT /* SchemaV8MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV8MigrationTests.swift; sourceTree = "<group>"; };
-		F1201SV9MT /* SchemaV9MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9MigrationTests.swift; sourceTree = "<group>"; };
-		F1201SCT /* StreakCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculatorTests.swift; sourceTree = "<group>"; };
-		F1201RNST /* RoutineNotificationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationServiceTests.swift; sourceTree = "<group>"; };
-		F1201NRT /* NoteReorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteReorderTests.swift; sourceTree = "<group>"; };
-		F1204RCT /* RoutineCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineCalendarTests.swift; sourceTree = "<group>"; };
-		F1101NNST /* NPSNavServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NPSNavServiceTests.swift; sourceTree = "<group>"; };
-		F1101SAST /* SIPAccrualServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPAccrualServiceTests.swift; sourceTree = "<group>"; };
-		F1101RCT /* ReconcileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconcileTests.swift; sourceTree = "<group>"; };
-		F1101SSVT /* SIPSetupValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIPSetupValidationTests.swift; sourceTree = "<group>"; };
-		F13DS1 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
-		F13NS /* NeuSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuSurface.swift; sourceTree = "<group>"; };
-		F13RMT /* RollingMoneyText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyText.swift; sourceTree = "<group>"; };
-		F13DST /* DesignTokensTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokensTests.swift; sourceTree = "<group>"; };
-		F13RMTT /* RollingMoneyTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyTextTests.swift; sourceTree = "<group>"; };
+		F901ACC /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
+		F902AST /* Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
+		F903AAH /* AccountAttributionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAttributionHelper.swift; sourceTree = "<group>"; };
+		F903APV /* AccountPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPickerView.swift; sourceTree = "<group>"; };
+		F903GAAT /* GmailAccountAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountAttributionTests.swift; sourceTree = "<group>"; };
+		F903SV6MT /* SchemaV6MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6MigrationTests.swift; sourceTree = "<group>"; };
+		F904ABT /* AccountBalanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTests.swift; sourceTree = "<group>"; };
+		F905ATIT /* AccountTypeInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeInferenceTests.swift; sourceTree = "<group>"; };
+		F906ACCT /* AccountCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCRUDTests.swift; sourceTree = "<group>"; };
+		F907ABS /* AccountBalance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalance.swift; sourceTree = "<group>"; };
+		F908CHX /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		F910ALV /* AccountsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsListView.swift; sourceTree = "<group>"; };
+		F911EAV /* EditAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccountView.swift; sourceTree = "<group>"; };
+		F911NWS /* NetWorthSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshot.swift; sourceTree = "<group>"; };
+		F912ADV /* AccountDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailView.swift; sourceTree = "<group>"; };
+		F913MRS /* MigrationReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationReviewSheet.swift; sourceTree = "<group>"; };
 		FANL01 /* AnalyticsAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsAggregator.swift; sourceTree = "<group>"; };
-		FANL07 /* AnalyticsAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsAggregatorTests.swift; sourceTree = "<group>"; };
 		FANL02 /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
 		FANL03 /* AnalyticsTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsTrendChart.swift; sourceTree = "<group>"; };
 		FANL04 /* AnalyticsCategoryBars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsCategoryBars.swift; sourceTree = "<group>"; };
 		FANL05 /* DeltaChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeltaChip.swift; sourceTree = "<group>"; };
 		FANL06 /* DeltaDrillDownSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeltaDrillDownSheet.swift; sourceTree = "<group>"; };
-		F1601IS /* InsightService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightService.swift; sourceTree = "<group>"; };
-		F1601IV /* InsightVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightVerifier.swift; sourceTree = "<group>"; };
-		F1601AIC /* AIInsightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIInsightCard.swift; sourceTree = "<group>"; };
-		F1601IST /* InsightServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightServiceTests.swift; sourceTree = "<group>"; };
-		F1601IVT /* InsightVerifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightVerifierTests.swift; sourceTree = "<group>"; };
+		FANL07 /* AnalyticsAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsAggregatorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -487,16 +487,6 @@
 			path = MyHomeApp;
 			sourceTree = "<group>";
 		};
-		G_DS /* DesignSystem */ = {
-			isa = PBXGroup;
-			children = (
-				F13DS1 /* DesignTokens.swift */,
-				F13NS /* NeuSurface.swift */,
-				F13RMT /* RollingMoneyText.swift */,
-			);
-			path = DesignSystem;
-			sourceTree = "<group>";
-		};
 		G110 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -504,36 +494,6 @@
 				F104 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		G120 /* Features */ = {
-			isa = PBXGroup;
-			children = (
-				G124 /* Overview */,
-				G121 /* Expenses */,
-				G122 /* Budgets */,
-				G123 /* Notes */,
-				G125 /* Settings */,
-				G126 /* Gmail */,
-				G127 /* Ingestion */,
-				G128 /* Shared */,
-				G1103 /* Assets */,
-				G_ANL /* Analytics */,
-			);
-			path = Features;
-			sourceTree = "<group>";
-		};
-		G_ANL /* Analytics */ = {
-			isa = PBXGroup;
-			children = (
-				FANL02 /* AnalyticsView.swift */,
-				FANL03 /* AnalyticsTrendChart.swift */,
-				FANL04 /* AnalyticsCategoryBars.swift */,
-				FANL05 /* DeltaChip.swift */,
-				FANL06 /* DeltaDrillDownSheet.swift */,
-				F1601AIC /* AIInsightCard.swift */,
-			);
-			path = Analytics;
 			sourceTree = "<group>";
 		};
 		G1103 /* Assets */ = {
@@ -552,6 +512,23 @@
 				F1101RCV /* ReconcileView.swift */,
 			);
 			path = Assets;
+			sourceTree = "<group>";
+		};
+		G120 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				G124 /* Overview */,
+				G121 /* Expenses */,
+				G122 /* Budgets */,
+				G123 /* Notes */,
+				G125 /* Settings */,
+				G126 /* Gmail */,
+				G127 /* Ingestion */,
+				G128 /* Shared */,
+				G1103 /* Assets */,
+				G_ANL /* Analytics */,
+			);
+			path = Features;
 			sourceTree = "<group>";
 		};
 		G121 /* Expenses */ = {
@@ -868,6 +845,29 @@
 				F002 /* MyHomeTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		G_ANL /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				FANL02 /* AnalyticsView.swift */,
+				FANL03 /* AnalyticsTrendChart.swift */,
+				FANL04 /* AnalyticsCategoryBars.swift */,
+				FANL05 /* DeltaChip.swift */,
+				FANL06 /* DeltaDrillDownSheet.swift */,
+				F1601AIC /* AIInsightCard.swift */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
+		G_DS /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				F13DS1 /* DesignTokens.swift */,
+				F13NS /* NeuSurface.swift */,
+				F13RMT /* RollingMoneyText.swift */,
+			);
+			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1331,6 +1331,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MyHomeApp/MyHome.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -1351,6 +1352,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.reojacob.myhome;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
@@ -1364,6 +1366,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MyHomeApp/MyHome.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -1384,6 +1387,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.reojacob.myhome;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;

@@ -2,12 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- App Groups reserved for post-v1 (extensions / BGTask shared container):
-	     com.apple.security.application-groups = group.com.reojacob.myhome
-	     Disabled until the $99/yr Apple Developer Program upgrade — App Groups
-	     cannot be provisioned on a free account, and no extension ships yet.
-	     All App Group access in code falls back to .standard / Application
-	     Support (see ModelContainer+App.swift). Re-add the key when paid. -->
+	<!-- App Groups: required so the app resolves its SwiftData store in the
+	     shared App Group container (group.com.reojacob.myhome / MyHome.store)
+	     rather than the empty Application Support fallback. Provisioned via
+	     Automatic signing under the free personal team. See ModelContainer+App.swift. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.reojacob.myhome</string>
+	</array>
 
 	<!-- CloudKit container reserved for post-v1 sync upgrade:
 	     iCloud.com.reojacob.myhome
