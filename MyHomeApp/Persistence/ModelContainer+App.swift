@@ -54,18 +54,19 @@ extension ModelContainer {
 
 // MARK: - Category seeding
 
-/// Seeds the 14 predefined India-tuned categories on first launch (D2-03, EXP-04).
+/// Seeds the predefined India-tuned categories on first launch (D2-03, EXP-04).
 ///
-/// Idempotent: fetches with fetchLimit = 1 first; if any category exists, returns
-/// immediately without inserting duplicates (Pitfall P2-03).
+/// Idempotent top-up (07-07): inserts only the predefined categories whose names are not
+/// already present, so it is safe to run on every launch — fresh installs get the full set,
+/// and existing installs pick up categories added in later releases (e.g. "Meat") without
+/// duplicating or disturbing user-created categories.
 ///
 /// `internal` (not `private`) so it can be called directly from CategorySeedTests.
 @MainActor
 func seedCategoriesIfNeeded(context: ModelContext) throws {
-    var descriptor = FetchDescriptor<Category>()
-    descriptor.fetchLimit = 1
-    let existing = try context.fetch(descriptor)
-    guard existing.isEmpty else { return }  // already seeded — skip
+    // 07-07: fetch ALL existing categories (not fetchLimit = 1) so we can top-up only the
+    // predefined names that are missing, rather than skipping entirely when any exist.
+    let existing = try context.fetch(FetchDescriptor<Category>())
 
     // Source of truth: 02-UI-SPEC.md § "Category Taxonomy Reference"
     let predefined: [(name: String, symbol: String, order: Int)] = [
@@ -83,9 +84,19 @@ func seedCategoriesIfNeeded(context: ModelContext) throws {
         ("UPI to Person",    "arrow.up.right",                     11),
         ("ATM",              "banknote",                           12),
         ("Misc",             "tray",                               13),
+        ("Meat",             "flame",                              14),   // 07-07: Licious et al.
+        ("Investments",      "chart.line.uptrend.xyaxis",          15),   // 07-07: Groww/BSE/NACH SIPs
     ]
 
-    let categories = predefined.map {
+    // 07-07: Top-up seeding. Previously all-or-nothing (skipped entirely if ANY category
+    // existed), which meant categories added in a later release never reached users who had
+    // already seeded. Now we insert only the predefined categories whose names are missing,
+    // preserving user-created categories and any the user renamed.
+    let existingNames = Set(existing.compactMap { $0.name })
+    let missing = predefined.filter { !existingNames.contains($0.name) }
+    guard !missing.isEmpty else { return }
+
+    let categories = missing.map {
         Category(name: $0.name, symbolName: $0.symbol, sortOrder: $0.order)
     }
     // Batch insert — avoids repeated single-append (30× perf difference per fatbobman).

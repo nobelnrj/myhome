@@ -67,4 +67,74 @@ struct MerchantNormalizerTests {
         #expect(result.normalizedName == "Uber")
         #expect(result.categoryHint == "Auto/Cab")
     }
+
+    // MARK: - Real-corpus seed additions (07-07)
+
+    @Test("normalize: real-corpus merchants resolve to expected category — 07-07")
+    func realCorpusSeedAdditions() {
+        // (rawMerchant, expectedNormalizedName, expectedCategory) drawn from the live
+        // HDFC/ICICI email corpus that previously fell through to Uncategorized.
+        let cases: [(String, String, String)] = [
+            ("INNOVATIVE RETAIL CONCEPTS PRIVATE LIMITED", "BigBasket", "Groceries"),
+            ("BLINK COMMERCE PVT LTD",                     "Blinkit",   "Groceries"),
+            ("Delightful Gourmet Pvt",                     "Licious",   "Meat"),
+            ("SRI SAI VEG BASKET",                         "Sri Sai Veg Basket", "Groceries"),
+            ("FRESHALICIOUS SUPER BAZAAR",                 "Freshalicious", "Groceries"),
+            ("CORNER HOUSE ICE CREAMS KAMMANAHALLI",       "Corner House Ice Creams", "Dining"),
+            ("OHHH MOMO STATION",                          "Ohhh Momo Station", "Dining"),
+            ("Aditya Birla Fashion And Retail Limited",    "Aditya Birla Fashion", "Shopping"),
+            ("Amazon Pay Groceries",                       "Amazon Pay", "Groceries"),
+            ("ATRIA CONVERGENCE TECH",                     "ACT Fibernet", "Utilities"),
+            ("ANTHROPIC* CLAUDE SUB",                      "Anthropic", "Misc"),
+            ("VERCEL DOMAINS",                             "Vercel",    "Misc"),
+            ("TO ONL NACH_DR/CIUB7020202261000973/GROWW INVEST TECH::00520", "Groww", "Investments"),
+            ("TO ONL BSE LIMITED:PAYMENT::00520",          "BSE",       "Investments"),
+        ]
+        for (raw, expectedName, expectedCategory) in cases {
+            let result = MerchantNormalizer.normalize(raw)
+            #expect(result.normalizedName == expectedName,
+                    "\(raw): expected name \(expectedName), got \(result.normalizedName)")
+            #expect(result.categoryHint == expectedCategory,
+                    "\(raw): expected \(expectedCategory), got \(result.categoryHint ?? "nil")")
+        }
+    }
+
+    @Test("normalize: AMAZON PAY IN GROCERY → Groceries (more specific than AMAZON) — 07-07")
+    func amazonGroceryBeatsGenericAmazon() {
+        let result = MerchantNormalizer.normalize("AMAZON PAY IN GROCERY")
+        #expect(result.categoryHint == "Groceries",
+                "Longer 'AMAZON PAY IN GROCERY' key should win over 'AMAZON'→Shopping")
+    }
+
+    // MARK: - Keyword-based category fallback (07-07)
+
+    @Test("normalize: unknown merchant with category keyword → hint set, raw name kept — 07-07")
+    func keywordFallbackInfersCategory() {
+        // Not in the explicit seed, but the keyword makes the type obvious.
+        let cases: [(String, String)] = [
+            ("SHREE VENKATESHWARA RESTAURANT", "Dining"),
+            ("NANDINI DAIRY PARLOUR",          "Groceries"),
+            ("APOLLO 24|7 PHARMACY",           "Health/Pharmacy"), // APOLLO seed → Health/Pharmacy anyway
+            ("KUMAR PROVISION STORE",          "Groceries"),
+            ("XYZ FILLING STATION",            "Fuel"),
+            ("TO ATM WDL:RR NO:021200008232:PBGN3220-UBI KANNUR BANGALORE", "ATM"),  // CUB ATM withdrawal
+            ("TO ONL NACH_DR/CIUB7020202261000973/INDIAN CLEARING C::00520", "Investments"),  // NACH SIP
+        ]
+        for (raw, expectedCategory) in cases {
+            let result = MerchantNormalizer.normalize(raw)
+            #expect(result.categoryHint == expectedCategory,
+                    "\(raw): expected \(expectedCategory), got \(result.categoryHint ?? "nil")")
+            // Keyword fallback must NOT rename the merchant — raw string is preserved.
+            #expect(result.normalizedName == raw || MerchantNormalizer.seed.keys.contains(where: { raw.uppercased().contains($0) }),
+                    "\(raw): keyword fallback should keep the raw display name")
+        }
+    }
+
+    @Test("normalize: keyword fallback does not fire for a truly unknown merchant — 07-07")
+    func keywordFallbackRespectsUnknown() {
+        let result = MerchantNormalizer.normalize("MILLION MARKET C4")
+        // No seed key, no keyword — must remain uncategorized (nil hint), raw name preserved.
+        #expect(result.normalizedName == "MILLION MARKET C4")
+        #expect(result.categoryHint == nil)
+    }
 }

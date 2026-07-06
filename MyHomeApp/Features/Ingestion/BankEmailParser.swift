@@ -7,9 +7,16 @@ import Foundation
 /// All fields are value types; no @Model references so this type is safe to pass
 /// across concurrency boundaries (Sendable). Amount is Decimal — never Double (Pitfall 17).
 public struct ParsedExpense: Sendable {
-    /// Transaction amount in INR. Negative for reversals/refunds.
+    /// Transaction amount. Negative for reversals/refunds.
     /// Always Decimal — never Double (Pitfall 17; money must not lose precision).
+    /// Denominated in `currencyCode` — usually INR, but foreign-currency card spends
+    /// (e.g. ICICI USD transactions) carry the original amount with `currencyCode != "INR"`.
     public let amount: Decimal
+
+    /// ISO-4217 currency code for `amount` (07-07). Defaults to "INR".
+    /// No FX conversion is performed — the raw foreign amount is preserved as-is, and the
+    /// stored `Expense.currencyCode` records the denomination so totals aren't mistaken for INR.
+    public let currencyCode: String
 
     /// Raw merchant string as extracted from the email (before normalization).
     public let rawMerchant: String
@@ -40,6 +47,7 @@ public struct ParsedExpense: Sendable {
 
     public init(
         amount: Decimal,
+        currencyCode: String = "INR",
         rawMerchant: String,
         normalizedMerchant: String,
         categoryHint: String?,
@@ -50,6 +58,7 @@ public struct ParsedExpense: Sendable {
         extractionScore: Double
     ) {
         self.amount = amount
+        self.currencyCode = currencyCode
         self.rawMerchant = rawMerchant
         self.normalizedMerchant = normalizedMerchant
         self.categoryHint = categoryHint
@@ -58,6 +67,44 @@ public struct ParsedExpense: Sendable {
         self.isReversal = isReversal
         self.fingerprintScore = fingerprintScore
         self.extractionScore = extractionScore
+    }
+}
+
+// MARK: - CurrencyConverter
+
+/// Converts a foreign-currency transaction amount into INR, the app's base currency (07-07).
+///
+/// Why this exists: parsers preserve the original currency faithfully (e.g. USD card spends),
+/// but every downstream aggregator — budgets, analytics, overview, donuts — sums `Expense.amount`
+/// as INR. Without conversion a $23.60 charge would count as ₹23.60. Conversion happens once, at
+/// ingestion, so those aggregators need no changes and can't accidentally skip a currency.
+///
+/// Live rates are fetched dynamically by `CurrencyRateProvider` (free, no-key FX API, cached 24h);
+/// this `staticRatesToINR` table is only the **offline fallback** used when the network and cache
+/// are both unavailable — deliberately kept to honour the "free data only" constraint. An unknown
+/// currency returns `nil` (caller keeps the original amount and flags the currency) rather than
+/// silently mis-scaling.
+public enum CurrencyConverter {
+
+    /// Offline fallback: approximate units of INR per 1 unit of the keyed currency. INR = identity.
+    /// Live values from `CurrencyRateProvider` override these whenever available.
+    public static let staticRatesToINR: [String: Decimal] = [
+        "INR": 1,
+        "USD": 86,
+        "EUR": 93,
+        "GBP": 109,
+        "AED": 23,
+        "SGD": 64,
+        "JPY": Decimal(string: "0.58")!,
+    ]
+
+    /// Returns `amount` converted to INR using the supplied `rates` (currency → INR-per-unit),
+    /// or `nil` when no rate is known for `currency`. A nil result signals the caller to keep the
+    /// original amount and preserve the currency code.
+    public static func toINR(_ amount: Decimal, from currency: String, using rates: [String: Decimal]) -> Decimal? {
+        let code = currency.uppercased()
+        guard let rate = rates[code] else { return nil }
+        return amount * rate
     }
 }
 

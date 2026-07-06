@@ -70,23 +70,41 @@ public struct ICICIParser: BankEmailParser {
         // Extract message Date header for fallback
         let fallbackDate = extractDate(from: rawEmail) ?? Date()
 
-        // Try CC-spend template (the only confirmed ICICI transaction template)
-        return parseCCSpend(body: body, fallbackDate: fallbackDate)
+        // Try each known template in order (07-07: expanded beyond CC-spend).
+        if let expense = parseCCSpend(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        if let expense = parseCCReversal(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        if let expense = parseNEFTDebit(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        if let expense = parseAccountCredit(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        return nil
     }
 
     // MARK: - Template parsers
 
-    /// ICICI CC spend: "Your ICICI Bank Credit Card XX<NNNN> has been used for a transaction of INR <amount> on <Mon dd, yyyy> at <hh:mm:ss>. Info: <MERCHANT>."
+    /// ICICI CC spend: "Your ICICI Bank Credit Card XX<NNNN> has been used for a transaction of <CUR> <amount> on <Mon dd, yyyy> at <hh:mm:ss>. Info: <MERCHANT>."
+    ///
+    /// 07-07: currency generalised from hardcoded INR to any ISO code so foreign-currency
+    /// spends (e.g. "USD 23.60" for Anthropic/Vercel) are captured. No FX conversion is done —
+    /// the original amount + `currencyCode` are preserved (see ParsedExpense.currencyCode).
     private func parseCCSpend(body: String, fallbackDate: Date) -> ParsedExpense? {
         // FINGERPRINT — required literals (ING-07): if any missing, return nil
         guard body.contains("Your ICICI Bank Credit Card XX"),
-              body.contains("has been used for a transaction of INR"),
+              body.contains("has been used for a transaction of"),
               body.contains("Info:") else {
             return nil
         }
 
-        // EXTRACT amount — "INR <amount> on"
-        guard let amount = extractAmount(pattern: #"INR\s+([\d,]+(?:\.\d{1,2})?)\s+on"#, from: body) else {
+        // EXTRACT currency + amount — "transaction of <CUR> <amount> on"
+        // Anchored to "transaction of" so the later "Available Credit Limit ... INR" is not matched.
+        guard let (currency, amount) = extractCurrencyAmount(
+            pattern: #"transaction of\s+([A-Z]{3})\s+([\d,]+(?:\.\d{1,2})?)\s+on"#, from: body) else {
             return nil
         }
 
@@ -105,12 +123,127 @@ public struct ICICIParser: BankEmailParser {
 
         return ParsedExpense(
             amount: amount,
+            currencyCode: currency,
             rawMerchant: merchant,
             normalizedMerchant: normalized.normalizedName,
             categoryHint: normalized.categoryHint,
             date: date,
             rawSourceLabel: sourceLabel,
             isReversal: false,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
+    /// ICICI CC reversal/refund (07-07): "the reversal of INR <amount> has been done on your
+    /// ICICI Bank Credit Card XX<NNNN> on <Month dd, yyyy>." Mirrors HDFC refund handling:
+    /// isReversal=true, negative amount. No merchant is present in the email.
+    private func parseCCReversal(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT
+        guard body.contains("the reversal of INR"),
+              body.contains("has been done on your ICICI Bank Credit Card") else {
+            return nil
+        }
+
+        // EXTRACT amount — "the reversal of INR <amount>"
+        guard let amount = extractAmount(pattern: #"the reversal of INR\s+([\d,]+(?:\.\d{1,2})?)"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT card tail — "Credit Card XX<NNNN>" (whitespace already collapsed by strip)
+        let cardTail = extractCapture(pattern: #"Credit Card\s+XX(\d{4})"#, from: body) ?? ""
+        let sourceLabel = cardTail.isEmpty ? "ICICI CC" : "ICICI CC ••\(cardTail)"
+
+        // EXTRACT date — "on <Month dd, yyyy>" (full or abbreviated month)
+        let date = extractLongOrShortMonthDate(from: body) ?? fallbackDate
+
+        return ParsedExpense(
+            amount: -abs(amount),           // reversal → negative (ING-09)
+            rawMerchant: "Reversal",
+            normalizedMerchant: "ICICI Reversal",
+            categoryHint: nil,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: true,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
+    /// ICICI savings-account NEFT outflow (07-07): "You have made an online NEFT payment of
+    /// Rs. <amount> towards <payee> on <Mon dd, yyyy> at <time> from your ICICI Bank Savings
+    /// Account XXXX<NNNN>." A genuine debit — downstream transfer detection flags self-transfers.
+    private func parseNEFTDebit(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT
+        guard body.contains("You have made an online NEFT payment of"),
+              body.contains("from your ICICI Bank Savings Account") else {
+            return nil
+        }
+
+        // EXTRACT amount — "NEFT payment of Rs. <amount> towards"
+        guard let amount = extractAmount(pattern: #"NEFT payment of Rs\.?\s*([\d,]+(?:\.\d{1,2})?)\s+towards"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT payee — "towards <payee> on <Mon dd, yyyy>"
+        let payee = extractCapture(pattern: #"towards\s+(.+?)\s+on\s+[A-Za-z]{3,9}\s+\d{1,2},"#, from: body) ?? "NEFT Transfer"
+
+        // EXTRACT account tail — "Savings Account XXXX<NNNN>"
+        let accountTail = extractCapture(pattern: #"Savings Account\s+X+(\d{4})"#, from: body) ?? ""
+        let sourceLabel = accountTail.isEmpty ? "ICICI Savings" : "ICICI Savings ••\(accountTail)"
+
+        // EXTRACT date — "on <Mon dd, yyyy>"
+        let date = extractLongOrShortMonthDate(from: body) ?? fallbackDate
+
+        // NORMALISE (payee is usually a person → typically Uncategorized)
+        let normalized = MerchantNormalizer.normalize(payee)
+
+        return ParsedExpense(
+            amount: amount,
+            rawMerchant: payee,
+            normalizedMerchant: normalized.normalizedName,
+            categoryHint: normalized.categoryHint,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: false,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
+    /// ICICI savings-account incoming credit (07-07): "Your ICICI Bank Account XX<NNNN> has been
+    /// credited with INR <amount> on <dd-Mon-yy>. Info: <detail>." Captured as a credit
+    /// (isReversal=true, negative amount) so incoming money is recorded, mirroring refund handling.
+    private func parseAccountCredit(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT
+        guard body.contains("Your ICICI Bank Account XX"),
+              body.contains("has been credited with INR") else {
+            return nil
+        }
+
+        // EXTRACT amount — "credited with INR <amount>"
+        guard let amount = extractAmount(pattern: #"has been credited with INR\s+([\d,]+(?:\.\d{1,2})?)"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT account tail — "Account XX<NNNN>"
+        let accountTail = extractCapture(pattern: #"ICICI Bank Account XX(\d{3,4})"#, from: body) ?? ""
+        let sourceLabel = accountTail.isEmpty ? "ICICI Savings" : "ICICI Savings ••\(accountTail)"
+
+        // Label interest credits distinctly; otherwise generic account credit.
+        let merchant = body.contains("Int.Pd") ? "Interest Credit" : "Account Credit"
+
+        // EXTRACT date — "on <dd-Mon-yy>"
+        let date = extractDDMonYY(from: body) ?? fallbackDate
+
+        return ParsedExpense(
+            amount: -abs(amount),           // credit → negative (money in), like a reversal (ING-09)
+            rawMerchant: merchant,
+            normalizedMerchant: merchant,
+            categoryHint: nil,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: true,
             fingerprintScore: 1.0,
             extractionScore: 1.0
         )
@@ -198,6 +331,27 @@ public struct ICICIParser: BankEmailParser {
         return Decimal(string: amtStr)
     }
 
+    /// Extracts an ISO currency code (group 1) and Decimal amount (group 2) in one match.
+    /// Never uses Double — Pitfall 17.
+    private func extractCurrencyAmount(pattern: String, from body: String) -> (String, Decimal)? {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+            return nil
+        }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range),
+              match.numberOfRanges > 2,
+              match.range(at: 1).location != NSNotFound,
+              match.range(at: 2).location != NSNotFound else {
+            return nil
+        }
+        let currency = nsBody.substring(with: match.range(at: 1)).uppercased()
+        let amtStr = nsBody.substring(with: match.range(at: 2))
+            .replacingOccurrences(of: ",", with: "")
+        guard let amount = Decimal(string: amtStr) else { return nil }
+        return (currency, amount)
+    }
+
     /// Generic single-capture-group extraction helper.
     private func extractCapture(pattern: String, from body: String) -> String? {
         guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
@@ -248,6 +402,41 @@ public struct ICICIParser: BankEmailParser {
         formatter.dateFormat = "MMM dd, yyyy"
         if let d = formatter.date(from: dateStr) { return d }
         formatter.dateFormat = "MMM d, yyyy"
+        return formatter.date(from: dateStr)
+    }
+
+    /// Parses an ICICI date that may use a full ("June 20, 2026") or abbreviated ("Jul 01, 2026")
+    /// month name — used by the reversal and NEFT templates (07-07). Whitespace is already
+    /// collapsed by `stripHTMLTags`, so "June      20" arrives as "June 20".
+    private func extractLongOrShortMonthDate(from body: String) -> Date? {
+        let pattern = #"\b([A-Za-z]{3,9}\s+\d{1,2},\s*\d{4})\b"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range) else { return nil }
+        let dateStr = nsBody.substring(with: match.range(at: 1))
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Kolkata")
+        for fmt in ["MMMM d, yyyy", "MMM d, yyyy", "MMMM dd, yyyy", "MMM dd, yyyy"] {
+            formatter.dateFormat = fmt
+            if let d = formatter.date(from: dateStr) { return d }
+        }
+        return nil
+    }
+
+    /// Parses ICICI account-alert date format: "dd-Mon-yy" (e.g. "30-Jun-26").
+    private func extractDDMonYY(from body: String) -> Date? {
+        let pattern = #"\b(\d{1,2}-[A-Za-z]{3}-\d{2})\b"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range) else { return nil }
+        let dateStr = nsBody.substring(with: match.range(at: 1))
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Kolkata")
+        formatter.dateFormat = "dd-MMM-yy"
         return formatter.date(from: dateStr)
     }
 }
