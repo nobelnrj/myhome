@@ -48,4 +48,21 @@ enum AccountAttributionHelper {
     static func accountID(forSourceLabel label: String, in map: [String: UUID]) -> UUID? {
         map[label] ?? map[label.lowercased()]
     }
+
+    /// Returns the distinct, non-empty expense `sourceLabel`s that do not resolve to any existing
+    /// account (07-07). These are the labels a fresh device should auto-create accounts for so that
+    /// per-account balances and transfer detection work without manual tagging.
+    ///
+    /// Order is first-seen (deterministic) so callers create accounts in a stable order.
+    static func unmatchedSourceLabels(in expenses: [Expense], accounts: [Account]) -> [String] {
+        let map = buildAccountIDsByLabel(from: accounts)
+        var seen = Set<String>()
+        var result: [String] = []
+        for expense in expenses {
+            guard let label = expense.sourceLabel, !label.isEmpty else { continue }
+            if accountID(forSourceLabel: label, in: map) != nil { continue }
+            if seen.insert(label).inserted { result.append(label) }
+        }
+        return result
+    }
 }

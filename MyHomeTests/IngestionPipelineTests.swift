@@ -28,7 +28,7 @@ struct IngestionPipelineTests {
 
     private func makeContainer() throws -> ModelContainer {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        return try ModelContainer(for: Expense.self, Cat.self, Note.self, NoteBlock.self,
+        return try ModelContainer(for: Expense.self, Cat.self, Note.self, NoteBlock.self, Account.self,
                                   configurations: config)
     }
 
@@ -92,6 +92,87 @@ struct IngestionPipelineTests {
         <p>Rs.\(amount) is debited from your HDFC Bank Debit Card ending 1234 at \(merchant) on 02 Jun, 2026</p>
         </body></html>
         """
+    }
+
+    /// Builds a raw ICICI CC-spend email denominated in a foreign currency (07-07).
+    private func makeICICIForeignEmail(currency: String = "USD", amount: String = "23.60",
+                                        merchant: String = "ANTHROPIC* CLAUDE SUB",
+                                        cardLast4: String = "8006") -> String {
+        return """
+        From: credit_cards@icici.bank.in
+        To: test@gmail.com
+        Subject: ICICI Bank Credit Card Transaction
+        Date: Wed, 10 Jun 2026 01:31:53 +0530
+        MIME-Version: 1.0
+        Content-Type: text/html; charset=UTF-8
+
+        <html><body>
+        <p>Your ICICI Bank Credit Card XX\(cardLast4) has been used for a transaction of \(currency) \(amount) on Jun 10, 2026 at 01:31:53. Info: \(merchant). The Available Credit Limit on your card is INR 1,46,443.82.</p>
+        </body></html>
+        """
+    }
+
+    // MARK: - 07-07: foreign currency converted to INR at ingestion
+
+    @Test("pipeline: USD card spend is converted to INR at ingestion using live rate — 07-07")
+    func foreignCurrencyConvertedToINR() async throws {
+        let container = try makeContainer()
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let fetch = SpyGmailFetch()
+        fetch.profileResult = GmailProfile(emailAddress: "user@gmail.com")
+        fetch.messageIDsResult = ["msg-usd"]
+        fetch.rawMessagesByID = ["msg-usd": makeICICIForeignEmail()]
+
+        // Inject a deterministic rate fetcher (no network): USD → INR at 80.
+        let controller = GmailSyncController(
+            auth: SpyGmailAuth(), keychain: SpyKeychainStore(), fetch: fetch, defaults: defaults,
+            fxRateFetcher: { ["INR": 1, "USD": 80] }
+        )
+        controller.accessToken = "access_tok"
+        controller.setContext(container.mainContext)
+
+        await controller.sync()
+
+        let expenses = try container.mainContext.fetch(FetchDescriptor<Expense>())
+        let e = try #require(expenses.first, "USD spend must be ingested")
+        // 23.60 USD × 80 = 1888.00 INR
+        #expect(e.amount == Decimal(string: "1888.00"), "USD amount must be converted to INR, got \(e.amount)")
+        #expect(e.currencyCode == "INR", "Stored currency should be the converted base currency INR")
+        #expect(e.note?.contains("USD 23.60") == true, "Note should preserve the original charge, got \(e.note ?? "nil")")
+    }
+
+    // MARK: - 07-07: fresh-device account auto-create + backfill attribution
+
+    @Test("pipeline: fresh sync auto-creates an account from sourceLabel and attributes the expense — 07-07")
+    func syncAutoCreatesAccountAndAttributes() async throws {
+        let container = try makeContainer()
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let fetch = SpyGmailFetch()
+        fetch.profileResult = GmailProfile(emailAddress: "user@gmail.com")
+        fetch.messageIDsResult = ["msg-attr"]
+        fetch.rawMessagesByID = ["msg-attr": makeICICIEmail(cardLast4: "9001")]
+
+        let controller = GmailSyncController(auth: SpyGmailAuth(), keychain: SpyKeychainStore(), fetch: fetch, defaults: defaults)
+        controller.accessToken = "access_tok"
+        controller.setContext(container.mainContext)
+
+        // No accounts exist before the sync (fresh device).
+        #expect(try container.mainContext.fetch(FetchDescriptor<Account>()).isEmpty)
+
+        await controller.sync()
+
+        // An account is auto-created for the ICICI CC ••9001 sourceLabel, and the expense attributes to it.
+        let accounts = try container.mainContext.fetch(FetchDescriptor<Account>())
+        let created = try #require(accounts.first { ($0.sourceLabel ?? "").contains("9001") },
+                                   "Fresh sync should auto-create an account for the ICICI CC ••9001 sourceLabel")
+        let expenses = try container.mainContext.fetch(FetchDescriptor<Expense>())
+        let e = try #require(expenses.first)
+        #expect(e.accountID == created.id, "Ingested expense must be attributed to the auto-created account")
+        #expect(created.sourceLabel != nil, "Auto-created account must carry the sourceLabel (surfaces for user review)")
     }
 
     // MARK: - UAT-6-05: connectedEmail populated from getProfile

@@ -147,10 +147,157 @@ final class GmailSyncController {
     /// App Group UserDefaults backing all persistent metadata.
     private let defaults: UserDefaults
 
+    /// Injectable **live** FX rate fetcher (07-07): does only the network call, returning live
+    /// currency→INR rates or nil on failure. Caching/freshness is handled on the MainActor in
+    /// `resolveCurrencyRates()` so UserDefaults never crosses an isolation boundary. Injectable so
+    /// tests exercise conversion without real network. Only invoked when a foreign-currency
+    /// transaction is actually seen, so INR-only syncs never fetch.
+    private let fxRateFetcher: @Sendable () async -> [String: Decimal]?
+
+    /// Per-sync memoised rates — populated lazily on first foreign-currency transaction.
+    private var currencyRatesCache: [String: Decimal]?
+
+    // FX cache keys (07-07).
+    private static let fxCacheKey = "fx.ratesToINR.v1"
+    private static let fxCacheDateKey = "fx.ratesToINR.fetchedAt"
+    private static let fxMaxAge: TimeInterval = 24 * 60 * 60   // refresh at most daily
+
     // MARK: - Pipeline components
 
     private let parsers: [any BankEmailParser] = [HDFCParser(), ICICIParser(), CUBParser()]
     private static let bankSenderFilter = "from:(hdfcbank.bank.in OR icici.bank.in OR cityunionbank.org)"
+
+    // MARK: - Amount normalisation (07-07)
+
+    /// Normalises a parsed transaction into the stored `Expense` shape: signed base-currency
+    /// amount, the currency code actually stored, and a note (annotated with the original
+    /// currency when a conversion happened). Shared by both ingestion paths so they can't diverge.
+    ///
+    /// Foreign currencies are converted to INR once, here, so every downstream aggregator keeps
+    /// treating `Expense.amount` as INR. If no rate is known the original amount + currency are
+    /// kept (best-effort, still flagged) rather than mis-scaled.
+    private static func normalisedExpenseFields(
+        from parsed: ParsedExpense,
+        rates: [String: Decimal]
+    ) -> (amount: Decimal, currencyCode: String, note: String) {
+        let baseNote = parsed.normalizedMerchant.isEmpty ? parsed.rawMerchant : parsed.normalizedMerchant
+
+        let storedAmount: Decimal
+        let storedCurrency: String
+        var note = baseNote
+
+        if parsed.currencyCode == "INR" {
+            storedAmount = parsed.amount
+            storedCurrency = "INR"
+        } else if let inr = CurrencyConverter.toINR(parsed.amount, from: parsed.currencyCode, using: rates) {
+            storedAmount = inr
+            storedCurrency = "INR"
+            // Preserve the original charge for traceability, e.g. "Anthropic (USD 23.60)".
+            note = "\(baseNote) (\(parsed.currencyCode) \(Self.originalAmountString(parsed.amount)))"
+        } else {
+            // Unknown currency — keep the original amount and code rather than mis-scaling to INR.
+            storedAmount = parsed.amount
+            storedCurrency = parsed.currencyCode
+        }
+
+        let signed = parsed.isReversal ? -abs(storedAmount) : storedAmount
+        return (signed, storedCurrency, note)
+    }
+
+    /// 07-07: Auto-create accounts + backfill attribution so a fresh device (no v5→v6 migration)
+    /// can attribute synced expenses without manual tagging — a prerequisite for per-account
+    /// balances and transfer detection (D-04 requires both legs attributed).
+    ///
+    /// Steps:
+    ///   1. For every ingested `sourceLabel` that resolves to no existing account, create one
+    ///      (name = sourceLabel, sourceLabel set, type inferred). These surface in the accounts
+    ///      list for the user to rename / set an opening balance. Idempotent: once created, the
+    ///      label resolves, so re-running never duplicates.
+    ///   2. Backfill: attribute any still-Unassigned expense whose `sourceLabel` now resolves.
+    ///
+    /// Runs before the transfer scan so newly-attributed legs are eligible for pairing.
+    private func reconcileAccounts() {
+        guard let ctx = modelContext else { return }
+        do {
+            let accounts = try ctx.fetch(FetchDescriptor<Account>())
+            let expenses = try ctx.fetch(FetchDescriptor<Expense>())
+
+            // 1. Auto-create accounts for unmatched sourceLabels.
+            let unmatched = AccountAttributionHelper.unmatchedSourceLabels(in: expenses, accounts: accounts)
+            for label in unmatched {
+                let account = Account(name: label, typeRaw: inferAccountType(from: label), sourceLabel: label)
+                ctx.insert(account)
+            }
+            if !unmatched.isEmpty { try ctx.save() }
+
+            // 2. Backfill attribution onto existing Unassigned expenses.
+            let refreshed = try ctx.fetch(FetchDescriptor<Account>())
+            let map = AccountAttributionHelper.buildAccountIDsByLabel(from: refreshed)
+            var changed = false
+            for expense in expenses where expense.accountID == nil {
+                if let label = expense.sourceLabel,
+                   let id = AccountAttributionHelper.accountID(forSourceLabel: label, in: map) {
+                    expense.accountID = id
+                    changed = true
+                }
+            }
+            if changed { try ctx.save() }
+        } catch {
+            print("[GmailSyncController] account reconcile failed: \(error)")
+        }
+    }
+
+    /// Lazily resolves currency→INR rates for the current sync, memoised after first use so at
+    /// most one fetch happens per sync. Only called when a foreign-currency transaction is seen.
+    private func currencyRatesToINR() async -> [String: Decimal] {
+        if let cached = currencyRatesCache { return cached }
+        let rates = await resolveCurrencyRates()
+        currencyRatesCache = rates
+        return rates
+    }
+
+    /// Resolves rates preferring a fresh (<24h) UserDefaults cache, then a live network fetch,
+    /// then a stale cache, then the static fallback. All UserDefaults access stays on the
+    /// MainActor; only the network fetch crosses an isolation boundary (returns a Sendable dict).
+    private func resolveCurrencyRates() async -> [String: Decimal] {
+        // 1. Fresh cache → no network.
+        if let fetchedAt = defaults.object(forKey: Self.fxCacheDateKey) as? Date,
+           now().timeIntervalSince(fetchedAt) < Self.fxMaxAge,
+           let cached = loadCachedRates() {
+            return cached
+        }
+        // 2. Live fetch (merged over the static table so omitted currencies still resolve).
+        if let live = await fxRateFetcher() {
+            var merged = CurrencyConverter.staticRatesToINR
+            for (code, rate) in live { merged[code] = rate }
+            saveCachedRates(merged)
+            return merged
+        }
+        // 3. Stale cache, else static fallback.
+        return loadCachedRates() ?? CurrencyConverter.staticRatesToINR
+    }
+
+    private func loadCachedRates() -> [String: Decimal]? {
+        guard let data = defaults.data(forKey: Self.fxCacheKey) else { return nil }
+        return try? JSONDecoder().decode([String: Decimal].self, from: data)
+    }
+
+    private func saveCachedRates(_ rates: [String: Decimal]) {
+        guard let data = try? JSONEncoder().encode(rates) else { return }
+        defaults.set(data, forKey: Self.fxCacheKey)
+        defaults.set(now(), forKey: Self.fxCacheDateKey)
+    }
+
+    /// Formats the original foreign amount for the note annotation (2dp, no grouping).
+    private static func originalAmountString(_ amount: Decimal) -> String {
+        let f = NumberFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.numberStyle = .decimal
+        f.usesGroupingSeparator = false
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 2
+        return f.string(from: NSDecimalNumber(decimal: amount)) ?? "\(amount)"
+    }
     private static let initialBackfillDays = 120
     static let autoSaveThreshold: Double = ConfidenceScorer.autoSaveThreshold
 
@@ -171,13 +318,17 @@ final class GmailSyncController {
         fetch: any GmailFetchPort = SystemGmailFetch(),
         now: @escaping () -> Date = Date.init,
         defaults: UserDefaults = UserDefaults(suiteName: "group.com.reojacob.myhome") ?? .standard,
-        accountStore: GmailAccountStore? = nil
+        accountStore: GmailAccountStore? = nil,
+        fxRateFetcher: @escaping @Sendable () async -> [String: Decimal]? = {
+            await CurrencyRateProvider.fetchLiveRatesToINR()
+        }
     ) {
         self.auth = auth
         self.keychain = keychain
         self.fetch = fetch
         self.now = now
         self.defaults = defaults
+        self.fxRateFetcher = fxRateFetcher
 
         // Build or use the provided store
         let builtStore = accountStore ?? GmailAccountStore(defaults: defaults, keychain: keychain)
@@ -337,6 +488,9 @@ final class GmailSyncController {
     ///
     /// ING-03: sync transitions idle → syncing → done.
     func sync() async {
+        // 07-07: drop memoised FX rates so a fresh sync re-checks the 24h cache / refetches.
+        currencyRatesCache = nil
+
         // Refresh the store's account list
         let connectedAccounts = store.accounts
 
@@ -526,12 +680,18 @@ final class GmailSyncController {
                     ingestionState = "needsReview"
                 }
 
+                // 07-07: convert foreign currency (e.g. USD card spends) to INR at ingestion so
+                // all downstream aggregators keep treating amount as the base currency. Rates are
+                // fetched lazily — only when a non-INR transaction is actually seen.
+                let rates: [String: Decimal] = parsed.currencyCode == "INR" ? [:] : await currencyRatesToINR()
+                let fields = GmailSyncController.normalisedExpenseFields(from: parsed, rates: rates)
                 let expense = Expense(
-                    amount: parsed.isReversal ? -abs(parsed.amount) : parsed.amount,
+                    amount: fields.amount,
                     date: parsed.date,
-                    note: parsed.normalizedMerchant.isEmpty ? parsed.rawMerchant : parsed.normalizedMerchant
+                    note: fields.note
                 )
                 expense.rawEmailBody = rawEmail
+                expense.currencyCode = fields.currencyCode
                 expense.parserID = parser.parserID
                 expense.parserVersion = parser.parserVersion
                 expense.sourceLabel = parsed.rawSourceLabel
@@ -566,6 +726,9 @@ final class GmailSyncController {
             if let ctx = modelContext {
                 try ctx.save()
             }
+            // 07-07: auto-create accounts + backfill attribution before scanning (D-04 needs
+            // both transfer legs attributed).
+            reconcileAccounts()
             // D-08: run transfer scorer after each sync (synchronous @MainActor call — no STAB-02 risk)
             transferScanService?.scan()
             return true
@@ -682,12 +845,16 @@ final class GmailSyncController {
                     ingestionState = "needsReview"
                 }
 
+                // 07-07: same currency normalisation as the multi-account path.
+                let rates: [String: Decimal] = parsed.currencyCode == "INR" ? [:] : await currencyRatesToINR()
+                let fields = GmailSyncController.normalisedExpenseFields(from: parsed, rates: rates)
                 let expense = Expense(
-                    amount: parsed.isReversal ? -abs(parsed.amount) : parsed.amount,
+                    amount: fields.amount,
                     date: parsed.date,
-                    note: parsed.normalizedMerchant.isEmpty ? parsed.rawMerchant : parsed.normalizedMerchant
+                    note: fields.note
                 )
                 expense.rawEmailBody = rawEmail
+                expense.currencyCode = fields.currencyCode
                 expense.parserID = parser.parserID
                 expense.parserVersion = parser.parserVersion
                 expense.sourceLabel = parsed.rawSourceLabel
@@ -714,6 +881,8 @@ final class GmailSyncController {
             if let ctx = modelContext {
                 try ctx.save()
             }
+            // 07-07: auto-create accounts + backfill attribution before scanning.
+            reconcileAccounts()
             // D-08: run transfer scorer after the legacy sync too (CR-02 — the legacy path
             // previously skipped this hook, silently non-detecting for pre-migration users).
             transferScanService?.scan()
@@ -825,5 +994,45 @@ final class GmailSyncController {
             return inner.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         return headerValue.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+// MARK: - CurrencyRateProvider (07-07)
+
+/// Fetches live currency→INR exchange rates from a free, no-API-key endpoint. Caching, freshness
+/// and the static fallback are handled by the controller (on the MainActor); this type is purely
+/// the network call, so it holds no state and touches no UserDefaults.
+///
+/// Source: open.er-api.com (free tier, no key). We request base = INR (one request covers every
+/// currency) and invert each `INR → X` quote into the `X → INR` factor we need. Returns nil on any
+/// failure (offline, non-2xx, decode error, `result != "success"`) so the caller can fall back.
+enum CurrencyRateProvider {
+
+    private static let endpoint = URL(string: "https://open.er-api.com/v6/latest/INR")!
+
+    private struct APIResponse: Decodable {
+        let result: String
+        let rates: [String: Double]     // INR → currency
+    }
+
+    /// Fetches and inverts the live quotes to currency→INR Decimal factors, or nil on any failure.
+    static func fetchLiveRatesToINR(session: URLSession = .shared) async -> [String: Decimal]? {
+        do {
+            let (data, response) = try await session.data(from: endpoint)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return nil
+            }
+            let decoded = try JSONDecoder().decode(APIResponse.self, from: data)
+            guard decoded.result == "success" else { return nil }
+
+            var inrPerUnit: [String: Decimal] = ["INR": 1]
+            for (code, inrToCurrency) in decoded.rates where inrToCurrency > 0 {
+                inrPerUnit[code] = Decimal(1.0 / inrToCurrency)   // invert: X → INR
+            }
+            // Sanity: require at least USD to consider the payload usable.
+            return inrPerUnit["USD"] != nil ? inrPerUnit : nil
+        } catch {
+            return nil
+        }
     }
 }
