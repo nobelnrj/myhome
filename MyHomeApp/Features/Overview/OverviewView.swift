@@ -136,13 +136,13 @@ private struct OverviewMonthContent: View {
         // Pre-aggregate outside any Chart DSL (Pitfall A guard)
         let spendByCategory = BudgetCalculator.monthlySpend(for: monthExpenses, categories: categories)
         let totalBudget: Decimal = categories.compactMap(\.monthlyBudget).reduce(.zero, +)
-        let totalSpend = spendByCategory.values.reduce(.zero, +)
-            + BudgetCalculator.uncategorizedSpend(for: monthExpenses)
 
-        // Income this month (expenses with negative amounts = refunds/income, negated to positive display)
-        let totalIncome = monthExpenses
-            .filter { $0.amount < 0 && $0.isTransfer != true }
-            .reduce(Decimal.zero) { $0 + abs($1.amount) }
+        // Hero cash-flow totals: gross positive-only spend and gross credit-only income, both with
+        // internal transfers excluded. Using positive-only spend (not the category net, which sums
+        // in credits) prevents a negative spend total from clamping the orb to 0% (see
+        // BudgetCalculator.grossSpend / .isTransferForCashFlow).
+        let totalSpend = BudgetCalculator.grossSpend(for: monthExpenses)
+        let totalIncome = BudgetCalculator.grossIncome(for: monthExpenses)
 
         // Category spend, sorted descending — feeds the stacked bar + donut + legend.
         let rankedSpend: [(category: Category, spent: Decimal)] = categories
@@ -159,6 +159,11 @@ private struct OverviewMonthContent: View {
                 return (category, spendByCategory[category.persistentModelID] ?? .zero, limit)
             }
             .sorted { fraction($0.spent, $0.limit) > fraction($1.spent, $1.limit) }
+
+        // Numerator for the hero budget strip: spend in budgeted categories only, so the strip's
+        // "% used" reconciles with the per-category Budgets rows (both use net per-category spend
+        // against the budgeted-only total). Gross cash-flow spend still drives the orb/tiles/net.
+        let budgetedSpent: Decimal = budgeted.reduce(Decimal.zero) { $0 + $1.spent }
 
         let recent = Array(monthExpenses.prefix(5))
 
@@ -192,6 +197,7 @@ private struct OverviewMonthContent: View {
                 SpendBudgetCard(
                     income: totalIncome,
                     spent: totalSpend,
+                    budgetedSpent: budgetedSpent,
                     totalBudget: totalBudget,
                     selectedTab: $selectedTab
                 )

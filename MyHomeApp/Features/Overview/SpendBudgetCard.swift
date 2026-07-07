@@ -18,7 +18,13 @@ struct SpendBudgetCard: View {
     /// Total income this month (sum of |expense.amount| where amount < 0 and not a transfer).
     let income: Decimal
     /// Total spend this month (sum of expense.amount where amount > 0, self-transfer-excluded).
+    /// Drives the cash-flow orb, the SPENT tile, and the net figure — NOT the budget strip.
     let spent: Decimal
+    /// Spend that lands in budgeted categories only — the SAME numerator the per-category
+    /// "Budgets" rows use (net per-category spend, summed over categories with a limit). The
+    /// budget strip uses this so its "% used" reconciles with those rows, instead of counting
+    /// unbudgeted/uncategorized spend against the budgeted-only total.
+    let budgetedSpent: Decimal
     /// Total monthly budget across all budgeted categories (0 when no budget is set).
     let totalBudget: Decimal
     @Binding var selectedTab: Int
@@ -32,9 +38,10 @@ struct SpendBudgetCard: View {
     private var net: Decimal { income - spent }
 
     /// Fraction of budget consumed (nil when no budget set; guarded against divide-by-zero).
+    /// Uses `budgetedSpent` (budgeted-category spend) so it matches the per-category rows.
     private var fractionUsed: Double? {
         guard totalBudget > 0 else { return nil }
-        return NSDecimalNumber(decimal: min(spent / totalBudget, Decimal(2))).doubleValue
+        return NSDecimalNumber(decimal: min(budgetedSpent / totalBudget, Decimal(2))).doubleValue
     }
 
     private var netIsPositive: Bool { net >= 0 }
@@ -45,7 +52,7 @@ struct SpendBudgetCard: View {
     /// Budget-health colour for the ring (independent of net sign): green under budget,
     /// orange near the limit, red once over.
     private var ringColor: Color {
-        if spent > totalBudget { return DesignTokens.negative }
+        if budgetedSpent > totalBudget { return DesignTokens.negative }
         if let f = fractionUsed, f >= 0.85 { return DesignTokens.orange }
         return DesignTokens.positive
     }
@@ -100,7 +107,7 @@ struct SpendBudgetCard: View {
                 incomeColor: DesignTokens.positive,
                 expenseColor: DesignTokens.negative,
                 size: 280,
-                pulse: totalBudget > 0 && spent > totalBudget
+                pulse: totalBudget > 0 && budgetedSpent > totalBudget
             ) {
                 VStack(spacing: 2) {
                     Text("\(spendPct)%")
@@ -220,6 +227,7 @@ struct SpendBudgetCard: View {
     SpendBudgetCard(
         income: Decimal(45000),
         spent: Decimal(32000),
+        budgetedSpent: Decimal(28000),
         totalBudget: Decimal(40000),
         selectedTab: $tab
     )
@@ -233,6 +241,7 @@ struct SpendBudgetCard: View {
     SpendBudgetCard(
         income: Decimal(20000),
         spent: Decimal(35000),
+        budgetedSpent: Decimal(0),
         totalBudget: Decimal(0),
         selectedTab: $tab
     )

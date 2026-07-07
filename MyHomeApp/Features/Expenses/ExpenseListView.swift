@@ -46,6 +46,7 @@ struct ExpenseListView: View {
     @Environment(\.modelContext) private var context
 
     @State private var showingAddSheet: Bool = false
+    @State private var showingAddTransferSheet: Bool = false
     @State private var editingExpense: Expense? = nil
 
     /// Active category filter for the main list. Defaults to showing everything.
@@ -181,15 +182,29 @@ struct ExpenseListView: View {
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    Button(action: { showingAddSheet = true }) {
+                    Menu {
+                        Button {
+                            showingAddSheet = true
+                        } label: {
+                            Label("New Expense", systemImage: "creditcard")
+                        }
+                        Button {
+                            showingAddTransferSheet = true
+                        } label: {
+                            Label("New Transfer", systemImage: "arrow.left.arrow.right")
+                        }
+                    } label: {
                         Image(systemName: "plus")
                     }
                     .tint(DesignTokens.accent)
-                    .accessibilityLabel("Add Expense")
+                    .accessibilityLabel("Add")
                 }
             }
             .sheet(isPresented: $showingAddSheet) {
                 AddExpenseView()
+            }
+            .sheet(isPresented: $showingAddTransferSheet) {
+                AddTransferView()
             }
             .sheet(item: $editingExpense) { expense in
                 EditExpenseView(expense: expense)

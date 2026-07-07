@@ -75,6 +75,9 @@
 		A120RV /* ReminderValueTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F120RV /* ReminderValueTypes.swift */; };
 		A121 /* DecimalKeypadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F121 /* DecimalKeypadView.swift */; };
 		A122 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F122 /* AddExpenseView.swift */; };
+		A70TF /* TransferFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70TF /* TransferFactory.swift */; };
+		A70ATV /* AddTransferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70ATV /* AddTransferView.swift */; };
+		A70TFT /* TransferFactoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70TFT /* TransferFactoryTests.swift */; };
 		A123 /* ExpenseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123 /* ExpenseListView.swift */; };
 		A124 /* ExpenseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F124 /* ExpenseRow.swift */; };
 		A125 /* EditExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F125 /* EditExpenseView.swift */; };
@@ -174,6 +177,7 @@
 		A703CS /* ConfidenceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CS /* ConfidenceScorer.swift */; };
 		A703CUB /* CUBParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703CUB /* CUBParser.swift */; };
 		A703DK /* DedupChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DK /* DedupChecker.swift */; };
+		A70DUP /* DuplicateExpenseCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70DUP /* DuplicateExpenseCleanup.swift */; };
 		A703DS /* DismissedMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DS /* DismissedMessageStore.swift */; };
 		A703HP /* HDFCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703HP /* HDFCParser.swift */; };
 		A703IP /* ICICIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703IP /* ICICIParser.swift */; };
@@ -185,6 +189,7 @@
 		A706RIR /* ReviewInboxRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F706RIR /* ReviewInboxRow.swift */; };
 		A707CS /* ConfidenceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F707CS /* ConfidenceScorerTests.swift */; };
 		A708DC /* DedupCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F708DC /* DedupCheckerTests.swift */; };
+		A70DUT /* DuplicateExpenseCleanupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70DUT /* DuplicateExpenseCleanupTests.swift */; };
 		A709MN /* MerchantNormalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F709MN /* MerchantNormalizerTests.swift */; };
 		A710IP /* IngestionPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F710IP /* IngestionPipelineTests.swift */; };
 		A711FIX /* Fixtures in Resources */ = {isa = PBXBuildFile; fileRef = F711FIX /* Fixtures */; };
@@ -300,6 +305,9 @@
 		F120RV /* ReminderValueTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderValueTypes.swift; sourceTree = "<group>"; };
 		F121 /* DecimalKeypadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecimalKeypadView.swift; sourceTree = "<group>"; };
 		F122 /* AddExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddExpenseView.swift; sourceTree = "<group>"; };
+		F70TF /* TransferFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferFactory.swift; sourceTree = "<group>"; };
+		F70ATV /* AddTransferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransferView.swift; sourceTree = "<group>"; };
+		F70TFT /* TransferFactoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferFactoryTests.swift; sourceTree = "<group>"; };
 		F123 /* ExpenseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseListView.swift; sourceTree = "<group>"; };
 		F124 /* ExpenseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseRow.swift; sourceTree = "<group>"; };
 		F125 /* EditExpenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExpenseView.swift; sourceTree = "<group>"; };
@@ -399,6 +407,7 @@
 		F703CS /* ConfidenceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorer.swift; sourceTree = "<group>"; };
 		F703CUB /* CUBParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CUBParser.swift; sourceTree = "<group>"; };
 		F703DK /* DedupChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupChecker.swift; sourceTree = "<group>"; };
+		F70DUP /* DuplicateExpenseCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateExpenseCleanup.swift; sourceTree = "<group>"; };
 		F703DS /* DismissedMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissedMessageStore.swift; sourceTree = "<group>"; };
 		F703HP /* HDFCParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParser.swift; sourceTree = "<group>"; };
 		F703IP /* ICICIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParser.swift; sourceTree = "<group>"; };
@@ -410,6 +419,7 @@
 		F706RIR /* ReviewInboxRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewInboxRow.swift; sourceTree = "<group>"; };
 		F707CS /* ConfidenceScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfidenceScorerTests.swift; sourceTree = "<group>"; };
 		F708DC /* DedupCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupCheckerTests.swift; sourceTree = "<group>"; };
+		F70DUT /* DuplicateExpenseCleanupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateExpenseCleanupTests.swift; sourceTree = "<group>"; };
 		F709MN /* MerchantNormalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizerTests.swift; sourceTree = "<group>"; };
 		F710IP /* IngestionPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestionPipelineTests.swift; sourceTree = "<group>"; };
 		F711FIX /* Fixtures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fixtures; sourceTree = "<group>"; };
@@ -536,6 +546,8 @@
 			children = (
 				F121 /* DecimalKeypadView.swift */,
 				F122 /* AddExpenseView.swift */,
+				F70TF /* TransferFactory.swift */,
+				F70ATV /* AddTransferView.swift */,
 				F123 /* ExpenseListView.swift */,
 				F124 /* ExpenseRow.swift */,
 				F706RIR /* ReviewInboxRow.swift */,
@@ -624,6 +636,7 @@
 				F703MN /* MerchantNormalizer.swift */,
 				F703CS /* ConfidenceScorer.swift */,
 				F703DK /* DedupChecker.swift */,
+				F70DUP /* DuplicateExpenseCleanup.swift */,
 				F703DS /* DismissedMessageStore.swift */,
 				F703HP /* HDFCParser.swift */,
 				F703IP /* ICICIParser.swift */,
@@ -774,6 +787,8 @@
 				F706CUB /* CUBParserTests.swift */,
 				F707CS /* ConfidenceScorerTests.swift */,
 				F708DC /* DedupCheckerTests.swift */,
+				F70DUT /* DuplicateExpenseCleanupTests.swift */,
+				F70TFT /* TransferFactoryTests.swift */,
 				F709MN /* MerchantNormalizerTests.swift */,
 				F710IP /* IngestionPipelineTests.swift */,
 				F619MAGT /* MultiAccountGmailTests.swift */,
@@ -1000,6 +1015,8 @@
 				A1102NWSS /* NetWorthSnapshotService.swift in Sources */,
 				A121 /* DecimalKeypadView.swift in Sources */,
 				A122 /* AddExpenseView.swift in Sources */,
+				A70TF /* TransferFactory.swift in Sources */,
+				A70ATV /* AddTransferView.swift in Sources */,
 				A123 /* ExpenseListView.swift in Sources */,
 				A124 /* ExpenseRow.swift in Sources */,
 				A706RIR /* ReviewInboxRow.swift in Sources */,
@@ -1094,6 +1111,7 @@
 				A703MN /* MerchantNormalizer.swift in Sources */,
 				A703CS /* ConfidenceScorer.swift in Sources */,
 				A703DK /* DedupChecker.swift in Sources */,
+				A70DUP /* DuplicateExpenseCleanup.swift in Sources */,
 				A703DS /* DismissedMessageStore.swift in Sources */,
 				A703HP /* HDFCParser.swift in Sources */,
 				A703IP /* ICICIParser.swift in Sources */,
@@ -1153,6 +1171,8 @@
 				A706CUB /* CUBParserTests.swift in Sources */,
 				A707CS /* ConfidenceScorerTests.swift in Sources */,
 				A708DC /* DedupCheckerTests.swift in Sources */,
+				A70DUT /* DuplicateExpenseCleanupTests.swift in Sources */,
+				A70TFT /* TransferFactoryTests.swift in Sources */,
 				A709MN /* MerchantNormalizerTests.swift in Sources */,
 				A710IP /* IngestionPipelineTests.swift in Sources */,
 				A619MAGT /* MultiAccountGmailTests.swift in Sources */,

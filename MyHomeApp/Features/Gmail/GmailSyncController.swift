@@ -64,6 +64,14 @@ final class GmailSyncController {
     /// Current sync pipeline state.
     var syncStatus: SyncStatus = .idle
 
+    /// Re-entrancy guard: true while a `sync()` is in flight. Prevents overlapping runs
+    /// (background refresh + a manual "Sync now" tap, or two taps) from each snapshotting
+    /// the pre-loop existing-expenses set and both inserting the same messages — which
+    /// produced exact-duplicate expenses (identical messageID/parser/account, same-second
+    /// createdAt) that doubled every Overview total. @MainActor makes the check-and-set
+    /// atomic (no lock needed).
+    private var isSyncing = false
+
     /// Last OAuth/Keychain error, or nil.
     var authError: GmailAuthError? = nil
 
@@ -488,6 +496,14 @@ final class GmailSyncController {
     ///
     /// ING-03: sync transitions idle → syncing → done.
     func sync() async {
+        // Re-entrancy guard: if a sync is already running, drop this call rather than start a
+        // second concurrent run. Two overlapping runs each build their dedup set from the same
+        // stale snapshot and both insert every message → exact-duplicate expenses. @MainActor
+        // serialises this check-and-set, so no lock is required.
+        guard !isSyncing else { return }
+        isSyncing = true
+        defer { isSyncing = false }
+
         // 07-07: drop memoised FX rates so a fresh sync re-checks the 24h cache / refetches.
         currencyRatesCache = nil
 
@@ -623,7 +639,7 @@ final class GmailSyncController {
             // D-MA-03 + D-MA-06(b): Build account-scoped idempotency set.
             // Exact match on (sourceAccount, gmailMessageID) for expenses with a sourceAccount.
             // For expenses with nil sourceAccount (legacy), match on messageID alone (fallback).
-            let accountMessageIDs: Set<String> = Set(existingExpenses.compactMap { expense -> String? in
+            var accountMessageIDs: Set<String> = Set(existingExpenses.compactMap { expense -> String? in
                 guard let msgID = expense.gmailMessageID else { return nil }
                 if let src = expense.sourceAccount {
                     // Exact account-scoped match: only skip if SAME account
@@ -719,6 +735,9 @@ final class GmailSyncController {
 
                 if let ctx = modelContext {
                     ctx.insert(expense)
+                    // Defense in depth: record the inserted messageID so a repeated ID within
+                    // this same run (or a re-list) is skipped even before the batched save.
+                    accountMessageIDs.insert(messageID)
                 }
             }
 
@@ -809,7 +828,7 @@ final class GmailSyncController {
             }
 
             // Legacy single-account dedup (messageID only — no sourceAccount context)
-            let ingestedMessageIDs = Set(existingExpenses.compactMap { $0.gmailMessageID })
+            var ingestedMessageIDs = Set(existingExpenses.compactMap { $0.gmailMessageID })
 
             // D-04: Capture category PersistentIdentifiers once (Sendable value types,
             // safe across the await suspension — replaces captured [String: Category] @Model refs).
@@ -874,6 +893,7 @@ final class GmailSyncController {
 
                 if let ctx = modelContext {
                     ctx.insert(expense)
+                    ingestedMessageIDs.insert(messageID)
                 }
             }
 

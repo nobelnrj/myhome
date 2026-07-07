@@ -34,6 +34,10 @@ struct MyHomeApp: App {
                 .preferredColorScheme(.dark)   // DS-05: neumorphic dark-mode-only; applied once at root
                 .onAppear {
                     setupNotifications()
+                    // One-time repair for stores that accumulated duplicate ingested expenses
+                    // from overlapping pre-guard sync runs (doubled Overview totals). No-op once
+                    // the store is clean, so it is safe to run on every launch.
+                    DuplicateExpenseCleanup.run(in: container.mainContext)
                     #if DEBUG
                     seedSampleDataIfRequested()
                     #endif

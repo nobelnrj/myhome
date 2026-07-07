@@ -1,6 +1,30 @@
 import SwiftData
 import Foundation
 
+/// Raised when the app cannot resolve its single source-of-truth store location.
+///
+/// We deliberately do NOT fall back to a second store location. A silent fallback (the old
+/// behaviour) split the database across the App Group store and Application Support whenever the
+/// App Groups entitlement flipped between builds — old notes/routines "vanished" while the OS kept
+/// firing their scheduled notifications. Failing loudly surfaces a provisioning problem instead of
+/// corrupting the data model. (Decided 2026-07-07 — see [[account-balance-sign-convention]] session.)
+enum AppContainerError: LocalizedError {
+    case appGroupUnavailable(identifier: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .appGroupUnavailable(let id):
+            return """
+            App Group container "\(id)" could not be resolved. The app uses this as its single \
+            source of truth for the SwiftData store. This almost always means the App Groups \
+            entitlement is missing or not provisioned for the current signing team — check \
+            Signing & Capabilities. Refusing to fall back to a second store location, which would \
+            split the database.
+            """
+        }
+    }
+}
+
 extension ModelContainer {
     /// Creates the app's production ModelContainer, wired to the App Group store URL.
     ///
@@ -8,29 +32,23 @@ extension ModelContainer {
     /// CloudKit: .none for v1 (local-only); flip to
     ///   .private("iCloud.com.reojacob.myhome") post-paid-developer-upgrade.
     ///
-    /// App Group fallback (RESEARCH Open Question 1, Pitfall 5):
-    /// On a free Apple Developer account the App Group entitlement may not provision
-    /// reliably. If containerURL returns nil, we fall back to .applicationSupportDirectory.
-    /// The store file is at the same relative path in both cases so migration is a file copy.
-    /// TODO: migrate to App Group URL when paid account active (group.com.reojacob.myhome).
+    /// **Single source of truth (2026-07-07):** the App Group store is the ONLY store location.
+    /// If the App Group container cannot be resolved we `throw` rather than silently fall back to
+    /// Application Support — the previous fallback split the database when the App Groups
+    /// entitlement was toggled between builds, making old data appear lost. See `AppContainerError`.
+    static let appGroupIdentifier = "group.com.reojacob.myhome"
+
     @MainActor
     static func appContainer() throws -> ModelContainer {
         let schema = Schema(versionedSchema: SchemaV9.self)
 
-        // Resolve the App Group container URL; fall back to Application Support if unavailable.
-        let storeURL: URL
-        if let groupURL = FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: "group.com.reojacob.myhome") {
-            storeURL = groupURL.appendingPathComponent("MyHome.store")
-        } else {
-            // TODO: migrate to App Group URL when paid account active
-            guard let supportURL = FileManager.default
-                .urls(for: .applicationSupportDirectory, in: .userDomainMask)
-                .first else {
-                throw CocoaError(.fileNoSuchFile)
-            }
-            storeURL = supportURL.appendingPathComponent("MyHome.store")
+        // Single source of truth: the App Group store. No fallback — fail loudly instead of
+        // silently switching stores and splitting the database.
+        guard let groupURL = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
+            throw AppContainerError.appGroupUnavailable(identifier: appGroupIdentifier)
         }
+        let storeURL = groupURL.appendingPathComponent("MyHome.store")
 
         let config = ModelConfiguration(
             schema: schema,
