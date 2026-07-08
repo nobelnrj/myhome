@@ -122,6 +122,10 @@ public protocol BankEmailParser: Sendable {
     var parserID: String { get }
 
     /// Semantic version of the parsing rules (e.g. "1.0").
+    ///
+    /// **Bump this whenever templates are added or changed** (07-08): GmailSyncController
+    /// re-scans the full backfill window when any parser's version changes, so historical
+    /// mails that failed to parse under the old rules are re-fetched and ingested.
     var parserVersion: String { get }
 
     /// Returns true when this parser is capable of handling an email with the given

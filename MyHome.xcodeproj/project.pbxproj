@@ -179,6 +179,8 @@
 		A703DK /* DedupChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DK /* DedupChecker.swift */; };
 		A70DUP /* DuplicateExpenseCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70DUP /* DuplicateExpenseCleanup.swift */; };
 		A703DS /* DismissedMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703DS /* DismissedMessageStore.swift */; };
+		A7UNPS /* UnparsedMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7UNPS /* UnparsedMessageStore.swift */; };
+		A7UNPT /* UnparsedMessageStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7UNPT /* UnparsedMessageStoreTests.swift */; };
 		A703HP /* HDFCParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703HP /* HDFCParser.swift */; };
 		A703IP /* ICICIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703IP /* ICICIParser.swift */; };
 		A703MN /* MerchantNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703MN /* MerchantNormalizer.swift */; };
@@ -202,14 +204,17 @@
 		A903AAH /* AccountAttributionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903AAH /* AccountAttributionHelper.swift */; };
 		A903APV /* AccountPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903APV /* AccountPickerView.swift */; };
 		A903GAAT /* GmailAccountAttributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903GAAT /* GmailAccountAttributionTests.swift */; };
+		A907AMGT /* AccountMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F907AMGT /* AccountMergeTests.swift */; };
 		A903SV6MT /* SchemaV6MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F903SV6MT /* SchemaV6MigrationTests.swift */; };
 		A904ABT /* AccountBalanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F904ABT /* AccountBalanceTests.swift */; };
 		A905ATIT /* AccountTypeInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F905ATIT /* AccountTypeInferenceTests.swift */; };
 		A906ACCT /* AccountCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F906ACCT /* AccountCRUDTests.swift */; };
 		A907ABS /* AccountBalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F907ABS /* AccountBalance.swift */; };
+		A907AMRG /* AccountMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F907AMRG /* AccountMerger.swift */; };
 		A908CHX /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F908CHX /* Color+Hex.swift */; };
 		A910ALV /* AccountsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F910ALV /* AccountsListView.swift */; };
 		A911EAV /* EditAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911EAV /* EditAccountView.swift */; };
+		A911MAV /* MergeAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911MAV /* MergeAccountView.swift */; };
 		A911NWS /* NetWorthSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911NWS /* NetWorthSnapshot.swift */; };
 		A912ADV /* AccountDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F912ADV /* AccountDetailView.swift */; };
 		A913MRS /* MigrationReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F913MRS /* MigrationReviewSheet.swift */; };
@@ -409,6 +414,8 @@
 		F703DK /* DedupChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DedupChecker.swift; sourceTree = "<group>"; };
 		F70DUP /* DuplicateExpenseCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateExpenseCleanup.swift; sourceTree = "<group>"; };
 		F703DS /* DismissedMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissedMessageStore.swift; sourceTree = "<group>"; };
+		F7UNPS /* UnparsedMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnparsedMessageStore.swift; sourceTree = "<group>"; };
+		F7UNPT /* UnparsedMessageStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnparsedMessageStoreTests.swift; sourceTree = "<group>"; };
 		F703HP /* HDFCParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HDFCParser.swift; sourceTree = "<group>"; };
 		F703IP /* ICICIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICICIParser.swift; sourceTree = "<group>"; };
 		F703MN /* MerchantNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantNormalizer.swift; sourceTree = "<group>"; };
@@ -432,14 +439,17 @@
 		F903AAH /* AccountAttributionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAttributionHelper.swift; sourceTree = "<group>"; };
 		F903APV /* AccountPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPickerView.swift; sourceTree = "<group>"; };
 		F903GAAT /* GmailAccountAttributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAccountAttributionTests.swift; sourceTree = "<group>"; };
+		F907AMGT /* AccountMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountMergeTests.swift; sourceTree = "<group>"; };
 		F903SV6MT /* SchemaV6MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV6MigrationTests.swift; sourceTree = "<group>"; };
 		F904ABT /* AccountBalanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceTests.swift; sourceTree = "<group>"; };
 		F905ATIT /* AccountTypeInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeInferenceTests.swift; sourceTree = "<group>"; };
 		F906ACCT /* AccountCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCRUDTests.swift; sourceTree = "<group>"; };
 		F907ABS /* AccountBalance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalance.swift; sourceTree = "<group>"; };
+		F907AMRG /* AccountMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountMerger.swift; sourceTree = "<group>"; };
 		F908CHX /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		F910ALV /* AccountsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsListView.swift; sourceTree = "<group>"; };
 		F911EAV /* EditAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccountView.swift; sourceTree = "<group>"; };
+		F911MAV /* MergeAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeAccountView.swift; sourceTree = "<group>"; };
 		F911NWS /* NetWorthSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshot.swift; sourceTree = "<group>"; };
 		F912ADV /* AccountDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailView.swift; sourceTree = "<group>"; };
 		F913MRS /* MigrationReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationReviewSheet.swift; sourceTree = "<group>"; };
@@ -611,6 +621,7 @@
 				F602 /* SettingsView.swift */,
 				F910ALV /* AccountsListView.swift */,
 				F911EAV /* EditAccountView.swift */,
+				F911MAV /* MergeAccountView.swift */,
 				F912ADV /* AccountDetailView.swift */,
 				F913MRS /* MigrationReviewSheet.swift */,
 			);
@@ -638,6 +649,7 @@
 				F703DK /* DedupChecker.swift */,
 				F70DUP /* DuplicateExpenseCleanup.swift */,
 				F703DS /* DismissedMessageStore.swift */,
+				F7UNPS /* UnparsedMessageStore.swift */,
 				F703HP /* HDFCParser.swift */,
 				F703IP /* ICICIParser.swift */,
 				F703CUB /* CUBParser.swift */,
@@ -718,6 +730,7 @@
 				F405 /* OverviewAggregation.swift */,
 				F1401SDA /* SpendDonutAggregation.swift */,
 				F907ABS /* AccountBalance.swift */,
+				F907AMRG /* AccountMerger.swift */,
 				F908CHX /* Color+Hex.swift */,
 				F1102ANS /* AMFINavService.swift */,
 				F1102NWC /* NetWorthCalculator.swift */,
@@ -788,6 +801,7 @@
 				F707CS /* ConfidenceScorerTests.swift */,
 				F708DC /* DedupCheckerTests.swift */,
 				F70DUT /* DuplicateExpenseCleanupTests.swift */,
+				F7UNPT /* UnparsedMessageStoreTests.swift */,
 				F70TFT /* TransferFactoryTests.swift */,
 				F709MN /* MerchantNormalizerTests.swift */,
 				F710IP /* IngestionPipelineTests.swift */,
@@ -806,6 +820,7 @@
 				F905ATIT /* AccountTypeInferenceTests.swift */,
 				F906ACCT /* AccountCRUDTests.swift */,
 				F903GAAT /* GmailAccountAttributionTests.swift */,
+				F907AMGT /* AccountMergeTests.swift */,
 				F1003TDST /* TransferDetectionScorerTests.swift */,
 				F1004TSST /* TransferScanServiceTests.swift */,
 				F1005ABTT /* AccountBalanceTransferTests.swift */,
@@ -1009,6 +1024,7 @@
 				A115 /* Decimal+INR.swift in Sources */,
 				A116 /* Date+Display.swift in Sources */,
 				A907ABS /* AccountBalance.swift in Sources */,
+				A907AMRG /* AccountMerger.swift in Sources */,
 				A908CHX /* Color+Hex.swift in Sources */,
 				A1102ANS /* AMFINavService.swift in Sources */,
 				A1102NWC /* NetWorthCalculator.swift in Sources */,
@@ -1066,6 +1082,7 @@
 				A602 /* SettingsView.swift in Sources */,
 				A910ALV /* AccountsListView.swift in Sources */,
 				A911EAV /* EditAccountView.swift in Sources */,
+				A911MAV /* MergeAccountView.swift in Sources */,
 				A912ADV /* AccountDetailView.swift in Sources */,
 				A913MRS /* MigrationReviewSheet.swift in Sources */,
 				A1103SV /* StalenessView.swift in Sources */,
@@ -1113,6 +1130,7 @@
 				A703DK /* DedupChecker.swift in Sources */,
 				A70DUP /* DuplicateExpenseCleanup.swift in Sources */,
 				A703DS /* DismissedMessageStore.swift in Sources */,
+				A7UNPS /* UnparsedMessageStore.swift in Sources */,
 				A703HP /* HDFCParser.swift in Sources */,
 				A703IP /* ICICIParser.swift in Sources */,
 				A703CUB /* CUBParser.swift in Sources */,
@@ -1172,6 +1190,7 @@
 				A707CS /* ConfidenceScorerTests.swift in Sources */,
 				A708DC /* DedupCheckerTests.swift in Sources */,
 				A70DUT /* DuplicateExpenseCleanupTests.swift in Sources */,
+				A7UNPT /* UnparsedMessageStoreTests.swift in Sources */,
 				A70TFT /* TransferFactoryTests.swift in Sources */,
 				A709MN /* MerchantNormalizerTests.swift in Sources */,
 				A710IP /* IngestionPipelineTests.swift in Sources */,
@@ -1190,6 +1209,7 @@
 				A905ATIT /* AccountTypeInferenceTests.swift in Sources */,
 				A906ACCT /* AccountCRUDTests.swift in Sources */,
 				A903GAAT /* GmailAccountAttributionTests.swift in Sources */,
+				A907AMGT /* AccountMergeTests.swift in Sources */,
 				A1003TDST /* TransferDetectionScorerTests.swift in Sources */,
 				A1004TSST /* TransferScanServiceTests.swift in Sources */,
 				A1005ABTT /* AccountBalanceTransferTests.swift in Sources */,

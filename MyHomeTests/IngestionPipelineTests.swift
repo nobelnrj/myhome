@@ -360,4 +360,122 @@ struct IngestionPipelineTests {
         #expect(e.ingestionStateRaw == "possibleDuplicate",
                 "Duplicate match must set ingestionStateRaw=possibleDuplicate — ING-14")
     }
+
+    // MARK: - 07-08: unparsed bank mail retry queue + parser-upgrade rescan
+
+    /// A bank-sender mail in a wording no template understands (stands in for a format the
+    /// parsers haven't learned yet).
+    private func makeUnknownFormatHDFCEmail() -> String {
+        return """
+        From: alerts@hdfcbank.bank.in
+        To: test@gmail.com
+        Subject: HDFC Bank Transaction Alert
+        Date: Mon, 29 Jun 2026 03:32:00 +0530
+        MIME-Version: 1.0
+        Content-Type: text/html; charset=UTF-8
+
+        <html><body><p>Dear Customer, INR 78,367.00 arrived in your account, phrased in a brand new way.</p></body></html>
+        """
+    }
+
+    /// The real NEFT "New Deposit Alert" credit that `parseNewDepositCredit` handles.
+    private func makeNEFTDepositEmail() -> String {
+        return """
+        From: alerts@hdfcbank.bank.in
+        To: test@gmail.com
+        Subject: New Deposit Alert: Check your A/c balance now!
+        Date: Mon, 29 Jun 2026 03:32:00 +0530
+        MIME-Version: 1.0
+        Content-Type: text/html; charset=UTF-8
+
+        <html><body>Dear Customer, You have received a credit in your HDFC Bank account. Details of the transaction: Amount received: INR 78,367.00 Account: XX1011 Date: 29-JUN-2026 Reference Details: NEFT Cr-ICIC0099999-RSM US INTEGRATED SERVICES INDIA PVT LTD-Bhuvanya Sridhar-INXXXXXXXXXX9838 Available Balance: INR 79,582.88</body></html>
+        """
+    }
+
+    @Test("pipeline: bank mail with no matching template is queued, then ingested by a later sync once it parses — 07-08")
+    func unparsedBankMailQueuedThenRecovered() async throws {
+        let container = try makeContainer()
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let fetch = SpyGmailFetch()
+        fetch.profileResult = GmailProfile(emailAddress: "user@gmail.com")
+        fetch.messageIDsResult = ["msg-neft"]
+        fetch.rawMessagesByID = ["msg-neft": makeUnknownFormatHDFCEmail()]
+
+        let keychain = SpyKeychainStore()
+        // The first sync seeds the account in the store, so the SECOND sync takes the
+        // multi-account path and needs a per-account refresh token (D-MA-02).
+        try keychain.save("refresh_tok", forKey: "refresh_token_user@gmail.com")
+
+        let controller = GmailSyncController(auth: SpyGmailAuth(), keychain: keychain,
+                                             fetch: fetch, defaults: defaults)
+        controller.accessToken = "access_tok"
+        controller.setContext(container.mainContext)
+
+        await controller.sync()
+
+        // No template matched → no expense, but the ID must be queued instead of dropped.
+        #expect(try container.mainContext.fetch(FetchDescriptor<Expense>()).isEmpty,
+                "Unparseable mail must not create an expense")
+        #expect(UnparsedMessageStore(defaults: defaults).ids(for: "user@gmail.com") == ["msg-neft"],
+                "Bank mail with no matching template must be queued for retry — 07-08")
+
+        // "Parser upgrade": the same message now parses. The incremental window has moved
+        // on (fresh list is empty) — only the retry queue still knows the ID.
+        fetch.rawMessagesByID = ["msg-neft": makeNEFTDepositEmail()]
+        fetch.messageIDsResult = []
+
+        await controller.sync()
+
+        let expenses = try container.mainContext.fetch(FetchDescriptor<Expense>())
+        let e = try #require(expenses.first, "Queued mail must be ingested once it parses")
+        #expect(e.gmailMessageID == "msg-neft")
+        #expect(e.amount == Decimal(string: "-78367"),
+                "NEFT credit must be recorded as money-in (negative)")
+        #expect(UnparsedMessageStore(defaults: defaults).ids(for: "user@gmail.com").isEmpty,
+                "Successfully parsed mail must leave the retry queue")
+    }
+
+    @Test("sync: parser signature change widens the query window to the full backfill — 07-08")
+    func parserUpgradeWidensQueryWindow() async throws {
+        let container = try makeContainer()
+        resetDefaults()
+        defer { resetDefaults() }
+
+        let fetch = SpyGmailFetch()
+        fetch.profileResult = GmailProfile(emailAddress: "user@gmail.com")
+        fetch.messageIDsResult = []
+
+        let keychain = SpyKeychainStore()
+        try keychain.save("refresh_tok", forKey: "refresh_token_user@gmail.com")
+
+        let controller = GmailSyncController(auth: SpyGmailAuth(), keychain: keychain,
+                                             fetch: fetch, defaults: defaults)
+        controller.accessToken = "access_tok"
+        controller.setContext(container.mainContext)
+
+        // 1st sync: no stored signature (fresh install / first run after upgrade) → backfill.
+        await controller.sync()
+        #expect(fetch.listMessageIDsCalls.count == 1)
+        #expect(fetch.listMessageIDsCalls[0].1.contains("newer_than:120d"),
+                "Missing parser signature must trigger the full backfill window")
+
+        // 2nd sync: signature stored + recent lastSyncedAt → incremental window, small page.
+        await controller.sync()
+        #expect(fetch.listMessageIDsCalls.count == 2)
+        #expect(fetch.listMessageIDsCalls[1].1.contains("newer_than:1d"),
+                "Unchanged parser signature must use the incremental window")
+        #expect(fetch.listMessageIDsCalls[1].2 == 50)
+
+        // Simulate a parser version bump by clearing the stored signature.
+        defaults.removeObject(forKey: GmailSyncController.parserSignatureKey(for: "user@gmail.com"))
+
+        // 3rd sync: signature mismatch → wide rescan window with the larger page size.
+        await controller.sync()
+        #expect(fetch.listMessageIDsCalls.count == 3)
+        #expect(fetch.listMessageIDsCalls[2].1.contains("newer_than:120d"),
+                "Changed parser signature must re-scan the full backfill window — 07-08")
+        #expect(fetch.listMessageIDsCalls[2].2 == 200)
+    }
 }

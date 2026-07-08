@@ -147,15 +147,18 @@ struct HDFCParserTests {
         #expect(!result.rawSourceLabel.isEmpty)
     }
 
-    // MARK: - ING-06: UPI credit (P2P) — must return nil (skip, not an expense)
+    // MARK: - ING-06: UPI P2P credit — recorded as money-in (07-08)
 
-    @Test("parse: HDFC UPI credit (P2P) → nil — must skip, not an expense — ING-06")
-    func parsesUPICreditSkip() throws {
+    @Test("parse: HDFC UPI P2P credit → credit with sender as merchant — 07-08 (was skip under ING-06)")
+    func parsesUPICreditRecorded() throws {
         let raw = try loadFixture("hdfc_upi_credit_1.eml")
         let sut = HDFCParser()
-        // P2P incoming is NOT an expense — parser should return nil
-        let result = sut.parse(rawEmail: raw)
-        #expect(result == nil)
+        // Incoming UPI P2P credit is money-in — recorded as a credit (negative, isReversal).
+        let result = try #require(sut.parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "-2000.00"))
+        #expect(result.isReversal)
+        #expect(result.rawSourceLabel == "HDFC ••4477")
+        #expect(result.rawMerchant == "ANANYA SHARMA M K")
     }
 
     // MARK: - Scores
@@ -205,10 +208,20 @@ struct HDFCParserTests {
         #expect(HDFCParser().parse(rawEmail: raw) == nil)
     }
 
-    @Test("parse: HDFC P2P credit (Sender:) still returns nil — 07-07 guard")
+    @Test("parse: HDFC old P2P credit (to your account **NNNN … Sender:) still returns nil — 07-07 guard")
     func p2pCreditStillSkipped() throws {
         let raw = "From: alerts@hdfcbank.bank.in\r\nDate: Wed, 01 Jul 2026 14:57:07 +0530\r\nSubject: You have received money\r\n\r\n<html><body>Rs.500.00 has been successfully credited to your account **1329 by VPA someone@okhdfcbank on 01-07-26. Sender: JOHN DOE</body></html>"
         #expect(HDFCParser().parse(rawEmail: raw) == nil)
+    }
+
+    @Test("parse: HDFC UPI P2P credit (account ending in … Sender:) → credit with sender as merchant — 07-08")
+    func parsesUPIP2PCredit() throws {
+        let raw = "From: alerts@hdfcbank.bank.in\r\nDate: Wed, 08 Jul 2026 10:15:00 +0530\r\nSubject: You have received money in your HDFC Bank account\r\n\r\n<html><body>Dear Customer, Greetings from HDFC Bank! We're writing to inform you that Rs.400.00 has been successfully credited to your HDFC Bank account ending in 1011. Transaction Details: a. Date: 08-07-26 b. Sender: V VARUN VIDHYUTH (VPA: varunvidhyuth@okicici) c. UPI Reference No.: 655528779152</body></html>"
+        let result = try #require(HDFCParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "-400.00"))
+        #expect(result.isReversal)
+        #expect(result.rawSourceLabel == "HDFC ••1011")
+        #expect(result.rawMerchant == "V VARUN VIDHYUTH")
     }
 
     // MARK: - Fixture loader helper
