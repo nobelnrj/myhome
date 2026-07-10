@@ -347,24 +347,48 @@ struct EmbossedBar<Fill: ShapeStyle>: View {
 // MARK: - Circular recessed well (chart dish)
 
 /// A circular sunken dish that charts sit inside — donut, budget ring, hero orb.
-/// Approximates the CSS `--well` inset shadow with a top-dark/bottom-light rim gradient.
+/// Real inner-shadow depth (the CSS `--well` recipe): a wide blurred dark arc pressed in
+/// from the top-left and a soft light rim rising from the bottom-right, both masked to the
+/// circle so the dish reads as carved into the surface — same depth as the pill wells.
 struct NeuCircularWell<Content: View>: View {
     var size: CGFloat
     @ViewBuilder var content: () -> Content
 
+    /// Shadow geometry scales with the dish so small wells don't over-darken.
+    private var depth: CGFloat { max(6, size * 0.035) }
+
     var body: some View {
         ZStack {
-            Circle()
-                .fill(DesignTokens.fillRecessed3)
-                .overlay(
-                    Circle().stroke(
-                        LinearGradient(colors: [.black.opacity(0.50), .white.opacity(0.035)],
+            // Dish chrome rasterized as one layer (drawingGroup) — the animated content
+            // (e.g. the hero orb's TimelineView) stays live on top, outside the group.
+            ZStack {
+                Circle()
+                    .fill(DesignTokens.fillRecessed3)
+
+                // Dark inner shadow — top-left, pressed in
+                Circle()
+                    .stroke(Color.black.opacity(0.55), lineWidth: depth * 1.6)
+                    .blur(radius: depth * 1.1)
+                    .offset(x: depth * 0.55, y: depth * 0.7)
+                    .mask(Circle())
+
+                // Light inner rim — bottom-right, rising
+                Circle()
+                    .stroke(Color.white.opacity(0.06), lineWidth: depth)
+                    .blur(radius: depth * 0.8)
+                    .offset(x: -depth * 0.4, y: -depth * 0.55)
+                    .mask(Circle())
+
+                // Crisp hairline edge so the well boundary stays defined under the blur
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(colors: [.black.opacity(0.50), .white.opacity(0.04)],
                                        startPoint: .topLeading, endPoint: .bottomTrailing),
-                        lineWidth: 2.5
+                        lineWidth: 1
                     )
-                    .blur(radius: 1.5)
-                    .clipShape(Circle())
-                )
+            }
+            .drawingGroup()
+
             content()
         }
         .frame(width: size, height: size)

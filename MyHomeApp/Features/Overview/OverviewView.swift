@@ -232,10 +232,12 @@ private struct OverviewMonthContent: View {
                     .entrance(4)
                 }
 
-                // Spend by category chart (D-05 — restyled, retained on Overview)
+                // Spend by category — same vertical pill-well chart as Analytics (user pick)
                 if !categoryItems.isEmpty {
-                    sectionHeader("By Category")
-                    SpendByCategoryChart(categoryItems: categoryItems)
+                    sectionHeader("By category")
+                        .id("bycat")
+                    AnalyticsCategoryBars(items: categoryItems)
+                        .neuSurface(.raised)
                         .entrance(5)
                 }
 
