@@ -48,12 +48,8 @@ struct SpendByCategoryChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            // Row A — Card title
-            Text("Spend by Category")
-                .font(.title2)
-                .foregroundStyle(DesignTokens.label)
-
-            // Row B — Track-backed bar list (WHOOP-style) or empty state
+            // Track-backed bar list or empty state. (Card title omitted — OverviewView's
+            // "By Category" section header labels this card.)
             if categoryItems.isEmpty {
                 // D4-07 empty state
                 Text("No spend yet this month.")
@@ -90,18 +86,8 @@ struct SpendByCategoryChart: View {
                     .foregroundStyle(DesignTokens.label2)
                     .monospacedDigit()
             }
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(DesignTokens.fillRecessed2)
-                    Capsule()
-                        .fill(LinearGradient(
-                            colors: [item.color.opacity(0.7), item.color],
-                            startPoint: .leading, endPoint: .trailing))
-                        .frame(width: max(6, CGFloat(item.spent / maxSpent) * geo.size.width))
-                        .neonGlow(item.color, radius: 7)
-                }
-            }
-            .frame(height: 9)
+            // v2 embossed recipe: recessed track + embossed category-colour fill
+            EmbossedBar(fraction: item.spent / maxSpent, fill: item.color, height: 10, minWidth: 10)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(item.name), \(item.spentDecimal.formattedINR())")

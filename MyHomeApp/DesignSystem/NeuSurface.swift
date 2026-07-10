@@ -201,6 +201,214 @@ extension View {
     }
 }
 
+// MARK: - CTA button styles (neumorphic v2 handoff)
+
+/// Primary CTA — extruded gradient-yellow pill with a soft yellow halo and a bright inner
+/// top rim. Presses to a flatter, darker look (standard neumorphic pressed affordance).
+/// One per screen at most — the single gradient accent of the CTA system.
+struct NeuPrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(Color(hex: "#231B00"))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                Capsule().fill(
+                    LinearGradient(
+                        colors: configuration.isPressed
+                            ? [Color(hex: "#E8C918"), Color(hex: "#D9B000")]
+                            : [Color(hex: "#FFE04A"), Color(hex: "#F2C500")],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                )
+            )
+            // Bright inner top rim (inset 1.5px white 0.45 in the handoff recipe)
+            .overlay(
+                Capsule().strokeBorder(
+                    LinearGradient(
+                        colors: [.white.opacity(configuration.isPressed ? 0.15 : 0.45), .clear],
+                        startPoint: .top, endPoint: .bottom
+                    ),
+                    lineWidth: 1.5
+                )
+            )
+            // Float shadow + soft yellow halo — collapse when pressed
+            .shadow(color: .white.opacity(configuration.isPressed ? 0 : 0.04),
+                    radius: 11, x: -9, y: -9)
+            .shadow(color: .black.opacity(configuration.isPressed ? 0.25 : 0.62),
+                    radius: configuration.isPressed ? 4 : 14,
+                    x: configuration.isPressed ? 2 : 11,
+                    y: configuration.isPressed ? 2 : 11)
+            .shadow(color: DesignTokens.accent.opacity(configuration.isPressed ? 0.10 : 0.22),
+                    radius: 11, y: 8)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
+    }
+}
+
+/// Secondary CTA — raised dark pill (`surfaceRaisedStrong`) with accent text and the
+/// float + rim shadow pair. Presses to a sunken look.
+struct NeuSecondaryButtonStyle: ButtonStyle {
+    /// Fixed-width variant (e.g. a compact header pill) skips maxWidth expansion.
+    var expands: Bool = true
+    var accentHalo: Bool = false
+    var fontSize: CGFloat = 15
+    var verticalPadding: CGFloat = 14
+    var horizontalPadding: CGFloat = 0
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: fontSize, weight: .semibold))
+            .foregroundStyle(DesignTokens.accent)
+            .frame(maxWidth: expands ? .infinity : nil)
+            .padding(.vertical, verticalPadding)
+            .padding(.horizontal, horizontalPadding)
+            .background(
+                Capsule().fill(configuration.isPressed
+                               ? DesignTokens.fillRecessed3
+                               : DesignTokens.surfaceRaisedStrong)
+            )
+            .overlay(
+                Capsule().strokeBorder(
+                    LinearGradient(
+                        colors: configuration.isPressed
+                            ? [Color.black.opacity(0.30), Color.white.opacity(0.045)]
+                            : [Color.white.opacity(0.045), Color.black.opacity(0.30)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+            )
+            .shadow(color: .white.opacity(configuration.isPressed ? 0 : 0.04),
+                    radius: 11, x: -9, y: -9)
+            .shadow(color: .black.opacity(configuration.isPressed ? 0.20 : 0.62),
+                    radius: configuration.isPressed ? 4 : 14,
+                    x: configuration.isPressed ? 2 : 11,
+                    y: configuration.isPressed ? 2 : 11)
+            .shadow(color: DesignTokens.accent.opacity(accentHalo && !configuration.isPressed ? 0.18 : 0),
+                    radius: 8, y: 6)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Embossed progress bar (handoff "embossed fill recipe")
+
+/// Recessed pill track + embossed colored fill: the fill carries an inner top highlight and
+/// bottom shade (`inset 0 1.5px 1px white/0.28, inset 0 -1.5px 2px black/0.28`) so it reads
+/// as a physical bar seated in a well. Used by every horizontal progress bar in v2.
+struct EmbossedBar<Fill: ShapeStyle>: View {
+    /// 0…1+ (clamped to 1 for rendering).
+    let fraction: Double
+    /// Fill style — a flat category color or the yellow→green budget gradient.
+    let fill: Fill
+    var height: CGFloat = 10
+    /// Minimum visible fill width so tiny fractions still render a nub.
+    var minWidth: CGFloat = 0
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                // Recessed track
+                Capsule().fill(DesignTokens.fillRecessed3)
+                    .overlay(
+                        Capsule().stroke(
+                            LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.03)],
+                                           startPoint: .top, endPoint: .bottom),
+                            lineWidth: 1
+                        )
+                        .blur(radius: 0.5)
+                        .clipShape(Capsule())
+                    )
+                // Embossed fill
+                if fraction > 0 {
+                    Capsule().fill(fill)
+                        .overlay(
+                            Capsule().fill(
+                                LinearGradient(stops: [
+                                    .init(color: .white.opacity(0.28), location: 0),
+                                    .init(color: .clear, location: 0.35),
+                                    .init(color: .clear, location: 0.65),
+                                    .init(color: .black.opacity(0.28), location: 1)
+                                ], startPoint: .top, endPoint: .bottom)
+                            )
+                        )
+                        .frame(width: max(minWidth, min(CGFloat(fraction), 1) * geo.size.width))
+                        .animation(.easeOut(duration: 0.5), value: fraction)
+                }
+            }
+        }
+        .frame(height: height)
+        .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Circular recessed well (chart dish)
+
+/// A circular sunken dish that charts sit inside — donut, budget ring, hero orb.
+/// Approximates the CSS `--well` inset shadow with a top-dark/bottom-light rim gradient.
+struct NeuCircularWell<Content: View>: View {
+    var size: CGFloat
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(DesignTokens.fillRecessed3)
+                .overlay(
+                    Circle().stroke(
+                        LinearGradient(colors: [.black.opacity(0.50), .white.opacity(0.035)],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: 2.5
+                    )
+                    .blur(radius: 1.5)
+                    .clipShape(Circle())
+                )
+            content()
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+/// A raised circular puck — the extruded disc that floats in the middle of a chart well
+/// (donut center, budget-ring percentage). Card shadow + rim, `surfaceRaised` fill.
+struct NeuCircularPuck<Content: View>: View {
+    var size: CGFloat
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(DesignTokens.surfaceRaised)
+                .shadow(color: .white.opacity(0.035), radius: 7, x: -6, y: -6)
+                .shadow(color: .black.opacity(0.55), radius: 9, x: 7, y: 7)
+                .overlay(
+                    Circle().strokeBorder(
+                        LinearGradient(colors: [.white.opacity(0.045), .black.opacity(0.30)],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: 1
+                    )
+                )
+            content()
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+// MARK: - Eyebrow label (12/600, ls 1.2, uppercase, label2)
+
+extension Text {
+    /// The handoff's eyebrow style — section micro-labels like "NET CASH FLOW" / "AI INSIGHT".
+    func eyebrow(_ color: Color = DesignTokens.label2) -> some View {
+        self
+            .font(.system(size: 12, weight: .semibold))
+            .kerning(1.2)
+            .textCase(.uppercase)
+            .foregroundStyle(color)
+    }
+}
+
 // MARK: - Preview
 
 #Preview("NeuSurface — all three states") {

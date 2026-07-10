@@ -48,35 +48,24 @@ struct AnalyticsView: View {
         )
 
         ScrollView(.vertical) {
-            LazyVStack(alignment: .leading, spacing: 16) {
+            LazyVStack(alignment: .leading, spacing: DesignTokens.spacing22) {
 
-                // 1. Range picker (ANL-02)
-                Picker("Range", selection: $selectedRange) {
-                    ForEach(SpendRange.allCases, id: \.self) { range in
-                        Text(range.label).tag(range)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.bottom, 4)
+                // 1. Range picker (ANL-02) — recessed pill with a raised accent thumb (v2)
+                NeuSegmentedControl(selection: $selectedRange)
+                    .padding(.bottom, 2)
 
-                // 2. Headline card (includes DeltaChip — ANL-05)
+                // 2. Headline KPI (includes DeltaChip — ANL-05)
                 headlineCard(summary: summary)
 
                 // 3. Trend chart (ANL-03) — receives pre-aggregated buckets only (Pitfall A)
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Spending Trend")
-                        .font(.headline)
-                        .foregroundStyle(DesignTokens.label2)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 14)
+                AnalyticsTrendChart(buckets: summary.trendBuckets)
+                    .neuSurface(.raised, padding: 14)
 
-                    AnalyticsTrendChart(buckets: summary.trendBuckets)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 14)
-                }
-                .neuSurface(.raised)
-
-                // 4. By-category breakdown (ANL-04) — all categories, sorted descending
+                // 4. By-category breakdown (ANL-04) — all categories, folded to 5 pill columns
+                Text("By category")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(DesignTokens.label)
+                    .padding(.bottom, -10)
                 AnalyticsCategoryBars(items: summary.categoryBreakdown)
                     .neuSurface(.raised)
 
@@ -110,50 +99,93 @@ struct AnalyticsView: View {
 
     @ViewBuilder
     private func headlineCard(summary: SpendSummary) -> some View {
-        VStack(spacing: 6) {
-            // Caption row
-            HStack {
-                Text("SPENT")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(DesignTokens.label2)
-                    .kerning(1.2)
-                Spacer()
-                Text(rangeCaption(for: selectedRange))
-                    .font(.caption)
-                    .foregroundStyle(DesignTokens.label2)
-            }
+        // v2 KPI block: TOTAL SPEND eyebrow / 40pt figure + delta chip / "vs last …" caption.
+        // Sits directly on the canvas (no card) per the handoff.
+        VStack(alignment: .leading, spacing: 5) {
+            Text("TOTAL SPEND").eyebrow()
 
-            // Hero number — solid .bold .default (NOT thin ultraLight-rounded per v1.2 hero rule)
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(summary.totalSpend.formattedINRWords())
-                    .font(.system(size: 34, weight: .bold, design: .default))
+            HStack(alignment: .center, spacing: 10) {
+                Text(summary.totalSpend.formattedINRWhole())
+                    .font(.system(size: 40, weight: .semibold, design: .default))
                     .monospacedDigit()
                     .foregroundStyle(DesignTokens.label)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
-                Spacer()
                 // ANL-05: delta chip with inverted color semantics; tap opens drill-down sheet (ANL-06)
                 DeltaChip(delta: summary.delta, priorTotal: summary.priorTotalSpend) {
                     showDeltaDrillDown = true
                 }
             }
+
+            Text(priorCaption(for: selectedRange))
+                .font(.system(size: 13))
+                .foregroundStyle(DesignTokens.label3)
         }
-        .padding(20)
-        .neuSurface(.floating)
+        .padding(.horizontal, 4)
     }
 
-    private func rangeCaption(for range: SpendRange) -> String {
+    private func priorCaption(for range: SpendRange) -> String {
         switch range {
-        case .week:  return "Last 7 days"
-        case .month: return currentMonthName()
-        case .year:  return String(Calendar.current.component(.year, from: Date()))
+        case .week:  return "vs last week"
+        case .month: return "vs last month"
+        case .year:  return "vs last year"
         }
     }
+}
 
-    private func currentMonthName() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: Date())
+// MARK: - NeuSegmentedControl
+
+/// v2 segmented control: a recessed pill track with a raised `surfaceElevatedControl` thumb
+/// under the active segment (accent text). The thumb slides with a soft spring.
+private struct NeuSegmentedControl: View {
+    @Binding var selection: SpendRange
+    @Namespace private var thumb
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(SpendRange.allCases, id: \.self) { range in
+                Button {
+                    Haptics.selection()
+                    withAnimation(DesignTokens.springSoft) { selection = range }
+                } label: {
+                    Text(range.label)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(selection == range ? DesignTokens.accent : DesignTokens.label2)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background {
+                            if selection == range {
+                                Capsule()
+                                    .fill(DesignTokens.surfaceElevatedControl)
+                                    .overlay(
+                                        Capsule().strokeBorder(
+                                            LinearGradient(colors: [.white.opacity(0.06), .black.opacity(0.30)],
+                                                           startPoint: .topLeading, endPoint: .bottomTrailing),
+                                            lineWidth: 1
+                                        )
+                                    )
+                                    .shadow(color: .black.opacity(0.45), radius: 6, x: 3, y: 3)
+                                    .matchedGeometryEffect(id: "thumb", in: thumb)
+                            }
+                        }
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .background(
+            Capsule().fill(DesignTokens.fillRecessed3)
+                .overlay(
+                    Capsule().stroke(
+                        LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.03)],
+                                       startPoint: .top, endPoint: .bottom),
+                        lineWidth: 1
+                    )
+                    .blur(radius: 0.5)
+                    .clipShape(Capsule())
+                )
+        )
+        .accessibilityElement(children: .contain)
     }
 }

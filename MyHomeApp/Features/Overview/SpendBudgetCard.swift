@@ -2,12 +2,14 @@ import SwiftUI
 
 /// Overview hero card — NET CASH FLOW: income vs spent split (D-04, OVR-01).
 ///
-/// Layout (UI-SPEC Screen 1 hero):
+/// Layout (neumorphic v2 handoff, Screen 1 — orb retained by user request):
 /// - `.neuSurface(.floating)` outer card (hero tier)
-/// - "NET CASH FLOW" header + status chip (right-aligned)
-/// - Income tile + Spent tile: each `.neuSurface(.recessed, radius: DesignTokens.radiusInner)`
-/// - `RollingMoneyText` for the net total (positive color when net >= 0, negative when net < 0)
-/// - Flat budget progress strip (track `fillRecessed2`, fill `positive`/`negative`)
+/// - "NET CASH FLOW" eyebrow + status chip (right-aligned)
+/// - Two-tone particle orb seated in a circular recessed well (the neumorphic "dish")
+/// - Income tile + Spent tile: recessed 2-up stat tiles with 7pt color dots
+/// - Budget progress: 12pt recessed track with an embossed yellow→green gradient fill,
+///   meta row "X% of ₹Y budget used" / "₹Z left"
+/// - CTA row: primary gradient-yellow "Add expense" pill + secondary raised "Details" pill
 ///
 /// Dumb/value-driven: consumes pre-computed income + spent from OverviewMonthContent. No @Query.
 ///
@@ -28,6 +30,10 @@ struct SpendBudgetCard: View {
     /// Total monthly budget across all budgeted categories (0 when no budget is set).
     let totalBudget: Decimal
     @Binding var selectedTab: Int
+    /// CTA row actions — wired by OverviewMonthContent to the add-expense sheet and the
+    /// Analytics push respectively.
+    let onAddExpense: () -> Void
+    let onDetails: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Drives the count-up: amounts render as ₹0 until `appeared` flips true on first appear.
@@ -49,18 +55,10 @@ struct SpendBudgetCard: View {
     private var statusChipLabel: String { netIsPositive ? "Positive" : "Negative" }
     private var statusColor: Color { netIsPositive ? DesignTokens.positive : DesignTokens.negative }
 
-    /// Budget-health colour for the ring (independent of net sign): green under budget,
-    /// orange near the limit, red once over.
-    private var ringColor: Color {
-        if budgetedSpent > totalBudget { return DesignTokens.negative }
-        if let f = fractionUsed, f >= 0.85 { return DesignTokens.orange }
-        return DesignTokens.positive
-    }
+    private var isOverBudget: Bool { totalBudget > 0 && budgetedSpent > totalBudget }
 
-    private var percentUsedLabel: String {
-        guard let f = fractionUsed else { return "" }
-        return f >= 1.0 ? "100%+ used" : "\(Int(f * 100))% used"
-    }
+    /// Budget remaining (may be negative when over).
+    private var budgetRemaining: Decimal { totalBudget - budgetedSpent }
 
     /// Fraction of the orb coloured as income (green); the rest is expense (red).
     /// Falls back to a half-and-half split when there's no activity yet.
@@ -79,50 +77,44 @@ struct SpendBudgetCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.spacing16) {
-            // Header row: "NET CASH FLOW" + status chip
+            // Header row: "NET CASH FLOW" eyebrow + status chip
             HStack {
-                Text("NET CASH FLOW")
-                    .font(.system(size: 12, weight: .semibold))
-                    .tracking(1.0)
-                    .foregroundStyle(DesignTokens.label2)
+                Text("NET CASH FLOW").eyebrow()
                 Spacer()
-                // Status chip
                 Text(statusChipLabel)
                     .font(.system(size: 11.5, weight: .semibold))
                     .foregroundStyle(statusColor)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(statusColor.opacity(0.14))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .strokeBorder(statusColor.opacity(0.40), lineWidth: 0.5)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .clipShape(Capsule())
             }
 
-            // Two-tone WHOOP orb: green particles = income share, red = expense share (always a
-            // full sphere, no gap). Centre frames the net outcome as SAVED / OVERSPENT (no minus).
-            GlowParticleRing(
-                incomeShare: incomeShare,
-                incomeColor: DesignTokens.positive,
-                expenseColor: DesignTokens.negative,
-                size: 280,
-                pulse: totalBudget > 0 && budgetedSpent > totalBudget
-            ) {
-                VStack(spacing: 2) {
-                    Text("\(spendPct)%")
-                        .font(.system(size: 58, weight: .bold, design: .default))
-                        .foregroundStyle(DesignTokens.label)
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                        .contentTransition(.numericText())
-                        .animation(.smooth(duration: 0.6), value: spendPct)
-                        .frame(width: 180)
-                    Text("spent")
-                        .font(.system(size: 14, weight: .medium))
-                        .tracking(0.5)
-                        .foregroundStyle(DesignTokens.label2)
+            // Two-tone WHOOP orb seated in a circular recessed well — the neumorphic dish.
+            // Green particles = income share, red = expense share (always a full sphere).
+            NeuCircularWell(size: 300) {
+                GlowParticleRing(
+                    incomeShare: incomeShare,
+                    incomeColor: DesignTokens.positive,
+                    expenseColor: DesignTokens.negative,
+                    size: 268,
+                    pulse: isOverBudget
+                ) {
+                    VStack(spacing: 2) {
+                        Text("\(spendPct)%")
+                            .font(.system(size: 54, weight: .bold, design: .default))
+                            .foregroundStyle(DesignTokens.label)
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                            .contentTransition(.numericText())
+                            .animation(.smooth(duration: 0.6), value: spendPct)
+                            .frame(width: 170)
+                        Text("spent")
+                            .font(.system(size: 14, weight: .medium))
+                            .tracking(0.5)
+                            .foregroundStyle(DesignTokens.label2)
+                    }
                 }
             }
             .frame(maxWidth: .infinity)
@@ -134,7 +126,7 @@ struct SpendBudgetCard: View {
                 splitTile(label: "SPENT", amount: appeared ? spent : 0, color: DesignTokens.negative)
             }
 
-            // Budget context (secondary): a thin strip when a budget exists, else a CTA.
+            // Budget context (secondary): embossed gradient strip when a budget exists, else a CTA.
             if let fraction = fractionUsed {
                 budgetStrip(fraction: fraction)
             } else {
@@ -147,6 +139,31 @@ struct SpendBudgetCard: View {
                 }
                 .tint(DesignTokens.accent)
             }
+
+            // CTA row — one gradient primary, one raised secondary (v2 CTA system)
+            HStack(spacing: 14) {
+                Button {
+                    Haptics.tap()
+                    onAddExpense()
+                } label: {
+                    HStack(spacing: 7) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 14, weight: .bold))
+                        Text("Add expense")
+                    }
+                }
+                .buttonStyle(NeuPrimaryButtonStyle())
+                .accessibilityLabel("Add expense")
+
+                Button("Details") {
+                    Haptics.tap()
+                    onDetails()
+                }
+                .buttonStyle(NeuSecondaryButtonStyle())
+                .frame(width: 118)
+                .accessibilityHint("Opens the monthly analytics breakdown")
+            }
+            .padding(.top, 2)
         }
         .neuSurface(.floating, padding: 18)
         .onAppear {
@@ -154,7 +171,7 @@ struct SpendBudgetCard: View {
             if reduceMotion { appeared = true }
             else { withAnimation(.smooth(duration: 0.9)) { appeared = true } }
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityLabel(accessibilityLabel)
     }
 
@@ -162,15 +179,20 @@ struct SpendBudgetCard: View {
 
     @ViewBuilder
     private func splitTile(label: String, amount: Decimal, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(.system(size: 11, weight: .semibold))
-                .tracking(0.5)
-                .foregroundStyle(DesignTokens.label2)
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 7, height: 7)
+                Text(label)
+                    .font(.system(size: 11, weight: .semibold))
+                    .kerning(0.8)
+                    .foregroundStyle(DesignTokens.label2)
+            }
             // Stat pattern (not RollingMoneyText — Pitfall 5). Solid system face to match
             // the heavier hero numeral above.
             Text(amount.formattedINRWhole())
-                .font(.system(size: 20, weight: .semibold, design: .default))
+                .font(.system(size: 22, weight: .semibold, design: .default))
                 .foregroundStyle(color)
                 .monospacedDigit()
                 .contentTransition(.numericText())
@@ -178,35 +200,41 @@ struct SpendBudgetCard: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
-        .padding(.horizontal, 13)
-        .padding(.vertical, 11)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .neuSurface(.recessed, radius: DesignTokens.radiusInner)
+        .neuSurface(.recessed, radius: 18, padding: nil)
     }
 
     // MARK: - Budget strip (secondary context)
 
     @ViewBuilder
     private func budgetStrip(fraction: Double) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(DesignTokens.fillRecessed2)
-                    Capsule()
-                        .fill(ringColor)
-                        .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
-                }
+        VStack(alignment: .leading, spacing: 7) {
+            if isOverBudget {
+                EmbossedBar(fraction: fraction, fill: DesignTokens.negative, height: 12)
+            } else {
+                EmbossedBar(
+                    fraction: fraction,
+                    fill: LinearGradient(
+                        colors: [DesignTokens.accent, DesignTokens.positive],
+                        startPoint: .leading, endPoint: .trailing
+                    ),
+                    height: 12
+                )
             }
-            .frame(height: 7)
 
             HStack {
-                Text("of \(totalBudget.formattedINRWhole()) budget")
-                    .font(.caption)
-                    .foregroundStyle(DesignTokens.label3)
+                Text("\(Int(min(fraction, 2) * 100))% of \(totalBudget.formattedINRWhole()) budget used")
+                    .font(.system(size: 13))
+                    .foregroundStyle(DesignTokens.label2)
                 Spacer()
-                Text(percentUsedLabel)
-                    .font(.caption)
-                    .foregroundStyle(DesignTokens.label3)
+                Text(isOverBudget
+                     ? "\(abs(budgetRemaining).formattedINRWhole()) over"
+                     : "\(budgetRemaining.formattedINRWhole()) left")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isOverBudget ? DesignTokens.negative : DesignTokens.label2)
+                    .monospacedDigit()
             }
         }
     }
@@ -224,14 +252,18 @@ struct SpendBudgetCard: View {
 
 #Preview("Positive net — has budget") {
     @Previewable @State var tab = 0
-    SpendBudgetCard(
-        income: Decimal(45000),
-        spent: Decimal(32000),
-        budgetedSpent: Decimal(28000),
-        totalBudget: Decimal(40000),
-        selectedTab: $tab
-    )
-    .padding()
+    ScrollView {
+        SpendBudgetCard(
+            income: Decimal(45000),
+            spent: Decimal(32000),
+            budgetedSpent: Decimal(28000),
+            totalBudget: Decimal(40000),
+            selectedTab: $tab,
+            onAddExpense: {},
+            onDetails: {}
+        )
+        .padding()
+    }
     .background(DesignTokens.bgCanvas)
     .preferredColorScheme(.dark)
 }
@@ -243,7 +275,9 @@ struct SpendBudgetCard: View {
         spent: Decimal(35000),
         budgetedSpent: Decimal(0),
         totalBudget: Decimal(0),
-        selectedTab: $tab
+        selectedTab: $tab,
+        onAddExpense: {},
+        onDetails: {}
     )
     .padding()
     .background(DesignTokens.bgCanvas)

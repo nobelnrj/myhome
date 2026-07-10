@@ -31,32 +31,38 @@ struct BudgetCategoryCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 11) {
-            HStack(spacing: 11) {
-                IconTile(category: progressData.category, size: 34, cornerRadius: 9)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                IconTile(category: progressData.category, size: 38, cornerRadius: 11)
 
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(progressData.category.name ?? "")
-                        .font(.headline)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(DesignTokens.label)
                         .lineLimit(1)
                     Text(subtitleText)
-                        .font(.subheadline)
+                        .font(.system(size: 13))
                         .foregroundStyle(subtitleColor)
                         .lineLimit(1)
                 }
 
                 Spacer(minLength: 8)
 
-                VStack(alignment: .trailing, spacing: 1) {
+                VStack(alignment: .trailing, spacing: 2) {
                     Text(progressData.spent.formattedINRWhole())
-                        .font(.headline)
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(DesignTokens.label)
+                        .monospacedDigit()
                         .lineLimit(1)
                     if let budget = progressData.budget {
                         Text("of \(budget.formattedINRWhole())")
-                            .font(.caption)
+                            .font(.system(size: 12))
                             .foregroundStyle(DesignTokens.label3)
                             .lineLimit(1)
+                    } else {
+                        Text("this month")
+                            .font(.system(size: 12))
+                            .foregroundStyle(DesignTokens.label3)
                     }
                 }
 
@@ -70,19 +76,10 @@ struct BudgetCategoryCard: View {
                 .accessibilityLabel("Edit budget for \(progressData.category.name ?? "category")")
             }
 
-            // Progress bar — only when a budget is set
+            // Embossed progress bar — only when a budget is set (v2 recipe: recessed track,
+            // embossed category-colour fill; solid red at full width once over budget)
             if hasBudget, let fraction = progressData.fractionUsed {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(DesignTokens.fillRecessed2)
-                        Capsule().fill(barColor)
-                            .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
-                            .neonGlow(barColor, radius: 6)
-                            .animation(.easeInOut(duration: 0.3), value: fraction)
-                    }
-                }
-                .frame(height: 8)
-                .accessibilityHidden(true)
+                EmbossedBar(fraction: fraction, fill: barColor, height: 10, minWidth: 10)
             }
         }
         .neuSurface(.raised, radius: 20, padding: 15, isInteractive: true)

@@ -51,18 +51,6 @@ struct OverviewView: View {
                 )
             }
         }
-        .navigationTitle("Home")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showAddExpense = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .accessibilityLabel("Add Expense")
-            }
-        }
         .sheet(isPresented: $showAddExpense) {
             AddExpenseView()
         }
@@ -184,14 +172,18 @@ private struct OverviewMonthContent: View {
         )
         let showNetWorth = !allAssets.isEmpty || netWorthBreakdown.cashValue != 0
 
+        ScrollViewReader { scrollProxy in
         ScrollView(.vertical) {
-            LazyVStack(alignment: .leading, spacing: 16) {
-                // Month label
-                Text(monthLabel)
-                    .font(.subheadline)
-                    .foregroundStyle(DesignTokens.label2)
-                    .padding(.bottom, -8)
-                    .entrance(0)
+            LazyVStack(alignment: .leading, spacing: DesignTokens.spacing22) {
+                // Screen header: eyebrow month + 34pt title (v2 handoff)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(monthLabel).eyebrow()
+                    Text("Overview")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(DesignTokens.label)
+                }
+                .padding(.bottom, -6)
+                .entrance(0)
 
                 // Hero
                 SpendBudgetCard(
@@ -199,7 +191,9 @@ private struct OverviewMonthContent: View {
                     spent: totalSpend,
                     budgetedSpent: budgetedSpent,
                     totalBudget: totalBudget,
-                    selectedTab: $selectedTab
+                    selectedTab: $selectedTab,
+                    onAddExpense: { showAddExpense = true },
+                    onDetails: { navigateToAnalytics = true }
                 )
                 .entrance(1)
 
@@ -224,8 +218,9 @@ private struct OverviewMonthContent: View {
                 // Where it’s going — donut + legend (OVR-05/06)
                 if !rankedSpend.isEmpty {
                     sectionHeader("Where it’s going")
+                        .id("donut")
                     SpendDonutCard(
-                        ranked: Array(rankedSpend.prefix(4)),
+                        ranked: rankedSpend,
                         // Share denominator = total categorised spend (gross), so per-category
                         // %s are stable regardless of income netting `totalSpend` down.
                         total: rankedSpend.reduce(Decimal.zero) { $0 + $1.spent },
@@ -254,6 +249,7 @@ private struct OverviewMonthContent: View {
                 // Budgets glance
                 if !budgeted.isEmpty {
                     sectionHeader("Budgets", action: ("See all", { selectedTab = 2 }))
+                        .id("budgets")
                     VStack(spacing: 0) {
                         ForEach(Array(budgeted.prefix(3).enumerated()), id: \.element.category.id) { index, item in
                             BudgetGlanceRow(category: item.category, spent: item.spent, limit: item.limit)
@@ -300,6 +296,24 @@ private struct OverviewMonthContent: View {
         .navigationDestination(isPresented: $navigateToAnalytics) {
             AnalyticsView(expenses: allGlobalExpenses, categories: categories)
         }
+        #if DEBUG
+        // Screenshot-verify hooks: `-openAnalytics` pushes the Analytics screen on launch
+        // (a navigation push, unreachable via -startTab); `-scrollTo <id>` jumps the
+        // Overview scroll to a tagged section ("donut", "budgets").
+        .onAppear {
+            let args = ProcessInfo.processInfo.arguments
+            if args.contains("-openAnalytics") {
+                navigateToAnalytics = true
+            }
+            if let i = args.firstIndex(of: "-scrollTo"), i + 1 < args.count {
+                let target = args[i + 1]
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    scrollProxy.scrollTo(target, anchor: .top)
+                }
+            }
+        }
+        #endif
+        }
     }
 
     // MARK: - Section header
@@ -313,10 +327,9 @@ private struct OverviewMonthContent: View {
             Spacer()
             if let action {
                 Button(action.label, action: action.run)
-                    .font(.subheadline)
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(DesignTokens.accent)
                     .tint(DesignTokens.accent)
-                    .neonGlow(DesignTokens.accent, radius: 5, intensity: 0.7)
             }
         }
         .padding(.bottom, -8)
@@ -395,28 +408,10 @@ private struct BudgetGlanceRow: View {
                 .font(.subheadline)
                 .fontWeight(.medium)
             }
-            ProgressBarLine(fraction: fraction, color: barColor)
+            // v2 embossed recipe: recessed track + embossed colour fill
+            EmbossedBar(fraction: fraction, fill: barColor, height: 8, minWidth: 8)
         }
         .padding(.vertical, 13)
-    }
-}
-
-/// Thin inline progress bar used by the Overview glance (matches the design's `ProgressBar`).
-private struct ProgressBarLine: View {
-    let fraction: Double
-    let color: Color
-    var height: CGFloat = 8
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule().fill(DesignTokens.fillRecessed2)
-                Capsule().fill(color)
-                    .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
-            }
-        }
-        .frame(height: height)
-        .accessibilityHidden(true)
     }
 }
 
@@ -441,9 +436,13 @@ private struct RecentExpenseRow: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
-            Text(expense.amount.formattedINR())
-                .font(.body)
+            // v2 row spec: whole rupees; income shows an explicit green "+"
+            Text(expense.amount < 0
+                 ? "+\(abs(expense.amount).formattedINRWhole())"
+                 : expense.amount.formattedINRWhole())
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(expense.amount < 0 ? DesignTokens.positive : DesignTokens.label)
+                .monospacedDigit()
                 .lineLimit(1)
         }
         .padding(.horizontal, 16)

@@ -151,30 +151,42 @@ struct ExpenseListView: View {
                                             .onTapGesture {
                                                 editingExpense = expense
                                             }
+                                            .listRowBackground(DesignTokens.surfaceRaised)
+                                            .listRowSeparatorTint(DesignTokens.separatorHairline)
                                     }
                                     .onDelete { offsets in
                                         deleteExpenses(in: section.expenses, at: offsets)
                                     }
                                 } header: {
+                                    // v2 day header: uppercase day + signed net total.
+                                    // Spends are stored positive, so total > 0 = net spend
+                                    // day ("−₹X", dim) and total < 0 = net income day
+                                    // ("+₹X", green) — see AccountBalance sign convention.
                                     HStack {
                                         Text(section.title)
-                                            .font(.footnote)
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .kerning(0.5)
+                                            .textCase(.uppercase)
                                             .foregroundStyle(DesignTokens.label2)
                                         Spacer()
-                                        Text(section.total.formattedINR())
-                                            .font(.footnote)
-                                            .fontWeight(.semibold)
-                                            .foregroundStyle(section.total >= 0 ? DesignTokens.positive : DesignTokens.label3)
+                                        Text(signedDayTotal(section.total))
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .monospacedDigit()
+                                            .textCase(nil)
+                                            .foregroundStyle(section.total < 0 ? DesignTokens.positive : DesignTokens.label3)
                                     }
                                 }
                             }
                         }
                     }
                     .listStyle(.insetGrouped)
+                    .listSectionSpacing(18)
+                    .scrollContentBackground(.hidden)
+                    .background(DesignTokens.bgCanvas)
                 }
             }
-            .navigationTitle("Expenses")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Activity")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 if !expenses.isEmpty {
                     ToolbarItem(placement: .topBarLeading) {
@@ -354,11 +366,35 @@ struct ExpenseListView: View {
             let total = items.reduce(Decimal(0)) { $0 + $1.amount }
             return DaySection(
                 id: dayStart,
-                title: dayStart.formattedAsRelativeDay(),
+                title: dayHeaderTitle(for: dayStart),
                 total: total,
                 expenses: items
             )
         }
+    }
+
+    /// v2 day header: "Today · Wed, 9 Jul" / "Yesterday · Tue, 8 Jul" / "Sat, 4 Jul".
+    /// (Rendered uppercase by the header's .textCase.)
+    private func dayHeaderTitle(for dayStart: Date) -> String {
+        let cal = Calendar.current
+        let relative = dayStart.formattedAsRelativeDay()
+        if cal.isDateInToday(dayStart) || cal.isDateInYesterday(dayStart) {
+            let formatter = DateFormatter()
+            formatter.locale = .current
+            formatter.timeZone = .current
+            formatter.setLocalizedDateFormatFromTemplate("EEEdMMM")
+            return "\(relative) · \(formatter.string(from: dayStart))"
+        }
+        return relative
+    }
+
+    /// Signed net figure for a day header. Spends are stored positive (see AccountBalance
+    /// sign convention), so a positive total is money OUT ("−₹X") and a negative total is
+    /// money IN ("+₹X").
+    private func signedDayTotal(_ total: Decimal) -> String {
+        if total > 0 { return "−\(total.formattedINRWhole())" }
+        if total < 0 { return "+\(abs(total).formattedINRWhole())" }
+        return total.formattedINRWhole()
     }
 
     /// Human-readable label for the active filter (used in the empty state).

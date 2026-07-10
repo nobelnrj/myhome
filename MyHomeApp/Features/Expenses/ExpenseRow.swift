@@ -1,24 +1,38 @@
 import SwiftUI
 
-/// Single row in the expense list.
+/// Single row in the Activity (expense) list — neumorphic v2, Screen 4 dense row.
 ///
-/// Restyled to the neumorphic design system: a colored category `IconTile`, the merchant (note) as
-/// the title, a "category · account" subtitle (with an envelope glyph for email-ingested rows),
-/// and the amount trailing. Income amounts (negative) show `DesignTokens.positive`; spend amounts
-/// show `DesignTokens.negative` — both `.semibold` for legibility.
+/// 36pt category `IconTile`, merchant (note) 15/500 title, "Category · time" tertiary
+/// subtitle (with an envelope glyph for email-ingested rows), amount trailing 15/600.
+/// Income rows (negative amounts) get a tinted green tile with an up-arrow and a green
+/// `+₹` amount; spend amounts stay in the primary label colour per the handoff.
 struct ExpenseRow: View {
 
     let expense: Expense
 
     private var category: Category? { expense.categories.first }
+    private var isIncome: Bool { expense.amount < 0 }
 
     var body: some View {
         HStack(spacing: 12) {
-            IconTile(category: category, size: 30)
+            if isIncome {
+                // Income tile: soft green fill + green up-arrow (handoff income row)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(DesignTokens.positive.opacity(0.16))
+                    .frame(width: 36, height: 36)
+                    .overlay(
+                        Image(systemName: "arrow.up")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(DesignTokens.positive)
+                    )
+                    .accessibilityHidden(true)
+            } else {
+                IconTile(category: category, size: 36)
+            }
 
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.body)
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(DesignTokens.label)
                     .lineLimit(1)
                     .truncationMode(.tail)
@@ -30,20 +44,20 @@ struct ExpenseRow: View {
                             .imageScale(.small)
                     }
                 }
-                .font(.subheadline)
-                .foregroundStyle(DesignTokens.label2)
+                .font(.system(size: 12.5))
+                .foregroundStyle(DesignTokens.label3)
             }
 
             Spacer(minLength: 8)
 
-            Text(expense.amount.formattedINR())
-                .font(.body)
-                .fontWeight(.semibold)
-                .foregroundStyle(expense.amount < 0 ? DesignTokens.positive : DesignTokens.negative)
+            Text(amountText)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(isIncome ? DesignTokens.positive : DesignTokens.label)
+                .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 5)
         .accessibilityElement(children: .combine)
     }
 
@@ -53,12 +67,28 @@ struct ExpenseRow: View {
         return category?.name ?? "Expense"
     }
 
-    /// Subtitle is "Category · Account" (account omitted when there's no source label).
+    /// Subtitle is "Category · time" (handoff row spec), keeping the account source label
+    /// when present: "Category · Account · 1:12 PM".
     private var subtitle: String {
-        let cat = category?.name ?? "Uncategorized"
+        var parts = [category?.name ?? "Uncategorized"]
         if let source = expense.sourceLabel, !source.isEmpty {
-            return "\(cat) · \(source)"
+            parts.append(source)
         }
-        return cat
+        parts.append(timeText)
+        return parts.joined(separator: " · ")
+    }
+
+    private var timeText: String {
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.timeZone = .current
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: expense.date)
+    }
+
+    /// Income shows an explicit `+` (design: `+₹14,000`); spends show the plain amount.
+    private var amountText: String {
+        isIncome ? "+\(abs(expense.amount).formattedINRWhole())" : expense.amount.formattedINRWhole()
     }
 }

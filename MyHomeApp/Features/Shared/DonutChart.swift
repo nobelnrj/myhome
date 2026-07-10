@@ -59,6 +59,72 @@ extension DonutChart where Center == EmptyView {
     }
 }
 
+// MARK: - NeuDonutRing (v2 handoff donut — rounded caps, gaps, per-segment glow)
+
+/// The v2 neumorphic donut: each segment is a rounded-cap arc with a ~4pt gap on either
+/// side and a soft glow in its own colour (`drop-shadow(0 3px 9px color@0.45)` in the mock).
+/// Cap allowance is baked into the trim range so round caps never overlap the gaps.
+/// Sweeps in over ~500ms ease-out on appear; honors Reduce Motion (snaps visible).
+struct NeuDonutRing: View {
+    /// Segments in display order. `value`s are relative weights (fractions computed internally).
+    let segments: [DonutSegment]
+    var size: CGFloat = 198
+    var lineWidth: CGFloat = 22
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var reveal: Double = 0
+
+    private struct Arc: Identifiable {
+        let id: String
+        let color: Color
+        let from: Double
+        let to: Double
+    }
+
+    private var arcs: [Arc] {
+        let total = segments.reduce(0) { $0 + max($1.value, 0) }
+        guard total > 0 else { return [] }
+        let radius = (size - lineWidth) / 2
+        let circumference = 2 * .pi * Double(radius)
+        let capFraction = Double(lineWidth / 2) / circumference   // round-cap overhang per end
+        let gapFraction = 4.0 / circumference                     // ~4pt visual gap per side
+
+        var cursor = 0.0
+        return segments.compactMap { seg in
+            let span = max(seg.value, 0) / total
+            defer { cursor += span }
+            let inset = capFraction + gapFraction / 2
+            var from = cursor + inset
+            var to = cursor + span - inset
+            if to <= from {
+                // Segment too small for a full rounded cap — render a centred dot-arc.
+                let mid = cursor + span / 2
+                from = mid - 0.0001
+                to = mid + 0.0001
+            }
+            return Arc(id: seg.id, color: seg.color, from: from, to: to)
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            ForEach(arcs) { arc in
+                Circle()
+                    .trim(from: arc.from, to: max(arc.from, arc.from + (arc.to - arc.from) * reveal))
+                    .stroke(arc.color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .shadow(color: arc.color.opacity(0.45), radius: 9, y: 3)
+            }
+        }
+        .frame(width: size, height: size)
+        .onAppear {
+            if reduceMotion { reveal = 1 }
+            else { withAnimation(.easeOut(duration: 0.5)) { reveal = 1 } }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 // MARK: - ActivityRing (Apple / WHOOP-style animated ring)
 
 /// A single animated progress ring: recessed track + angular-gradient stroke with a rounded
