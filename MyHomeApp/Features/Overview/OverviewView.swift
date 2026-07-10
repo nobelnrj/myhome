@@ -248,20 +248,14 @@ private struct OverviewMonthContent: View {
                         .entrance(6)
                 }
 
-                // Budgets glance
+                // Budgets glance — pill-well gauges, same chart language as "By category"
+                // (fill = share of that category's budget, red when over)
                 if !budgeted.isEmpty {
                     sectionHeader("Budgets", action: ("See all", { selectedTab = 2 }))
                         .id("budgets")
-                    VStack(spacing: 0) {
-                        ForEach(Array(budgeted.prefix(3).enumerated()), id: \.element.category.id) { index, item in
-                            BudgetGlanceRow(category: item.category, spent: item.spent, limit: item.limit)
-                            if index < min(budgeted.count, 3) - 1 {
-                                Divider().padding(.leading, 36)
-                            }
-                        }
-                    }
-                    .neuSurface(.raised)
-                    .entrance(7)
+                    BudgetGlancePills(items: Array(budgeted.prefix(5)))
+                        .neuSurface(.raised)
+                        .entrance(7)
                 }
 
                 // Recent
@@ -375,45 +369,70 @@ private struct ReviewBanner: View {
         .buttonStyle(.plain)
     }
 }
-// MARK: - Budgets glance row
+// MARK: - Budgets glance pills
 
-private struct BudgetGlanceRow: View {
-    let category: Category
-    let spent: Decimal
-    let limit: Decimal
+/// Budgets glance as pill-well gauges — the same chart language as "By category", but the
+/// fill is the category's OWN budget consumption (spent/limit), not a share of the largest
+/// spend. Colour carries state: category colour normally, orange ≥85%, red when over.
+/// Colour is never the sole signal — the amount line carries the numbers (D2-09).
+private struct BudgetGlancePills: View {
+    let items: [(category: Category, spent: Decimal, limit: Decimal)]
 
-    private var fraction: Double {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var reveal: Double = 0
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 0) {
+            ForEach(items, id: \.category.id) { item in
+                pillColumn(item)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.vertical, 6)
+        .onAppear {
+            if reduceMotion { reveal = 1 }
+            else { withAnimation(.easeOut(duration: 0.5)) { reveal = 1 } }
+        }
+    }
+
+    @ViewBuilder
+    private func pillColumn(_ item: (category: Category, spent: Decimal, limit: Decimal)) -> some View {
+        let fraction = fraction(item.spent, item.limit)
+        let isOver = item.spent > item.limit
+        let color: Color = isOver
+            ? DesignTokens.negative
+            : (fraction >= 0.85 ? DesignTokens.orange : CategoryStyle.color(for: item.category))
+
+        VStack(spacing: 10) {
+            VerticalPillGauge(fraction: fraction, color: color, reveal: reveal)
+
+            VStack(spacing: 2) {
+                Text(item.category.name ?? "—")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(DesignTokens.label2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Text("\(item.spent.formattedINRWords()) / \(item.limit.formattedINRWords())")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isOver ? DesignTokens.negative : DesignTokens.label)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityText(item, isOver: isOver))
+    }
+
+    private func fraction(_ spent: Decimal, _ limit: Decimal) -> Double {
         guard limit > 0 else { return 0 }
         return NSDecimalNumber(decimal: spent).doubleValue / NSDecimalNumber(decimal: limit).doubleValue
     }
-    private var isOver: Bool { spent > limit }
-    private var barColor: Color {
-        if isOver { return DesignTokens.negative }
-        if fraction >= 0.85 { return DesignTokens.orange }
-        return CategoryStyle.color(for: category)
-    }
 
-    var body: some View {
-        VStack(spacing: 9) {
-            HStack(spacing: 10) {
-                IconTile(category: category, size: 26)
-                Text(category.name ?? "—")
-                    .font(.subheadline)
-                    .lineLimit(1)
-                Spacer(minLength: 6)
-                HStack(spacing: 4) {
-                    Text(spent.formattedINRWhole())
-                        .foregroundStyle(isOver ? DesignTokens.negative : DesignTokens.label2)
-                    Text("/ \(limit.formattedINRWhole())")
-                        .foregroundStyle(DesignTokens.label3)
-                }
-                .font(.subheadline)
-                .fontWeight(.medium)
-            }
-            // v2 embossed recipe: recessed track + embossed colour fill
-            EmbossedBar(fraction: fraction, fill: barColor, height: 8, minWidth: 8)
-        }
-        .padding(.vertical, 13)
+    private func accessibilityText(_ item: (category: Category, spent: Decimal, limit: Decimal), isOver: Bool) -> String {
+        let name = item.category.name ?? "Category"
+        let state = isOver ? "over budget" : "\(Int(fraction(item.spent, item.limit) * 100)) percent used"
+        return "\(name): \(item.spent.formattedINR()) of \(item.limit.formattedINR()), \(state)"
     }
 }
 

@@ -344,6 +344,68 @@ struct EmbossedBar<Fill: ShapeStyle>: View {
     }
 }
 
+// MARK: - Vertical pill gauge (recessed well + glowing fill column)
+
+/// The v2 chart column: a recessed vertical pill well with a glowing colour fill pill
+/// inset from the sides and bottom. Used by the Analytics/Overview "By category" charts
+/// (fraction = share of the largest value) and the Overview Budgets glance
+/// (fraction = share of the category's budget).
+struct VerticalPillGauge: View {
+    /// 0…1 fill fraction of the well (clamped).
+    var fraction: Double
+    var color: Color
+    var wellWidth: CGFloat = 42
+    var wellHeight: CGFloat = 150
+    /// Fill inset from the well's sides and bottom.
+    var inset: CGFloat = 9
+    /// Minimum fill height so tiny values still render a visible pill.
+    var minFillHeight: CGFloat = 24
+    /// Entrance multiplier (0…1) — callers animate this for the bar-rise effect.
+    var reveal: Double = 1
+
+    private var fillHeight: CGFloat {
+        let maxFill = wellHeight - inset * 2
+        let f = min(max(fraction, 0), 1)
+        let target = minFillHeight + (maxFill - minFillHeight) * f
+        return max(minFillHeight * reveal, target * reveal)
+    }
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            // Recessed vertical well
+            Capsule()
+                .fill(DesignTokens.fillRecessed3)
+                .overlay(
+                    Capsule().stroke(
+                        LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.03)],
+                                       startPoint: .top, endPoint: .bottom),
+                        lineWidth: 1
+                    )
+                    .blur(radius: 0.5)
+                    .clipShape(Capsule())
+                )
+                .frame(width: wellWidth, height: wellHeight)
+
+            // Glowing inner fill pill — light→base vertical gradient of the colour.
+            // A zero fraction renders an empty well (no minimum nub implying usage).
+            if fraction > 0 {
+                Capsule()
+                    .fill(color)
+                    .overlay(
+                        Capsule().fill(
+                            LinearGradient(colors: [.white.opacity(0.35), .clear],
+                                           startPoint: .top, endPoint: .bottom)
+                        )
+                    )
+                    .frame(width: wellWidth - inset * 2, height: fillHeight)
+                    .padding(.bottom, inset)
+                    .shadow(color: color.opacity(0.45), radius: 8)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 // MARK: - Circular recessed well (chart dish)
 
 /// A circular sunken dish that charts sit inside — donut, budget ring, hero orb.

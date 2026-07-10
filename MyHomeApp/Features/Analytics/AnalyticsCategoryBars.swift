@@ -95,42 +95,16 @@ struct AnalyticsCategoryBars: View {
 
     @ViewBuilder
     private func pillColumn(_ column: Column) -> some View {
-        let fraction = column.amount / maxAmount
-        let maxFill = wellHeight - fillInset * 2
-        let fillHeight = (minFillHeight + (maxFill - minFillHeight) * fraction) * reveal
-
         VStack(spacing: 10) {
-            ZStack(alignment: .bottom) {
-                // Recessed vertical well
-                Capsule()
-                    .fill(DesignTokens.fillRecessed3)
-                    .overlay(
-                        Capsule().stroke(
-                            LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.03)],
-                                           startPoint: .top, endPoint: .bottom),
-                            lineWidth: 1
-                        )
-                        .blur(radius: 0.5)
-                        .clipShape(Capsule())
-                    )
-                    .frame(width: wellWidth, height: wellHeight)
-
-                // Glowing inner fill pill — light→base vertical gradient of the category colour
-                Capsule()
-                    .fill(
-                        LinearGradient(colors: [column.color, column.color], startPoint: .top, endPoint: .bottom)
-                    )
-                    .overlay(
-                        Capsule().fill(
-                            LinearGradient(colors: [.white.opacity(0.35), .clear],
-                                           startPoint: .top, endPoint: .bottom)
-                        )
-                    )
-                    .frame(width: wellWidth - fillInset * 2,
-                           height: max(minFillHeight * reveal, fillHeight))
-                    .padding(.bottom, fillInset)
-                    .shadow(color: column.color.opacity(0.45), radius: 8)
-            }
+            VerticalPillGauge(
+                fraction: column.amount / maxAmount,
+                color: column.color,
+                wellWidth: wellWidth,
+                wellHeight: wellHeight,
+                inset: fillInset,
+                minFillHeight: minFillHeight,
+                reveal: reveal
+            )
 
             VStack(spacing: 2) {
                 Text(column.name)

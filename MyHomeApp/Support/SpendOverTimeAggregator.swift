@@ -98,7 +98,7 @@ enum SpendOverTimeAggregator {
 
         // Map every slot to a SpendBucket (default .zero for empty slots — Pitfall C)
         return slots.map { day in
-            let decimalSpent = totals[day] ?? .zero
+            let decimalSpent = clampedSpend(totals[day] ?? .zero)
             let doubleSpent = NSDecimalNumber(decimal: decimalSpent).doubleValue
             let label = day.formatted(.dateTime.weekday(.abbreviated).day())
             return SpendBucket(id: day, date: day, spent: doubleSpent, spentDecimal: decimalSpent, dateLabel: label)
@@ -133,7 +133,7 @@ enum SpendOverTimeAggregator {
         }
 
         return slots.map { day in
-            let decimalSpent = totals[day] ?? .zero
+            let decimalSpent = clampedSpend(totals[day] ?? .zero)
             let doubleSpent = NSDecimalNumber(decimal: decimalSpent).doubleValue
             let label = day.formatted(.dateTime.month(.abbreviated).day())
             return SpendBucket(id: day, date: day, spent: doubleSpent, spentDecimal: decimalSpent, dateLabel: label)
@@ -168,7 +168,7 @@ enum SpendOverTimeAggregator {
         }
 
         return slots.map { monthStart in
-            let decimalSpent = totals[monthStart] ?? .zero
+            let decimalSpent = clampedSpend(totals[monthStart] ?? .zero)
             let doubleSpent = NSDecimalNumber(decimal: decimalSpent).doubleValue
             let label = monthStart.formatted(.dateTime.month(.abbreviated))
             return SpendBucket(id: monthStart, date: monthStart, spent: doubleSpent, spentDecimal: decimalSpent, dateLabel: label)
@@ -190,11 +190,23 @@ enum SpendOverTimeAggregator {
         range: SpendRange,
         calendar: Calendar = .current
     ) -> [SpendBucket] {
-        let spendable = expenses.filter { $0.isTransfer != true } // D-15: exclude confirmed self-transfers from spend chart
+        // Exclude confirmed AND pending self-transfers (D-15), matching the hero's
+        // cash-flow convention (BudgetCalculator.isTransferForCashFlow).
+        let spendable = expenses.filter { !BudgetCalculator.isTransferForCashFlow($0) }
         switch range {
         case .week:  return weekBuckets(expenses: spendable, calendar: calendar)
         case .month: return monthBuckets(expenses: spendable, calendar: calendar)
         case .year:  return yearBuckets(expenses: spendable, calendar: calendar)
         }
+    }
+
+    // MARK: - Spend-only floor
+
+    /// Floors a slot's net total at zero for the chart. Refunds still net against the same
+    /// slot's spend (EXP-11 refund contract), but a slot dominated by income (salary credit)
+    /// clamps to ₹0 instead of plunging the spend line below the axis — the trend charts
+    /// are spend-only by design (user decision, 2026-07-10).
+    fileprivate static func clampedSpend(_ net: Decimal) -> Decimal {
+        max(net, .zero)
     }
 }
