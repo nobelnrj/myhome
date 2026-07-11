@@ -185,7 +185,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 Plans:
 **Wave 1**
 
-- [ ] 17-01-PLAN.md — Wave 1: dark baselines + Color.adaptive factory + D-06 bit-identity test harness
+- [x] 17-01-PLAN.md — Wave 1: dark baselines + Color.adaptive factory + D-06 bit-identity test harness
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -249,4 +249,4 @@ Why it's a phase, not a toggle:
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
 | 16. AI Insight Card | v1.2 | 5/5 | Complete    | 2026-06-27 |
-| 17. Light Mode Support | v1.2 | 0/0 | Planned | — |
+| 17. Light Mode Support | v1.2 | 1/9 | In Progress|  |

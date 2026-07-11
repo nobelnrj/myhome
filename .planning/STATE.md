@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Neumorphic Redesign
 status: executing
-last_updated: "2026-07-11T20:29:05.519Z"
-last_activity: 2026-07-11 -- Phase 17 planning complete
+last_updated: "2026-07-11T20:30:59.534Z"
+last_activity: 2026-07-11 -- Phase 17 execution started
 progress:
   total_phases: 5
   completed_phases: 4
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 999.1 — light mode support for the neumorphic redesign (backlog)
+**Current focus:** Phase 17 — light-mode-support-neumorphic-redesign
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-07-11 -- Phase 17 planning complete
+Phase: 17 (light-mode-support-neumorphic-redesign) — EXECUTING
+Plan: 1 of 9
+Status: Executing Phase 17
+Last activity: 2026-07-11 -- Phase 17 execution started
 
 ## Performance Metrics
 
