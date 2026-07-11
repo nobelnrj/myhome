@@ -189,7 +189,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 17-02-PLAN.md — Wave 2: all DesignTokens → adaptive pairs + accentText/aiVioletText/dishSlate + scheme-aware neonGlow + WCAG floors
+- [x] 17-02-PLAN.md — Wave 2: all DesignTokens → adaptive pairs + accentText/aiVioletText/dishSlate + scheme-aware neonGlow + WCAG floors
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -249,4 +249,4 @@ Why it's a phase, not a toggle:
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
 | 16. AI Insight Card | v1.2 | 5/5 | Complete    | 2026-06-27 |
-| 17. Light Mode Support | v1.2 | 1/9 | In Progress|  |
+| 17. Light Mode Support | v1.2 | 2/9 | In Progress|  |
