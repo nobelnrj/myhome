@@ -3,15 +3,14 @@ import SwiftData
 
 /// Root expense list view.
 ///
-/// Layout (UI-SPEC Screen 1):
-/// - NavigationStack, navigationTitle "Expenses" inline
-/// - "Needs Review" section at the top for ingested expenses needing triage (D7-04)
-/// - Main expenses grouped into month sections (header = "May 2026" + month total),
-///   newest month first; rows within a month stay date-descending.
-/// - Toolbar filter menu to scope the list by category (All / each category / Uncategorized).
-/// - Each row: ExpenseRow with onTapGesture → edit sheet
-/// - .onDelete: swipe-to-delete via modelContext.delete
-/// - Toolbar: "+" (SF Symbol plus, accent, accessibilityLabel "Add Expense")
+/// Layout (neumorphic v2, handoff expenses.jsx):
+/// - NavigationStack, navigationTitle "Activity" large
+/// - "Needs Review" card at the top for ingested expenses needing triage (D7-04)
+/// - Main expenses grouped into one raised card per day (header = "TODAY · WED, 9 JUL"
+///   + signed net total), newest day first; rows within a day stay date-descending.
+/// - Toolbar filter menu to scope the list by category / account / transfers.
+/// - Each row: ExpenseRow button → edit sheet; delete via context menu (and EditExpenseView)
+/// - Toolbar: "+" menu (New Expense / New Transfer)
 /// - Empty state: ContentUnavailableView "No Expenses Yet"
 ///
 /// Reads via @Query (RESEARCH Pattern 4). Writes via modelContext (no repository wrapper).
@@ -110,78 +109,85 @@ struct ExpenseListView: View {
                         description: Text("Tap + to record your first expense.")
                     )
                 } else {
-                    List {
-                        // "Needs Review" section — shown above the main expense list (D7-04)
-                        if !reviewItems.isEmpty {
-                            Section("Needs Review") {
-                                ForEach(reviewItems) { expense in
-                                    ReviewInboxRow(expense: expense)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            editingExpense = expense
+                    // Neumorphic v2: one raised card per day group (handoff expenses.jsx) —
+                    // ScrollView + LazyVStack instead of List so cards carry the dual outer
+                    // shadow. Row triage that used to live on swipeActions is now inline
+                    // buttons (ReviewInboxRow / TransferPairRow) and a context-menu delete.
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: DesignTokens.spacing22) {
+                            // "Needs Review" section — shown above the main expense list (D7-04)
+                            if !reviewItems.isEmpty {
+                                sectionCard(header: sectionHeader("Needs Review")) {
+                                    ForEach(reviewItems) { expense in
+                                        ReviewInboxRow(expense: expense)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 8)
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
+                                                editingExpense = expense
+                                            }
+                                        if expense.id != reviewItems.last?.id {
+                                            rowDivider
                                         }
+                                    }
                                 }
                             }
-                        }
 
-                        // "Possible Transfers" section — pending scorer-detected pairs (D-11, XFER-02)
-                        if !pendingPairs.isEmpty {
-                            Section("Possible Transfers") {
-                                ForEach(pendingPairs, id: \.debit.id) { pair in
-                                    TransferPairRow(debit: pair.debit, credit: pair.credit)
+                            // "Possible Transfers" section — pending scorer-detected pairs (D-11, XFER-02)
+                            if !pendingPairs.isEmpty {
+                                sectionCard(header: sectionHeader("Possible Transfers")) {
+                                    ForEach(pendingPairs, id: \.debit.id) { pair in
+                                        TransferPairRow(debit: pair.debit, credit: pair.credit)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 8)
+                                        if pair.debit.id != pendingPairs.last?.debit.id {
+                                            rowDivider
+                                        }
+                                    }
                                 }
                             }
-                        }
 
-                        // Main list — grouped into day sections (filtered by category).
-                        if daySections.isEmpty {
-                            Section {
+                            // Main list — grouped into day-group cards (filtered by category).
+                            if daySections.isEmpty {
                                 ContentUnavailableView(
                                     "No Matching Expenses",
                                     systemImage: "line.3.horizontal.decrease.circle",
                                     description: Text("No expenses for \(filterLabel).")
                                 )
-                            }
-                        } else {
-                            ForEach(daySections) { section in
-                                Section {
-                                    ForEach(section.expenses) { expense in
-                                        ExpenseRow(expense: expense)
-                                            .contentShape(Rectangle())
-                                            .onTapGesture {
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 40)
+                            } else {
+                                ForEach(daySections) { section in
+                                    sectionCard(header: dayHeader(for: section)) {
+                                        ForEach(section.expenses) { expense in
+                                            Button {
                                                 editingExpense = expense
+                                            } label: {
+                                                ExpenseRow(expense: expense)
+                                                    .padding(.horizontal, 16)
+                                                    .padding(.vertical, 3)
+                                                    .contentShape(Rectangle())
                                             }
-                                            .listRowBackground(DesignTokens.surfaceRaised)
-                                            .listRowSeparatorTint(DesignTokens.separatorHairline)
-                                    }
-                                    .onDelete { offsets in
-                                        deleteExpenses(in: section.expenses, at: offsets)
-                                    }
-                                } header: {
-                                    // v2 day header: uppercase day + signed net total.
-                                    // Spends are stored positive, so total > 0 = net spend
-                                    // day ("−₹X", dim) and total < 0 = net income day
-                                    // ("+₹X", green) — see AccountBalance sign convention.
-                                    HStack {
-                                        Text(section.title)
-                                            .font(.system(size: 13, weight: .semibold))
-                                            .kerning(0.5)
-                                            .textCase(.uppercase)
-                                            .foregroundStyle(DesignTokens.label2)
-                                        Spacer()
-                                        Text(signedDayTotal(section.total))
-                                            .font(.system(size: 13, weight: .semibold))
-                                            .monospacedDigit()
-                                            .textCase(nil)
-                                            .foregroundStyle(section.total < 0 ? DesignTokens.positive : DesignTokens.label3)
+                                            .buttonStyle(.plain)
+                                            .contextMenu {
+                                                Button(role: .destructive) {
+                                                    deleteExpense(expense)
+                                                } label: {
+                                                    Label("Delete Expense", systemImage: "trash")
+                                                }
+                                            }
+                                            if expense.id != section.expenses.last?.id {
+                                                rowDivider
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 4)
+                        .padding(.bottom, 24)
                     }
-                    .listStyle(.insetGrouped)
-                    .listSectionSpacing(18)
-                    .scrollContentBackground(.hidden)
                     .background(DesignTokens.bgCanvas)
                 }
             }
@@ -243,6 +249,57 @@ struct ExpenseListView: View {
                 activeCategoryFilter = CategoryFilter.category(uuid)
             }
         }
+    }
+
+    // MARK: - Section card builders (neumorphic v2)
+
+    /// A day-group / inbox section: header row above one raised card of rows
+    /// (handoff expenses.jsx — 13pt uppercase header, radius-26 card, dual shadow).
+    private func sectionCard(header: some View, @ViewBuilder rows: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            header
+                .padding(.horizontal, 16)
+            VStack(spacing: 0) {
+                rows()
+            }
+            .padding(.vertical, 6)
+            .neuSurface(.raised, padding: nil)
+        }
+    }
+
+    /// Uppercase micro-header for the inbox sections ("NEEDS REVIEW", "POSSIBLE TRANSFERS").
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 13))
+            .kerning(0.3)
+            .textCase(.uppercase)
+            .foregroundStyle(DesignTokens.label2)
+    }
+
+    /// v2 day header: uppercase day + signed net total. Spends are stored positive,
+    /// so total > 0 = net spend day ("−₹X", dim) and total < 0 = net income day
+    /// ("+₹X", green) — see AccountBalance sign convention.
+    private func dayHeader(for section: DaySection) -> some View {
+        HStack {
+            Text(section.title)
+                .font(.system(size: 13))
+                .kerning(0.3)
+                .textCase(.uppercase)
+                .foregroundStyle(DesignTokens.label2)
+            Spacer()
+            Text(signedDayTotal(section.total))
+                .font(.system(size: 13, weight: .semibold))
+                .monospacedDigit()
+                .foregroundStyle(section.total < 0 ? DesignTokens.positive : DesignTokens.label3)
+        }
+    }
+
+    /// Hairline row separator inset past the 36pt icon tile (16 + 36 + 12 spacing = 64).
+    private var rowDivider: some View {
+        Rectangle()
+            .fill(DesignTokens.separatorHairline)
+            .frame(height: 0.5)
+            .padding(.leading, 64)
     }
 
     // MARK: - Filter menu
@@ -423,21 +480,16 @@ struct ExpenseListView: View {
 
     // MARK: - Actions
 
-    /// Delete swiped rows from a specific month section.
-    ///
-    /// Offsets are relative to `sectionExpenses`, so we resolve them against that array
-    /// (not the full `expenses` query) before deleting.
-    private func deleteExpenses(in sectionExpenses: [Expense], at offsets: IndexSet) {
-        for index in offsets {
-            context.delete(sectionExpenses[index])
-        }
+    /// Delete a single expense (context-menu action; EditExpenseView also offers Delete).
+    private func deleteExpense(_ expense: Expense) {
+        context.delete(expense)
         // CR-01: persist the delete explicitly — do not rely on implicit autosave.
         do {
             try context.save()
         } catch {
             // Surface the failure rather than swallowing it silently.
-            assertionFailure("Failed to save after deleting expenses: \(error)")
-            print("Failed to save after deleting expenses: \(error)")
+            assertionFailure("Failed to save after deleting expense: \(error)")
+            print("Failed to save after deleting expense: \(error)")
         }
     }
 }

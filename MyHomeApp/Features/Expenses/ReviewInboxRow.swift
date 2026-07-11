@@ -76,25 +76,36 @@ struct ReviewInboxRow: View {
                     .foregroundStyle(DesignTokens.orange)
                     .lineLimit(2)
             }
+
+            // Inline triage buttons — the row lives in a ScrollView card (neumorphic v2),
+            // where swipeActions don't fire; these are the primary Accept/Discard affordance.
+            HStack(spacing: 10) {
+                Button {
+                    discardExpense()
+                } label: {
+                    Label("Discard", systemImage: "trash")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(DesignTokens.label2)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(DesignTokens.fillRecessed3, in: Capsule())
+                }
+                Button {
+                    acceptExpense()
+                } label: {
+                    Label("Accept", systemImage: "checkmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(DesignTokens.positive)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(DesignTokens.positive.opacity(0.14), in: Capsule())
+                }
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 4)
         }
         .padding(.vertical, 2)
-        .accessibilityElement(children: .combine)
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            // Destructive: Discard — dismisses Gmail message ID + deletes expense (D7-06/07)
-            Button(role: .destructive) {
-                discardExpense()
-            } label: {
-                Label("Discard", systemImage: "trash")
-            }
-
-            // Non-destructive: Accept — promotes to normal expense by clearing ingestionStateRaw (D7-06)
-            Button {
-                acceptExpense()
-            } label: {
-                Label("Accept", systemImage: "checkmark")
-            }
-            .tint(DesignTokens.positive)
-        }
+        .accessibilityElement(children: .contain)
     }
 
     // MARK: - Subtitle

@@ -36,11 +36,23 @@ struct NeuSurface: ViewModifier {
 
     // MARK: - Fill
 
-    private var fill: Color {
+    /// Raised/floating fills are diagonal curvature gradients (lit top-left → shaded
+    /// bottom-right) so the surface reads convex; recessed stays a flat dark fill and
+    /// gets its concavity from the inner shadow overlay.
+    private var fill: AnyShapeStyle {
         switch state {
-        case .raised:    return DesignTokens.surfaceRaised
-        case .floating:  return DesignTokens.surfaceRaisedStrong
-        case .recessed:  return DesignTokens.fillRecessed3
+        case .raised:
+            return AnyShapeStyle(LinearGradient(
+                colors: [DesignTokens.surfaceRaisedTop, DesignTokens.surfaceRaisedBottom],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            ))
+        case .floating:
+            return AnyShapeStyle(LinearGradient(
+                colors: [DesignTokens.surfaceRaisedStrongTop, DesignTokens.surfaceRaisedStrongBottom],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            ))
+        case .recessed:
+            return AnyShapeStyle(DesignTokens.fillRecessed3)
         }
     }
 
@@ -101,8 +113,9 @@ private struct OuterShadowModifier: ViewModifier {
 // MARK: - Inner rim overlay (raised / floating)
 
 /// Adds a strokeBorder rim gradient for raised/floating states.
-/// Gradient runs white 4.5% → black 30% top-leading → bottom-trailing,
-/// replicating the inner light/dark rim from the UI-SPEC shadowRim spec.
+/// The CSS token is white 4.5% → black 30%, but a 1pt SwiftUI stroke renders far softer
+/// than a crisp CSS inset — white 7% / black 35% reproduces the handoff's visible
+/// top-left catch-light edge without reading as an outline.
 private struct RimOverlayModifier: ViewModifier {
     let state: NeuSurfaceState
     let radius: CGFloat
@@ -118,8 +131,8 @@ private struct RimOverlayModifier: ViewModifier {
                     .strokeBorder(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(0.045),
-                                Color.black.opacity(0.30)
+                                Color.white.opacity(0.07),
+                                Color.black.opacity(0.35)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -133,11 +146,11 @@ private struct RimOverlayModifier: ViewModifier {
 
 // MARK: - Recessed inset approximation
 
-/// For `.recessed`, overlays a gradient that makes the surface appear sunken.
-/// SwiftUI has no native inset shadow. We approximate it with a gradient overlay:
-/// dark in top-left + light in bottom-right, giving the illusion of light coming
-/// from the top (RESEARCH Open Question 1 — overlay-gradient is the default approach;
-/// the fillRecessed3 color being darker than bgCanvas carries the primary sunken look).
+/// For `.recessed`, overlays a real inner shadow — the same stroke+blur+offset+mask
+/// recipe as `NeuCircularWell` — so rectangular wells (stat tiles, input tracks) read
+/// carved into the surface rather than tinted. A dark arc presses in from the top-left,
+/// a soft light rim rises from the bottom-right, and a crisp hairline keeps the well
+/// boundary defined under the blur.
 private struct RecessedOverlayModifier: ViewModifier {
     let state: NeuSurfaceState
     let radius: CGFloat
@@ -145,18 +158,30 @@ private struct RecessedOverlayModifier: ViewModifier {
     func body(content: Content) -> some View {
         content.overlay {
             if state == .recessed {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.black.opacity(0.30),
-                                Color.white.opacity(0.025)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+                ZStack {
+                    // Dark inner shadow — top-left, pressed in
+                    shape
+                        .stroke(Color.black.opacity(0.55), lineWidth: 8)
+                        .blur(radius: 6)
+                        .offset(x: 3, y: 4)
+                        .mask(shape)
+
+                    // Light inner rim — bottom-right, rising
+                    shape
+                        .stroke(Color.white.opacity(0.05), lineWidth: 6)
+                        .blur(radius: 5)
+                        .offset(x: -2, y: -3)
+                        .mask(shape)
+
+                    // Crisp hairline edge so the well boundary stays defined under the blur
+                    shape.strokeBorder(
+                        LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.04)],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: 1
                     )
-                    .allowsHitTesting(false)
+                }
+                .allowsHitTesting(false)
             }
         }
     }
@@ -265,16 +290,22 @@ struct NeuSecondaryButtonStyle: ButtonStyle {
             .padding(.vertical, verticalPadding)
             .padding(.horizontal, horizontalPadding)
             .background(
-                Capsule().fill(configuration.isPressed
-                               ? DesignTokens.fillRecessed3
-                               : DesignTokens.surfaceRaisedStrong)
+                Capsule().fill(
+                    configuration.isPressed
+                        ? AnyShapeStyle(DesignTokens.fillRecessed3)
+                        : AnyShapeStyle(LinearGradient(
+                            colors: [DesignTokens.surfaceRaisedStrongTop,
+                                     DesignTokens.surfaceRaisedStrongBottom],
+                            startPoint: .topLeading, endPoint: .bottomTrailing
+                          ))
+                )
             )
             .overlay(
                 Capsule().strokeBorder(
                     LinearGradient(
                         colors: configuration.isPressed
-                            ? [Color.black.opacity(0.30), Color.white.opacity(0.045)]
-                            : [Color.white.opacity(0.045), Color.black.opacity(0.30)],
+                            ? [Color.black.opacity(0.35), Color.white.opacity(0.07)]
+                            : [Color.white.opacity(0.07), Color.black.opacity(0.35)],
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     ),
                     lineWidth: 1
@@ -310,11 +341,21 @@ struct EmbossedBar<Fill: ShapeStyle>: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                // Recessed track
+                // Recessed track — top shade band inside the well + a stronger dark top
+                // edge so the track reads sunken at bar height (too shallow for the full
+                // stroke-blur inner-shadow recipe).
                 Capsule().fill(DesignTokens.fillRecessed3)
                     .overlay(
+                        Capsule().fill(
+                            LinearGradient(stops: [
+                                .init(color: .black.opacity(0.35), location: 0),
+                                .init(color: .clear, location: 0.55)
+                            ], startPoint: .top, endPoint: .bottom)
+                        )
+                    )
+                    .overlay(
                         Capsule().stroke(
-                            LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.03)],
+                            LinearGradient(colors: [.black.opacity(0.55), .white.opacity(0.04)],
                                            startPoint: .top, endPoint: .bottom),
                             lineWidth: 1
                         )
@@ -372,12 +413,21 @@ struct VerticalPillGauge: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Recessed vertical well
+            // Recessed vertical well — shade band pressed in from the top plus a stronger
+            // dark top edge, matching the EmbossedBar track depth treatment.
             Capsule()
                 .fill(DesignTokens.fillRecessed3)
                 .overlay(
+                    Capsule().fill(
+                        LinearGradient(stops: [
+                            .init(color: .black.opacity(0.35), location: 0),
+                            .init(color: .clear, location: 0.30)
+                        ], startPoint: .top, endPoint: .bottom)
+                    )
+                )
+                .overlay(
                     Capsule().stroke(
-                        LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.03)],
+                        LinearGradient(colors: [.black.opacity(0.55), .white.opacity(0.04)],
                                        startPoint: .top, endPoint: .bottom),
                         lineWidth: 1
                     )
@@ -466,12 +516,17 @@ struct NeuCircularPuck<Content: View>: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(DesignTokens.surfaceRaised)
-                .shadow(color: .white.opacity(0.035), radius: 7, x: -6, y: -6)
+                .fill(
+                    LinearGradient(
+                        colors: [DesignTokens.surfaceRaisedTop, DesignTokens.surfaceRaisedBottom],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: .white.opacity(0.05), radius: 7, x: -6, y: -6)
                 .shadow(color: .black.opacity(0.55), radius: 9, x: 7, y: 7)
                 .overlay(
                     Circle().strokeBorder(
-                        LinearGradient(colors: [.white.opacity(0.045), .black.opacity(0.30)],
+                        LinearGradient(colors: [.white.opacity(0.07), .black.opacity(0.35)],
                                        startPoint: .topLeading, endPoint: .bottomTrailing),
                         lineWidth: 1
                     )

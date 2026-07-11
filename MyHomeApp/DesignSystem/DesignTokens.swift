@@ -12,6 +12,14 @@ enum DesignTokens {
     static let bgCanvas               = Color(hex: "#1C1C23")
     static let surfaceRaised          = Color(hex: "#1F1F27")
     static let surfaceRaisedStrong    = Color(hex: "#22222C")
+    // Curvature gradient endpoints — raised/floating surfaces are lit from the top-left,
+    // so their fill runs lighter (topLeading) → darker (bottomTrailing), averaging to the
+    // flat surface colors above. This diagonal falloff is what sells the convex "pillow"
+    // read; a flat fill looks like a sticker no matter how strong the outer shadows are.
+    static let surfaceRaisedTop          = Color(hex: "#24242D")
+    static let surfaceRaisedBottom       = Color(hex: "#1B1B21")
+    static let surfaceRaisedStrongTop    = Color(hex: "#282833")
+    static let surfaceRaisedStrongBottom = Color(hex: "#1E1E26")
     static let surfaceElevatedControl = Color(hex: "#262630")
     static let fillRecessed           = Color(hex: "#16161C")
     static let fillRecessed2          = Color(hex: "#191920")
@@ -101,15 +109,18 @@ enum DesignTokens {
         let darkY: CGFloat
     }
 
-    /// Standard raised card: dual outer shadow (light top-left, dark bottom-right)
+    /// Standard raised card: dual outer shadow (light top-left, dark bottom-right).
+    /// Light opacity runs hotter than the CSS token (0.035) because SwiftUI's gaussian
+    /// shadow spreads thinner than a CSS box-shadow at the same radius — 0.05 lands at
+    /// the handoff's perceived brightness.
     static let shadowRaised = ShadowSpec(
-        lightColor: .white.opacity(0.035), lightRadius: 7,  lightX: -6, lightY: -6,
+        lightColor: .white.opacity(0.05),  lightRadius: 7,  lightX: -6, lightY: -6,
         darkColor:  .black.opacity(0.55),  darkRadius:  9,  darkX:   7, darkY:   7
     )
 
     /// Floating element (hero card, tab bar capsule, bottom sheet): deeper dual outer shadow
     static let shadowFloat = ShadowSpec(
-        lightColor: .white.opacity(0.04),  lightRadius: 11, lightX: -9, lightY: -9,
+        lightColor: .white.opacity(0.055), lightRadius: 11, lightX: -9, lightY: -9,
         darkColor:  .black.opacity(0.62),  darkRadius:  14, darkX:  11, darkY:  11
     )
 
