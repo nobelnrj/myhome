@@ -206,6 +206,7 @@ private struct OverviewMonthContent: View {
                 // Net Worth card — suppressed when no assets and cash is 0 (D-04 / ASSET-05)
                 if showNetWorth {
                     sectionHeader("Net Worth", action: ("See holdings", { navigateToAssets = true }))
+                        .id("networth")
                     NetWorthCard(
                         allAssets: allAssets,
                         allAccounts: allAccounts,

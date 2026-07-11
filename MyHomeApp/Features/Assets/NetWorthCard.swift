@@ -6,8 +6,9 @@ import SwiftData
 
 /// Overview card: net-worth total + 4-class allocation donut + legend + trend chart.
 ///
-/// Layout: Section header + tappable card wrapping:
-///   - HStack: DonutChart (132 pt) left | legend VStack right
+/// Layout (neumorphic v2 — mirrors SpendDonutCard): Section header + tappable card wrapping:
+///   - NeuCircularWell (236) + NeuDonutRing (198/22) + NeuCircularPuck (132) centre readout
+///   - Legend rows (7pt dot · label · amount) with hairline dividers
 ///   - NetWorthTrendChart below (140 pt height)
 ///
 /// Tapping the card navigates to AssetsListView (mirrors WhereItsGoingCard pattern).
@@ -46,16 +47,20 @@ struct NetWorthCard: View {
 
     @ViewBuilder
     private func cardContent(breakdown: NetWorthBreakdown, segments: [DonutSegment]) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 18) {
-                // Donut — .accessibilityHidden(true) is built into DonutChart
-                DonutChart(segments: segments, size: 132) {
+        VStack(alignment: .leading, spacing: 16) {
+            // Circular well + rounded-cap allocation ring + raised centre puck —
+            // same chart language as the "Where it's going" donut (SpendDonutCard).
+            NeuCircularWell(size: 236) {
+                NeuDonutRing(segments: segments, size: 198, lineWidth: 22)
+                NeuCircularPuck(size: 132) {
                     donutCenter(total: breakdown.totalNetWorth)
                 }
-
-                // Legend
-                legend(breakdown: breakdown)
             }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 4)
+
+            // Legend rows with hairline dividers (SpendDonutCard row recipe)
+            legend(breakdown: breakdown)
 
             // Trend chart below the donut+legend row — only once there are ≥2 days
             // of history. A single snapshot (e.g. the day the first holding is added)
@@ -72,16 +77,18 @@ struct NetWorthCard: View {
 
     @ViewBuilder
     private func donutCenter(total: Decimal) -> some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 3) {
             Text("NET WORTH")
-                .font(.caption2)
-                .fontWeight(.semibold)
+                .font(.system(size: 11, weight: .semibold))
+                .kerning(1.2)
                 .foregroundStyle(DesignTokens.label2)
             Text(total.formattedINRWhole())
-                .font(.headline)
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(DesignTokens.label)
+                .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
+                .frame(maxWidth: 108)
                 // Accessibility: expose the full formatted value for VoiceOver
                 .accessibilityValue(total.formattedINR())
         }
@@ -91,30 +98,41 @@ struct NetWorthCard: View {
 
     @ViewBuilder
     private func legend(breakdown: NetWorthBreakdown) -> some View {
-        VStack(alignment: .leading, spacing: 11) {
-            legendRow(label: "Mutual Funds", color: DesignTokens.catSubscriptions, value: breakdown.mfValue)
-            legendRow(label: "Stocks",       color: DesignTokens.positive,         value: breakdown.stockValue)
-            legendRow(label: "NPS",          color: DesignTokens.orange,           value: breakdown.npsValue)
-            legendRow(label: "Cash",         color: DesignTokens.catAuto,          value: breakdown.cashValue)
+        let rows: [(label: String, color: Color, value: Decimal)] = [
+            ("Mutual Funds", DesignTokens.catSubscriptions, breakdown.mfValue),
+            ("Stocks",       DesignTokens.positive,         breakdown.stockValue),
+            ("NPS",          DesignTokens.orange,           breakdown.npsValue),
+            ("Cash",         DesignTokens.catAuto,          breakdown.cashValue),
+        ]
+        VStack(spacing: 0) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
+                legendRow(label: row.label, color: row.color, value: row.value)
+                if index < rows.count - 1 {
+                    Rectangle()
+                        .fill(DesignTokens.separatorHairline)
+                        .frame(height: 1)
+                }
+            }
         }
     }
 
     @ViewBuilder
     private func legendRow(label: String, color: Color, value: Decimal) -> some View {
-        HStack(spacing: 9) {
-            RoundedRectangle(cornerRadius: 3)
+        HStack(spacing: 10) {
+            Circle()
                 .fill(color)
-                .frame(width: 10, height: 10)
+                .frame(width: 7, height: 7)
             Text(label)
-                .font(.subheadline)
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(DesignTokens.label)
                 .lineLimit(1)
-            Spacer(minLength: 6)
+            Spacer(minLength: 8)
             Text(value.formattedINRWhole())
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(DesignTokens.label2)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(DesignTokens.label)
+                .monospacedDigit()
         }
+        .padding(.vertical, 12)
     }
 
     // MARK: - Allocation segment builder (testable static func)
