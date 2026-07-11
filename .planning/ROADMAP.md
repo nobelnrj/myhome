@@ -179,8 +179,17 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 
 **Goal**: Add a light-mode theme to the v1.2 neumorphic redesign. Today the app is dark-only by decision (DS-05): `MyHomeApp.swift` forces `.preferredColorScheme(.dark)` at the root, and every `DesignTokens` color is a single static dark hex with no adaptive `Color(light:dark:)` variants.
 **Depends on**: Phase 13 (DesignTokens + NeuSurface), Phase 16 (AI Insight orb/glow treatment) — the entire v1.2 dark design system must exist before it can be made adaptive.
-**Requirements**: TBD
-**Plans**: 0 plans (promoted from backlog 2026-06-27; run /gsd-plan-phase to plan)
+**Requirements**: none formally mapped — scope locked by 17-CONTEXT.md decisions D-01…D-15 (supersedes DS-05 dark-only by user decision, promoted from backlog 2026-06-27)
+**Plans**: 7 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — Wave 1: dark baselines + Color.adaptive factory + D-06 bit-identity test harness
+- [ ] 17-02-PLAN.md — Wave 2: all DesignTokens → adaptive pairs + accentText/aiVioletText/dishSlate + scheme-aware neonGlow + WCAG floors
+- [ ] 17-03-PLAN.md — Wave 3: AppStorage theme (System/Light/Dark) + Settings Appearance row + chrome + accent role-split audit
+- [ ] 17-04-PLAN.md — Wave 4: NeuSurface surface/button/puck light shadow twins + on-device depth tuning + paired previews
+- [ ] 17-05-PLAN.md — Wave 5: instrument windows (orb/donut/ring dishes, pill-gauge wells) + EmbossedBar light glow language
+- [ ] 17-06-PLAN.md — Wave 6: trend charts in slate windows + IconTile/range-picker/account audit + AI card violet (D-15)
+- [ ] 17-07-PLAN.md — Wave 7: final D-06 double dark sweep + light integration smoke + end-of-phase human sign-off
 
 Why it's a phase, not a toggle:
 - Needs a full light-tuned palette (canvas, surfaces, fills, label tiers).
