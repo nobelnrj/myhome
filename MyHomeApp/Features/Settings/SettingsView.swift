@@ -44,6 +44,17 @@ struct SettingsView: View {
                         .listRowSeparator(.hidden)
                 }
 
+                // MARK: Appearance Section (D-03)
+
+                // Neumorphic System/Light/Dark segmented pill bound to the same
+                // @AppStorage("appearanceTheme") key as the app root — flipping it re-themes
+                // the app live. Placed near the top, above Security.
+                Section("Appearance") {
+                    AppearanceSegmentedRow()
+                        .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
+                }
+                .listRowBackground(DesignTokens.surfaceRaised)
+
                 // MARK: Security Section
 
                 Section("Security") {
@@ -384,5 +395,116 @@ struct SettingsView: View {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
         return "Version \(version) (Build \(build))"
+    }
+}
+
+// MARK: - Appearance Segmented Row (D-03)
+
+/// Custom neumorphic 3-segment pill (System/Light/Dark) — NOT `Picker(.segmented)`.
+///
+/// Recessed track: a Capsule filled with `fillRecessed3`, a top shade band, and a dark→light
+/// hairline stroke — the `EmbossedBar`/`VerticalPillGauge` well recipe. The active segment is a
+/// raised Capsule with the `surfaceRaisedStrong` diagonal gradient + rim stroke (the
+/// `NeuSecondaryButtonStyle` pill look), sliding between segments via `matchedGeometryEffect`
+/// with `springBouncy`. Reduce Motion skips the slide (matches `EntranceModifier`'s guard).
+///
+/// Bound to `@AppStorage("appearanceTheme")` — the SAME key the app root reads — so a flip
+/// re-themes the app live. The theme-flip transition itself is SwiftUI's default environment
+/// change (no crossfade added here; Plan 07 evaluates jarring-ness on device).
+private struct AppearanceSegmentedRow: View {
+    @AppStorage("appearanceTheme") private var appearanceThemeRaw = AppearanceTheme.system.rawValue
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Namespace private var segmentNamespace
+
+    private var selection: AppearanceTheme {
+        AppearanceTheme(rawValue: appearanceThemeRaw) ?? .system
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(AppearanceTheme.allCases, id: \.self) { theme in
+                segment(theme)
+            }
+        }
+        .padding(4)
+        .background(recessedTrack)
+        .clipShape(Capsule())
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Appearance")
+    }
+
+    private func segment(_ theme: AppearanceTheme) -> some View {
+        let isSelected = theme == selection
+        return Text(theme.label)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(isSelected ? DesignTokens.label : DesignTokens.label2)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .contentShape(Capsule())
+            .background {
+                if isSelected {
+                    activePill
+                        .matchedGeometryEffect(id: "appearanceActiveSegment", in: segmentNamespace)
+                }
+            }
+            .onTapGesture { select(theme) }
+            .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    }
+
+    private func select(_ theme: AppearanceTheme) {
+        guard theme != selection else { return }
+        Haptics.selection()
+        if reduceMotion {
+            appearanceThemeRaw = theme.rawValue
+        } else {
+            withAnimation(DesignTokens.springBouncy) {
+                appearanceThemeRaw = theme.rawValue
+            }
+        }
+    }
+
+    /// Recessed pill track — `fillRecessed3` well + top shade band + dark→light hairline
+    /// (the `EmbossedBar` track recipe, NeuSurface.swift).
+    private var recessedTrack: some View {
+        Capsule()
+            .fill(DesignTokens.fillRecessed3)
+            .overlay(
+                Capsule().fill(
+                    LinearGradient(stops: [
+                        .init(color: .black.opacity(0.35), location: 0),
+                        .init(color: .clear, location: 0.55)
+                    ], startPoint: .top, endPoint: .bottom)
+                )
+            )
+            .overlay(
+                Capsule().stroke(
+                    LinearGradient(colors: [.black.opacity(0.55), .white.opacity(0.04)],
+                                   startPoint: .top, endPoint: .bottom),
+                    lineWidth: 1
+                )
+            )
+    }
+
+    /// Raised active segment — `surfaceRaisedStrong` diagonal gradient + white/black rim
+    /// (the `NeuSecondaryButtonStyle` pill look) with a soft depth shadow.
+    private var activePill: some View {
+        Capsule()
+            .fill(
+                LinearGradient(
+                    colors: [DesignTokens.surfaceRaisedStrongTop,
+                             DesignTokens.surfaceRaisedStrongBottom],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                )
+            )
+            .overlay(
+                Capsule().strokeBorder(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.07), Color.black.opacity(0.35)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+            )
+            .shadow(color: .black.opacity(0.25), radius: 4, x: 2, y: 2)
     }
 }
