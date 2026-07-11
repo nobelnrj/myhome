@@ -44,9 +44,11 @@ enum DesignTokens {
                                               dark: "#FFD60A", darkAlpha: 0.16)
     static let accentOnYellow = Color.adaptive(light: "#1A1404", dark: "#1A1404")
     // D-10: deepened semantic light twins with preserved hue; dark = luminous verbatim.
-    static let positive      = Color.adaptive(light: "#047857", dark: "#34E29B")
+    // Light twins deepened to clear the WCAG 4.5:1 small-text floor on #E3E6EE
+    // (positive 5.25:1, negative 5.18:1, orange 5.03:1) — locked by ContrastTests.
+    static let positive      = Color.adaptive(light: "#036B4A", dark: "#34E29B")
     static let negative      = Color.adaptive(light: "#B91C1C", dark: "#FF6B6B")
-    static let orange        = Color.adaptive(light: "#B45309", dark: "#FFB020")
+    static let orange        = Color.adaptive(light: "#A34209", dark: "#FFB020")
 
     /// D-08 role split — text/icon accent (NOT a fill). Dark amber on light (5.12:1 on the
     /// #E3E6EE canvas per the RESEARCH WCAG table); canary in dark. The dark branch is

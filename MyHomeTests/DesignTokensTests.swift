@@ -174,3 +174,94 @@ struct ContrastHelperTests {
         #expect(abs(contrastRatio(white, black) - 21.0) < 0.01)
     }
 }
+
+// MARK: - Light-palette WCAG floors (Phase 17 Plan 02 — D-08/09/10/12/13/15)
+
+/// Locks the LIGHT-scheme palette contrast floors as executable regression tests. Future
+/// on-device tuning (Plans 04-07) may change the light hexes, but these floors MUST stay green.
+/// Tokens resolve in an explicit LIGHT `EnvironmentValues` via the file-internal contrastRatio,
+/// except dish readouts (see note below).
+@MainActor
+struct ContrastTests {
+
+    /// Semantic delta-text tokens that render as small text on the light canvas (D-10).
+    nonisolated static let semantics: [(String, Color)] = [
+        ("positive", DesignTokens.positive),
+        ("negative", DesignTokens.negative),
+        ("orange",   DesignTokens.orange),
+    ]
+
+    /// 11 category colors — icons/tiles/fills, WCAG non-text floor (D-09). Where a category
+    /// renders SMALL TEXT on light, later plans may deepen the twin further.
+    nonisolated static let categories: [(String, Color)] = [
+        ("catGroceries",     DesignTokens.catGroceries),
+        ("catDining",        DesignTokens.catDining),
+        ("catFuel",          DesignTokens.catFuel),
+        ("catUtilities",     DesignTokens.catUtilities),
+        ("catRent",          DesignTokens.catRent),
+        ("catAuto",          DesignTokens.catAuto),
+        ("catShopping",      DesignTokens.catShopping),
+        ("catHealth",        DesignTokens.catHealth),
+        ("catSubscriptions", DesignTokens.catSubscriptions),
+        ("catEntertainment", DesignTokens.catEntertainment),
+        ("catOther",         DesignTokens.catOther),
+    ]
+
+    /// Contrast of `fg` on `bg`, both resolved in the same scheme (default light).
+    private func ratio(_ fg: Color, on bg: Color, _ scheme: ColorScheme = .light) -> Double {
+        let e = env(scheme)
+        return contrastRatio(fg.resolve(in: e), bg.resolve(in: e))
+    }
+
+    @Test("accentText ≥ 4.5:1 on bgCanvas — small text/icon accent (D-08)")
+    func accentTextFloor() {
+        #expect(ratio(DesignTokens.accentText, on: DesignTokens.bgCanvas) >= 4.5)
+    }
+
+    @Test("semantic delta text ≥ 4.5:1 on bgCanvas (D-10)", arguments: semantics)
+    func semanticFloors(name: String, token: Color) {
+        #expect(ratio(token, on: DesignTokens.bgCanvas) >= 4.5,
+                "\(name) below 4.5:1 on the light canvas")
+    }
+
+    @Test("aiVioletText ≥ 4.5:1 on bgCanvas — sparkle/text violet (D-15)")
+    func aiVioletTextFloor() {
+        #expect(ratio(DesignTokens.aiVioletText, on: DesignTokens.bgCanvas) >= 4.5)
+    }
+
+    @Test("label ≥ 7.0:1 on bgCanvas — primary text")
+    func labelFloor() {
+        #expect(ratio(DesignTokens.label, on: DesignTokens.bgCanvas) >= 7.0)
+    }
+
+    @Test("category color ≥ 3.0:1 on bgCanvas — icons/tiles/fills (D-09)",
+          arguments: categories)
+    func categoryFloors(name: String, token: Color) {
+        #expect(ratio(token, on: DesignTokens.bgCanvas) >= 3.0,
+                "\(name) below 3.0:1 on the light canvas")
+    }
+
+    @Test("accentOnYellow ≥ 4.5:1 on accent (canary CTA fill) — light env (D-08)")
+    func ctaTextOnCanary() {
+        #expect(ratio(DesignTokens.accentOnYellow, on: DesignTokens.accent) >= 4.5)
+    }
+
+    // Dish readouts render inside a FORCE-DARK subtree (D-11): the CONTENT tokens (label,
+    // accent) resolve to their DARK branch, while the dishSlate CHROME sits on the light
+    // canvas and resolves LIGHT. We assert the ACTUALLY-RENDERED pairing (dark content on
+    // light-resolved slate), not a same-env pairing — a light-env `label` (#23252E deep ink)
+    // on slate never renders and would be a meaningless ~1.5:1 assertion.
+    @Test("label readout (force-dark) ≥ 4.5:1 on dishSlate chrome (light) — D-13")
+    func labelOnDish() {
+        let r = contrastRatio(DesignTokens.label.resolve(in: env(.dark)),
+                              DesignTokens.dishSlate.resolve(in: env(.light)))
+        #expect(r >= 4.5)
+    }
+
+    @Test("accent canary (force-dark) ≥ 4.5:1 on dishSlate chrome (light) — D-12")
+    func accentOnDish() {
+        let r = contrastRatio(DesignTokens.accent.resolve(in: env(.dark)),
+                              DesignTokens.dishSlate.resolve(in: env(.light)))
+        #expect(r >= 4.5)
+    }
+}
