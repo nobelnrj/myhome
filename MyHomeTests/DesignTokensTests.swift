@@ -39,6 +39,47 @@ func contrastRatio(_ a: Color.Resolved, _ b: Color.Resolved) -> Double {
     return (max(l1, l2) + 0.05) / (min(l1, l2) + 0.05)
 }
 
+/// D-01/D-02 + T-17-03: the AppStorage-backed appearance preference maps raw strings to the
+/// SwiftUI `preferredColorScheme` argument, and any missing/malformed persisted value degrades
+/// safely to `.system` (follow the device) via the optional-init fallback at the call site.
+@MainActor
+struct AppearanceThemeTests {
+
+    @Test("system → nil (follow device), light → .light, dark → .dark")
+    func colorSchemeMapping() {
+        #expect(AppearanceTheme.system.colorScheme == nil)
+        #expect(AppearanceTheme.light.colorScheme == .light)
+        #expect(AppearanceTheme.dark.colorScheme == .dark)
+    }
+
+    @Test("labels are System/Light/Dark for the Settings segmented row")
+    func segmentLabels() {
+        #expect(AppearanceTheme.system.label == "System")
+        #expect(AppearanceTheme.light.label == "Light")
+        #expect(AppearanceTheme.dark.label == "Dark")
+    }
+
+    @Test("garbage persisted value falls back to .system (T-17-03)")
+    func garbageValueFallsBackToSystem() {
+        // D-02: a corrupted/unknown UserDefaults string must degrade to the device-following
+        // default rather than crash or lock the app into an unexpected scheme.
+        #expect((AppearanceTheme(rawValue: "garbage") ?? .system) == .system)
+        #expect((AppearanceTheme(rawValue: String()) ?? .system) == .system)
+    }
+
+    @Test("empty-string raw value is nil (optional-init contract)")
+    func emptyStringIsNil() {
+        #expect(AppearanceTheme(rawValue: String()) == nil)
+    }
+
+    @Test("all cases round-trip through their rawValue")
+    func rawValueRoundTrip() {
+        for theme in AppearanceTheme.allCases {
+            #expect(AppearanceTheme(rawValue: theme.rawValue) == theme)
+        }
+    }
+}
+
 @MainActor
 struct DesignTokensTests {
 

@@ -26,12 +26,20 @@ struct MyHomeApp: App {
     /// scenePhase for scheduling background refresh on app-backgrounding.
     @Environment(\.scenePhase) private var scenePhase
 
+    /// D-01: user-selected appearance (System/Light/Dark), persisted in plain UserDefaults.
+    /// Shares the "appearanceTheme" key with the Settings Appearance row so flipping the row
+    /// re-resolves the root scheme live. D-02: a missing/garbage value resolves to `.system`
+    /// (follow the device) via the optional-init fallback below — no migration, no opt-in gate.
+    @AppStorage("appearanceTheme") private var appearanceThemeRaw = AppearanceTheme.system.rawValue
+
     // MARK: - Scene
 
     var body: some Scene {
         WindowGroup {
             RootView(gmailSyncController: gmailSyncController)
-                .preferredColorScheme(.dark)   // DS-05: neumorphic dark-mode-only; applied once at root
+                // D-01: root scheme is AppStorage-driven (System/Light/Dark) — supersedes the
+                // former forced-dark DS-05 pin. Garbage/missing key → .system (D-02).
+                .preferredColorScheme((AppearanceTheme(rawValue: appearanceThemeRaw) ?? .system).colorScheme)
                 .onAppear {
                     setupNotifications()
                     // One-time repair for stores that accumulated duplicate ingested expenses

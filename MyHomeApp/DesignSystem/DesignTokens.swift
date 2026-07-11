@@ -174,6 +174,43 @@ enum DesignTokens {
     static let springSoft:   Animation = .spring(response: 0.4, dampingFraction: 0.90)
 }
 
+// MARK: - Appearance Theme
+
+/// App appearance preference, persisted via `@AppStorage("appearanceTheme")`.
+///
+/// D-01: replaces the former hard-coded `.preferredColorScheme(.dark)` at the app root. The
+/// raw string lives in plain `UserDefaults.standard` — no App Group suite, because no widget
+/// or extension reads the theme (the App-Group store is a SwiftData concern only).
+///
+/// D-02: `colorScheme` maps `system → nil` so SwiftUI follows the phone appearance. A missing
+/// or malformed persisted value resolves to `.system` at the call site
+/// (`AppearanceTheme(rawValue: raw) ?? .system`), so the first launch after this update follows
+/// the device appearance with zero migration and no opt-in gate. This optional-init fallback is
+/// the T-17-03 input-validation mitigation (unit-tested with garbage input).
+enum AppearanceTheme: String, CaseIterable {
+    case system
+    case light
+    case dark
+
+    /// SwiftUI `preferredColorScheme` argument: `system → nil` (follow the device appearance).
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light:  return .light
+        case .dark:   return .dark
+        }
+    }
+
+    /// Human-readable segment label for the Settings Appearance row (D-03).
+    var label: String {
+        switch self {
+        case .system: return "System"
+        case .light:  return "Light"
+        case .dark:   return "Dark"
+        }
+    }
+}
+
 // MARK: - Neon Glow
 
 /// Scheme-aware neon bloom.
