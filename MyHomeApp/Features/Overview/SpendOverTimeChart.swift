@@ -51,12 +51,8 @@ struct SpendOverTimeChart: View {
         let hasSpend = bucketedData.contains { $0.spent > 0 }
 
         VStack(alignment: .leading, spacing: 12) {
-            // Row A — Card title
-            Text("Spend Over Time")
-                .font(.title2)
-                .foregroundStyle(DesignTokens.label)
-
-            // Row B — Range segmented control (always visible, even in empty state)
+            // Range segmented control (always visible, even in empty state). Card title
+            // omitted — OverviewView's "Over Time" section header labels this card.
             Picker("Range", selection: $selectedRange) {
                 Text(SpendRange.week.label).tag(SpendRange.week)
                 Text(SpendRange.month.label).tag(SpendRange.month)
@@ -74,15 +70,15 @@ struct SpendOverTimeChart: View {
                     .frame(height: 80)
             } else {
                 Chart(bucketedData) { point in
-                    // Neon trend: gradient area fade + a soft wide glow line under a bright thin
-                    // line (the "same vibe" as the orb — emitted light, no flat fills).
+                    // v2 trend recipe (matches AnalyticsTrendChart): warm area fade under a
+                    // smooth 3.5pt yellow→red gradient line.
                     AreaMark(
                         x: .value("Date", point.date),
                         y: .value("Spend", point.spent)
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(LinearGradient(
-                        colors: [DesignTokens.accent.opacity(0.35), DesignTokens.accent.opacity(0.02)],
+                        colors: [Color(hex: "#FFB43C").opacity(0.26), .clear],
                         startPoint: .top, endPoint: .bottom))
 
                     LineMark(
@@ -90,37 +86,36 @@ struct SpendOverTimeChart: View {
                         y: .value("Spend", point.spent)
                     )
                     .interpolationMethod(.catmullRom)
-                    .lineStyle(StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(DesignTokens.accent.opacity(0.18))   // glow underlay
-
-                    LineMark(
-                        x: .value("Date", point.date),
-                        y: .value("Spend", point.spent)
-                    )
-                    .interpolationMethod(.catmullRom)
-                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(DesignTokens.accent)                 // crisp neon line
+                    .lineStyle(StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+                    .foregroundStyle(LinearGradient(
+                        colors: [DesignTokens.accent, DesignTokens.negative],
+                        startPoint: .leading, endPoint: .trailing))
                     .accessibilityLabel("\(point.dateLabel), \(point.spentDecimal.formattedINR())")
                 }
                 .chartXAxis {
                     AxisMarks(values: .automatic) { value in
                         AxisGridLine()
+                            .foregroundStyle(Color.white.opacity(0.045))
                         AxisValueLabel(format: xAxisDateFormat(for: selectedRange))
-                            .font(.caption)
+                            .font(.system(size: 11))
+                            .foregroundStyle(DesignTokens.label3)
                     }
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
                         AxisGridLine()
+                            .foregroundStyle(Color.white.opacity(0.045))
                         AxisValueLabel {
                             if let d = value.as(Double.self) {
                                 Text(Decimal(d).formattedINRCompact())
-                                    .font(.caption)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(DesignTokens.label3)
                             }
                         }
                     }
                 }
                 .frame(height: 200)
+                .shadow(color: Color(hex: "#FFB43C").opacity(0.30), radius: 5, y: 5)
                 .accessibilityLabel("Spend over time chart, \(selectedRange.label) view")
             }
         }

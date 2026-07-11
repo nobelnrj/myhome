@@ -59,6 +59,89 @@ extension DonutChart where Center == EmptyView {
     }
 }
 
+// MARK: - NeuDonutRing (v2 handoff donut — rounded caps, gaps, per-segment glow)
+
+/// The v2 neumorphic donut: each segment is a rounded-cap arc with a ~4pt gap on either
+/// side and a soft glow in its own colour (`drop-shadow(0 3px 9px color@0.45)` in the mock).
+/// Cap allowance is baked into the trim range so round caps never overlap the gaps.
+/// Sweeps in over ~500ms ease-out on appear; honors Reduce Motion (snaps visible).
+struct NeuDonutRing: View {
+    /// Segments in display order. `value`s are relative weights (fractions computed internally).
+    let segments: [DonutSegment]
+    var size: CGFloat = 198
+    var lineWidth: CGFloat = 22
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var reveal: Double = 0
+
+    private struct Arc: Identifiable {
+        let id: String
+        let color: Color
+        let from: Double
+        let to: Double
+    }
+
+    private var arcs: [Arc] {
+        // Zero-value segments draw nothing (a zero slice must not occupy arc space).
+        let visible = segments.filter { $0.value > 0 }
+        let total = visible.reduce(0) { $0 + $1.value }
+        guard total > 0 else { return [] }
+        let radius = (size - lineWidth) / 2
+        let circumference = 2 * .pi * Double(radius)
+        let capFraction = Double(lineWidth / 2) / circumference   // round-cap overhang per end
+        let gapFraction = 4.0 / circumference                     // ~4pt visual gap per side
+        let inset = capFraction + gapFraction / 2
+
+        // Every arc needs room for its two rounded caps + gaps plus a sliver of body.
+        // A trim span narrower than the cap renders as a full-lineWidth dot that spills
+        // far beyond its angular share — adjacent 1–2% slices then pile up and overlap
+        // their neighbours. Instead, grant small segments this minimum span and shrink
+        // the larger ones proportionally, so the ring stays gap-accurate and cap-safe.
+        let minSpan = inset * 2 + 0.006
+        var spans = visible.map { $0.value / total }
+        if minSpan * Double(spans.count) < 1 {
+            let deficit = spans.reduce(0) { $0 + max(0, minSpan - $1) }
+            if deficit > 0 {
+                let shrinkable = spans.reduce(0) { $0 + max(0, $1 - minSpan) }
+                spans = spans.map { span in
+                    span < minSpan
+                        ? minSpan
+                        : span - deficit * (span - minSpan) / shrinkable
+                }
+            }
+        } else {
+            // Degenerate: more segments than the ring can seat — equal spans.
+            spans = Array(repeating: 1 / Double(spans.count), count: spans.count)
+        }
+
+        var cursor = 0.0
+        return zip(visible, spans).map { seg, span in
+            let from = cursor + inset
+            let to = max(from, cursor + span - inset)
+            cursor += span
+            return Arc(id: seg.id, color: seg.color, from: from, to: to)
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            ForEach(arcs) { arc in
+                Circle()
+                    .trim(from: arc.from, to: max(arc.from, arc.from + (arc.to - arc.from) * reveal))
+                    .stroke(arc.color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .shadow(color: arc.color.opacity(0.45), radius: 9, y: 3)
+            }
+        }
+        .frame(width: size, height: size)
+        .onAppear {
+            if reduceMotion { reveal = 1 }
+            else { withAnimation(.easeOut(duration: 0.5)) { reveal = 1 } }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 // MARK: - ActivityRing (Apple / WHOOP-style animated ring)
 
 /// A single animated progress ring: recessed track + angular-gradient stroke with a rounded
@@ -316,6 +399,15 @@ struct GlowParticleRing<Center: View>: View {
                 .scaleEffect(pulsing ? 1.07 : 1.0)
                 .opacity(animated)
 
+            // Contact shadow — pools below the sphere (light source top-left), the cue
+            // that the orb is resting in its dish rather than floating over it.
+            Ellipse()
+                .fill(Color.black.opacity(0.45))
+                .frame(width: size * 0.70, height: size * 0.18)
+                .blur(radius: size * 0.05)
+                .offset(x: size * 0.02, y: size * 0.37)
+                .opacity(animated)
+
             TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: reduceMotion)) { timeline in
                 let t = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
 
@@ -376,6 +468,26 @@ struct GlowParticleRing<Center: View>: View {
                                 .init(color: .black.opacity(0.0), location: 0.46)
                             ]),
                             center: center, startRadius: 0, endRadius: outerR))
+                    }
+
+                    // 2.5 Sphere shading — light from the top-left (same light source as the
+                    // neumorphic surfaces): a soft highlight up-left and a darkened far limb
+                    // down-right turn the flat particle disc into a convex ball.
+                    let lightCenter = CGPoint(x: dim * 0.38, y: dim * 0.36)
+                    ctx.drawLayer { layer in
+                        layer.clip(to: blob)
+                        layer.fill(blob, with: .radialGradient(
+                            Gradient(stops: [
+                                .init(color: .white.opacity(0.07), location: 0),
+                                .init(color: .white.opacity(0.0), location: 0.5)
+                            ]),
+                            center: lightCenter, startRadius: 0, endRadius: outerR * 1.1))
+                        layer.fill(blob, with: .radialGradient(
+                            Gradient(stops: [
+                                .init(color: .black.opacity(0.0), location: 0.60),
+                                .init(color: .black.opacity(0.32), location: 1.0)
+                            ]),
+                            center: lightCenter, startRadius: 0, endRadius: outerR * 1.55))
                     }
 
                     // 3. Blurred glow rim.

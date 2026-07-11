@@ -51,18 +51,6 @@ struct OverviewView: View {
                 )
             }
         }
-        .navigationTitle("Home")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showAddExpense = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .accessibilityLabel("Add Expense")
-            }
-        }
         .sheet(isPresented: $showAddExpense) {
             AddExpenseView()
         }
@@ -136,13 +124,13 @@ private struct OverviewMonthContent: View {
         // Pre-aggregate outside any Chart DSL (Pitfall A guard)
         let spendByCategory = BudgetCalculator.monthlySpend(for: monthExpenses, categories: categories)
         let totalBudget: Decimal = categories.compactMap(\.monthlyBudget).reduce(.zero, +)
-        let totalSpend = spendByCategory.values.reduce(.zero, +)
-            + BudgetCalculator.uncategorizedSpend(for: monthExpenses)
 
-        // Income this month (expenses with negative amounts = refunds/income, negated to positive display)
-        let totalIncome = monthExpenses
-            .filter { $0.amount < 0 && $0.isTransfer != true }
-            .reduce(Decimal.zero) { $0 + abs($1.amount) }
+        // Hero cash-flow totals: gross positive-only spend and gross credit-only income, both with
+        // internal transfers excluded. Using positive-only spend (not the category net, which sums
+        // in credits) prevents a negative spend total from clamping the orb to 0% (see
+        // BudgetCalculator.grossSpend / .isTransferForCashFlow).
+        let totalSpend = BudgetCalculator.grossSpend(for: monthExpenses)
+        let totalIncome = BudgetCalculator.grossIncome(for: monthExpenses)
 
         // Category spend, sorted descending — feeds the stacked bar + donut + legend.
         let rankedSpend: [(category: Category, spent: Decimal)] = categories
@@ -159,6 +147,11 @@ private struct OverviewMonthContent: View {
                 return (category, spendByCategory[category.persistentModelID] ?? .zero, limit)
             }
             .sorted { fraction($0.spent, $0.limit) > fraction($1.spent, $1.limit) }
+
+        // Numerator for the hero budget strip: spend in budgeted categories only, so the strip's
+        // "% used" reconciles with the per-category Budgets rows (both use net per-category spend
+        // against the budgeted-only total). Gross cash-flow spend still drives the orb/tiles/net.
+        let budgetedSpent: Decimal = budgeted.reduce(Decimal.zero) { $0 + $1.spent }
 
         let recent = Array(monthExpenses.prefix(5))
 
@@ -179,21 +172,28 @@ private struct OverviewMonthContent: View {
         )
         let showNetWorth = !allAssets.isEmpty || netWorthBreakdown.cashValue != 0
 
+        ScrollViewReader { scrollProxy in
         ScrollView(.vertical) {
-            LazyVStack(alignment: .leading, spacing: 16) {
-                // Month label
-                Text(monthLabel)
-                    .font(.subheadline)
-                    .foregroundStyle(DesignTokens.label2)
-                    .padding(.bottom, -8)
-                    .entrance(0)
+            LazyVStack(alignment: .leading, spacing: DesignTokens.spacing22) {
+                // Screen header: eyebrow month + 34pt title (v2 handoff)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(monthLabel).eyebrow()
+                    Text("Overview")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(DesignTokens.label)
+                }
+                .padding(.bottom, -6)
+                .entrance(0)
 
                 // Hero
                 SpendBudgetCard(
                     income: totalIncome,
                     spent: totalSpend,
+                    budgetedSpent: budgetedSpent,
                     totalBudget: totalBudget,
-                    selectedTab: $selectedTab
+                    selectedTab: $selectedTab,
+                    onAddExpense: { showAddExpense = true },
+                    onDetails: { navigateToAnalytics = true }
                 )
                 .entrance(1)
 
@@ -206,6 +206,7 @@ private struct OverviewMonthContent: View {
                 // Net Worth card — suppressed when no assets and cash is 0 (D-04 / ASSET-05)
                 if showNetWorth {
                     sectionHeader("Net Worth", action: ("See holdings", { navigateToAssets = true }))
+                        .id("networth")
                     NetWorthCard(
                         allAssets: allAssets,
                         allAccounts: allAccounts,
@@ -218,8 +219,9 @@ private struct OverviewMonthContent: View {
                 // Where it’s going — donut + legend (OVR-05/06)
                 if !rankedSpend.isEmpty {
                     sectionHeader("Where it’s going")
+                        .id("donut")
                     SpendDonutCard(
-                        ranked: Array(rankedSpend.prefix(4)),
+                        ranked: rankedSpend,
                         // Share denominator = total categorised spend (gross), so per-category
                         // %s are stable regardless of income netting `totalSpend` down.
                         total: rankedSpend.reduce(Decimal.zero) { $0 + $1.spent },
@@ -231,10 +233,12 @@ private struct OverviewMonthContent: View {
                     .entrance(4)
                 }
 
-                // Spend by category chart (D-05 — restyled, retained on Overview)
+                // Spend by category — same vertical pill-well chart as Analytics (user pick)
                 if !categoryItems.isEmpty {
-                    sectionHeader("By Category")
-                    SpendByCategoryChart(categoryItems: categoryItems)
+                    sectionHeader("By category")
+                        .id("bycat")
+                    AnalyticsCategoryBars(items: categoryItems)
+                        .neuSurface(.raised)
                         .entrance(5)
                 }
 
@@ -245,19 +249,14 @@ private struct OverviewMonthContent: View {
                         .entrance(6)
                 }
 
-                // Budgets glance
+                // Budgets glance — pill-well gauges, same chart language as "By category"
+                // (fill = share of that category's budget, red when over)
                 if !budgeted.isEmpty {
                     sectionHeader("Budgets", action: ("See all", { selectedTab = 2 }))
-                    VStack(spacing: 0) {
-                        ForEach(Array(budgeted.prefix(3).enumerated()), id: \.element.category.id) { index, item in
-                            BudgetGlanceRow(category: item.category, spent: item.spent, limit: item.limit)
-                            if index < min(budgeted.count, 3) - 1 {
-                                Divider().padding(.leading, 36)
-                            }
-                        }
-                    }
-                    .neuSurface(.raised)
-                    .entrance(7)
+                        .id("budgets")
+                    BudgetGlancePills(items: Array(budgeted.prefix(5)))
+                        .neuSurface(.raised)
+                        .entrance(7)
                 }
 
                 // Recent
@@ -294,6 +293,24 @@ private struct OverviewMonthContent: View {
         .navigationDestination(isPresented: $navigateToAnalytics) {
             AnalyticsView(expenses: allGlobalExpenses, categories: categories)
         }
+        #if DEBUG
+        // Screenshot-verify hooks: `-openAnalytics` pushes the Analytics screen on launch
+        // (a navigation push, unreachable via -startTab); `-scrollTo <id>` jumps the
+        // Overview scroll to a tagged section ("donut", "budgets").
+        .onAppear {
+            let args = ProcessInfo.processInfo.arguments
+            if args.contains("-openAnalytics") {
+                navigateToAnalytics = true
+            }
+            if let i = args.firstIndex(of: "-scrollTo"), i + 1 < args.count {
+                let target = args[i + 1]
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    scrollProxy.scrollTo(target, anchor: .top)
+                }
+            }
+        }
+        #endif
+        }
     }
 
     // MARK: - Section header
@@ -307,10 +324,9 @@ private struct OverviewMonthContent: View {
             Spacer()
             if let action {
                 Button(action.label, action: action.run)
-                    .font(.subheadline)
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(DesignTokens.accent)
                     .tint(DesignTokens.accent)
-                    .neonGlow(DesignTokens.accent, radius: 5, intensity: 0.7)
             }
         }
         .padding(.bottom, -8)
@@ -354,63 +370,70 @@ private struct ReviewBanner: View {
         .buttonStyle(.plain)
     }
 }
-// MARK: - Budgets glance row
+// MARK: - Budgets glance pills
 
-private struct BudgetGlanceRow: View {
-    let category: Category
-    let spent: Decimal
-    let limit: Decimal
+/// Budgets glance as pill-well gauges — the same chart language as "By category", but the
+/// fill is the category's OWN budget consumption (spent/limit), not a share of the largest
+/// spend. Colour carries state: category colour normally, orange ≥85%, red when over.
+/// Colour is never the sole signal — the amount line carries the numbers (D2-09).
+private struct BudgetGlancePills: View {
+    let items: [(category: Category, spent: Decimal, limit: Decimal)]
 
-    private var fraction: Double {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var reveal: Double = 0
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 0) {
+            ForEach(items, id: \.category.id) { item in
+                pillColumn(item)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.vertical, 6)
+        .onAppear {
+            if reduceMotion { reveal = 1 }
+            else { withAnimation(.easeOut(duration: 0.5)) { reveal = 1 } }
+        }
+    }
+
+    @ViewBuilder
+    private func pillColumn(_ item: (category: Category, spent: Decimal, limit: Decimal)) -> some View {
+        let fraction = fraction(item.spent, item.limit)
+        let isOver = item.spent > item.limit
+        let color: Color = isOver
+            ? DesignTokens.negative
+            : (fraction >= 0.85 ? DesignTokens.orange : CategoryStyle.color(for: item.category))
+
+        VStack(spacing: 10) {
+            VerticalPillGauge(fraction: fraction, color: color, reveal: reveal)
+
+            VStack(spacing: 2) {
+                Text(item.category.name ?? "—")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(DesignTokens.label2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Text("\(item.spent.formattedINRWords()) / \(item.limit.formattedINRWords())")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isOver ? DesignTokens.negative : DesignTokens.label)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityText(item, isOver: isOver))
+    }
+
+    private func fraction(_ spent: Decimal, _ limit: Decimal) -> Double {
         guard limit > 0 else { return 0 }
         return NSDecimalNumber(decimal: spent).doubleValue / NSDecimalNumber(decimal: limit).doubleValue
     }
-    private var isOver: Bool { spent > limit }
-    private var barColor: Color {
-        if isOver { return DesignTokens.negative }
-        if fraction >= 0.85 { return DesignTokens.orange }
-        return CategoryStyle.color(for: category)
-    }
 
-    var body: some View {
-        VStack(spacing: 9) {
-            HStack(spacing: 10) {
-                IconTile(category: category, size: 26)
-                Text(category.name ?? "—")
-                    .font(.subheadline)
-                    .lineLimit(1)
-                Spacer(minLength: 6)
-                HStack(spacing: 4) {
-                    Text(spent.formattedINRWhole())
-                        .foregroundStyle(isOver ? DesignTokens.negative : DesignTokens.label2)
-                    Text("/ \(limit.formattedINRWhole())")
-                        .foregroundStyle(DesignTokens.label3)
-                }
-                .font(.subheadline)
-                .fontWeight(.medium)
-            }
-            ProgressBarLine(fraction: fraction, color: barColor)
-        }
-        .padding(.vertical, 13)
-    }
-}
-
-/// Thin inline progress bar used by the Overview glance (matches the design's `ProgressBar`).
-private struct ProgressBarLine: View {
-    let fraction: Double
-    let color: Color
-    var height: CGFloat = 8
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule().fill(DesignTokens.fillRecessed2)
-                Capsule().fill(color)
-                    .frame(width: max(0, min(CGFloat(fraction), 1)) * geo.size.width)
-            }
-        }
-        .frame(height: height)
-        .accessibilityHidden(true)
+    private func accessibilityText(_ item: (category: Category, spent: Decimal, limit: Decimal), isOver: Bool) -> String {
+        let name = item.category.name ?? "Category"
+        let state = isOver ? "over budget" : "\(Int(fraction(item.spent, item.limit) * 100)) percent used"
+        return "\(name): \(item.spent.formattedINR()) of \(item.limit.formattedINR()), \(state)"
     }
 }
 
@@ -435,9 +458,13 @@ private struct RecentExpenseRow: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
-            Text(expense.amount.formattedINR())
-                .font(.body)
+            // v2 row spec: whole rupees; income shows an explicit green "+"
+            Text(expense.amount < 0
+                 ? "+\(abs(expense.amount).formattedINRWhole())"
+                 : expense.amount.formattedINRWhole())
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(expense.amount < 0 ? DesignTokens.positive : DesignTokens.label)
+                .monospacedDigit()
                 .lineLimit(1)
         }
         .padding(.horizontal, 16)

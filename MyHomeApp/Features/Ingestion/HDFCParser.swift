@@ -18,11 +18,14 @@ import Foundation
 /// - HDFC UPI debit:    "Rs.<amt> is debited … towards VPA <vpa> (<MERCHANT>) on <dd-mm-yy>"
 /// - HDFC debit-card:  "Rs.<amt> is debited from your HDFC Bank Debit Card ending <NNNN> at <MERCHANT> on <dd Mon, yyyy>"
 /// - HDFC refund:      "Rs. <amt> is successfully credited to your account **<NNNN> by VPA <vpa> <MERCHANT> on <dd-mm-yy>"
-/// - HDFC P2P credit:  "Rs.<amt> has been successfully credited … Sender:" → SKIP (not expense)
+/// - HDFC P2P credit:  "Rs.<amt> has been successfully credited to your HDFC Bank account
+///                      ending in <NNNN> … Sender:" → CREDIT (money in), sender as merchant
 public struct HDFCParser: BankEmailParser {
 
     public let parserID = "hdfc-v1"
-    public let parserVersion = "1.0"
+    // 1.1 (07-08): P2P credit recorded with sender as merchant (was skip). Bumping the
+    // version triggers the sync layer's wide rescan so pre-upgrade mails are re-fetched.
+    public let parserVersion = "1.1"
 
     public init() {}
 
@@ -82,6 +85,12 @@ public struct HDFCParser: BankEmailParser {
             return expense
         }
         if let expense = parseRefund(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        if let expense = parseAccountCredit(body: body, fallbackDate: fallbackDate) {
+            return expense
+        }
+        if let expense = parseNewDepositCredit(body: body, fallbackDate: fallbackDate) {
             return expense
         }
         // P2P credit and unrecognised templates → nil (ING-07)
@@ -266,7 +275,126 @@ public struct HDFCParser: BankEmailParser {
         )
     }
 
+    /// HDFC incoming account credit (07-07): "Rs.<amt> has been successfully credited to your
+    /// HDFC Bank account ending in <NNNN>. Transaction Details: a. Date: <dd-mm-yy> …"
+    /// (subject "View: Account update for your HDFC Bank A/c"). Captured as a credit
+    /// (isReversal=true, negative amount) so incoming money — salary, NEFT-in — is recorded.
+    ///
+    /// Also covers the incoming **UPI P2P** variant of this format, which carries a
+    /// "b. Sender: <NAME> (VPA: <vpa>)" line (07-08 real corpus). When present, the sender
+    /// name becomes the merchant. This is distinct from the older P2P skip template
+    /// ("credited to your account **<NNNN> … Sender:"), whose different phrasing never matches
+    /// this fingerprint and stays skipped via the fall-through path.
+    ///
+    /// Distinct from `parseRefund` (UPI refund, "by VPA").
+    private func parseAccountCredit(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT
+        guard body.contains("has been successfully credited to your HDFC Bank account ending in") else {
+            return nil
+        }
+
+        // EXTRACT amount — "Rs.<amount> has been successfully credited"
+        guard let amount = extractAmount(pattern: #"Rs\.?\s*(\d[\d,]*(?:\.\d{1,2})?)\s+has been successfully credited"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT account tail — "account ending in <NNNN>"
+        let accountTail = extractAccountTail(pattern: #"account ending in\s+(\d{4})"#, from: body) ?? ""
+        let sourceLabel = accountTail.isEmpty ? "HDFC Bank A/c" : "HDFC ••\(accountTail)"
+
+        // EXTRACT date — "Date: <dd-mm-yy>"
+        let date = extractDDMMYY(from: body) ?? fallbackDate
+
+        // EXTRACT sender — UPI P2P credits carry "Sender: <NAME> (VPA: …)"; use the
+        // sender name as the merchant so the credit is attributable. NEFT/salary credits
+        // have no Sender line → generic "Account Credit".
+        let merchant = extractCreditSender(from: body) ?? "Account Credit"
+        let normalized = MerchantNormalizer.normalize(merchant)
+
+        return ParsedExpense(
+            amount: -abs(amount),           // credit → negative (money in), like a reversal (ING-09)
+            rawMerchant: merchant,
+            normalizedMerchant: normalized.normalizedName,
+            categoryHint: nil,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: true,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
+    /// Extracts the sender name from an HDFC UPI P2P credit's "Sender: <NAME> (VPA: …)" line.
+    /// Captures the name up to the "(VPA:…)" token, the next lettered detail ("c."), the
+    /// "UPI Reference" label, or end of string. Returns nil when there is no Sender line.
+    private func extractCreditSender(from body: String) -> String? {
+        let pattern = #"Sender:\s*(.+?)\s*(?:\(|\bc\.|UPI Reference|$)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+            return nil
+        }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range),
+              match.numberOfRanges > 1, match.range(at: 1).location != NSNotFound else {
+            return nil
+        }
+        let name = nsBody.substring(with: match.range(at: 1)).trimmingCharacters(in: .whitespaces)
+        return name.isEmpty ? nil : name
+    }
+
+    /// HDFC "New Deposit Alert" incoming credit (07-07, second corpus): "You have received a credit
+    /// in your HDFC Bank account. Details of the transaction: Amount received: INR <amt> Account:
+    /// XX<NNNN> Date: <dd-MON-yyyy> Reference Details: NEFT Cr-…". A distinct format from
+    /// `parseAccountCredit` ("has been successfully credited"). Captured as a credit
+    /// (isReversal=true, negative amount).
+    private func parseNewDepositCredit(body: String, fallbackDate: Date) -> ParsedExpense? {
+        // FINGERPRINT
+        guard body.contains("You have received a credit in your HDFC Bank account"),
+              body.contains("Amount received: INR") else {
+            return nil
+        }
+
+        // EXTRACT amount — "Amount received: INR <amount>"
+        guard let amount = extractAmount(pattern: #"Amount received:\s*INR\s+(\d[\d,]*(?:\.\d{1,2})?)"#, from: body) else {
+            return nil
+        }
+
+        // EXTRACT account tail — "Account: XX<NNNN>"
+        let accountTail = extractAccountTail(pattern: #"Account:\s*XX(\d{4})"#, from: body) ?? ""
+        let sourceLabel = accountTail.isEmpty ? "HDFC Bank A/c" : "HDFC ••\(accountTail)"
+
+        // EXTRACT date — "Date: <dd-MON-yyyy>"
+        let date = extractDDMonYYYYDash(from: body) ?? fallbackDate
+
+        return ParsedExpense(
+            amount: -abs(amount),           // credit → negative (money in), like a reversal (ING-09)
+            rawMerchant: "Deposit",
+            normalizedMerchant: "Deposit",
+            categoryHint: nil,
+            date: date,
+            rawSourceLabel: sourceLabel,
+            isReversal: true,
+            fingerprintScore: 1.0,
+            extractionScore: 1.0
+        )
+    }
+
     // MARK: - Extraction helpers
+
+    /// Parses HDFC dash date with an uppercase abbreviated month: "dd-MON-yyyy" (e.g. "29-JUN-2026").
+    private func extractDDMonYYYYDash(from body: String) -> Date? {
+        let pattern = #"\b(\d{1,2}-[A-Za-z]{3}-\d{4})\b"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        let nsBody = body as NSString
+        let range = NSRange(location: 0, length: nsBody.length)
+        guard let match = regex.firstMatch(in: body, options: [], range: range) else { return nil }
+        let dateStr = nsBody.substring(with: match.range(at: 1))
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Kolkata")
+        formatter.dateFormat = "dd-MMM-yyyy"
+        return formatter.date(from: dateStr)
+    }
 
     /// Decodes quoted-printable and strips HTML tags to get visible text.
     ///

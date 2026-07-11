@@ -147,15 +147,18 @@ struct HDFCParserTests {
         #expect(!result.rawSourceLabel.isEmpty)
     }
 
-    // MARK: - ING-06: UPI credit (P2P) — must return nil (skip, not an expense)
+    // MARK: - ING-06: UPI P2P credit — recorded as money-in (07-08)
 
-    @Test("parse: HDFC UPI credit (P2P) → nil — must skip, not an expense — ING-06")
-    func parsesUPICreditSkip() throws {
+    @Test("parse: HDFC UPI P2P credit → credit with sender as merchant — 07-08 (was skip under ING-06)")
+    func parsesUPICreditRecorded() throws {
         let raw = try loadFixture("hdfc_upi_credit_1.eml")
         let sut = HDFCParser()
-        // P2P incoming is NOT an expense — parser should return nil
-        let result = sut.parse(rawEmail: raw)
-        #expect(result == nil)
+        // Incoming UPI P2P credit is money-in — recorded as a credit (negative, isReversal).
+        let result = try #require(sut.parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "-2000.00"))
+        #expect(result.isReversal)
+        #expect(result.rawSourceLabel == "HDFC ••4477")
+        #expect(result.rawMerchant == "ANANYA SHARMA M K")
     }
 
     // MARK: - Scores
@@ -177,6 +180,48 @@ struct HDFCParserTests {
         let sut = HDFCParser()
         let result = try #require(sut.parse(rawEmail: raw))
         #expect(!result.normalizedMerchant.isEmpty)
+    }
+
+    // MARK: - 07-07: incoming account credit (inline raw fixture)
+
+    @Test("parse: HDFC account credit → negative amount, isReversal true — 07-07")
+    func parsesAccountCredit() throws {
+        let raw = "From: alerts@hdfcbank.bank.in\r\nDate: Wed, 01 Jul 2026 14:57:07 +0530\r\nSubject: View: Account update for your HDFC Bank A/c\r\n\r\n<html><body>Dear Customer, Greetings from HDFC Bank! We're writing to inform you that Rs.13774.00 has been successfully credited to your HDFC Bank account ending in 1329. Transaction Details: a. Date: 01-07-26</body></html>"
+        let result = try #require(HDFCParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "-13774.00"))
+        #expect(result.isReversal)
+        #expect(result.rawSourceLabel == "HDFC ••1329")
+    }
+
+    @Test("parse: HDFC New Deposit Alert credit → negative amount, isReversal true — 07-07 (2nd corpus)")
+    func parsesNewDepositCredit() throws {
+        let raw = "From: alerts@hdfcbank.bank.in\r\nDate: Mon, 29 Jun 2026 03:32:00 +0530\r\nSubject: New Deposit Alert: Check your A/c balance now!\r\n\r\n<html><body>Dear Customer, You have received a credit in your HDFC Bank account. Details of the transaction: Amount received: INR 78,367.00 Account: XX1011 Date: 29-JUN-2026 Reference Details: NEFT Cr-ICIC0099999-RSM US INTEGRATED SERVICES INDIA PVT LTD-Bhuvanya Sridhar-INXXXXXXXXXX9838 Available Balance: INR 79,582.88</body></html>"
+        let result = try #require(HDFCParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "-78367.00"))
+        #expect(result.isReversal)
+        #expect(result.rawSourceLabel == "HDFC ••1011")
+    }
+
+    @Test("parse: HDFC balance-drop notification is NOT parsed as a transaction — 07-07 guard")
+    func balanceAlertNotParsed() {
+        let raw = "From: alerts@hdfcbank.bank.in\r\nDate: Sun, 28 Jun 2026 01:52:25 +0530\r\nSubject: View: Account update for your HDFC Bank A/c\r\n\r\n<html><body>The balance in your account ending XX1011 has dropped below Rs. INR 5000.00, which is the threshold set by you. Balance as of yesterday: Rs. INR 2780.88</body></html>"
+        #expect(HDFCParser().parse(rawEmail: raw) == nil)
+    }
+
+    @Test("parse: HDFC old P2P credit (to your account **NNNN … Sender:) still returns nil — 07-07 guard")
+    func p2pCreditStillSkipped() throws {
+        let raw = "From: alerts@hdfcbank.bank.in\r\nDate: Wed, 01 Jul 2026 14:57:07 +0530\r\nSubject: You have received money\r\n\r\n<html><body>Rs.500.00 has been successfully credited to your account **1329 by VPA someone@okhdfcbank on 01-07-26. Sender: JOHN DOE</body></html>"
+        #expect(HDFCParser().parse(rawEmail: raw) == nil)
+    }
+
+    @Test("parse: HDFC UPI P2P credit (account ending in … Sender:) → credit with sender as merchant — 07-08")
+    func parsesUPIP2PCredit() throws {
+        let raw = "From: alerts@hdfcbank.bank.in\r\nDate: Wed, 08 Jul 2026 10:15:00 +0530\r\nSubject: You have received money in your HDFC Bank account\r\n\r\n<html><body>Dear Customer, Greetings from HDFC Bank! We're writing to inform you that Rs.400.00 has been successfully credited to your HDFC Bank account ending in 1011. Transaction Details: a. Date: 08-07-26 b. Sender: V VARUN VIDHYUTH (VPA: varunvidhyuth@okicici) c. UPI Reference No.: 655528779152</body></html>"
+        let result = try #require(HDFCParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "-400.00"))
+        #expect(result.isReversal)
+        #expect(result.rawSourceLabel == "HDFC ••1011")
+        #expect(result.rawMerchant == "V VARUN VIDHYUTH")
     }
 
     // MARK: - Fixture loader helper

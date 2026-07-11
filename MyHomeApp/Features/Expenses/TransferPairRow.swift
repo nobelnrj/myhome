@@ -62,26 +62,36 @@ struct TransferPairRow: View {
             Text(debit.date.formattedForExpenseList())
                 .font(.caption)
                 .foregroundStyle(DesignTokens.label3)
+
+            // Inline Confirm/Reject — the row lives in a ScrollView card (neumorphic v2),
+            // where swipeActions don't fire; these are the only pair-triage affordance (D-13).
+            HStack(spacing: 10) {
+                Button {
+                    rejectPair()
+                } label: {
+                    Label("Reject", systemImage: "xmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(DesignTokens.label2)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(DesignTokens.fillRecessed3, in: Capsule())
+                }
+                Button {
+                    confirmPair()
+                } label: {
+                    Label("Confirm", systemImage: "checkmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(DesignTokens.positive)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(DesignTokens.positive.opacity(0.14), in: Capsule())
+                }
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 4)
         }
         .padding(.vertical, 2)
-        .accessibilityElement(children: .combine)
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-
-            // Destructive: Reject — marks both legs as non-transfer and unlinks the pair (D-13)
-            Button(role: .destructive) {
-                rejectPair()
-            } label: {
-                Label("Reject", systemImage: "xmark")
-            }
-
-            // Non-destructive: Confirm — marks both legs as confirmed transfers (D-13)
-            Button {
-                confirmPair()
-            } label: {
-                Label("Confirm", systemImage: "checkmark")
-            }
-            .tint(DesignTokens.positive)
-        }
+        .accessibilityElement(children: .contain)
     }
 
     // MARK: - Helpers

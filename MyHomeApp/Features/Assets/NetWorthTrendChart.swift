@@ -42,8 +42,10 @@ struct NetWorthTrendChart: View {
                 y: .value("Net Worth", point.value)
             )
             .interpolationMethod(.catmullRom)
+            // Lighter fade than the spend charts — net worth hovers far above zero, so a
+            // strong fill reads as a solid slab rather than an area accent.
             .foregroundStyle(LinearGradient(
-                colors: [DesignTokens.positive.opacity(0.35), DesignTokens.positive.opacity(0.02)],
+                colors: [DesignTokens.positive.opacity(0.22), DesignTokens.positive.opacity(0.02)],
                 startPoint: .top, endPoint: .bottom))
 
             LineMark(
@@ -63,12 +65,16 @@ struct NetWorthTrendChart: View {
             .foregroundStyle(DesignTokens.positive)                 // crisp neon line
         }
         .chartYAxis {
+            // v2 axis treatment (matches SpendOverTimeChart): whisper-faint grid,
+            // 11pt tertiary labels — the data glows, the chrome recedes.
             AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
                 AxisGridLine()
+                    .foregroundStyle(Color.white.opacity(0.045))
                 AxisValueLabel {
                     if let d = value.as(Double.self) {
                         Text(Decimal(d).formattedINRCompact())
-                            .font(.caption)
+                            .font(.system(size: 11))
+                            .foregroundStyle(DesignTokens.label3)
                     }
                 }
             }
@@ -76,8 +82,10 @@ struct NetWorthTrendChart: View {
         .chartXAxis {
             AxisMarks(values: .automatic) { value in
                 AxisGridLine()
+                    .foregroundStyle(Color.white.opacity(0.045))
                 AxisValueLabel(format: .dateTime.month(.abbreviated))
-                    .font(.caption)
+                    .font(.system(size: 11))
+                    .foregroundStyle(DesignTokens.label3)
             }
         }
         .frame(height: 140)

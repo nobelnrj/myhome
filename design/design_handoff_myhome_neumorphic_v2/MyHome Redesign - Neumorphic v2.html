@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="design_doc_mode" content="canvas" />
+<title>MyHome — Neumorphic Redesign v2</title>
+<style>
+  :root {
+    --canvas: #1C1C23;
+    --raised: #1F1F27;
+    --raised-strong: #22222C;
+    --elevated: #262630;
+    --recess: #15151B;
+    --recess-alt: #16161C;
+    --hairline: rgba(255,255,255,0.05);
+    --label1: #ECEDF4;
+    --label2: rgba(220,223,238,0.56);
+    --label3: rgba(220,223,238,0.32);
+    --accent: #FFD60A;
+    --accent-soft: rgba(255,214,10,0.16);
+    --pos: #34E29B;
+    --neg: #FF6B6B;
+    --violet: #A78BFA;
+    --card-shadow: -6px -6px 14px rgba(255,255,255,0.035), 7px 7px 18px rgba(0,0,0,0.55);
+    --float-shadow: -9px -9px 22px rgba(255,255,255,0.04), 11px 11px 28px rgba(0,0,0,0.62);
+    --rim: inset 1px 1px 1px rgba(255,255,255,0.045), inset -1px -1px 1px rgba(0,0,0,0.30);
+    --well: inset 2px 2px 5px rgba(0,0,0,0.5), inset -2px -2px 5px rgba(255,255,255,0.035);
+    --c-rent: #818CF8; --c-health: #A78BFA; --c-dining: #FB923C;
+    --c-groceries: #2DD4BF; --c-fuel: #F472B6; --c-utilities: #7DD3FC;
+    --c-atm: #2DD4BF; --c-other: #94A3B8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif; color: var(--label1); }
+  a { color: var(--accent); } a:hover { color: #FFE45C; }
+
+  .frame {
+    position: absolute;
+    isolation: isolate;
+    z-index: 0;
+    width: 402px;
+    background: var(--canvas);
+    border-radius: 40px;
+    padding: 24px 16px 28px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    font-variant-numeric: tabular-nums;
+  }
+  .frame-label {
+    position: absolute; top: -34px; left: 4px;
+    font: 600 13px/1 -apple-system, system-ui, sans-serif;
+    color: rgba(236,237,244,0.75); letter-spacing: 0.4px; white-space: nowrap;
+  }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  /* ---- shared primitives ---- */
+  .card { background: var(--raised); border-radius: 26px; box-shadow: var(--card-shadow), var(--rim); }
+  .card-strong { background: var(--raised-strong); border-radius: 26px; box-shadow: var(--float-shadow), var(--rim); }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--label2); }
+  .section-h { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin: 26px 4px 12px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600; }
+  .icon-tile { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .track { background: var(--recess); border-radius: 999px; box-shadow: var(--well); overflow: hidden; }
+  .chart-well { border-radius: 999px; background: var(--recess); box-shadow: var(--well); display: flex; align-items: center; justify-content: center; position: relative; }
+  .chart-puck { position: absolute; inset: 0; margin: auto; border-radius: 999px; background: var(--raised); box-shadow: var(--card-shadow), var(--rim); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .plot-inset { background: var(--recess-alt); border-radius: 18px; box-shadow: var(--well); padding: 14px 10px 4px; }
+  .btn { border: 0; border-radius: 999px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; padding: 14px 0; flex: 1; }
+  .btn-primary { background: linear-gradient(150deg, #FFE04A, #F2C500); color: #231B00; box-shadow: var(--float-shadow), inset 1.5px 1.5px 1.5px rgba(255,255,255,0.45), 0 8px 22px rgba(255,214,10,0.22); }
+  .btn-raised { background: var(--raised-strong); color: var(--accent); box-shadow: var(--float-shadow), var(--rim); }
+  .cta-row { display: flex; gap: 14px; margin-top: 18px; }
+  .vpill { width: 42px; height: 150px; border-radius: 999px; background: var(--recess); box-shadow: var(--well); position: relative; }
+  .vfill { position: absolute; left: 9px; right: 9px; bottom: 9px; border-radius: 999px; }
+  .vcol { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .vcol .vn { font-size: 12px; color: var(--label2); font-weight: 500; }
+  .vcol .va { font-size: 13.5px; font-weight: 600; letter-spacing: -0.2px; margin-top: -7px; }
+
+  /* ---- 1. hero ---- */
+  .hero { padding: 22px 20px 20px; }
+  .hero-top { display: flex; align-items: center; justify-content: space-between; }
+  .net-amount { font-size: 52px; font-weight: 600; letter-spacing: -1.5px; margin: 14px 0 4px; }
+  .net-sub { font-size: 13px; color: var(--label3); margin-bottom: 18px; }
+  .stat-2up { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .stat-tile { background: var(--recess); border-radius: 18px; box-shadow: var(--well); padding: 14px 16px; }
+  .stat-tile .lbl { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--label2); margin-bottom: 8px; }
+  .stat-tile .amt { font-size: 24px; font-weight: 600; letter-spacing: -0.6px; }
+  .dot { width: 7px; height: 7px; border-radius: 999px; flex: 0 0 auto; }
+  .budget-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--label2); margin-top: 9px; }
+
+  /* ---- 2. donut ---- */
+  .donut-wrap { display: flex; justify-content: center; padding: 6px 0 2px; position: relative; }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; pointer-events: none; }
+  .legend { display: flex; flex-direction: column; margin-top: 10px; }
+  .legend-row { display: flex; align-items: center; gap: 10px; padding: 11px 4px; border-top: 1px solid var(--hairline); font-size: 15px; }
+  .legend-row:first-child { border-top: 0; }
+  .legend-row .name { flex: 1; font-weight: 500; }
+  .legend-row .pct { color: var(--label3); font-size: 13px; margin-right: 10px; }
+  .legend-row .amt { font-weight: 600; letter-spacing: -0.2px; }
+
+  /* ---- 4. activity ---- */
+  .day-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 6px; margin: 20px 0 9px; }
+  .day-head .d { font-size: 13px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--label2); }
+  .day-head .t { font-size: 13px; font-weight: 600; color: var(--label3); }
+  .tx-card { padding: 4px 14px; }
+  .tx-row { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-top: 1px solid var(--hairline); }
+  .tx-row:first-child { border-top: 0; }
+  .tx-row .icon-tile { width: 36px; height: 36px; border-radius: 10px; }
+  .tx-main { flex: 1; min-width: 0; }
+  .tx-main .m { font-size: 15px; font-weight: 500; letter-spacing: -0.1px; }
+  .tx-main .s { font-size: 12.5px; color: var(--label3); margin-top: 2px; }
+  .tx-amt { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; white-space: nowrap; }
+
+  /* ---- 5. analytics ---- */
+  .seg { display: flex; background: var(--recess); border-radius: 999px; box-shadow: var(--well); padding: 4px; }
+  .seg button { flex: 1; border: 0; background: transparent; color: var(--label2); font-size: 13px; font-weight: 600; padding: 8px 0; border-radius: 999px; }
+  .seg .on { background: var(--elevated); color: var(--accent); box-shadow: var(--card-shadow); }
+  .delta-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,107,107,0.14); color: var(--neg); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; }
+  .bar-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+  .bar-row .icon-tile { width: 32px; height: 32px; border-radius: 9px; }
+  .bar-mid { flex: 1; min-width: 0; }
+  .bar-top { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 6px; }
+  .bar-top .n { font-weight: 500; } .bar-top .a { font-weight: 600; color: var(--label2); }
+  .bar-track { height: 12px; }
+  .bar-fill { height: 100%; border-radius: 999px; box-shadow: inset 0 1.5px 1px rgba(255,255,255,0.28), inset 0 -1.5px 2px rgba(0,0,0,0.28); }
+
+  .ai-card {
+    position: relative; background: var(--raised); border-radius: 26px; overflow: hidden;
+    box-shadow: var(--card-shadow), var(--rim), -2px 0 18px rgba(167,139,250,0.28);
+    padding: 18px 18px 18px 22px;
+  }
+  .ai-card::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--violet); box-shadow: 0 0 14px 2px rgba(167,139,250,0.55); }
+  .ai-orb { width: 12px; height: 12px; border-radius: 999px; background: radial-gradient(circle at 35% 35%, #D6C7FF, #7C5CE8); box-shadow: 0 0 12px 3px rgba(167,139,250,0.6); animation: breathe 2.6s ease-in-out infinite; flex: 0 0 auto; }
+  @keyframes breathe { 0%,100% { transform: scale(1); opacity: 0.85; } 50% { transform: scale(1.25); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .ai-orb { animation: none; } }
+
+  /* ---- 3. budgets ---- */
+  .bring-card { display: flex; align-items: center; gap: 20px; padding: 22px 22px; }
+  .brow { display: flex; align-items: center; gap: 12px; padding: 16px; margin-top: 12px; }
+  .brow .info { flex: 1; min-width: 0; }
+  .brow .nm { font-size: 16px; font-weight: 600; letter-spacing: -0.2px; }
+  .brow .left { font-size: 13px; color: var(--label2); margin-top: 2px; }
+  .brow .amts { text-align: right; }
+  .brow .spent { font-size: 15px; font-weight: 600; }
+  .brow .of { font-size: 12px; color: var(--label3); margin-top: 2px; }
+  .brow-bar { height: 8px; margin: 10px 16px 16px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute;" aria-hidden="true">
+  <defs>
+    <filter id="arcLift" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.4"></feDropShadow>
+      <feDropShadow dx="-1.5" dy="-1.5" stdDeviation="2" flood-color="#ffffff" flood-opacity="0.06"></feDropShadow>
+    </filter>
+    <filter id="lineGlow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#FFB43C" flood-opacity="0.35"></feDropShadow>
+    </filter>
+  </defs>
+</svg>
+
+<!-- ═══════════ 1 · OVERVIEW HERO ═══════════ -->
+<div class="frame" style="left: 60px; top: 80px;">
+  <div class="frame-label">1 · Overview hero — no orb, semibold money, one percentage</div>
+  <div style="font-size:12px;font-weight:600;letter-spacing:1.2px;color:var(--label3);text-transform:uppercase;margin:2px 4px 6px;">July 2026</div>
+  <div style="font-size:34px;font-weight:700;letter-spacing:0.37px;margin:0 4px 16px;">Overview</div>
+
+  <div class="card-strong hero">
+    <div class="hero-top">
+      <span class="eyebrow">Net Cash Flow</span>
+      <span class="pill" style="background:rgba(255,107,107,0.14);color:var(--neg);">Negative</span>
+    </div>
+    <div class="net-amount tnum" style="color:var(--neg);">−₹600</div>
+    <div class="net-sub">Income minus spending this month</div>
+
+    <div class="stat-2up">
+      <div class="stat-tile">
+        <div class="lbl"><span class="dot" style="background:var(--pos);"></span>Income</div>
+        <div class="amt tnum" style="color:var(--pos);">₹14,000</div>
+      </div>
+      <div class="stat-tile">
+        <div class="lbl"><span class="dot" style="background:var(--neg);"></span>Spent</div>
+        <div class="amt tnum" style="color:var(--neg);">₹14,600</div>
+      </div>
+    </div>
+
+    <div class="track" style="height:12px;">
+      <div class="bar-fill" style="width:33%;background:linear-gradient(90deg,#FFD60A,#34E29B);"></div>
+    </div>
+    <div class="budget-meta">
+      <span class="tnum">33% of ₹44,000 budget used</span>
+      <span class="tnum" style="color:var(--label3);">₹29,400 left</span>
+    </div>
+    <div class="cta-row">
+      <button class="btn btn-primary">＋ Add expense</button>
+      <button class="btn btn-raised">Details</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 2 · WHERE IT'S GOING ═══════════ -->
+<div class="frame" style="left: 540px; top: 80px;">
+  <div class="frame-label">2 · Where it's going — single matte donut + Other bucket</div>
+  <div class="section-h" style="margin-top:2px;">Where it's going</div>
+
+  <div class="card" style="padding:20px 18px 10px;">
+    <div class="donut-wrap" style="padding:10px 0 6px;">
+      <div class="chart-well" style="width:236px;height:236px;">
+        <svg width="236" height="236" viewBox="0 0 236 236">
+          <g transform="rotate(-90 118 118)" stroke-linecap="round" fill="none">
+            <!-- rent 50% -->
+            <circle cx="118" cy="118" r="88" stroke="var(--c-rent)" stroke-width="22" stroke-dasharray="250.4 302.5" stroke-dashoffset="-13" style="filter:drop-shadow(0 3px 9px rgba(129,140,248,0.45));"></circle>
+            <!-- health 27% -->
+            <circle cx="118" cy="118" r="88" stroke="var(--c-health)" stroke-width="22" stroke-dasharray="123.3 429.6" stroke-dashoffset="-289.4" style="filter:drop-shadow(0 3px 9px rgba(167,139,250,0.45));"></circle>
+            <!-- dining 12% -->
+            <circle cx="118" cy="118" r="88" stroke="var(--c-dining)" stroke-width="22" stroke-dasharray="40.3 512.6" stroke-dashoffset="-438.7" style="filter:drop-shadow(0 3px 9px rgba(251,146,60,0.45));"></circle>
+            <!-- other 11% -->
+            <circle cx="118" cy="118" r="88" stroke="var(--c-other)" stroke-width="22" stroke-dasharray="34.8 518.1" stroke-dashoffset="-505.1" style="filter:drop-shadow(0 3px 9px rgba(148,163,184,0.35));"></circle>
+          </g>
+        </svg>
+        <div class="chart-puck" style="width:132px;height:132px;">
+          <span class="eyebrow" style="font-size:11px;">Spent</span>
+          <span class="tnum" style="font-size:28px;font-weight:600;letter-spacing:-0.8px;">₹14,600</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-row">
+        <span class="dot" style="background:var(--c-rent);"></span><span class="name">Rent</span>
+        <span class="pct tnum">50%</span><span class="amt tnum">₹7,300</span>
+      </div>
+      <div class="legend-row">
+        <span class="dot" style="background:var(--c-health);"></span><span class="name">Health/Pharmacy</span>
+        <span class="pct tnum">27%</span><span class="amt tnum">₹3,900</span>
+      </div>
+      <div class="legend-row">
+        <span class="dot" style="background:var(--c-dining);"></span><span class="name">Dining</span>
+        <span class="pct tnum">12%</span><span class="amt tnum">₹1,800</span>
+      </div>
+      <div class="legend-row">
+        <span class="dot" style="background:var(--c-other);"></span><span class="name" style="color:var(--label2);">Other <span style="color:var(--label3);font-size:12.5px;font-weight:400;">· Groceries, ATM, Fuel</span></span>
+        <span class="pct tnum">11%</span><span class="amt tnum" style="color:var(--label2);">₹1,600</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 3 · BUDGETS SUMMARY ═══════════ -->
+<div class="frame" style="left: 1020px; top: 80px;">
+  <div class="frame-label">3 · Budgets — matte summary ring + category rows</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:2px 4px 18px;">
+    <span style="font-size:34px;font-weight:700;letter-spacing:0.37px;">Budgets</span>
+    <button class="btn btn-raised" style="flex:0 0 auto;padding:12px 22px;font-size:14px;">Manage</button>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:16px;color:var(--label2);font-size:16px;font-weight:600;">
+    <span style="color:var(--accent);">‹</span> July 2026 <span style="color:var(--accent);">›</span>
+  </div>
+
+  <div class="card-strong bring-card">
+    <div class="chart-well" style="width:136px;height:136px;flex:0 0 auto;">
+      <svg width="136" height="136" viewBox="0 0 136 136">
+        <defs>
+          <linearGradient id="bgrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFD60A"></stop><stop offset="100%" stop-color="#34E29B"></stop>
+          </linearGradient>
+        </defs>
+        <g transform="rotate(-90 68 68)">
+          <circle cx="68" cy="68" r="54" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="13"></circle>
+          <circle cx="68" cy="68" r="54" fill="none" stroke="url(#bgrad)" stroke-width="13" stroke-linecap="round" stroke-dasharray="112 339.3" style="filter:drop-shadow(0 4px 12px rgba(255,214,10,0.35));"></circle>
+        </g>
+      </svg>
+      <div class="chart-puck" style="width:80px;height:80px;">
+        <span class="tnum" style="font-size:24px;font-weight:600;letter-spacing:-0.6px;">33%</span>
+        <span style="font-size:11px;color:var(--label3);">used</span>
+      </div>
+    </div>
+    <div>
+      <div class="eyebrow" style="font-size:11px;">Left to spend</div>
+      <div class="tnum" style="font-size:32px;font-weight:600;letter-spacing:-0.8px;margin:4px 0 3px;">₹29,400</div>
+      <div class="tnum" style="font-size:13px;color:var(--label3);">₹14.6K of ₹44K</div>
+    </div>
+  </div>
+
+  <div class="card brow">
+    <div class="icon-tile" style="background:var(--c-dining);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1404" stroke-width="2.2" stroke-linecap="round"><path d="M7 3v8M4 3v4a3 3 0 0 0 6 0V3M17 3c-1.5 0-3 2-3 5v3h3v10M7 14v7"></path></svg></div>
+    <div class="info"><div class="nm">Dining</div><div class="left tnum">₹2,900 left</div></div>
+    <div class="amts"><div class="spent tnum">₹5,100</div><div class="of tnum">of ₹8,000</div></div>
+  </div>
+  <div class="card" style="margin-top:-26px;border-radius:0 0 26px 26px;box-shadow:var(--card-shadow);position:relative;z-index:-1;padding-top:26px;">
+    <div class="brow-bar track" style="height:10px;"><div class="bar-fill" style="width:64%;background:var(--c-dining);"></div></div>
+  </div>
+
+  <div class="card brow">
+    <div class="icon-tile" style="background:var(--c-rent);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101226" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M6 9.5V21h12V9.5"></path></svg></div>
+    <div class="info"><div class="nm">Rent</div><div class="left tnum">₹6,700 left</div></div>
+    <div class="amts"><div class="spent tnum">₹7,300</div><div class="of tnum">of ₹14,000</div></div>
+  </div>
+  <div class="card" style="margin-top:-26px;border-radius:0 0 26px 26px;box-shadow:var(--card-shadow);position:relative;z-index:-1;padding-top:26px;">
+    <div class="brow-bar track" style="height:10px;"><div class="bar-fill" style="width:52%;background:var(--c-rent);"></div></div>
+  </div>
+
+  <div class="card brow">
+    <div class="icon-tile" style="background:var(--c-health);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#141026" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v8M8 12h8"></path><rect x="3" y="6" width="18" height="14" rx="4"></rect></svg></div>
+    <div class="info"><div class="nm">Health/Pharmacy</div><div class="left tnum" style="color:var(--neg);">₹900 over</div></div>
+    <div class="amts"><div class="spent tnum">₹3,900</div><div class="of tnum">of ₹3,000</div></div>
+  </div>
+  <div class="card" style="margin-top:-26px;border-radius:0 0 26px 26px;box-shadow:var(--card-shadow);position:relative;z-index:-1;padding-top:26px;">
+    <div class="brow-bar track" style="height:10px;"><div class="bar-fill" style="width:100%;background:var(--neg);"></div></div>
+  </div>
+
+  <div class="card brow">
+    <div class="icon-tile" style="background:var(--c-groceries);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#062A24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.5 12h11L21 8H6"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="17" cy="20" r="1.4"></circle></svg></div>
+    <div class="info"><div class="nm">Groceries</div><div class="left" style="color:var(--label3);">No budget set</div></div>
+    <div class="amts"><div class="spent tnum" style="color:var(--label2);">₹900</div><div class="of">this month</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ 4 · ACTIVITY ═══════════ -->
+<div class="frame" style="left: 1500px; top: 80px;">
+  <div class="frame-label">4 · Activity — grouped day cards, dense rows</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:2px 4px 4px;">
+    <span style="font-size:34px;font-weight:700;letter-spacing:0.37px;">Activity</span>
+    <span class="icon-tile" style="width:44px;height:44px;background:var(--raised-strong);box-shadow:var(--float-shadow),var(--rim),0 6px 16px rgba(255,214,10,0.18);border-radius:999px;color:var(--accent);font-size:24px;font-weight:400;">+</span>
+  </div>
+
+  <div class="day-head"><span class="d">Today · Wed, 9 Jul</span><span class="t tnum">−₹1,240</span></div>
+  <div class="card tx-card">
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-dining);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1A1404" stroke-width="2.2" stroke-linecap="round"><path d="M7 3v8M4 3v4a3 3 0 0 0 6 0V3M17 3c-1.5 0-3 2-3 5v3h3v10M7 14v7"></path></svg></div>
+      <div class="tx-main"><div class="m">Swiggy</div><div class="s">Dining · 1:12 PM</div></div>
+      <div class="tx-amt tnum">₹340</div>
+    </div>
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-groceries);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#062A24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.5 12h11L21 8H6"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="17" cy="20" r="1.4"></circle></svg></div>
+      <div class="tx-main"><div class="m">Zepto</div><div class="s">Groceries · 11:05 AM</div></div>
+      <div class="tx-amt tnum">₹620</div>
+    </div>
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-fuel);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2A0A18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M4 21h12M15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg></div>
+      <div class="tx-main"><div class="m">HP Petrol Pump</div><div class="s">Fuel · 8:40 AM</div></div>
+      <div class="tx-amt tnum">₹280</div>
+    </div>
+  </div>
+
+  <div class="day-head"><span class="d">Yesterday · Tue, 8 Jul</span><span class="t tnum">−₹14,200</span></div>
+  <div class="card tx-card">
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-rent);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#101226" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M6 9.5V21h12V9.5"></path></svg></div>
+      <div class="tx-main"><div class="m">Rent — July</div><div class="s">Rent · 9:00 AM</div></div>
+      <div class="tx-amt tnum">₹7,300</div>
+    </div>
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-health);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#141026" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v8M8 12h8"></path><rect x="3" y="6" width="18" height="14" rx="4"></rect></svg></div>
+      <div class="tx-main"><div class="m">Apollo Pharmacy</div><div class="s">Health/Pharmacy · 6:24 PM</div></div>
+      <div class="tx-amt tnum">₹3,900</div>
+    </div>
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-dining);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1A1404" stroke-width="2.2" stroke-linecap="round"><path d="M7 3v8M4 3v4a3 3 0 0 0 6 0V3M17 3c-1.5 0-3 2-3 5v3h3v10M7 14v7"></path></svg></div>
+      <div class="tx-main"><div class="m">Third Wave Coffee</div><div class="s">Dining · 4:10 PM</div></div>
+      <div class="tx-amt tnum">₹460</div>
+    </div>
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-dining);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1A1404" stroke-width="2.2" stroke-linecap="round"><path d="M7 3v8M4 3v4a3 3 0 0 0 6 0V3M17 3c-1.5 0-3 2-3 5v3h3v10M7 14v7"></path></svg></div>
+      <div class="tx-main"><div class="m">Zomato</div><div class="s">Dining · 1:02 PM</div></div>
+      <div class="tx-amt tnum">₹540</div>
+    </div>
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-groceries);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#062A24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.5 12h11L21 8H6"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="17" cy="20" r="1.4"></circle></svg></div>
+      <div class="tx-main"><div class="m">Blinkit</div><div class="s">Groceries · 10:15 AM</div></div>
+      <div class="tx-amt tnum">₹280</div>
+    </div>
+  </div>
+
+  <div class="day-head"><span class="d">Mon, 6 Jul</span><span class="t tnum" style="color:var(--label3);">+₹14,000</span></div>
+  <div class="card tx-card">
+    <div class="tx-row">
+      <div class="icon-tile" style="background:rgba(52,226,155,0.16);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#34E29B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></div>
+      <div class="tx-main"><div class="m">Salary — July</div><div class="s">Income · 9:30 AM</div></div>
+      <div class="tx-amt tnum" style="color:var(--pos);">+₹14,000</div>
+    </div>
+  </div>
+
+  <div class="day-head"><span class="d">Sat, 4 Jul</span><span class="t tnum">−₹1,180</span></div>
+  <div class="card tx-card">
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-atm);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#062A24" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="6" width="18" height="12" rx="2.5"></rect><circle cx="12" cy="12" r="2.6"></circle></svg></div>
+      <div class="tx-main"><div class="m">ATM Withdrawal</div><div class="s">ATM · 7:48 PM</div></div>
+      <div class="tx-amt tnum">₹400</div>
+    </div>
+    <div class="tx-row">
+      <div class="icon-tile" style="background:var(--c-utilities);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0A2436" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"></path></svg></div>
+      <div class="tx-main"><div class="m">BESCOM Electricity</div><div class="s">Utilities · 11:20 AM</div></div>
+      <div class="tx-amt tnum">₹780</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 5 · ANALYTICS ═══════════ -->
+<div class="frame" style="left: 1980px; top: 80px;">
+  <div class="frame-label">5 · Analytics — matte charts, one intentional glow (AI card)</div>
+  <div style="display:flex;align-items:center;gap:12px;margin:2px 4px 18px;">
+    <span class="icon-tile" style="background:var(--raised);box-shadow:var(--card-shadow),var(--rim);border-radius:999px;color:var(--accent);font-size:18px;">‹</span>
+    <div>
+      <div style="font-size:12px;color:var(--label3);">Spending overview</div>
+      <div style="font-size:22px;font-weight:700;letter-spacing:-0.4px;">Analytics</div>
+    </div>
+  </div>
+
+  <div class="seg">
+    <button>Week</button><button class="on">Month</button><button>Year</button>
+  </div>
+
+  <div style="margin:22px 4px 16px;">
+    <div class="eyebrow" style="font-size:11px;">Total spend</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+      <span class="tnum" style="font-size:40px;font-weight:600;letter-spacing:-1.1px;">₹14,600</span>
+      <span class="delta-chip tnum">▲ 8%</span>
+    </div>
+    <div style="font-size:12.5px;color:var(--label3);margin-top:4px;">vs last month</div>
+  </div>
+
+  <div class="card-strong" style="padding:16px 14px 12px;">
+    <div class="plot-inset">
+    <svg width="100%" viewBox="0 0 340 130" style="display:block;">
+      <defs>
+        <linearGradient id="tline" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#FFD60A"></stop><stop offset="100%" stop-color="#FF6B6B"></stop>
+        </linearGradient>
+        <linearGradient id="tfill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(255,214,10,0.14)"></stop><stop offset="100%" stop-color="rgba(255,214,10,0)"></stop>
+        </linearGradient>
+      </defs>
+      <g stroke="rgba(255,255,255,0.045)" stroke-width="1">
+        <line x1="6" y1="30" x2="334" y2="30"></line>
+        <line x1="6" y1="62" x2="334" y2="62"></line>
+        <line x1="6" y1="94" x2="334" y2="94"></line>
+        <line x1="6" y1="126" x2="334" y2="126"></line>
+      </g>
+      <path d="M6 108 C 30 104, 44 96, 62 92 S 96 96, 112 84 S 142 40, 162 44 S 196 78, 216 72 S 246 30, 268 26 S 316 44, 334 38 L 334 126 L 6 126 Z" fill="url(#tfill)" stroke="none"></path>
+      <path d="M6 108 C 30 104, 44 96, 62 92 S 96 96, 112 84 S 142 40, 162 44 S 196 78, 216 72 S 246 30, 268 26 S 316 44, 334 38" fill="none" stroke="url(#tline)" stroke-width="3.5" stroke-linecap="round" filter="url(#lineGlow)"></path>
+      <g style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.45));">
+        <rect x="196" y="0" width="60" height="22" rx="11" fill="var(--elevated)"></rect>
+        <text x="226" y="15" text-anchor="middle" font-size="12" font-weight="600" fill="var(--label1)">₹1,840</text>
+      </g>
+      <circle cx="268" cy="26" r="9" fill="rgba(255,107,107,0.18)"></circle>
+      <circle cx="268" cy="26" r="4.5" fill="#FF6B6B" stroke="var(--recess-alt)" stroke-width="2"></circle>
+    </svg>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--label3);padding:10px 6px 4px;" class="tnum">
+      <span>1 Jul</span><span>8 Jul</span><span>15 Jul</span><span>22 Jul</span><span>29 Jul</span>
+    </div>
+  </div>
+
+  <div class="ai-card" style="margin-top:16px;">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">
+      <span class="ai-orb"></span>
+      <span class="eyebrow" style="font-size:11px;color:var(--violet);">AI Insight</span>
+    </div>
+    <div style="font-size:14.5px;line-height:1.5;color:var(--label2);">Health spending is <span style="color:var(--label1);font-weight:600;">₹900 over budget</span> this month — a one-time pharmacy bill on 8 Jul. Everything else is tracking under.</div>
+  </div>
+
+  <div class="section-h" style="font-size:17px;margin:24px 4px 6px;">By category</div>
+  <div class="card" style="padding:26px 12px 20px;">
+    <div style="display:flex;justify-content:space-around;align-items:flex-end;">
+      <div class="vcol">
+        <div class="vpill"><div class="vfill" style="height:126px;background:linear-gradient(180deg,#A5AEFF,#818CF8);box-shadow:0 0 16px 2px rgba(129,140,248,0.45);"></div></div>
+        <div class="vn">Rent</div><div class="va tnum">₹7.3K</div>
+      </div>
+      <div class="vcol">
+        <div class="vpill"><div class="vfill" style="height:69px;background:linear-gradient(180deg,#C4B0FF,#A78BFA);box-shadow:0 0 16px 2px rgba(167,139,250,0.45);"></div></div>
+        <div class="vn">Health</div><div class="va tnum">₹3.9K</div>
+      </div>
+      <div class="vcol">
+        <div class="vpill"><div class="vfill" style="height:36px;background:linear-gradient(180deg,#FFB067,#FB923C);box-shadow:0 0 16px 2px rgba(251,146,60,0.45);"></div></div>
+        <div class="vn">Dining</div><div class="va tnum">₹1.8K</div>
+      </div>
+      <div class="vcol">
+        <div class="vpill"><div class="vfill" style="height:26px;background:linear-gradient(180deg,#6FE8D6,#2DD4BF);box-shadow:0 0 16px 2px rgba(45,212,191,0.45);"></div></div>
+        <div class="vn">Groceries</div><div class="va tnum">₹900</div>
+      </div>
+      <div class="vcol">
+        <div class="vpill"><div class="vfill" style="height:24px;background:linear-gradient(180deg,#B2C0D4,#94A3B8);box-shadow:0 0 14px 2px rgba(148,163,184,0.4);"></div></div>
+        <div class="vn">Other</div><div class="va tnum">₹700</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

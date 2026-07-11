@@ -29,9 +29,10 @@ struct IconTile: View {
             .fill(color)
             .frame(width: size, height: size)
             .overlay(
+                // v2 handoff: dark strokes on colored tiles (not white)
                 Image(systemName: symbol)
                     .font(.system(size: size * 0.5, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(hex: "#16161C").opacity(0.85))
             )
             .accessibilityHidden(true)
     }

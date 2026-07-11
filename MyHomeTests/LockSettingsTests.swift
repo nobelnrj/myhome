@@ -13,7 +13,13 @@ import Foundation
 /// SET-01:  enableLock() requires auth success; auth failure keeps lockEnabled false.
 /// SET-01:  disableLock() requires auth success; auth failure keeps lockEnabled true.
 /// T-05-03: Toggle binding cannot flip the flag without auth — verified by auth-failure tests.
+/// `.serialized`: every test here mutates the same process-global App Group `UserDefaults`
+/// key (`lockEnabled`). Swift Testing runs tests in parallel by default, so without this a
+/// sibling test can flip the flag between another test's `resetLockEnabled()` and its assertion
+/// (a pre-existing race, surfaced by unrelated test-ordering changes). Serializing the suite
+/// restores the reset→act→assert isolation these tests assume.
 @MainActor
+@Suite(.serialized)
 struct LockSettingsTests {
 
     /// Shared UserDefaults suite for isolation helpers.

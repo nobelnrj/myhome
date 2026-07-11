@@ -143,6 +143,75 @@ struct ICICIParserTests {
         #expect(!result.normalizedMerchant.isEmpty)
     }
 
+    // MARK: - 07-07: expanded templates (inline raw fixtures)
+
+    /// Builds a minimal raw email the parser can consume (Date header + single text/html part).
+    private func rawEmail(sender: String, date: String, body: String) -> String {
+        "From: \(sender)\r\nDate: \(date)\r\nSubject: alert\r\n\r\n<html><body>\(body)</body></html>"
+    }
+
+    @Test("parse: ICICI CC spend in USD → amount 23.60, currencyCode USD — 07-07")
+    func parsesForeignCurrencyCCSpend() throws {
+        let raw = rawEmail(
+            sender: "credit_cards@icici.bank.in",
+            date: "Wed, 10 Jun 2026 01:31:53 +0530",
+            body: "Dear Customer, Your ICICI Bank Credit Card XX8006 has been used for a transaction of USD 23.60 on Jun 10, 2026 at 01:31:53. Info: ANTHROPIC* CLAUDE SUB. The Available Credit Limit on your card is INR 1,46,443.82.")
+        let result = try #require(ICICIParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "23.60"))
+        #expect(result.currencyCode == "USD")
+        #expect(result.rawMerchant == "ANTHROPIC* CLAUDE SUB")
+        #expect(!result.isReversal)
+    }
+
+    @Test("parse: ICICI CC spend in INR still defaults currencyCode INR — 07-07 regression")
+    func inrCCSpendKeepsINRCurrency() throws {
+        let raw = rawEmail(
+            sender: "credit_cards@icici.bank.in",
+            date: "Thu, 02 Jul 2026 07:56:54 +0530",
+            body: "Dear Customer, Your ICICI Bank Credit Card XX5005 has been used for a transaction of INR 704.00 on Jul 02, 2026 at 07:56:54. Info: AMAZON PAY IN E COMMERCE. The Available Credit Limit on your card is INR 2,00,000.00.")
+        let result = try #require(ICICIParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "704.00"))
+        #expect(result.currencyCode == "INR")
+        #expect(!result.isReversal)
+    }
+
+    @Test("parse: ICICI CC reversal → negative amount, isReversal true, full month date — 07-07")
+    func parsesCCReversal() throws {
+        let raw = rawEmail(
+            sender: "credit_cards@icici.bank.in",
+            date: "Sat, 20 Jun 2026 10:15:51 +0530",
+            body: "Greetings from ICICI Bank. We wish to inform you that the reversal of INR 590 has been done on your ICICI Bank Credit Card  XX8006 on June      20, 2026.")
+        let result = try #require(ICICIParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "-590"))
+        #expect(result.isReversal)
+        #expect(result.rawSourceLabel == "ICICI CC ••8006")
+    }
+
+    @Test("parse: ICICI savings NEFT outflow → amount 50000, payee extracted, not reversal — 07-07")
+    func parsesNEFTDebit() throws {
+        let raw = rawEmail(
+            sender: "customernotification@icici.bank.in",
+            date: "Tue, 01 Jul 2026 14:33:47 +0530",
+            body: "Dear Customer, You have made an online NEFT payment of Rs. 50,000.00 towards Nobel Reo Jacob K S on Jul 01, 2026 at 08:03 p.m. from your ICICI Bank Savings Account XXXX6843. The Transaction ID is IN12618244306080.")
+        let result = try #require(ICICIParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "50000.00"))
+        #expect(result.rawMerchant == "Nobel Reo Jacob K S")
+        #expect(!result.isReversal)
+        #expect(result.rawSourceLabel == "ICICI Savings ••6843")
+    }
+
+    @Test("parse: ICICI account interest credit → negative amount, isReversal true — 07-07")
+    func parsesAccountCredit() throws {
+        let raw = rawEmail(
+            sender: "customernotification@icici.bank.in",
+            date: "Tue, 30 Jun 2026 13:47:14 +0530",
+            body: "Dear Customer, Greetings from ICICI Bank. Your ICICI Bank Account XX843 has been credited with INR 74 on 30-Jun-26. Info: XX843:Int.Pd:30-03-2026 to 29-06-2026.")
+        let result = try #require(ICICIParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "-74"))
+        #expect(result.isReversal)
+        #expect(result.rawMerchant == "Interest Credit")
+    }
+
     // MARK: - Fixture loader helper
 
     /// Loads a raw .eml fixture from the test bundle's Fixtures directory.
@@ -158,5 +227,41 @@ struct ICICIParserTests {
 
     private enum FixtureError: Error {
         case notFound(String)
+    }
+}
+
+// MARK: - CurrencyConverter (07-07)
+
+/// Tests the FX conversion math with injected rates (no network — the live fetch in
+/// CurrencyRateProvider is exercised only in production / integration).
+@MainActor
+struct CurrencyConverterTests {
+
+    private let rates: [String: Decimal] = ["INR": 1, "USD": 86, "EUR": 93]
+
+    @Test("toINR: converts USD to INR using supplied rate — 07-07")
+    func convertsUSD() {
+        #expect(CurrencyConverter.toINR(Decimal(string: "23.60")!, from: "USD", using: rates) == Decimal(string: "2029.60"))
+    }
+
+    @Test("toINR: INR passes through at 1:1 — 07-07")
+    func inrIdentity() {
+        #expect(CurrencyConverter.toINR(Decimal(500), from: "INR", using: rates) == Decimal(500))
+    }
+
+    @Test("toINR: case-insensitive currency code — 07-07")
+    func caseInsensitive() {
+        #expect(CurrencyConverter.toINR(Decimal(10), from: "usd", using: rates) == Decimal(860))
+    }
+
+    @Test("toINR: unknown currency → nil (caller keeps original) — 07-07")
+    func unknownCurrencyReturnsNil() {
+        #expect(CurrencyConverter.toINR(Decimal(10), from: "XYZ", using: rates) == nil)
+    }
+
+    @Test("staticRatesToINR: offline fallback contains INR identity and USD — 07-07")
+    func staticFallbackSane() {
+        #expect(CurrencyConverter.staticRatesToINR["INR"] == 1)
+        #expect(CurrencyConverter.staticRatesToINR["USD"] != nil)
     }
 }

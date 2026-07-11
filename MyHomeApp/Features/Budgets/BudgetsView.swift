@@ -30,67 +30,79 @@ struct BudgetsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Month pager header
-                monthPagerHeader
+                // Screen header: 34pt title + raised "Manage" pill (v2 handoff, Screen 3)
+                titleHeader
+
+                // Month stepper: ‹ July 2026 › with accent chevrons
+                monthStepper
 
                 // Month content — child view re-inits on month change (RESEARCH OQ3)
                 if let (start, end) = BudgetCalculator.monthBoundaries(for: viewedMonth) {
                     BudgetsMonthView(start: start, end: end)
                 }
             }
-            .navigationTitle("Budgets")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Manage Categories") {
-                        showManageCategories = true
-                    }
-                }
-            }
+            .background(DesignTokens.bgCanvas)
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showManageCategories) {
                 ManageCategoriesView()
             }
         }
     }
 
-    // MARK: - Month Pager Header
+    // MARK: - Title Header
 
     @ViewBuilder
-    private var monthPagerHeader: some View {
-        HStack {
-            // < Previous month button
+    private var titleHeader: some View {
+        HStack(alignment: .center) {
+            Text("Budgets")
+                .font(.system(size: 34, weight: .bold))
+                .foregroundStyle(DesignTokens.label)
+            Spacer()
+            Button("Manage") {
+                showManageCategories = true
+            }
+            .buttonStyle(NeuSecondaryButtonStyle(
+                expands: false, fontSize: 14, verticalPadding: 11, horizontalPadding: 22
+            ))
+            .accessibilityLabel("Manage categories")
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+
+    // MARK: - Month Stepper
+
+    @ViewBuilder
+    private var monthStepper: some View {
+        HStack(spacing: 18) {
             Button(action: previousMonth) {
                 Image(systemName: "chevron.left")
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(DesignTokens.accent)
                     .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
             .accessibilityLabel("Previous month")
 
-            Spacer()
-
-            // Month + year label
             if let (start, _) = BudgetCalculator.monthBoundaries(for: viewedMonth) {
                 Text(start.formattedAsMonthYear())
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(DesignTokens.label)
+                    .frame(minWidth: 110)
             }
 
-            Spacer()
-
-            // > Next month button — disabled at current month
             Button(action: nextMonth) {
                 Image(systemName: "chevron.right")
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(isAtCurrentMonth ? DesignTokens.label3 : DesignTokens.accent)
                     .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
             .disabled(isAtCurrentMonth)
-            .opacity(isAtCurrentMonth ? 0.3 : 1.0)
             .accessibilityLabel("Next month")
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(DesignTokens.bgCanvas)
-        Divider()
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 2)
     }
 
     // MARK: - Month Navigation
@@ -262,45 +274,39 @@ private struct BudgetSummaryCard: View {
             .neuSurface(.floating, padding: 22)
         } else {
             HStack(spacing: 20) {
-                DonutChart(
-                    segments: [
-                        DonutSegment(id: "used", label: "Used",
-                                     value: max(0, min(NSDecimalNumber(decimal: totalSpent).doubleValue,
-                                                       NSDecimalNumber(decimal: totalLimit).doubleValue)),
-                                     color: ringColor),
-                        DonutSegment(id: "left", label: "Left",
-                                     value: max(0, NSDecimalNumber(decimal: remaining).doubleValue),
-                                     color: DesignTokens.fillRecessed2),
-                    ],
-                    innerRatio: 0.7,
-                    size: 120
-                ) {
-                    VStack(spacing: 0) {
-                        Text("\(Int(fraction * 100))%")
-                            .font(.title.weight(.bold))
-                            .foregroundStyle(DesignTokens.label)
-                        Text("used")
-                            .font(.caption2)
-                            .foregroundStyle(DesignTokens.label2)
+                // Circular well + gradient ring + raised % puck (v2 handoff, Screen 3)
+                NeuCircularWell(size: 136) {
+                    BudgetGradientRing(fraction: fraction, over: remaining < 0)
+                    NeuCircularPuck(size: 80) {
+                        VStack(spacing: 0) {
+                            Text("\(Int(fraction * 100))%")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(DesignTokens.label)
+                                .monospacedDigit()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                                .frame(maxWidth: 62)
+                            Text("used")
+                                .font(.system(size: 11))
+                                .foregroundStyle(DesignTokens.label2)
+                        }
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(remaining >= 0 ? "LEFT TO SPEND" : "OVER BUDGET")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(DesignTokens.label2)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(remaining >= 0 ? "LEFT TO SPEND" : "OVER BUDGET").eyebrow()
                     Text(abs(remaining).formattedINRWhole())
-                        .font(.title.weight(.bold))
+                        .font(.system(size: 32, weight: .semibold))
                         .foregroundStyle(remaining >= 0 ? DesignTokens.label : DesignTokens.negative)
+                        .monospacedDigit()
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Text("\(totalSpent.formattedINRWords()) of \(totalLimit.formattedINRWords())")
-                        .font(.subheadline)
-                        .foregroundStyle(DesignTokens.label2)
+                        .font(.system(size: 13))
+                        .foregroundStyle(DesignTokens.label3)
                     if overCount > 0 {
                         Label("\(overCount) over limit", systemImage: "flag.fill")
-                            .font(.subheadline)
+                            .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(DesignTokens.negative)
                             .padding(.top, 4)
                     }
@@ -308,5 +314,52 @@ private struct BudgetSummaryCard: View {
             }
             .neuSurface(.floating, padding: 20)
         }
+    }
+}
+
+// MARK: - BudgetGradientRing
+
+/// The summary ring: a faint recessed track circle plus a rounded-cap yellow→green gradient
+/// arc with a soft yellow glow (`drop-shadow(0 4px 12px rgba(255,214,10,0.35))`). Turns
+/// solid red when over budget. Sweeps in on appear; honors Reduce Motion.
+private struct BudgetGradientRing: View {
+    /// 0…1+ fraction of budget used (clamped to a full turn).
+    let fraction: Double
+    let over: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var reveal: Double = 0
+
+    private let size: CGFloat = 108
+    private let lineWidth: CGFloat = 13
+
+    var body: some View {
+        ZStack {
+            // Faint track
+            Circle()
+                .stroke(Color.black.opacity(0.18), lineWidth: lineWidth)
+
+            // Gradient arc
+            Circle()
+                .trim(from: 0, to: max(0.0001, min(fraction, 1) * reveal))
+                .stroke(
+                    over
+                        ? AnyShapeStyle(DesignTokens.negative)
+                        : AnyShapeStyle(LinearGradient(
+                            colors: [DesignTokens.accent, DesignTokens.positive],
+                            startPoint: .top, endPoint: .bottom
+                          )),
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+                .shadow(color: (over ? DesignTokens.negative : DesignTokens.accent).opacity(0.35),
+                        radius: 12, y: 4)
+        }
+        .frame(width: size, height: size)
+        .onAppear {
+            if reduceMotion { reveal = 1 }
+            else { withAnimation(.easeOut(duration: 0.5)) { reveal = 1 } }
+        }
+        .accessibilityHidden(true)
     }
 }

@@ -64,6 +64,14 @@ final class GmailSyncController {
     /// Current sync pipeline state.
     var syncStatus: SyncStatus = .idle
 
+    /// Re-entrancy guard: true while a `sync()` is in flight. Prevents overlapping runs
+    /// (background refresh + a manual "Sync now" tap, or two taps) from each snapshotting
+    /// the pre-loop existing-expenses set and both inserting the same messages — which
+    /// produced exact-duplicate expenses (identical messageID/parser/account, same-second
+    /// createdAt) that doubled every Overview total. @MainActor makes the check-and-set
+    /// atomic (no lock needed).
+    private var isSyncing = false
+
     /// Last OAuth/Keychain error, or nil.
     var authError: GmailAuthError? = nil
 
@@ -147,10 +155,185 @@ final class GmailSyncController {
     /// App Group UserDefaults backing all persistent metadata.
     private let defaults: UserDefaults
 
+    /// Injectable **live** FX rate fetcher (07-07): does only the network call, returning live
+    /// currency→INR rates or nil on failure. Caching/freshness is handled on the MainActor in
+    /// `resolveCurrencyRates()` so UserDefaults never crosses an isolation boundary. Injectable so
+    /// tests exercise conversion without real network. Only invoked when a foreign-currency
+    /// transaction is actually seen, so INR-only syncs never fetch.
+    private let fxRateFetcher: @Sendable () async -> [String: Decimal]?
+
+    /// Per-sync memoised rates — populated lazily on first foreign-currency transaction.
+    private var currencyRatesCache: [String: Decimal]?
+
+    // FX cache keys (07-07).
+    private static let fxCacheKey = "fx.ratesToINR.v1"
+    private static let fxCacheDateKey = "fx.ratesToINR.fetchedAt"
+    private static let fxMaxAge: TimeInterval = 24 * 60 * 60   // refresh at most daily
+
     // MARK: - Pipeline components
 
     private let parsers: [any BankEmailParser] = [HDFCParser(), ICICIParser(), CUBParser()]
     private static let bankSenderFilter = "from:(hdfcbank.bank.in OR icici.bank.in OR cityunionbank.org)"
+
+    /// Retry queue for bank mails that matched a sender but no template (07-08).
+    private let unparsedStore: UnparsedMessageStore
+
+    // MARK: - Parser upgrade rescan (07-08)
+
+    /// Combined signature of all parser versions. Bump a parser's `parserVersion` whenever its
+    /// templates change; the changed signature makes the next sync per account widen the query
+    /// window to the full backfill, so mails that failed to parse before the upgrade are
+    /// re-fetched (idempotent — already-ingested messageIDs are skipped). A missing stored
+    /// signature (fresh install, first run after this feature) also triggers the wide pass.
+    private var parserSignature: String {
+        parsers.map { "\($0.parserID)=\($0.parserVersion)" }.sorted().joined(separator: ",")
+    }
+
+    /// UserDefaults key holding the parser signature last fully synced for an account.
+    /// Internal (not private) so tests can clear it to force a rescan.
+    static func parserSignatureKey(for email: String) -> String {
+        "gmail_parser_signature_\(email.lowercased())"
+    }
+
+    /// Page size for incremental syncs vs. parser-upgrade/backfill rescans. The wide window
+    /// spans far more mail than the incremental one; already-ingested IDs are skipped before
+    /// any raw fetch, so larger pages cost extra list calls, not extra message fetches.
+    private static let incrementalMaxResults = 50
+    private static let rescanMaxResults = 200
+
+    // MARK: - Amount normalisation (07-07)
+
+    /// Normalises a parsed transaction into the stored `Expense` shape: signed base-currency
+    /// amount, the currency code actually stored, and a note (annotated with the original
+    /// currency when a conversion happened). Shared by both ingestion paths so they can't diverge.
+    ///
+    /// Foreign currencies are converted to INR once, here, so every downstream aggregator keeps
+    /// treating `Expense.amount` as INR. If no rate is known the original amount + currency are
+    /// kept (best-effort, still flagged) rather than mis-scaled.
+    private static func normalisedExpenseFields(
+        from parsed: ParsedExpense,
+        rates: [String: Decimal]
+    ) -> (amount: Decimal, currencyCode: String, note: String) {
+        let baseNote = parsed.normalizedMerchant.isEmpty ? parsed.rawMerchant : parsed.normalizedMerchant
+
+        let storedAmount: Decimal
+        let storedCurrency: String
+        var note = baseNote
+
+        if parsed.currencyCode == "INR" {
+            storedAmount = parsed.amount
+            storedCurrency = "INR"
+        } else if let inr = CurrencyConverter.toINR(parsed.amount, from: parsed.currencyCode, using: rates) {
+            storedAmount = inr
+            storedCurrency = "INR"
+            // Preserve the original charge for traceability, e.g. "Anthropic (USD 23.60)".
+            note = "\(baseNote) (\(parsed.currencyCode) \(Self.originalAmountString(parsed.amount)))"
+        } else {
+            // Unknown currency — keep the original amount and code rather than mis-scaling to INR.
+            storedAmount = parsed.amount
+            storedCurrency = parsed.currencyCode
+        }
+
+        let signed = parsed.isReversal ? -abs(storedAmount) : storedAmount
+        return (signed, storedCurrency, note)
+    }
+
+    /// 07-07: Auto-create accounts + backfill attribution so a fresh device (no v5→v6 migration)
+    /// can attribute synced expenses without manual tagging — a prerequisite for per-account
+    /// balances and transfer detection (D-04 requires both legs attributed).
+    ///
+    /// Steps:
+    ///   1. For every ingested `sourceLabel` that resolves to no existing account, create one
+    ///      (name = sourceLabel, sourceLabel set, type inferred). These surface in the accounts
+    ///      list for the user to rename / set an opening balance. Idempotent: once created, the
+    ///      label resolves, so re-running never duplicates.
+    ///   2. Backfill: attribute any still-Unassigned expense whose `sourceLabel` now resolves.
+    ///
+    /// Runs before the transfer scan so newly-attributed legs are eligible for pairing.
+    private func reconcileAccounts() {
+        guard let ctx = modelContext else { return }
+        do {
+            let accounts = try ctx.fetch(FetchDescriptor<Account>())
+            let expenses = try ctx.fetch(FetchDescriptor<Expense>())
+
+            // 1. Auto-create accounts for unmatched sourceLabels.
+            let unmatched = AccountAttributionHelper.unmatchedSourceLabels(in: expenses, accounts: accounts)
+            for label in unmatched {
+                let account = Account(name: label, typeRaw: inferAccountType(from: label), sourceLabel: label)
+                ctx.insert(account)
+            }
+            if !unmatched.isEmpty { try ctx.save() }
+
+            // 2. Backfill attribution onto existing Unassigned expenses.
+            let refreshed = try ctx.fetch(FetchDescriptor<Account>())
+            let map = AccountAttributionHelper.buildAccountIDsByLabel(from: refreshed)
+            var changed = false
+            for expense in expenses where expense.accountID == nil {
+                guard let label = expense.sourceLabel else { continue }
+                // Exact/alias match first, then suffix match (••843 vs ••6843, D-MERGE-02).
+                if let id = AccountAttributionHelper.accountID(forSourceLabel: label, in: map)
+                    ?? AccountAttributionHelper.accountIDBySuffix(forSourceLabel: label, accounts: refreshed) {
+                    expense.accountID = id
+                    changed = true
+                }
+            }
+            if changed { try ctx.save() }
+        } catch {
+            print("[GmailSyncController] account reconcile failed: \(error)")
+        }
+    }
+
+    /// Lazily resolves currency→INR rates for the current sync, memoised after first use so at
+    /// most one fetch happens per sync. Only called when a foreign-currency transaction is seen.
+    private func currencyRatesToINR() async -> [String: Decimal] {
+        if let cached = currencyRatesCache { return cached }
+        let rates = await resolveCurrencyRates()
+        currencyRatesCache = rates
+        return rates
+    }
+
+    /// Resolves rates preferring a fresh (<24h) UserDefaults cache, then a live network fetch,
+    /// then a stale cache, then the static fallback. All UserDefaults access stays on the
+    /// MainActor; only the network fetch crosses an isolation boundary (returns a Sendable dict).
+    private func resolveCurrencyRates() async -> [String: Decimal] {
+        // 1. Fresh cache → no network.
+        if let fetchedAt = defaults.object(forKey: Self.fxCacheDateKey) as? Date,
+           now().timeIntervalSince(fetchedAt) < Self.fxMaxAge,
+           let cached = loadCachedRates() {
+            return cached
+        }
+        // 2. Live fetch (merged over the static table so omitted currencies still resolve).
+        if let live = await fxRateFetcher() {
+            var merged = CurrencyConverter.staticRatesToINR
+            for (code, rate) in live { merged[code] = rate }
+            saveCachedRates(merged)
+            return merged
+        }
+        // 3. Stale cache, else static fallback.
+        return loadCachedRates() ?? CurrencyConverter.staticRatesToINR
+    }
+
+    private func loadCachedRates() -> [String: Decimal]? {
+        guard let data = defaults.data(forKey: Self.fxCacheKey) else { return nil }
+        return try? JSONDecoder().decode([String: Decimal].self, from: data)
+    }
+
+    private func saveCachedRates(_ rates: [String: Decimal]) {
+        guard let data = try? JSONEncoder().encode(rates) else { return }
+        defaults.set(data, forKey: Self.fxCacheKey)
+        defaults.set(now(), forKey: Self.fxCacheDateKey)
+    }
+
+    /// Formats the original foreign amount for the note annotation (2dp, no grouping).
+    private static func originalAmountString(_ amount: Decimal) -> String {
+        let f = NumberFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.numberStyle = .decimal
+        f.usesGroupingSeparator = false
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 2
+        return f.string(from: NSDecimalNumber(decimal: amount)) ?? "\(amount)"
+    }
     private static let initialBackfillDays = 120
     static let autoSaveThreshold: Double = ConfidenceScorer.autoSaveThreshold
 
@@ -171,13 +354,18 @@ final class GmailSyncController {
         fetch: any GmailFetchPort = SystemGmailFetch(),
         now: @escaping () -> Date = Date.init,
         defaults: UserDefaults = UserDefaults(suiteName: "group.com.reojacob.myhome") ?? .standard,
-        accountStore: GmailAccountStore? = nil
+        accountStore: GmailAccountStore? = nil,
+        fxRateFetcher: @escaping @Sendable () async -> [String: Decimal]? = {
+            await CurrencyRateProvider.fetchLiveRatesToINR()
+        }
     ) {
         self.auth = auth
         self.keychain = keychain
         self.fetch = fetch
         self.now = now
         self.defaults = defaults
+        self.fxRateFetcher = fxRateFetcher
+        self.unparsedStore = UnparsedMessageStore(defaults: defaults)
 
         // Build or use the provided store
         let builtStore = accountStore ?? GmailAccountStore(defaults: defaults, keychain: keychain)
@@ -337,6 +525,17 @@ final class GmailSyncController {
     ///
     /// ING-03: sync transitions idle → syncing → done.
     func sync() async {
+        // Re-entrancy guard: if a sync is already running, drop this call rather than start a
+        // second concurrent run. Two overlapping runs each build their dedup set from the same
+        // stale snapshot and both insert every message → exact-duplicate expenses. @MainActor
+        // serialises this check-and-set, so no lock is required.
+        guard !isSyncing else { return }
+        isSyncing = true
+        defer { isSyncing = false }
+
+        // 07-07: drop memoised FX rates so a fresh sync re-checks the 24h cache / refetches.
+        currencyRatesCache = nil
+
         // Refresh the store's account list
         let connectedAccounts = store.accounts
 
@@ -428,14 +627,21 @@ final class GmailSyncController {
     /// The idempotency guard is (sourceAccount, gmailMessageID)-scoped (D-MA-03, T-MA-05).
     /// D-MA-06(b): nil-sourceAccount expenses match ANY account for their messageID (legacy fallback).
     private func syncAccount(email: String, accessToken: String) async -> Bool {
-        // D6-10: Compute query window
+        // D6-10: Compute query window. 07-08: when the parser signature changed (a parser
+        // learned new formats), widen back to the full backfill window so mails that failed
+        // to parse under the old parsers are re-fetched.
         let accountLastSync = store.accounts.first { $0.email == email }?.lastSyncedAt
+        let needsParserRescan =
+            defaults.string(forKey: Self.parserSignatureKey(for: email)) != parserSignature
         let query: String
-        if let last = accountLastSync {
+        let listMax: Int
+        if let last = accountLastSync, !needsParserRescan {
             let daysSince = Int(now().timeIntervalSince(last) / 86400)
             query = "\(GmailSyncController.bankSenderFilter) newer_than:\(max(1, daysSince))d"
+            listMax = Self.incrementalMaxResults
         } else {
             query = "\(GmailSyncController.bankSenderFilter) newer_than:\(GmailSyncController.initialBackfillDays)d"
+            listMax = Self.rescanMaxResults
         }
 
         do {
@@ -455,7 +661,7 @@ final class GmailSyncController {
 
             // Step 2: list message IDs
             let messageIDs = try await fetch.listMessageIDs(
-                accessToken: accessToken, q: query, maxResults: 50
+                accessToken: accessToken, q: query, maxResults: listMax
             )
 
             // Step 3: Fetch existing expenses for dedup
@@ -469,7 +675,7 @@ final class GmailSyncController {
             // D-MA-03 + D-MA-06(b): Build account-scoped idempotency set.
             // Exact match on (sourceAccount, gmailMessageID) for expenses with a sourceAccount.
             // For expenses with nil sourceAccount (legacy), match on messageID alone (fallback).
-            let accountMessageIDs: Set<String> = Set(existingExpenses.compactMap { expense -> String? in
+            var accountMessageIDs: Set<String> = Set(existingExpenses.compactMap { expense -> String? in
                 guard let msgID = expense.gmailMessageID else { return nil }
                 if let src = expense.sourceAccount {
                     // Exact account-scoped match: only skip if SAME account
@@ -493,26 +699,60 @@ final class GmailSyncController {
             // Plain [String: UUID] — no @Model refs held across await (mirrors categoryIDsByName).
             // Archived accounts excluded (T-09-09 / Pitfall 6).
             let accountIDsByLabel: [String: UUID]
+            // Value-typed suffix index for ••843 vs ••6843 fallback — no @Model refs across await (STAB-02).
+            let accountSuffixIndex: [AccountAttributionHelper.SuffixIndexEntry]
             if let ctx = modelContext {
                 let allAccounts = (try? ctx.fetch(FetchDescriptor<Account>())) ?? []
                 accountIDsByLabel = AccountAttributionHelper.buildAccountIDsByLabel(from: allAccounts)
+                accountSuffixIndex = AccountAttributionHelper.buildSuffixIndex(from: allAccounts)
             } else {
                 accountIDsByLabel = [:]
+                accountSuffixIndex = []
             }
 
-            // Step 5: Process each message
-            for messageID in messageIDs {
-                if DismissedMessageStore.isDismissed(messageID) { continue }
-                if accountMessageIDs.contains(messageID) { continue }
+            // 07-08: retry previously unparseable bank mails — IDs that matched a bank sender
+            // but no template on an earlier sync. A parser upgrade may handle them now, and the
+            // incremental query window has usually moved past them, so they are appended to
+            // this sync's work list. IDs already in the fresh list are processed once.
+            let freshIDs = Set(messageIDs)
+            let retryIDs = unparsedStore.ids(for: confirmedEmail).filter { !freshIDs.contains($0) }
 
-                let rawEmail = try await fetch.getRawMessage(accessToken: accessToken, messageID: messageID)
+            // Step 5: Process each message
+            for messageID in messageIDs + retryIDs {
+                if DismissedMessageStore.isDismissed(messageID) {
+                    unparsedStore.remove(messageID, account: confirmedEmail)
+                    continue
+                }
+                if accountMessageIDs.contains(messageID) {
+                    unparsedStore.remove(messageID, account: confirmedEmail)
+                    continue
+                }
+
+                // A deleted/unfetchable message must not abort the whole sync when it is only
+                // a retry of an old ID — skip it and leave it queued (the cap bounds growth).
+                let rawEmailResult: String?
+                if freshIDs.contains(messageID) {
+                    rawEmailResult = try await fetch.getRawMessage(accessToken: accessToken, messageID: messageID)
+                } else {
+                    rawEmailResult = try? await fetch.getRawMessage(accessToken: accessToken, messageID: messageID)
+                }
+                guard let rawEmail = rawEmailResult else { continue }
                 let sender = emailAddress(from: extractHeader("From", from: rawEmail))
                 let subject = extractHeader("Subject", from: rawEmail)
 
                 guard let parser = parsers.first(where: { $0.canHandle(sender: sender, subject: subject) }) else {
+                    // No parser claims this sender/subject — it can never parse; drop any queue entry.
+                    unparsedStore.remove(messageID, account: confirmedEmail)
                     continue
                 }
-                guard let parsed = parser.parse(rawEmail: rawEmail) else { continue }
+                guard let parsed = parser.parse(rawEmail: rawEmail) else {
+                    // Bank mail with no matching template (07-08): queue it so future syncs retry
+                    // after a parser upgrade — previously these were dropped silently and lost
+                    // once the incremental window moved past them.
+                    unparsedStore.record(messageID, account: confirmedEmail)
+                    continue
+                }
+                unparsedStore.remove(messageID, account: confirmedEmail)
 
                 let confidence = ConfidenceScorer.score(parsed)
                 let duplicate = DedupChecker.findDuplicate(of: parsed, in: existingExpenses)
@@ -526,12 +766,18 @@ final class GmailSyncController {
                     ingestionState = "needsReview"
                 }
 
+                // 07-07: convert foreign currency (e.g. USD card spends) to INR at ingestion so
+                // all downstream aggregators keep treating amount as the base currency. Rates are
+                // fetched lazily — only when a non-INR transaction is actually seen.
+                let rates: [String: Decimal] = parsed.currencyCode == "INR" ? [:] : await currencyRatesToINR()
+                let fields = GmailSyncController.normalisedExpenseFields(from: parsed, rates: rates)
                 let expense = Expense(
-                    amount: parsed.isReversal ? -abs(parsed.amount) : parsed.amount,
+                    amount: fields.amount,
                     date: parsed.date,
-                    note: parsed.normalizedMerchant.isEmpty ? parsed.rawMerchant : parsed.normalizedMerchant
+                    note: fields.note
                 )
                 expense.rawEmailBody = rawEmail
+                expense.currencyCode = fields.currencyCode
                 expense.parserID = parser.parserID
                 expense.parserVersion = parser.parserVersion
                 expense.sourceLabel = parsed.rawSourceLabel
@@ -541,11 +787,15 @@ final class GmailSyncController {
                 expense.sourceAccount = confirmedEmail    // D-MA-03: stamp owning account
 
                 // D-05: Auto-attribute to matching active account by sourceLabel.
-                // Uses pre-loop UUID map — no @Model refs across await (STAB-02).
+                // Uses pre-loop UUID map, then a suffix fallback (••843 vs ••6843, D-MERGE-02) —
+                // both are plain values, no @Model refs across await (STAB-02).
                 // No match → accountID stays nil (Unassigned).
                 expense.accountID = AccountAttributionHelper.accountID(
                     forSourceLabel: parsed.rawSourceLabel,
                     in: accountIDsByLabel
+                ) ?? AccountAttributionHelper.accountIDBySuffix(
+                    forSourceLabel: parsed.rawSourceLabel,
+                    in: accountSuffixIndex
                 )
 
                 // D-04: Re-resolve Category by PersistentIdentifier after the await suspension.
@@ -559,6 +809,9 @@ final class GmailSyncController {
 
                 if let ctx = modelContext {
                     ctx.insert(expense)
+                    // Defense in depth: record the inserted messageID so a repeated ID within
+                    // this same run (or a re-list) is skipped even before the batched save.
+                    accountMessageIDs.insert(messageID)
                 }
             }
 
@@ -566,8 +819,17 @@ final class GmailSyncController {
             if let ctx = modelContext {
                 try ctx.save()
             }
+            // 07-07: auto-create accounts + backfill attribution before scanning (D-04 needs
+            // both transfer legs attributed).
+            reconcileAccounts()
             // D-08: run transfer scorer after each sync (synchronous @MainActor call — no STAB-02 risk)
             transferScanService?.scan()
+            // 07-08: record the parser signature only after a fully successful pass, so a
+            // failed sync retries the wide rescan window next time.
+            defaults.set(parserSignature, forKey: Self.parserSignatureKey(for: email))
+            if confirmedEmail != email.lowercased() {
+                defaults.set(parserSignature, forKey: Self.parserSignatureKey(for: confirmedEmail))
+            }
             return true
 
         } catch {
@@ -616,14 +878,24 @@ final class GmailSyncController {
             return
         }
 
-        // D6-10: query window
+        // D6-10: query window. 07-08: widen to the full backfill window when the parser
+        // signature changed, mirroring syncAccount (no stored account → backfill anyway).
         let lastSync = store.accounts.first?.lastSyncedAt
+        let needsParserRescan: Bool
+        if let knownEmail = store.accounts.first?.email {
+            needsParserRescan = defaults.string(forKey: Self.parserSignatureKey(for: knownEmail)) != parserSignature
+        } else {
+            needsParserRescan = true
+        }
         let query: String
-        if let last = lastSync {
+        let listMax: Int
+        if let last = lastSync, !needsParserRescan {
             let daysSince = Int(now().timeIntervalSince(last) / 86400)
             query = "\(GmailSyncController.bankSenderFilter) newer_than:\(max(1, daysSince))d"
+            listMax = Self.incrementalMaxResults
         } else {
             query = "\(GmailSyncController.bankSenderFilter) newer_than:\(GmailSyncController.initialBackfillDays)d"
+            listMax = Self.rescanMaxResults
         }
 
         do {
@@ -636,7 +908,7 @@ final class GmailSyncController {
                 isConnected = true
             }
 
-            let messageIDs = try await fetch.listMessageIDs(accessToken: token, q: query, maxResults: 50)
+            let messageIDs = try await fetch.listMessageIDs(accessToken: token, q: query, maxResults: listMax)
 
             let existingExpenses: [Expense]
             if let ctx = modelContext {
@@ -646,7 +918,7 @@ final class GmailSyncController {
             }
 
             // Legacy single-account dedup (messageID only — no sourceAccount context)
-            let ingestedMessageIDs = Set(existingExpenses.compactMap { $0.gmailMessageID })
+            var ingestedMessageIDs = Set(existingExpenses.compactMap { $0.gmailMessageID })
 
             // D-04: Capture category PersistentIdentifiers once (Sendable value types,
             // safe across the await suspension — replaces captured [String: Category] @Model refs).
@@ -657,18 +929,42 @@ final class GmailSyncController {
                 }
             }
 
-            for messageID in messageIDs {
-                if DismissedMessageStore.isDismissed(messageID) { continue }
-                if ingestedMessageIDs.contains(messageID) { continue }
+            // 07-08: append the retry queue for this account, mirroring syncAccount.
+            let freshIDs = Set(messageIDs)
+            let retryIDs = unparsedStore.ids(for: email).filter { !freshIDs.contains($0) }
 
-                let rawEmail = try await fetch.getRawMessage(accessToken: token, messageID: messageID)
+            for messageID in messageIDs + retryIDs {
+                if DismissedMessageStore.isDismissed(messageID) {
+                    unparsedStore.remove(messageID, account: email)
+                    continue
+                }
+                if ingestedMessageIDs.contains(messageID) {
+                    unparsedStore.remove(messageID, account: email)
+                    continue
+                }
+
+                // Retried IDs must not abort the sync when unfetchable (deleted mail) — skip.
+                let rawEmailResult: String?
+                if freshIDs.contains(messageID) {
+                    rawEmailResult = try await fetch.getRawMessage(accessToken: token, messageID: messageID)
+                } else {
+                    rawEmailResult = try? await fetch.getRawMessage(accessToken: token, messageID: messageID)
+                }
+                guard let rawEmail = rawEmailResult else { continue }
                 let sender = emailAddress(from: extractHeader("From", from: rawEmail))
                 let subject = extractHeader("Subject", from: rawEmail)
 
                 guard let parser = parsers.first(where: { $0.canHandle(sender: sender, subject: subject) }) else {
+                    unparsedStore.remove(messageID, account: email)
                     continue
                 }
-                guard let parsed = parser.parse(rawEmail: rawEmail) else { continue }
+                guard let parsed = parser.parse(rawEmail: rawEmail) else {
+                    // Bank mail with no matching template → queue for retry after a parser
+                    // upgrade (07-08); previously dropped silently.
+                    unparsedStore.record(messageID, account: email)
+                    continue
+                }
+                unparsedStore.remove(messageID, account: email)
 
                 let confidence = ConfidenceScorer.score(parsed)
                 let duplicate = DedupChecker.findDuplicate(of: parsed, in: existingExpenses)
@@ -682,12 +978,16 @@ final class GmailSyncController {
                     ingestionState = "needsReview"
                 }
 
+                // 07-07: same currency normalisation as the multi-account path.
+                let rates: [String: Decimal] = parsed.currencyCode == "INR" ? [:] : await currencyRatesToINR()
+                let fields = GmailSyncController.normalisedExpenseFields(from: parsed, rates: rates)
                 let expense = Expense(
-                    amount: parsed.isReversal ? -abs(parsed.amount) : parsed.amount,
+                    amount: fields.amount,
                     date: parsed.date,
-                    note: parsed.normalizedMerchant.isEmpty ? parsed.rawMerchant : parsed.normalizedMerchant
+                    note: fields.note
                 )
                 expense.rawEmailBody = rawEmail
+                expense.currencyCode = fields.currencyCode
                 expense.parserID = parser.parserID
                 expense.parserVersion = parser.parserVersion
                 expense.sourceLabel = parsed.rawSourceLabel
@@ -707,6 +1007,7 @@ final class GmailSyncController {
 
                 if let ctx = modelContext {
                     ctx.insert(expense)
+                    ingestedMessageIDs.insert(messageID)
                 }
             }
 
@@ -714,9 +1015,13 @@ final class GmailSyncController {
             if let ctx = modelContext {
                 try ctx.save()
             }
+            // 07-07: auto-create accounts + backfill attribution before scanning.
+            reconcileAccounts()
             // D-08: run transfer scorer after the legacy sync too (CR-02 — the legacy path
             // previously skipped this hook, silently non-detecting for pre-migration users).
             transferScanService?.scan()
+            // 07-08: record the parser signature only after a fully successful pass.
+            defaults.set(parserSignature, forKey: Self.parserSignatureKey(for: email))
         } catch {
             let errMsg = error.localizedDescription.lowercased()
             if errMsg.contains("401") || errMsg.contains("unauthorized") || errMsg.contains("invalid_grant") {
@@ -743,6 +1048,8 @@ final class GmailSyncController {
     func signOut(email: String) {
         store.remove(email: email)
         accessTokenMap.removeValue(forKey: email.lowercased())
+        unparsedStore.removeAll(for: email)
+        defaults.removeObject(forKey: Self.parserSignatureKey(for: email))
         updateIsConnected()
         if store.accounts.isEmpty {
             syncStatus = .idle
@@ -758,6 +1065,8 @@ final class GmailSyncController {
         for account in store.accounts {
             store.remove(email: account.email)
             accessTokenMap.removeValue(forKey: account.email)
+            unparsedStore.removeAll(for: account.email)
+            defaults.removeObject(forKey: Self.parserSignatureKey(for: account.email))
         }
         // Legacy: also delete the bare refresh_token if it exists
         try? keychain.delete(forKey: "refresh_token")
@@ -825,5 +1134,45 @@ final class GmailSyncController {
             return inner.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         return headerValue.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+// MARK: - CurrencyRateProvider (07-07)
+
+/// Fetches live currency→INR exchange rates from a free, no-API-key endpoint. Caching, freshness
+/// and the static fallback are handled by the controller (on the MainActor); this type is purely
+/// the network call, so it holds no state and touches no UserDefaults.
+///
+/// Source: open.er-api.com (free tier, no key). We request base = INR (one request covers every
+/// currency) and invert each `INR → X` quote into the `X → INR` factor we need. Returns nil on any
+/// failure (offline, non-2xx, decode error, `result != "success"`) so the caller can fall back.
+enum CurrencyRateProvider {
+
+    private static let endpoint = URL(string: "https://open.er-api.com/v6/latest/INR")!
+
+    private struct APIResponse: Decodable {
+        let result: String
+        let rates: [String: Double]     // INR → currency
+    }
+
+    /// Fetches and inverts the live quotes to currency→INR Decimal factors, or nil on any failure.
+    static func fetchLiveRatesToINR(session: URLSession = .shared) async -> [String: Decimal]? {
+        do {
+            let (data, response) = try await session.data(from: endpoint)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                return nil
+            }
+            let decoded = try JSONDecoder().decode(APIResponse.self, from: data)
+            guard decoded.result == "success" else { return nil }
+
+            var inrPerUnit: [String: Decimal] = ["INR": 1]
+            for (code, inrToCurrency) in decoded.rates where inrToCurrency > 0 {
+                inrPerUnit[code] = Decimal(1.0 / inrToCurrency)   // invert: X → INR
+            }
+            // Sanity: require at least USD to consider the payload usable.
+            return inrPerUnit["USD"] != nil ? inrPerUnit : nil
+        } catch {
+            return nil
+        }
     }
 }

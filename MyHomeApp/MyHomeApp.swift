@@ -34,6 +34,10 @@ struct MyHomeApp: App {
                 .preferredColorScheme(.dark)   // DS-05: neumorphic dark-mode-only; applied once at root
                 .onAppear {
                     setupNotifications()
+                    // One-time repair for stores that accumulated duplicate ingested expenses
+                    // from overlapping pre-guard sync runs (doubled Overview totals). No-op once
+                    // the store is clean, so it is safe to run on every launch.
+                    DuplicateExpenseCleanup.run(in: container.mainContext)
                     #if DEBUG
                     seedSampleDataIfRequested()
                     #endif
@@ -115,9 +119,15 @@ struct MyHomeApp: App {
 
         // Spend across categories this month (positive = spend). Spends-only so totalSpend
         // stays clean-positive for the demo (uncategorised negatives would net it down).
-        let spends: [(Int, Decimal)] = [(0, 14200), (1, 9300), (2, 5100), (3, 3800), (0, 2600), (1, 1900)]
-        for (idx, (catIndex, amount)) in spends.enumerated() {
-            let day = cal.date(byAdding: .day, value: -(idx * 3 + 1), to: now) ?? now
+        // The two trailing 1–2%-share spends exercise the donut's tiny-segment path
+        // (rounded caps must not overlap — the NeuDonutRing min-span fix).
+        // (category index, amount, days ago). The tiny spends stay within the last few
+        // days so they land in the CURRENT month — the donut is month-scoped.
+        let spends: [(Int, Decimal, Int)] = [(0, 14200, 1), (1, 9300, 4), (2, 5100, 7), (3, 3800, 10),
+                                             (0, 2600, 13), (1, 1900, 16), (4, 430, 2), (5, 210, 3)]
+        for (catIndex, amount, daysAgo) in spends {
+            guard catIndex < cats.count else { continue }
+            let day = cal.date(byAdding: .day, value: -daysAgo, to: now) ?? now
             let e = Expense(amount: amount, date: day, note: "SAMPLE")
             e.categories = [cats[catIndex]]
             ctx.insert(e)
@@ -125,6 +135,31 @@ struct MyHomeApp: App {
         // Income (negative amount, uncategorised) so the two-tone orb shows green + red.
         let income = Expense(amount: Decimal(-14000), date: cal.date(byAdding: .day, value: -2, to: now) ?? now, note: "SAMPLE")
         ctx.insert(income)
+
+        // Assets + snapshot history so the Overview net-worth card (donut + trend) renders.
+        let mf = Asset()
+        mf.name = "SAMPLE Index Fund"
+        mf.assetClassRaw = "mutual_fund"
+        mf.units = 1200
+        mf.currentNAV = Decimal(155)
+        mf.navAsOfDate = now
+        ctx.insert(mf)
+        let stock = Asset()
+        stock.name = "SAMPLE Stock"
+        stock.assetClassRaw = "stock"
+        stock.units = 90
+        stock.currentNAV = Decimal(640)
+        stock.navAsOfDate = now
+        ctx.insert(stock)
+        for dayOffset in stride(from: 35, through: 0, by: -1) {
+            let snap = NetWorthSnapshot()
+            snap.date = cal.startOfDay(for: cal.date(byAdding: .day, value: -dayOffset, to: now) ?? now)
+            let wobble = Decimal(dayOffset % 7) * 2800 - Decimal(dayOffset) * 950
+            snap.mfValue = 186_000 - wobble
+            snap.stockValue = 57_600 + wobble / 2
+            snap.totalNetWorth = snap.mfValue + snap.stockValue
+            ctx.insert(snap)
+        }
         try? ctx.save()
     }
     #endif

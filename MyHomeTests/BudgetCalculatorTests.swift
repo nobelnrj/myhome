@@ -326,4 +326,68 @@ struct BudgetCalculatorTests {
         // end must be after start
         #expect(bounds.end > bounds.start)
     }
+
+    // MARK: - Cash-flow aggregation (hero orb): grossSpend / grossIncome / isTransferForCashFlow
+
+    /// Builds a bank-style expense: positive = debit (spend), negative = credit (income).
+    private func makeExpense(_ amount: Decimal,
+                             isTransfer: Bool? = nil,
+                             pairID: UUID? = nil) -> Expense {
+        let e = Expense(amount: amount, date: Date())
+        e.isTransfer = isTransfer
+        e.transferPairID = pairID
+        return e
+    }
+
+    @Test("grossSpend sums only positive amounts — never goes negative when credits dwarf debits")
+    func grossSpendNeverNegative() {
+        // 80k of debits, 157k of credits (the real-data shape that clamped the orb to 0%).
+        let expenses = [makeExpense(80_000), makeExpense(-157_000)]
+        let spend = BudgetCalculator.grossSpend(for: expenses)
+        #expect(spend == Decimal(80_000))   // credits do NOT drag it below zero
+    }
+
+    @Test("grossIncome sums |credits| only; grossSpend ignores them")
+    func grossIncomeAndSpendSplitBySign() {
+        let expenses = [makeExpense(500), makeExpense(1_500), makeExpense(-157_038)]
+        #expect(BudgetCalculator.grossSpend(for: expenses) == Decimal(2_000))
+        #expect(BudgetCalculator.grossIncome(for: expenses) == Decimal(157_038))
+    }
+
+    @Test("Pending transfer pair (transferPairID set, isTransfer nil) is excluded from both totals")
+    func pendingPairExcluded() {
+        let pairID = UUID()
+        let debit  = makeExpense(50_000, isTransfer: nil, pairID: pairID)   // leaves account A
+        let credit = makeExpense(-50_000, isTransfer: nil, pairID: pairID)  // enters account B
+        let realSpend = makeExpense(1_200)
+        let salary = makeExpense(-90_000)   // genuine income, no pair
+
+        #expect(BudgetCalculator.grossSpend(for: [debit, credit, realSpend, salary]) == Decimal(1_200))
+        #expect(BudgetCalculator.grossIncome(for: [debit, credit, realSpend, salary]) == Decimal(90_000))
+    }
+
+    @Test("Confirmed transfer (isTransfer true) excluded; user-rejected (isTransfer false) included")
+    func confirmedExcludedRejectedIncluded() {
+        let confirmed = makeExpense(-40_000, isTransfer: true)   // confirmed transfer → not income
+        let rejected  = makeExpense(-40_000, isTransfer: false)  // user said "not a transfer" → income
+
+        #expect(BudgetCalculator.isTransferForCashFlow(confirmed) == true)
+        #expect(BudgetCalculator.isTransferForCashFlow(rejected) == false)
+        #expect(BudgetCalculator.grossIncome(for: [confirmed, rejected]) == Decimal(40_000))
+    }
+
+    @Test("Regression: income 157,038 + spent-shaped credits → spend positive, orb pct > 0")
+    func regressionOrbNotZero() {
+        // Mirror the real July data: big uncategorised credits + smaller debits.
+        let expenses = [
+            makeExpense(56_000), makeExpense(10_000), makeExpense(4_000),  // categorised-ish spend
+            makeExpense(-157_038)                                          // credits (income/transfers)
+        ]
+        let spend = BudgetCalculator.grossSpend(for: expenses)
+        let income = BudgetCalculator.grossIncome(for: expenses)
+        #expect(spend == Decimal(70_000))
+        // spendPct = spent / (income + spent) — must be > 0 now that spend is positive.
+        let pct = Double(truncating: (spend / (income + spend)) as NSDecimalNumber)
+        #expect(pct > 0)
+    }
 }

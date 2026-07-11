@@ -18,7 +18,13 @@ import Foundation
 /// D5-06:   cancel errors → authError = nil; lockout/failed → mapped error states.
 /// D5-07a:  enableLock() requires auth success; auth failure keeps lockEnabled false.
 /// D5-07b:  disableLock() requires auth success.
+///
+/// `.serialized`: every test mutates the same process-global App Group `UserDefaults` key
+/// (`lockEnabled`, suite `group.com.reojacob.myhome`). Swift Testing runs tests in parallel by
+/// default, so without this a sibling test flips the flag between another test's reset and its
+/// assertion. `LockSettingsTests` shares the same key and is likewise serialized.
 @MainActor
+@Suite(.serialized)
 struct LockStateTests {
 
     // MARK: - SEC-01: Persistence

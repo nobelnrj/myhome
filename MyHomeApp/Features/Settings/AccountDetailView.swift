@@ -68,6 +68,8 @@ struct AccountDetailView: View {
     // MARK: - State
 
     @State private var showEditSheet = false
+    @State private var showMergeSheet = false
+    @Environment(\.dismiss) private var dismiss
 
     // MARK: - Body
 
@@ -120,11 +122,28 @@ struct AccountDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("Edit") { showEditSheet = true }
+                Menu {
+                    Button {
+                        showEditSheet = true
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    Button {
+                        showMergeSheet = true
+                    } label: {
+                        Label("Merge into Another Account…", systemImage: "arrow.triangle.merge")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
             }
         }
         .sheet(isPresented: $showEditSheet) {
             EditAccountView(account: account)
+        }
+        .sheet(isPresented: $showMergeSheet) {
+            // On merge the absorbed account (this one) is deleted — pop back to the list.
+            MergeAccountView(absorbed: account) { dismiss() }
         }
         // NOTE: No pull-to-refresh — balance is reactive via @Query (D-10 contract)
     }

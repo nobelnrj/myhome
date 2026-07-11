@@ -200,4 +200,60 @@ struct AccountBalanceTransferTests {
         #expect(computeB == expectedComputeB,
                 "Account B (credit leg, amount < 0 = inflow): balance should be \(expectedComputeB), got \(computeB). Formula: baseline − negative_amount = balance increases.")
     }
+
+    // MARK: - 07-07 end-to-end validation (real email formats → detect → balance)
+
+    /// Full-chain validation using the REAL parsers on REAL email shapes: a ₹50,000 transfer that
+    /// leaves an ICICI savings account (NEFT-out, now parsed) and arrives in an HDFC account
+    /// (credit-in, now parsed). Proves the two legs pair via the scorer and that per-account
+    /// balances move correctly (source ↓, destination ↑, net worth unchanged).
+    @Test("e2e: real ICICI-NEFT-out + HDFC-credit-in pair and move balances correctly — 07-07")
+    func realCrossAccountTransferDetectedAndBalanced() throws {
+        let container = try makeContainer()
+        let ctx = container.mainContext
+        let asOf = asOfDate()
+
+        // Two own accounts, both attributed.
+        let icici = makeAccount(in: ctx, name: "ICICI Savings", baseline: 200000, asOf: asOf)
+        let hdfc  = makeAccount(in: ctx, name: "HDFC Savings",  baseline: 100000, asOf: asOf)
+        try ctx.save()
+
+        // Parse both legs with the actual production parsers (validates the live formats).
+        let neftOutRaw = "From: customernotification@icici.bank.in\r\nDate: Wed, 15 Jul 2026 20:03:00 +0530\r\nSubject: NEFT transaction through ICICI Bank iMobile.\r\n\r\n<html><body>You have made an online NEFT payment of Rs. 50,000.00 towards Bhuvanya Sridhar on Jul 15, 2026 at 08:03 p.m. from your ICICI Bank Savings Account XXXX6843. The Transaction ID is IN123.</body></html>"
+        let creditInRaw = "From: alerts@hdfcbank.bank.in\r\nDate: Wed, 15 Jul 2026 20:04:00 +0530\r\nSubject: View: Account update for your HDFC Bank A/c\r\n\r\n<html><body>We're writing to inform you that Rs.50000.00 has been successfully credited to your HDFC Bank account ending in 1011. Transaction Details: a. Date: 15-07-26</body></html>"
+
+        let debitLegParsed  = try #require(ICICIParser().parse(rawEmail: neftOutRaw), "ICICI NEFT-out must parse")
+        let creditLegParsed = try #require(HDFCParser().parse(rawEmail: creditInRaw), "HDFC credit-in must parse")
+
+        // Sanity on the parsed legs: opposite signs, equal magnitude.
+        #expect(debitLegParsed.amount == Decimal(string: "50000.00"))
+        #expect(creditLegParsed.amount == Decimal(string: "-50000.00"))
+
+        // Build Expenses exactly as the controller does (isReversal → negative), attribute to accounts.
+        func makeExpense(_ p: ParsedExpense, account: Account) -> Expense {
+            let e = Expense(amount: p.isReversal ? -abs(p.amount) : p.amount, date: p.date)
+            e.accountID = account.id
+            ctx.insert(e)
+            return e
+        }
+        _ = makeExpense(debitLegParsed, account: icici)   // +50000 on ICICI
+        _ = makeExpense(creditLegParsed, account: hdfc)   // -50000 on HDFC
+        try ctx.save()
+
+        // Run the real scorer (the same call TransferScanService.scan() makes).
+        var istCal = Calendar(identifier: .gregorian)
+        istCal.timeZone = TimeZone(identifier: "Asia/Kolkata")!
+        let all = try ctx.fetch(FetchDescriptor<Expense>())
+        let pairs = TransferDetectionScorer.findCandidatePairs(from: all, calendar: istCal)
+
+        // 1) The two legs are detected as a transfer pair.
+        #expect(pairs.count == 1, "Expected exactly one detected transfer pair, got \(pairs.count)")
+
+        // 2) Balances move correctly and net worth is unchanged.
+        let icBal = AccountBalance.compute(baseline: 200000, asOf: asOf, expenses: all, accountID: icici.id)
+        let hdBal = AccountBalance.compute(baseline: 100000, asOf: asOf, expenses: all, accountID: hdfc.id)
+        #expect(icBal == Decimal(150000), "ICICI (source) must drop by 50,000 → 150,000, got \(icBal)")
+        #expect(hdBal == Decimal(150000), "HDFC (destination) must rise by 50,000 → 150,000, got \(hdBal)")
+        #expect(icBal + hdBal == Decimal(300000), "Net worth unchanged across the transfer")
+    }
 }
