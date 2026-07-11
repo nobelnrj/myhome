@@ -126,8 +126,11 @@ None. `accentText`, `aiVioletText`, `dishSlate` are additive tokens consumed by 
 - ContrastTests lock the floors: device tuning may change light hexes but must keep them green.
 - diff_dark.py (TOLERANCE=16) ready for later dark before/after diffs; capture with `clear`+time/wifi/battery status-bar overrides to match baselines.
 
-## Self-Check: PENDING
-(populated below after verification)
+## Self-Check: PASSED
+- DesignTokens.swift, DesignTokensTests.swift, diff_dark.py, 17-02-SUMMARY.md all exist
+- Commits 587af19, 6bb18dd, eb501da, 29d5b0f present
+- DesignTokens contains `Color.adaptive`; ContrastTests present; non-comment `Color(hex:)` count = 0
+- D-06 unit gate green (0 drift); dark render diff exit 0 (6/6 screens)
 
 ---
 *Phase: 17-light-mode-support-neumorphic-redesign*
