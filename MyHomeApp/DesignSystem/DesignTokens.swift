@@ -9,62 +9,103 @@ import UIKit
 enum DesignTokens {
 
     // MARK: - Canvas & Surface
-    static let bgCanvas               = Color(hex: "#1C1C23")
-    static let surfaceRaised          = Color(hex: "#1F1F27")
-    static let surfaceRaisedStrong    = Color(hex: "#22222C")
+    // D-04: every color token is now an adaptive light/dark pair. The DARK branch is the
+    // pre-refactor hex VERBATIM, so dark rendering stays byte-identical (D-06, enforced by
+    // DarkBitIdentityTests). Light values are directional starting points, tuned on device
+    // in Plans 04-07; only the dark branches are LOCKED.
+    static let bgCanvas               = Color.adaptive(light: "#E3E6EE", dark: "#1C1C23")
+    static let surfaceRaised          = Color.adaptive(light: "#E9ECF3", dark: "#1F1F27")
+    static let surfaceRaisedStrong    = Color.adaptive(light: "#EDF0F6", dark: "#22222C")
     // Curvature gradient endpoints — raised/floating surfaces are lit from the top-left,
     // so their fill runs lighter (topLeading) → darker (bottomTrailing), averaging to the
     // flat surface colors above. This diagonal falloff is what sells the convex "pillow"
     // read; a flat fill looks like a sticker no matter how strong the outer shadows are.
-    static let surfaceRaisedTop          = Color(hex: "#24242D")
-    static let surfaceRaisedBottom       = Color(hex: "#1B1B21")
-    static let surfaceRaisedStrongTop    = Color(hex: "#282833")
-    static let surfaceRaisedStrongBottom = Color(hex: "#1E1E26")
-    static let surfaceElevatedControl = Color(hex: "#262630")
-    static let fillRecessed           = Color(hex: "#16161C")
-    static let fillRecessed2          = Color(hex: "#191920")
-    static let fillRecessed3          = Color(hex: "#15151B")
+    static let surfaceRaisedTop          = Color.adaptive(light: "#EFF2F8", dark: "#24242D")
+    static let surfaceRaisedBottom       = Color.adaptive(light: "#E2E5ED", dark: "#1B1B21")
+    static let surfaceRaisedStrongTop    = Color.adaptive(light: "#F3F5FA", dark: "#282833")
+    static let surfaceRaisedStrongBottom = Color.adaptive(light: "#E6E9F1", dark: "#1E1E26")
+    static let surfaceElevatedControl = Color.adaptive(light: "#EDEFF6", dark: "#262630")
+    static let fillRecessed           = Color.adaptive(light: "#D7DBE6", dark: "#16161C")
+    static let fillRecessed2          = Color.adaptive(light: "#DADEE8", dark: "#191920")
+    static let fillRecessed3          = Color.adaptive(light: "#D4D8E3", dark: "#15151B")
+
+    /// D-13 instrument-window dish interior. Deep slate in light, `fillRecessed3` VERBATIM in
+    /// dark (the dish fill today). Consumed by Plans 05/06 for the force-dark dish chrome so a
+    /// dish reads as a deliberate deep instrument well on light surfaces — never a "hole into
+    /// dark mode" (#15151B charcoal) that D-13 forbids on a light canvas.
+    static let dishSlate              = Color.adaptive(light: "#3E4250", dark: "#15151B")
 
     // MARK: - Accent & Semantic
-    static let accent        = Color(hex: "#FFD60A")
-    static let accentSoft    = Color(hex: "#FFD60A").opacity(0.16)
-    static let accentOnYellow = Color(hex: "#1A1404")
-    static let positive      = Color(hex: "#34E29B")
-    static let negative      = Color(hex: "#FF6B6B")
-    static let orange        = Color(hex: "#FFB020")
+    // D-08: `accent` stays canary in BOTH schemes — it governs FILLS (canary chips, active
+    // pills, gauge sheens) which read correctly on light and dark alike. Text/icon roles use
+    // the deepened `accentText` twin below.
+    static let accent        = Color.adaptive(light: "#FFD60A", dark: "#FFD60A")
+    static let accentSoft    = Color.adaptive(light: "#FFD60A", lightAlpha: 0.22,
+                                              dark: "#FFD60A", darkAlpha: 0.16)
+    static let accentOnYellow = Color.adaptive(light: "#1A1404", dark: "#1A1404")
+    // D-10: deepened semantic light twins with preserved hue; dark = luminous verbatim.
+    static let positive      = Color.adaptive(light: "#047857", dark: "#34E29B")
+    static let negative      = Color.adaptive(light: "#B91C1C", dark: "#FF6B6B")
+    static let orange        = Color.adaptive(light: "#B45309", dark: "#FFB020")
+
+    /// D-08 role split — text/icon accent (NOT a fill). Dark amber on light (5.12:1 on the
+    /// #E3E6EE canvas per the RESEARCH WCAG table); canary in dark. The dark branch is
+    /// identical to `accent` so dark rendering cannot shift when call sites migrate a text/icon
+    /// tint from `accent` to `accentText`.
+    static let accentText    = Color.adaptive(light: "#755C00", dark: "#FFD60A")
 
     // MARK: - AI Insight accent (Phase 16 — localized; not a general accent)
     // Scoped exclusively to AIInsightCard. DO NOT use on any other surface.
     // The primary app accent (#FFD60A canary) is unchanged and continues to govern
     // all Overview, tab bar, and budget UI.
-    static let aiVioletTop    = Color(hex: "#C4A6FF")  // edge gradient — top
-    static let aiVioletBottom = Color(hex: "#7C5CFF")  // edge gradient — bottom
-    static let aiVioletGlow   = Color(hex: "#8B5CF6")  // shadow / orb / wash
+    // D-15: deepened violet light twins with preserved hue; dark = current luminous verbatim.
+    static let aiVioletTop    = Color.adaptive(light: "#6D28D9", dark: "#C4A6FF")  // edge gradient — top
+    static let aiVioletBottom = Color.adaptive(light: "#4C1D95", dark: "#7C5CFF")  // edge gradient — bottom
+    static let aiVioletGlow   = Color.adaptive(light: "#6D28D9", dark: "#8B5CF6")  // shadow / orb / wash
+
+    /// D-15 text/sparkle violet — deepened light twin passing 4.5:1 (7.19:1 on the light
+    /// canvas). Dark branch == current `aiVioletTop` (violet text uses aiVioletTop today), so
+    /// dark rendering is unchanged. Violet stays AI-only.
+    static let aiVioletText   = Color.adaptive(light: "#5B21B6", dark: "#C4A6FF")
 
     // MARK: - Labels
     // Base: #ECEDF4 for primary; #DCDFEE (rgb 220,223,238) with opacity for secondary tiers
-    static let label  = Color(hex: "#ECEDF4")
-    static let label2 = Color(hex: "#DCDFEE").opacity(0.56)
-    static let label3 = Color(hex: "#DCDFEE").opacity(0.32)
-    static let label4 = Color(hex: "#DCDFEE").opacity(0.16)
+    // Label tiers carry per-scheme baked alpha (dark = current #DCDFEE composite verbatim;
+    // light = deep ink #23252E at matching tier opacities).
+    static let label  = Color.adaptive(light: "#23252E", dark: "#ECEDF4")
+    static let label2 = Color.adaptive(light: "#23252E", lightAlpha: 0.62,
+                                       dark: "#DCDFEE", darkAlpha: 0.56)
+    static let label3 = Color.adaptive(light: "#23252E", lightAlpha: 0.40,
+                                       dark: "#DCDFEE", darkAlpha: 0.32)
+    static let label4 = Color.adaptive(light: "#23252E", lightAlpha: 0.22,
+                                       dark: "#DCDFEE", darkAlpha: 0.16)
 
     // MARK: - Separators & Borders
-    static let separatorHairline = Color.white.opacity(0.05)
-    static let separatorEdge     = Color.black.opacity(0.30)
-    static let glassBorder       = Color.white.opacity(0.025)
+    // Dark branches = current white/black baked-opacity values verbatim; light branches invert
+    // to faint black hairlines that read on a bright canvas.
+    static let separatorHairline = Color.adaptive(light: "#000000", lightAlpha: 0.07,
+                                                  dark: "#FFFFFF", darkAlpha: 0.05)
+    static let separatorEdge     = Color.adaptive(light: "#000000", lightAlpha: 0.12,
+                                                  dark: "#000000", darkAlpha: 0.30)
+    static let glassBorder       = Color.adaptive(light: "#000000", lightAlpha: 0.04,
+                                                  dark: "#FFFFFF", darkAlpha: 0.025)
 
     // MARK: - Category Palette
-    static let catGroceries     = Color(hex: "#2DD4BF")
-    static let catDining        = Color(hex: "#FB923C")
-    static let catFuel          = Color(hex: "#F472B6")
-    static let catUtilities     = Color(hex: "#7DD3FC")
-    static let catRent          = Color(hex: "#818CF8")
-    static let catAuto          = Color(hex: "#38BDF8")
-    static let catShopping      = Color(hex: "#E879F9")
-    static let catHealth        = Color(hex: "#A78BFA")
-    static let catSubscriptions = Color(hex: "#22D3EE")
-    static let catEntertainment = Color(hex: "#C084FC")
-    static let catOther         = Color(hex: "#94A3B8")
+    // D-09/D-10: deepened light twins with preserved hue identity; dark = luminous verbatim.
+    // D-09/D-11 note: these light twins apply on light SURFACES. Inside force-dark instrument
+    // windows (dishes, Plans 05/06) the same tokens auto-resolve to their original luminous
+    // dark values — no per-call-site conditional needed.
+    static let catGroceries     = Color.adaptive(light: "#0F766E", dark: "#2DD4BF")
+    static let catDining        = Color.adaptive(light: "#C2410C", dark: "#FB923C")
+    static let catFuel          = Color.adaptive(light: "#BE185D", dark: "#F472B6")
+    static let catUtilities     = Color.adaptive(light: "#0369A1", dark: "#7DD3FC")
+    static let catRent          = Color.adaptive(light: "#4338CA", dark: "#818CF8")
+    static let catAuto          = Color.adaptive(light: "#0284C7", dark: "#38BDF8")
+    static let catShopping      = Color.adaptive(light: "#A21CAF", dark: "#E879F9")
+    static let catHealth        = Color.adaptive(light: "#6D28D9", dark: "#A78BFA")
+    static let catSubscriptions = Color.adaptive(light: "#0E7490", dark: "#22D3EE")
+    static let catEntertainment = Color.adaptive(light: "#7E22CE", dark: "#C084FC")
+    static let catOther         = Color.adaptive(light: "#475569", dark: "#94A3B8")
 
     // MARK: - Corner Radii
     static let radiusCard:   CGFloat = 26
