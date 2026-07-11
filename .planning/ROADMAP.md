@@ -139,6 +139,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 - [x] 15-01-PLAN.md â AnalyticsAggregator + SpendSummary + IST-boundary tests (ANL-03, ANL-07)
 - [x] 15-02-PLAN.md â Analytics screen shell, push nav, AreaMark trend + category bars (ANL-01, ANL-02, ANL-03, ANL-04)
 - [x] 15-03-PLAN.md â Inverted-color delta chips + drill-down sheet + full clean-build gate + human-verify (ANL-05, ANL-06, ANL-07)
+
 **UI hint**: yes
 
 ### Phase 16: AI Insight Card
@@ -180,18 +181,51 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 **Goal**: Add a light-mode theme to the v1.2 neumorphic redesign. Today the app is dark-only by decision (DS-05): `MyHomeApp.swift` forces `.preferredColorScheme(.dark)` at the root, and every `DesignTokens` color is a single static dark hex with no adaptive `Color(light:dark:)` variants.
 **Depends on**: Phase 13 (DesignTokens + NeuSurface), Phase 16 (AI Insight orb/glow treatment) — the entire v1.2 dark design system must exist before it can be made adaptive.
 **Requirements**: none formally mapped — scope locked by 17-CONTEXT.md decisions D-01…D-15 (supersedes DS-05 dark-only by user decision, promoted from backlog 2026-06-27)
-**Plans**: 7 plans
-
+**Plans**: 9 plans
 Plans:
+**Wave 1**
+
 - [ ] 17-01-PLAN.md — Wave 1: dark baselines + Color.adaptive factory + D-06 bit-identity test harness
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 17-02-PLAN.md — Wave 2: all DesignTokens → adaptive pairs + accentText/aiVioletText/dishSlate + scheme-aware neonGlow + WCAG floors
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 17-03-PLAN.md — Wave 3: AppStorage theme (System/Light/Dark) + Settings Appearance row + chrome + accent role-split audit
-- [ ] 17-04-PLAN.md — Wave 4: NeuSurface surface/button/puck light shadow twins + on-device depth tuning + paired previews
-- [ ] 17-05-PLAN.md — Wave 5: instrument windows (orb/donut/ring dishes, pill-gauge wells) + EmbossedBar light glow language
-- [ ] 17-06-PLAN.md — Wave 6: trend charts in slate windows + IconTile/range-picker/account audit + AI card violet (D-15)
-- [ ] 17-07-PLAN.md — Wave 7: final D-06 double dark sweep + light integration smoke + end-of-phase human sign-off
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 17-08-PLAN.md — Wave 4: accent role-split audit — RollingMoneyText + Settings + Expenses areas (foregroundStyle(accent) → accentText, dark identity)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 17-09-PLAN.md — Wave 5: accent role-split audit — Notes/Budgets + Overview/Assets/Analytics areas + app-wide accent gate
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 17-04-PLAN.md — Wave 6: NeuSurface surface/button/puck light shadow twins + on-device depth tuning + paired previews
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 17-05-PLAN.md — Wave 7: instrument windows (orb/donut/ring dishes, pill-gauge wells) + EmbossedBar light glow language
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 17-06-PLAN.md — Wave 8: trend charts in slate windows + IconTile/range-picker/account audit + AI card violet (D-15)
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
+- [ ] 17-07-PLAN.md — Wave 9: final D-06 double dark sweep + light integration smoke + end-of-phase human sign-off
+
+**Cross-cutting constraints:**
+
+- Dark rendering remains pixel-identical to Plan 01 baselines
+- Every accent call site in these areas has a recorded role classification — no site is silently skipped
 
 Why it's a phase, not a toggle:
+
 - Needs a full light-tuned palette (canvas, surfaces, fills, label tiers).
 - Neumorphic shadows must be reworked — soft inner/outer shadow directions and opacities are calibrated for a dark canvas.
 - The WHOOP-style particle orb + activity rings need a non-glow / adjusted treatment; the bloom only reads against darkness.
@@ -216,4 +250,3 @@ Why it's a phase, not a toggle:
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
 | 16. AI Insight Card | v1.2 | 5/5 | Complete    | 2026-06-27 |
 | 17. Light Mode Support | v1.2 | 0/0 | Planned | — |
-

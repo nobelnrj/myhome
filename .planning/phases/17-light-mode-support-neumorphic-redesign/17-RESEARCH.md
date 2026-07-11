@@ -708,10 +708,13 @@ labels, category amounts), target ≥4.5:1; where only icons/tiles/chart fills,
 | A6 | Keyboard appearance and Face ID/system overlays follow the window's resolved scheme with no extra work | Pitfall 7 | Cosmetic; scoped fixes |
 | A7 | `drawingGroup()` chrome re-renders on live theme flip | Pitfall 5 | Remove/condition drawingGroup or force id() on scheme — verify live-flip in Wave-1 |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Do the three trend charts get instrument-window treatment?** (D-12
    enumerates dishes; CONTEXT §specifics says "ALL charts in deep dishes.")
+   - **RESOLVED (YES)** — 17-06-PLAN.md Task 1 "PLANNER DECISION" block: all
+     three trend charts get instrument-window (slate + force-dark) treatment;
+     SpendOverTimeChart's `#FFB43C` line swaps to a deepened twin.
    - What we know: AnalyticsTrendChart already has a recessed plot inset;
      SpendOverTimeChart renders directly on a raised card; NetWorthTrendChart
      sits inside the NetWorthCard near its donut dish.
@@ -723,8 +726,14 @@ labels, category amounts), target ≥4.5:1; where only icons/tiles/chart fills,
    device-tuned (Claude's discretion). Plan should structure tuning as an
    explicit screenshot-loop task per component group, not bake guesses into
    many tasks.
+   - **RESOLVED (device-tuning scope, not a blocking question)** — structured
+     as explicit screenshot-loop tuning tasks in 17-04-PLAN.md Task 2 and
+     17-05-PLAN.md; no fixed values baked into the plan.
 3. **Theme-flip transition** — default to the environment change; only add a
    crossfade if jarring (discretion). No research blocker.
+   - **RESOLVED (default, no crossfade)** — 17-03-PLAN.md Task 2 ships the plain
+     environment-driven flip; a crossfade is added only if device review finds
+     it jarring.
 
 ## Environment Availability
 
