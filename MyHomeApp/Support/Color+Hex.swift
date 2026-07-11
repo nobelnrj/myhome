@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 extension Color {
     /// Initialize a `Color` from a CSS-style hex string (e.g. `"#FF3B30"` or `"FF3B30"`).
@@ -33,5 +34,54 @@ extension Color {
                       Int(r * 255),
                       Int(g * 255),
                       Int(b * 255))
+    }
+}
+
+// MARK: - Adaptive (light/dark) color factory — Phase 17 (D-06)
+
+extension UIColor {
+    /// Initialize a `UIColor` from a 6-digit CSS-style hex string plus an alpha.
+    ///
+    /// Uses the IDENTICAL 6-digit sRGB parsing contract as `Color.init(hex:)`:
+    /// trim whitespace, strip `#`, require exactly 6 hex digits, decode
+    /// `((value >> 16) & 0xFF)/255` per component. On any parse failure it falls
+    /// back to `.gray` — component-identical to `Color.init(hex:)`'s fallback —
+    /// so a malformed value degrades to gray and never crashes (threat T-17-01).
+    ///
+    /// This is the dark-branch parser for `Color.adaptive`; its byte-for-byte
+    /// agreement with the legacy `Color(hex:)` path is what guarantees D-06 dark
+    /// bit-identity, enforced by `DarkBitIdentityTests`.
+    convenience init(hex: String, alpha: CGFloat = 1) {
+        let cleaned = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "#", with: "")
+        guard cleaned.count == 6,
+              let value = UInt64(cleaned, radix: 16) else {
+            // Match Color(hex:)'s `.gray` fallback exactly.
+            self.init(Color.gray)
+            return
+        }
+        let r = CGFloat((value >> 16) & 0xFF) / 255.0
+        let g = CGFloat((value >> 8) & 0xFF) / 255.0
+        let b = CGFloat(value & 0xFF) / 255.0
+        self.init(red: r, green: g, blue: b, alpha: alpha)
+    }
+}
+
+extension Color {
+    /// Build an adaptive light/dark `Color` from two hex strings (with optional
+    /// per-scheme alpha), backed by a `UIColor(dynamicProvider:)` so it resolves
+    /// against the SwiftUI environment's `colorScheme`.
+    ///
+    /// The **dark branch must pass the token's current hex verbatim** (D-06):
+    /// its output is component-identical to the legacy `Color(hex:)` path because
+    /// `UIColor(hex:alpha:)` shares the same sRGB parsing math. This is the single
+    /// mechanism every `DesignTokens` color migrates to from Plan 02 onward.
+    static func adaptive(light: String, lightAlpha: CGFloat = 1,
+                         dark: String, darkAlpha: CGFloat = 1) -> Color {
+        Color(uiColor: UIColor { trait in
+            trait.userInterfaceStyle == .dark
+                ? UIColor(hex: dark, alpha: darkAlpha)
+                : UIColor(hex: light, alpha: lightAlpha)
+        })
     }
 }
