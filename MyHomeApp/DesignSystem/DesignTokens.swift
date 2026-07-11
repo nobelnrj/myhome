@@ -174,13 +174,45 @@ enum DesignTokens {
 
 // MARK: - Neon Glow
 
+/// Scheme-aware neon bloom.
+///
+/// In DARK it renders the EXACT two-layer bloom (tight + wide) the app has always used — the
+/// source colour makes strokes, bars, and rings appear to emit light (D-06: dark path unchanged,
+/// byte-for-byte). In LIGHT it collapses to a single faint tinted drop-shadow (D-14) — a whisper
+/// of the neon language on the bright canvas, never a rendering smudge.
+///
+/// Synergy: inside force-dark dish subtrees (Plan 05) the environment reads `.dark`, so the full
+/// two-layer bloom is preserved automatically (D-11/D-12) with no per-call-site branching.
+///
+/// This is one of only THREE legitimate `@Environment(\.colorScheme)` read sites in the app
+/// (the others: the dish `content()` override and NeuSurface). Do NOT add scheme reads elsewhere.
+private struct NeonGlowModifier: ViewModifier {
+    let color: Color
+    let radius: CGFloat
+    let intensity: Double
+    @Environment(\.colorScheme) private var scheme
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if scheme == .dark {
+            content
+                .shadow(color: color.opacity(0.55 * intensity), radius: radius * 0.55)
+                .shadow(color: color.opacity(0.32 * intensity), radius: radius * 1.5)
+        } else {
+            // D-14 — whisper of the neon language on light; never a rendering smudge.
+            content
+                .shadow(color: color.opacity(0.28 * intensity), radius: radius * 0.7, y: 2)
+        }
+    }
+}
+
 extension View {
-    /// Layered coloured bloom — the neon vibe shared with the Overview orb. Two soft shadows in
-    /// the source colour (tight + wide) make strokes, bars, and rings appear to emit light.
+    /// Layered coloured bloom — the neon vibe shared with the Overview orb. Scheme-aware: the
+    /// full two-layer bloom in dark (verbatim), a single faint tinted drop-shadow in light (D-14).
+    /// Signature is unchanged so all existing `.neonGlow(_:radius:intensity:)` call sites are
+    /// untouched.
     func neonGlow(_ color: Color, radius: CGFloat = 8, intensity: Double = 1) -> some View {
-        self
-            .shadow(color: color.opacity(0.55 * intensity), radius: radius * 0.55)
-            .shadow(color: color.opacity(0.32 * intensity), radius: radius * 1.5)
+        modifier(NeonGlowModifier(color: color, radius: radius, intensity: intensity))
     }
 }
 
