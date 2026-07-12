@@ -73,7 +73,7 @@ struct AccountsListView: View {
                                 showReviewSheet = true
                             }
                             .font(.body)
-                            .tint(DesignTokens.accent)
+                            .tint(DesignTokens.accentText)
                         }
                     }
 

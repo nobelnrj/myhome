@@ -161,7 +161,7 @@ struct SettingsView: View {
                         Button("Sync now") {
                             Task { await gmailSyncController.sync() }
                         }
-                        .foregroundStyle(DesignTokens.accent)
+                        .foregroundStyle(DesignTokens.accentText)
                         .disabled(gmailSyncController.syncStatus == .syncing)
                     }
                 }

@@ -70,7 +70,7 @@ struct UnlockView: View {
             Image(systemName: "house.circle.fill")
                 .resizable()
                 .frame(width: 80, height: 80)
-                .foregroundStyle(DesignTokens.accent)
+                .foregroundStyle(DesignTokens.accentText)
         }
     }
 

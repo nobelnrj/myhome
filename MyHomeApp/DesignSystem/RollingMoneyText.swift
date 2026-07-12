@@ -108,7 +108,7 @@ private struct RollingMoneyTextPreview: View {
                     useNegativeColor.toggle()
                 }
             }
-            .foregroundStyle(DesignTokens.accent)
+            .foregroundStyle(DesignTokens.accentText)
             .font(.body)
 
             Text("To test Reduce Motion: Simulator → Settings → Accessibility → Motion → Reduce Motion ON.\nDigit roll should snap to target with zero intermediate frames.")

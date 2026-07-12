@@ -51,7 +51,7 @@ struct MigrationReviewSheet: View {
                         UserDefaults.standard.set(false, forKey: "accountReviewPending")
                         dismiss()
                     }
-                    .foregroundStyle(DesignTokens.accent)
+                    .foregroundStyle(DesignTokens.accentText)
                 }
             }
             .confirmationDialog(
@@ -87,7 +87,7 @@ struct MigrationReviewSheet: View {
                             .onSubmit { saveRename(for: account) }
                         Button("Done") { saveRename(for: account) }
                             .font(.body)
-                            .tint(DesignTokens.accent)
+                            .tint(DesignTokens.accentText)
                     }
                     .frame(minHeight: 44)
                     if let error = nameError {

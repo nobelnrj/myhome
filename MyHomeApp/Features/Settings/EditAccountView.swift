@@ -164,7 +164,7 @@ struct EditAccountView: View {
                                             .frame(width: 48, height: 48)
                                         Image(systemName: sym)
                                             .font(.title3)
-                                            .foregroundStyle(symbolName == sym ? DesignTokens.accent : DesignTokens.label2)
+                                            .foregroundStyle(symbolName == sym ? DesignTokens.accentText : DesignTokens.label2)
                                     }
                                 }
                                 .buttonStyle(.plain)
@@ -206,7 +206,7 @@ struct EditAccountView: View {
                         saveAccount()
                     }
                     .disabled(!isValid)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
             .onAppear {
