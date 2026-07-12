@@ -225,7 +225,7 @@ struct ReminderEditView: View {
                         Task { await saveReminder() }
                     }
                     .disabled(isSaving)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
             // Permission denied hint (D3-12)
@@ -288,7 +288,7 @@ struct ReminderEditView: View {
                         .foregroundStyle(DesignTokens.label)
                     Spacer()
                     Text(reminderDate.formattedAsReminderDate(isAllDay: isAllDay))
-                        .foregroundStyle(DesignTokens.accent)
+                        .foregroundStyle(DesignTokens.accentText)
                         .font(.subheadline)
                     Image(systemName: showDatePicker ? "chevron.up" : "chevron.down")
                         .foregroundStyle(DesignTokens.label2)
@@ -397,7 +397,7 @@ struct ReminderEditView: View {
                             .foregroundStyle(DesignTokens.label)
                         Spacer()
                         Text(endDate.formattedAsReminderDate(isAllDay: true))
-                            .foregroundStyle(DesignTokens.accent)
+                            .foregroundStyle(DesignTokens.accentText)
                             .font(.subheadline)
                         Image(systemName: showEndDatePicker ? "chevron.up" : "chevron.down")
                             .foregroundStyle(DesignTokens.label2)

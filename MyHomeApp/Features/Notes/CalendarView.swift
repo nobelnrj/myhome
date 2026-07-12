@@ -178,7 +178,7 @@ struct CalendarView: View {
                 Text(day.formattedAsCalendarDay())
                     .font(.body)
                     .fontWeight(isToday ? .bold : .regular)
-                    .foregroundStyle(isToday ? DesignTokens.accent : DesignTokens.label)
+                    .foregroundStyle(isToday ? DesignTokens.accentText : DesignTokens.label)
                     .frame(width: 32, height: 32)
                     .background(
                         Circle()
@@ -390,7 +390,7 @@ struct DayAgendaView: View {
                                             toggleCompletion(item)
                                         } label: {
                                             Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
-                                                .foregroundStyle(item.isChecked ? DesignTokens.accent : DesignTokens.label3)
+                                                .foregroundStyle(item.isChecked ? DesignTokens.accentText : DesignTokens.label3)
                                                 .font(.body)
                                                 .frame(minWidth: 44, minHeight: 44)
                                         }
@@ -561,7 +561,7 @@ private struct RoutineAgendaRow: View {
                 toggleAllBlocks()
             } label: {
                 Image(systemName: isCompleteToday ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isCompleteToday ? DesignTokens.accent : DesignTokens.label3)
+                    .foregroundStyle(isCompleteToday ? DesignTokens.accentText : DesignTokens.label3)
                     .font(.body)
                     .frame(minWidth: 44, minHeight: 44)
             }

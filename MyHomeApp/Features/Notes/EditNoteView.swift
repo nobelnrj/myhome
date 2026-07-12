@@ -253,7 +253,7 @@ struct EditNoteView: View {
                 } label: {
                     Image(systemName: block.isChecked ? "checkmark.square.fill" : "square")
                         .font(.body)
-                        .foregroundStyle(block.isChecked ? DesignTokens.accent : DesignTokens.label3)
+                        .foregroundStyle(block.isChecked ? DesignTokens.accentText : DesignTokens.label3)
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)

@@ -70,7 +70,7 @@ struct NotesListView: View {
                 Button(action: { showingAddSheet = true }) {
                     Image(systemName: "plus")
                 }
-                .tint(DesignTokens.accent)
+                .tint(DesignTokens.accentText)
                 .accessibilityLabel("Add Note")
             }
         }

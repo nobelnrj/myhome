@@ -44,7 +44,7 @@ struct AddNoteView: View {
                         createNote()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
         }

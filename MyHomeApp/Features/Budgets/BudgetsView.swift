@@ -78,7 +78,7 @@ struct BudgetsView: View {
             Button(action: previousMonth) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(DesignTokens.accent)
+                    .foregroundStyle(DesignTokens.accentText)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
@@ -94,7 +94,7 @@ struct BudgetsView: View {
             Button(action: nextMonth) {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(isAtCurrentMonth ? DesignTokens.label3 : DesignTokens.accent)
+                    .foregroundStyle(isAtCurrentMonth ? DesignTokens.label3 : DesignTokens.accentText)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
@@ -257,7 +257,7 @@ private struct BudgetSummaryCard: View {
             VStack(spacing: 10) {
                 Image(systemName: "chart.pie")
                     .font(.system(size: 28))
-                    .foregroundStyle(DesignTokens.accent)
+                    .foregroundStyle(DesignTokens.accentText)
                     .frame(width: 52, height: 52)
                     .background(DesignTokens.fillRecessed, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .neonGlow(DesignTokens.accent, radius: 7, intensity: 0.8)

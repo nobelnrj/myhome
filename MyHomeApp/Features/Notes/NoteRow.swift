@@ -61,7 +61,7 @@ struct NoteRow: View {
                             .font(.caption2)
                             .fontWeight(.medium)
                     }
-                    .foregroundStyle(DesignTokens.accent)
+                    .foregroundStyle(DesignTokens.accentText)
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
                     .background(DesignTokens.accent.opacity(0.12), in: Capsule())
@@ -84,7 +84,7 @@ struct NoteRow: View {
                 // Unchecked: label3; checked: accent (UI-SPEC Screen 4)
                 Image(systemName: block.isChecked ? "checkmark.square.fill" : "square")
                     .font(.caption)
-                    .foregroundStyle(block.isChecked ? DesignTokens.accent : DesignTokens.label3)
+                    .foregroundStyle(block.isChecked ? DesignTokens.accentText : DesignTokens.label3)
                 // Done text: label3 + strikethrough (UI-SPEC Screen 4)
                 Text(block.text.isEmpty ? " " : block.text)
                     .font(.caption)

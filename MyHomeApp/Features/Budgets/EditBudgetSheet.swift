@@ -84,7 +84,7 @@ struct EditBudgetSheet: View {
                         saveBudget()
                     }
                     .disabled(!isSaveEnabled)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
             .confirmationDialog(

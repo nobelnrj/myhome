@@ -49,7 +49,7 @@ struct ManageCategoriesView: View {
                                 addCategory(name: newCategoryName)
                             }
                             .font(.body)
-                            .tint(DesignTokens.accent)
+                            .tint(DesignTokens.accentText)
                         }
                         .frame(minHeight: 44)
                         if let error = nameError {
@@ -136,7 +136,7 @@ struct ManageCategoriesView: View {
                         saveRename(for: category)
                     }
                     .font(.body)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
                 .frame(minHeight: 44)
                 if let error = nameError {
