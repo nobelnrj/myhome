@@ -344,34 +344,41 @@ struct EmbossedBar<Fill: ShapeStyle>: View {
                 // Recessed track — top shade band inside the well + a stronger dark top
                 // edge so the track reads sunken at bar height (too shallow for the full
                 // stroke-blur inner-shadow recipe).
+                // EmbossedBar is NOT a dish (D-14): the track stays a light-tuned recessed well
+                // (`fillRecessed3`, light-gray in light) — no dishSlate, no force-dark override.
+                // Shade band + hairline reuse the Plan-04 neu* family so the well reads recessed
+                // with gray-blue depth in light; dark = the prior black/white opacity verbatim.
                 Capsule().fill(DesignTokens.fillRecessed3)
                     .overlay(
                         Capsule().fill(
                             LinearGradient(stops: [
-                                .init(color: .black.opacity(0.35), location: 0),
+                                .init(color: DesignTokens.neuRimBottom, location: 0),
                                 .init(color: .clear, location: 0.55)
                             ], startPoint: .top, endPoint: .bottom)
                         )
                     )
                     .overlay(
                         Capsule().stroke(
-                            LinearGradient(colors: [.black.opacity(0.55), .white.opacity(0.04)],
+                            LinearGradient(colors: [DesignTokens.neuInnerShade, DesignTokens.neuHairlineLight],
                                            startPoint: .top, endPoint: .bottom),
                             lineWidth: 1
                         )
                         .blur(radius: 0.5)
                         .clipShape(Capsule())
                     )
-                // Embossed fill
+                // Embossed fill — the caller's colors resolve to DEEPENED light variants on the
+                // light track automatically (D-9/D-10); emboss top-highlight/bottom-shade use the
+                // adaptive embossTop/embossBottom pair. The D-14 drop-shadow glow comes from the
+                // scheme-aware neonGlow at call sites (BudgetProgressView:50) — verified visually.
                 if fraction > 0 {
                     Capsule().fill(fill)
                         .overlay(
                             Capsule().fill(
                                 LinearGradient(stops: [
-                                    .init(color: .white.opacity(0.28), location: 0),
+                                    .init(color: DesignTokens.embossTop, location: 0),
                                     .init(color: .clear, location: 0.35),
                                     .init(color: .clear, location: 0.65),
-                                    .init(color: .black.opacity(0.28), location: 1)
+                                    .init(color: DesignTokens.embossBottom, location: 1)
                                 ], startPoint: .top, endPoint: .bottom)
                             )
                         )
@@ -413,21 +420,22 @@ struct VerticalPillGauge: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Recessed vertical well — shade band pressed in from the top plus a stronger
-            // dark top edge, matching the EmbossedBar track depth treatment.
+            // Recessed vertical well — an instrument-window dish (D-12): slate chrome in light,
+            // charcoal VERBATIM in dark. Chrome uses dishSlate + dish* tokens and stays OUTSIDE
+            // the force-dark override below so it harmonizes with the light canvas (not a hole).
             Capsule()
-                .fill(DesignTokens.fillRecessed3)
+                .fill(DesignTokens.dishSlate)
                 .overlay(
                     Capsule().fill(
                         LinearGradient(stops: [
-                            .init(color: .black.opacity(0.35), location: 0),
+                            .init(color: DesignTokens.dishWellShade, location: 0),
                             .init(color: .clear, location: 0.30)
                         ], startPoint: .top, endPoint: .bottom)
                     )
                 )
                 .overlay(
                     Capsule().stroke(
-                        LinearGradient(colors: [.black.opacity(0.55), .white.opacity(0.04)],
+                        LinearGradient(colors: [DesignTokens.dishInnerShade, DesignTokens.dishHairlineLight],
                                        startPoint: .top, endPoint: .bottom),
                         lineWidth: 1
                     )
@@ -438,6 +446,9 @@ struct VerticalPillGauge: View {
 
             // Glowing inner fill pill — light→base vertical gradient of the colour.
             // A zero fraction renders an empty well (no minimum nub implying usage).
+            // D-11: the FILL is dish content — force-dark so the caller's adaptive category
+            // `color` resolves to its luminous dark variant and the .shadow glow renders at
+            // full strength inside the well, in BOTH themes. The well chrome above is untouched.
             if fraction > 0 {
                 Capsule()
                     .fill(color)
@@ -450,6 +461,7 @@ struct VerticalPillGauge: View {
                     .frame(width: wellWidth - inset * 2, height: fillHeight)
                     .padding(.bottom, inset)
                     .shadow(color: color.opacity(0.45), radius: 8)
+                    .environment(\.colorScheme, .dark)
             }
         }
         .accessibilityHidden(true)
