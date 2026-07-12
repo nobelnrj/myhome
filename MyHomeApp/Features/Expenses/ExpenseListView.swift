@@ -214,7 +214,7 @@ struct ExpenseListView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                     .accessibilityLabel("Add")
                 }
             }

@@ -90,7 +90,7 @@ struct AddExpenseView: View {
                         saveExpense()
                     }
                     .disabled(!isSaveEnabled)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
         }

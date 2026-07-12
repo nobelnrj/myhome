@@ -79,7 +79,7 @@ struct AddTransferView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save Transfer") { saveTransfer() }
                         .disabled(!isSaveEnabled)
-                        .tint(DesignTokens.accent)
+                        .tint(DesignTokens.accentText)
                 }
             }
         }

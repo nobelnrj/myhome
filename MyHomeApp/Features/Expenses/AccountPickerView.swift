@@ -42,7 +42,7 @@ struct AccountPickerView: View {
                         Spacer()
                         if selectedAccount == nil {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(DesignTokens.accent)
+                                .foregroundStyle(DesignTokens.accentText)
                         }
                     }
                     .frame(minHeight: 44)
@@ -70,7 +70,7 @@ struct AccountPickerView: View {
                             Spacer()
                             if selectedAccount?.persistentModelID == account.persistentModelID {
                                 Image(systemName: "checkmark")
-                                    .foregroundStyle(DesignTokens.accent)
+                                    .foregroundStyle(DesignTokens.accentText)
                             }
                         }
                         .frame(minHeight: 44)

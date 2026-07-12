@@ -39,7 +39,7 @@ struct CategoryPickerView: View {
                         Spacer()
                         if selectedCategory == nil {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(DesignTokens.accent)
+                                .foregroundStyle(DesignTokens.accentText)
                         }
                     }
                     .frame(minHeight: 44)
@@ -67,7 +67,7 @@ struct CategoryPickerView: View {
                             Spacer()
                             if selectedCategory?.persistentModelID == category.persistentModelID {
                                 Image(systemName: "checkmark")
-                                    .foregroundStyle(DesignTokens.accent)
+                                    .foregroundStyle(DesignTokens.accentText)
                             }
                         }
                         .frame(minHeight: 44)
