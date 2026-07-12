@@ -187,6 +187,11 @@ struct DarkBitIdentityTests {
         // Plan 06 — trend-inset hairline (dark = AnalyticsTrendChart's prior black.45/white.03).
         ("dishInsetHairDark",         DesignTokens.dishInsetHairDark,         Color.black, 0.45),
         ("dishInsetHairLight",        DesignTokens.dishInsetHairLight,        Color.white, 0.03),
+        // Plan 06 — IconTile glyph (dark = #16161C@0.85) + segmented-control chrome.
+        ("iconTileGlyph",             DesignTokens.iconTileGlyph,             Color(hex: "#16161C"), 0.85),
+        ("segRimTop",                 DesignTokens.segRimTop,                 Color.white, 0.06),
+        ("segRimBottom",              DesignTokens.segRimBottom,              Color.black, 0.30),
+        ("segTrackRise",              DesignTokens.segTrackRise,              Color.white, 0.03),
     ]
 
     @Test("plain token resolves in dark exactly to its pre-refactor hex",
@@ -309,6 +314,14 @@ struct ContrastTests {
     func categoryFloors(name: String, token: Color) {
         #expect(ratio(token, on: DesignTokens.bgCanvas) >= 3.0,
                 "\(name) below 3.0:1 on the light canvas")
+    }
+
+    // D-09: the LIGHT IconTile glyph is a white symbol on a DEEPENED category twin. Assert the
+    // worst case — the lightest twin (catOther #475569) — clears the 3.0:1 non-text floor so the
+    // glyph stays legible on every tile in light mode.
+    @Test("iconTileGlyph (light) ≥ 3.0:1 on the lightest category twin catOther — D-09")
+    func iconGlyphOnLightestTile() {
+        #expect(ratio(DesignTokens.iconTileGlyph, on: DesignTokens.catOther) >= 3.0)
     }
 
     @Test("accentOnYellow ≥ 4.5:1 on accent (canary CTA fill) — light env (D-08)")

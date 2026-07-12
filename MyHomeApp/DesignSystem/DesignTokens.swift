@@ -115,6 +115,15 @@ enum DesignTokens {
     static let catEntertainment = Color.adaptive(light: "#7E22CE", dark: "#C084FC")
     static let catOther         = Color.adaptive(light: "#475569", dark: "#94A3B8")
 
+    /// D-09: IconTile glyph color. In DARK the fill is a LUMINOUS category twin (e.g. #2DD4BF),
+    /// so a near-black glyph reads best — `#16161C` @0.85 VERBATIM (byte-identical, D-06). In
+    /// LIGHT the fill is a DEEPENED category twin (e.g. #0F766E dark teal), where a dark glyph
+    /// loses contrast — so light flips to a bright white glyph (≥ 7.5:1 even on the lightest twin
+    /// catOther #475569). Inside a force-dark dish the token auto-resolves to the dark near-black
+    /// glyph on the luminous fill — correct with no per-site conditional.
+    static let iconTileGlyph    = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.92,
+                                                 dark: "#16161C", darkAlpha: 0.85)
+
     // MARK: - Corner Radii
     static let radiusCard:   CGFloat = 26
     static let radiusInner:  CGFloat = 20   // mid-range of 16–22 spec
@@ -197,6 +206,23 @@ enum DesignTokens {
     /// CTA-button pressed float depth — secondary style (was `.black.opacity(0.20)`).
     static let neuButtonShadePressedSoft = Color.adaptive(light: "#8E97AD", lightAlpha: 0.20,
                                                           dark: "#000000", darkAlpha: 0.20)
+
+    // MARK: - Segmented-control chrome (Plan 06 — NeuSegmentedControl, NOT a dish)
+    // The Analytics range picker is a standard on-surface control: a recessed pill TRACK with a
+    // RAISED accent thumb. Its rim/shade colors adapt like the neu* family (bright white
+    // highlight + gray-blue shade in light) while dark stays the pre-refactor opacity VERBATIM.
+    // The two black.45 legs (thumb drop-shadow + track top hairline) reuse `neuHairlineDark`
+    // (dark = black.45 exact); these three tokens cover the values with no neu* equivalent.
+
+    /// Raised active-thumb rim catch-light, top-left (was `.white.opacity(0.06)`).
+    static let segRimTop         = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.90,
+                                                  dark: "#FFFFFF", darkAlpha: 0.06)
+    /// Raised active-thumb rim shade, bottom-right (was `.black.opacity(0.30)`).
+    static let segRimBottom      = Color.adaptive(light: "#9BA3B8", lightAlpha: 0.55,
+                                                  dark: "#000000", darkAlpha: 0.30)
+    /// Recessed-track hairline light end, bottom rise (was `.white.opacity(0.03)`).
+    static let segTrackRise      = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.70,
+                                                  dark: "#FFFFFF", darkAlpha: 0.03)
 
     // MARK: - Instrument-window dish chrome (Plan 05 — D-11/D-12/D-13)
     // The dish CHROME (fill + inner arcs + hairline of NeuCircularWell / VerticalPillGauge)

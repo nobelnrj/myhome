@@ -29,10 +29,11 @@ struct IconTile: View {
             .fill(color)
             .frame(width: size, height: size)
             .overlay(
-                // v2 handoff: dark strokes on colored tiles (not white)
+                // D-09 adaptive glyph: near-black on the LUMINOUS dark fills (v2 handoff), bright
+                // white on the DEEPENED light category twins where a dark glyph would lose contrast.
                 Image(systemName: symbol)
                     .font(.system(size: size * 0.5, weight: .semibold))
-                    .foregroundStyle(Color(hex: "#16161C").opacity(0.85))
+                    .foregroundStyle(DesignTokens.iconTileGlyph)
             )
             .accessibilityHidden(true)
     }

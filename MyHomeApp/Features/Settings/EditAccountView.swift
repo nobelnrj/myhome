@@ -182,9 +182,16 @@ struct EditAccountView: View {
                                             .fill(Color(hex: item.hex))
                                             .frame(width: 40, height: 40)
                                         if colorHex.uppercased() == item.hex.uppercased() {
+                                            // Selection checkmark stays white but gains a dark
+                                            // contrast halo so it reads on the LIGHT swatches
+                                            // (Yellow/Mint/Cyan/Teal) as well as the dark ones —
+                                            // presentation chrome only, never touches the stored
+                                            // account colorHex (user data). Audited in light: the
+                                            // vivid swatch fills themselves read on the light Form.
                                             Image(systemName: "checkmark")
                                                 .font(.caption.weight(.bold))
                                                 .foregroundStyle(.white)
+                                                .shadow(color: .black.opacity(0.35), radius: 1)
                                         }
                                     }
                                 }

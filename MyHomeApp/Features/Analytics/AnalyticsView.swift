@@ -159,12 +159,12 @@ private struct NeuSegmentedControl: View {
                                     .fill(DesignTokens.surfaceElevatedControl)
                                     .overlay(
                                         Capsule().strokeBorder(
-                                            LinearGradient(colors: [.white.opacity(0.06), .black.opacity(0.30)],
+                                            LinearGradient(colors: [DesignTokens.segRimTop, DesignTokens.segRimBottom],
                                                            startPoint: .topLeading, endPoint: .bottomTrailing),
                                             lineWidth: 1
                                         )
                                     )
-                                    .shadow(color: .black.opacity(0.45), radius: 6, x: 3, y: 3)
+                                    .shadow(color: DesignTokens.neuHairlineDark, radius: 6, x: 3, y: 3)
                                     .matchedGeometryEffect(id: "thumb", in: thumb)
                             }
                         }
@@ -178,7 +178,7 @@ private struct NeuSegmentedControl: View {
             Capsule().fill(DesignTokens.fillRecessed3)
                 .overlay(
                     Capsule().stroke(
-                        LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.03)],
+                        LinearGradient(colors: [DesignTokens.neuHairlineDark, DesignTokens.segTrackRise],
                                        startPoint: .top, endPoint: .bottom),
                         lineWidth: 1
                     )
