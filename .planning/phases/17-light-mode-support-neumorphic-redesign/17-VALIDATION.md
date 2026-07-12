@@ -1,11 +1,14 @@
 ---
 phase: 17
 slug: light-mode-support-neumorphic-redesign
-status: planned
+status: passed
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-07-11
+finalized: 2026-07-13
 ---
+
+> **Final gate (2026-07-13):** Full suite **614 pass / 0 fail** on iPhone 17; **69 DarkBitIdentityTests** assertions green (D-06 byte-identity intact). Light review set captured (baselines/light-overview-orb.png, light-analytics-trend-gauges.png, light-budgets-donut.png). **D-13 revised** during end-of-phase sign-off: the light-mode chart/dish/orb treatment changed from "dark instrument window + force-dark neon content" to **soft-white neumorphism with matte content** per the user's reference — dark mode unchanged.
 
 # Phase 17 — Validation Strategy
 
