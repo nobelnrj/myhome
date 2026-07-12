@@ -29,11 +29,12 @@ enum DesignTokens {
     static let fillRecessed2          = Color.adaptive(light: "#DADEE8", dark: "#191920")
     static let fillRecessed3          = Color.adaptive(light: "#D4D8E3", dark: "#15151B")
 
-    /// D-13 instrument-window dish interior. Deep slate in light, `fillRecessed3` VERBATIM in
-    /// dark (the dish fill today). Consumed by Plans 05/06 for the force-dark dish chrome so a
-    /// dish reads as a deliberate deep instrument well on light surfaces — never a "hole into
-    /// dark mode" (#15151B charcoal) that D-13 forbids on a light canvas.
-    static let dishSlate              = Color.adaptive(light: "#3E4250", dark: "#15151B")
+    /// D-13 instrument-window dish interior. Soft gray-blue recessed well in light (user
+    /// sign-off: the deep charcoal-slate original read as too dark a panel on the light canvas —
+    /// lightened to #AAB2C4 so the dish frames the luminous content without being a dark hole),
+    /// `fillRecessed3` VERBATIM in dark (the dish fill today). Consumed by Plans 05/06 for the
+    /// force-dark dish chrome; the neon content still reads, with a gentler glow.
+    static let dishSlate              = Color.adaptive(light: "#AAB2C4", dark: "#15151B")
 
     // MARK: - Accent & Semantic
     // D-08: `accent` stays canary in BOTH schemes — it governs FILLS (canary chips, active
@@ -238,23 +239,24 @@ enum DesignTokens {
     // CONTENT (orb/donut/ring/gauge fills) is forced to the dark environment at the call site so
     // luminous chart colors + full glow render as designed — these tokens govern chrome ONLY.
     // Dark branches = the pre-refactor black/white opacity VERBATIM (DarkBitIdentityTests).
-    // Light branches are a navy-slate family harmonized with `dishSlate` (#3E4250) so the dish
-    // reads as a deliberate deep well on a light canvas — never a "hole into dark mode" (D-13).
+    // Light branches are a light-well family harmonized with the lightened `dishSlate` (#AAB2C4):
+    // gray-blue shade (#8E97AD) + white rim, so the dish reads as a soft recessed instrument
+    // well on the light canvas — not a dark charcoal panel (D-13, revised per user sign-off).
 
     /// Dish dark inner arc, top-left pressed in — NeuCircularWell (was `.black.opacity(0.55)`).
-    static let dishInnerShade    = Color.adaptive(light: "#23262F", lightAlpha: 0.60,
+    static let dishInnerShade    = Color.adaptive(light: "#8E97AD", lightAlpha: 0.55,
                                                   dark: "#000000", darkAlpha: 0.55)
     /// Dish light inner rim, bottom-right rising — NeuCircularWell (was `.white.opacity(0.06)`).
-    static let dishInnerRise     = Color.adaptive(light: "#565B6C", lightAlpha: 0.50,
+    static let dishInnerRise     = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.75,
                                                   dark: "#FFFFFF", darkAlpha: 0.06)
     /// Dish boundary hairline, dark end — NeuCircularWell (was `.black.opacity(0.50)`).
-    static let dishHairlineDark  = Color.adaptive(light: "#23262F", lightAlpha: 0.55,
+    static let dishHairlineDark  = Color.adaptive(light: "#8E97AD", lightAlpha: 0.50,
                                                   dark: "#000000", darkAlpha: 0.50)
     /// Dish boundary hairline, light end — dish + gauge well (was `.white.opacity(0.04)`).
-    static let dishHairlineLight = Color.adaptive(light: "#565B6C", lightAlpha: 0.45,
+    static let dishHairlineLight = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.70,
                                                   dark: "#FFFFFF", darkAlpha: 0.04)
     /// Gauge-well top shade band — VerticalPillGauge dish (was `.black.opacity(0.35)`).
-    static let dishWellShade     = Color.adaptive(light: "#23262F", lightAlpha: 0.42,
+    static let dishWellShade     = Color.adaptive(light: "#8E97AD", lightAlpha: 0.40,
                                                   dark: "#000000", darkAlpha: 0.35)
 
     // MARK: - Trend-chart instrument windows (Plan 06 — D-12 "ALL charts in deep dishes")
@@ -268,12 +270,12 @@ enum DesignTokens {
 
     /// Trend-inset dish fill. Slate in light; `fillRecessed` (#16161C) VERBATIM in dark — the
     /// AnalyticsTrendChart inset fill today, so its dark render cannot shift (D-06).
-    static let dishSlateInset      = Color.adaptive(light: "#3E4250", dark: "#16161C")
+    static let dishSlateInset      = Color.adaptive(light: "#AAB2C4", dark: "#16161C")
     /// Trend-inset boundary hairline, dark end (was `.black.opacity(0.45)` — AnalyticsTrendChart).
-    static let dishInsetHairDark   = Color.adaptive(light: "#23262F", lightAlpha: 0.55,
+    static let dishInsetHairDark   = Color.adaptive(light: "#8E97AD", lightAlpha: 0.50,
                                                     dark: "#000000", darkAlpha: 0.45)
     /// Trend-inset boundary hairline, light end (was `.white.opacity(0.03)` — AnalyticsTrendChart).
-    static let dishInsetHairLight  = Color.adaptive(light: "#565B6C", lightAlpha: 0.45,
+    static let dishInsetHairLight  = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.70,
                                                     dark: "#FFFFFF", darkAlpha: 0.03)
 
     // MARK: - EmbossedBar light glow language (Plan 05 — D-14, NOT a dish)
