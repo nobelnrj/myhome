@@ -552,44 +552,62 @@ extension Text {
 
 // MARK: - Preview
 
-#Preview("NeuSurface — all three states") {
-    ScrollView {
-        VStack(spacing: DesignTokens.spacing22) {
+private struct NeuSurfacePreviewGallery: View {
+    var body: some View {
+        ScrollView {
+            VStack(spacing: DesignTokens.spacing22) {
 
-            // Raised — standard card
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Raised").font(.caption).foregroundStyle(DesignTokens.label2)
-                Text("Standard card surface")
-                    .foregroundStyle(DesignTokens.label)
-                    .neuSurface(.raised)
-            }
+                // Raised — standard card
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Raised").font(.caption).foregroundStyle(DesignTokens.label2)
+                    Text("Standard card surface")
+                        .foregroundStyle(DesignTokens.label)
+                        .neuSurface(.raised)
+                }
 
-            // Floating — hero card
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Floating").font(.caption).foregroundStyle(DesignTokens.label2)
-                Text("Hero / tab-bar surface")
-                    .foregroundStyle(DesignTokens.label)
-                    .neuSurface(.floating)
-            }
+                // Floating — hero card
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Floating").font(.caption).foregroundStyle(DesignTokens.label2)
+                    Text("Hero / tab-bar surface")
+                        .foregroundStyle(DesignTokens.label)
+                        .neuSurface(.floating)
+                }
 
-            // Recessed — input well
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Recessed").font(.caption).foregroundStyle(DesignTokens.label2)
-                Text("Input / track surface")
-                    .foregroundStyle(DesignTokens.label)
-                    .neuSurface(.recessed)
-            }
+                // Recessed — input well
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Recessed").font(.caption).foregroundStyle(DesignTokens.label2)
+                    Text("Input / track surface")
+                        .foregroundStyle(DesignTokens.label)
+                        .neuSurface(.recessed)
+                }
 
-            // Interactive (raised + glassBorder DS-06 affordance)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Interactive (raised)").font(.caption).foregroundStyle(DesignTokens.label2)
-                Text("Tappable card — glassBorder visible at 0.5pt")
-                    .foregroundStyle(DesignTokens.label)
-                    .neuSurface(.raised, isInteractive: true)
+                // Interactive (raised + glassBorder DS-06 affordance)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Interactive (raised)").font(.caption).foregroundStyle(DesignTokens.label2)
+                    Text("Tappable card — glassBorder visible at 0.5pt")
+                        .foregroundStyle(DesignTokens.label)
+                        .neuSurface(.raised, isInteractive: true)
+                }
+
+                // CTA button styles — both neumorphic button vocabularies
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("CTA buttons").font(.caption).foregroundStyle(DesignTokens.label2)
+                    Button("Primary CTA") {}.buttonStyle(NeuPrimaryButtonStyle())
+                    Button("Secondary CTA") {}.buttonStyle(NeuSecondaryButtonStyle())
+                }
             }
+            .padding(DesignTokens.spacing16)
         }
-        .padding(DesignTokens.spacing16)
+        .background(DesignTokens.bgCanvas)
     }
-    .background(DesignTokens.bgCanvas)
-    .preferredColorScheme(.dark)
+}
+
+#Preview("Dark") {
+    NeuSurfacePreviewGallery()
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Light") {
+    NeuSurfacePreviewGallery()
+        .preferredColorScheme(.light)
 }

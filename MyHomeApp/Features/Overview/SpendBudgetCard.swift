@@ -250,7 +250,7 @@ struct SpendBudgetCard: View {
 
 // MARK: - Preview
 
-#Preview("Positive net — has budget") {
+#Preview("Positive net — has budget · Dark") {
     @Previewable @State var tab = 0
     ScrollView {
         SpendBudgetCard(
@@ -268,7 +268,25 @@ struct SpendBudgetCard: View {
     .preferredColorScheme(.dark)
 }
 
-#Preview("Negative net — no budget") {
+#Preview("Positive net — has budget · Light") {
+    @Previewable @State var tab = 0
+    ScrollView {
+        SpendBudgetCard(
+            income: Decimal(45000),
+            spent: Decimal(32000),
+            budgetedSpent: Decimal(28000),
+            totalBudget: Decimal(40000),
+            selectedTab: $tab,
+            onAddExpense: {},
+            onDetails: {}
+        )
+        .padding()
+    }
+    .background(DesignTokens.bgCanvas)
+    .preferredColorScheme(.light)
+}
+
+#Preview("Negative net — no budget · Dark") {
     @Previewable @State var tab = 0
     SpendBudgetCard(
         income: Decimal(20000),
@@ -282,4 +300,20 @@ struct SpendBudgetCard: View {
     .padding()
     .background(DesignTokens.bgCanvas)
     .preferredColorScheme(.dark)
+}
+
+#Preview("Negative net — no budget · Light") {
+    @Previewable @State var tab = 0
+    SpendBudgetCard(
+        income: Decimal(20000),
+        spent: Decimal(35000),
+        budgetedSpent: Decimal(0),
+        totalBudget: Decimal(0),
+        selectedTab: $tab,
+        onAddExpense: {},
+        onDetails: {}
+    )
+    .padding()
+    .background(DesignTokens.bgCanvas)
+    .preferredColorScheme(.light)
 }

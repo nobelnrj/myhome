@@ -68,10 +68,16 @@ struct RollingMoneyText: View {
 
 // MARK: - Preview
 
-#Preview("RollingMoneyText — digit roll demo") {
+#Preview("Dark") {
     RollingMoneyTextPreview()
         .background(DesignTokens.bgCanvas)
         .preferredColorScheme(.dark)
+}
+
+#Preview("Light") {
+    RollingMoneyTextPreview()
+        .background(DesignTokens.bgCanvas)
+        .preferredColorScheme(.light)
 }
 
 private struct RollingMoneyTextPreview: View {
