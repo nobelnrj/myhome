@@ -47,7 +47,7 @@ Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROAD
 - [x] **Phase 14: Restyle Existing Screens + Overview Donut** â Full neumorphic restyle of every existing screen; spend donut with tap-to-filter added to Overview (completed 2026-06-22)
 - [x] **Phase 15: Analytics Screen** â New screen pushed from Overview; AnalyticsAggregator, area chart, category bars, delta chips (completed 2026-06-25)
 - [x] **Phase 16: AI Insight Card** â On-device FoundationModels card on Analytics screen; availability gating, streaming typewriter, numeric integrity (completed 2026-06-27)
-- [ ] **Phase 17: Light Mode Support** — Light-tuned palette, reworked neumorphic shadow directions/opacities, and non-glow treatment for the particle orb + activity rings (promoted from backlog 2026-06-27)
+- [x] **Phase 17: Light Mode Support** — Light-tuned palette, reworked neumorphic shadow directions/opacities, and non-glow treatment for the particle orb + activity rings (promoted from backlog 2026-06-27) (completed 2026-07-12)
 
 ---
 
@@ -217,7 +217,7 @@ Plans:
 
 **Wave 9** *(blocked on Wave 8 completion)*
 
-- [ ] 17-07-PLAN.md — Wave 9: final D-06 double dark sweep + light integration smoke + end-of-phase human sign-off
+- [x] 17-07-PLAN.md — Wave 9: final D-06 double dark sweep + light integration smoke + end-of-phase human sign-off
 
 **Cross-cutting constraints:**
 
@@ -249,4 +249,4 @@ Why it's a phase, not a toggle:
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
 | 16. AI Insight Card | v1.2 | 5/5 | Complete    | 2026-06-27 |
-| 17. Light Mode Support | v1.2 | 8/9 | In Progress|  |
+| 17. Light Mode Support | v1.2 | 9/9 | Complete    | 2026-07-12 |
