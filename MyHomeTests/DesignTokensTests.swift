@@ -158,6 +158,21 @@ struct DarkBitIdentityTests {
         ("separatorHairline",  DesignTokens.separatorHairline,  Color.white,           0.05),
         ("separatorEdge",      DesignTokens.separatorEdge,      Color.black,           0.30),
         ("glassBorder",        DesignTokens.glassBorder,        Color.white,           0.025),
+        // Plan 04 — neumorphic shadow/rim/hairline tokens (dark branch = legacy white/black opacity).
+        ("neuOuterHighlight",         DesignTokens.neuOuterHighlight,         Color.white, 0.05),
+        ("neuOuterShade",             DesignTokens.neuOuterShade,             Color.black, 0.55),
+        ("neuOuterHighlightFloat",    DesignTokens.neuOuterHighlightFloat,    Color.white, 0.055),
+        ("neuOuterShadeFloat",        DesignTokens.neuOuterShadeFloat,        Color.black, 0.62),
+        ("neuRimTop",                 DesignTokens.neuRimTop,                 Color.white, 0.07),
+        ("neuRimBottom",              DesignTokens.neuRimBottom,              Color.black, 0.35),
+        ("neuInnerShade",             DesignTokens.neuInnerShade,             Color.black, 0.55),
+        ("neuInnerRise",              DesignTokens.neuInnerRise,              Color.white, 0.05),
+        ("neuHairlineDark",           DesignTokens.neuHairlineDark,           Color.black, 0.45),
+        ("neuHairlineLight",          DesignTokens.neuHairlineLight,          Color.white, 0.04),
+        ("neuButtonHighlight",        DesignTokens.neuButtonHighlight,        Color.white, 0.04),
+        ("neuButtonShade",            DesignTokens.neuButtonShade,            Color.black, 0.62),
+        ("neuButtonShadePressed",     DesignTokens.neuButtonShadePressed,     Color.black, 0.25),
+        ("neuButtonShadePressedSoft", DesignTokens.neuButtonShadePressedSoft, Color.black, 0.20),
     ]
 
     @Test("plain token resolves in dark exactly to its pre-refactor hex",

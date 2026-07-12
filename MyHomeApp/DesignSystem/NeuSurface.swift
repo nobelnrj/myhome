@@ -131,8 +131,8 @@ private struct RimOverlayModifier: ViewModifier {
                     .strokeBorder(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(0.07),
-                                Color.black.opacity(0.35)
+                                DesignTokens.neuRimTop,
+                                DesignTokens.neuRimBottom
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -162,21 +162,21 @@ private struct RecessedOverlayModifier: ViewModifier {
                 ZStack {
                     // Dark inner shadow — top-left, pressed in
                     shape
-                        .stroke(Color.black.opacity(0.55), lineWidth: 8)
+                        .stroke(DesignTokens.neuInnerShade, lineWidth: 8)
                         .blur(radius: 6)
                         .offset(x: 3, y: 4)
                         .mask(shape)
 
                     // Light inner rim — bottom-right, rising
                     shape
-                        .stroke(Color.white.opacity(0.05), lineWidth: 6)
+                        .stroke(DesignTokens.neuInnerRise, lineWidth: 6)
                         .blur(radius: 5)
                         .offset(x: -2, y: -3)
                         .mask(shape)
 
                     // Crisp hairline edge so the well boundary stays defined under the blur
                     shape.strokeBorder(
-                        LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.04)],
+                        LinearGradient(colors: [DesignTokens.neuHairlineDark, DesignTokens.neuHairlineLight],
                                        startPoint: .topLeading, endPoint: .bottomTrailing),
                         lineWidth: 1
                     )
@@ -259,9 +259,9 @@ struct NeuPrimaryButtonStyle: ButtonStyle {
                 )
             )
             // Float shadow + soft yellow halo — collapse when pressed
-            .shadow(color: .white.opacity(configuration.isPressed ? 0 : 0.04),
+            .shadow(color: configuration.isPressed ? Color.clear : DesignTokens.neuButtonHighlight,
                     radius: 11, x: -9, y: -9)
-            .shadow(color: .black.opacity(configuration.isPressed ? 0.25 : 0.62),
+            .shadow(color: configuration.isPressed ? DesignTokens.neuButtonShadePressed : DesignTokens.neuButtonShade,
                     radius: configuration.isPressed ? 4 : 14,
                     x: configuration.isPressed ? 2 : 11,
                     y: configuration.isPressed ? 2 : 11)
@@ -285,7 +285,7 @@ struct NeuSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: fontSize, weight: .semibold))
-            .foregroundStyle(DesignTokens.accent)
+            .foregroundStyle(DesignTokens.accentText)
             .frame(maxWidth: expands ? .infinity : nil)
             .padding(.vertical, verticalPadding)
             .padding(.horizontal, horizontalPadding)
@@ -304,16 +304,16 @@ struct NeuSecondaryButtonStyle: ButtonStyle {
                 Capsule().strokeBorder(
                     LinearGradient(
                         colors: configuration.isPressed
-                            ? [Color.black.opacity(0.35), Color.white.opacity(0.07)]
-                            : [Color.white.opacity(0.07), Color.black.opacity(0.35)],
+                            ? [DesignTokens.neuRimBottom, DesignTokens.neuRimTop]
+                            : [DesignTokens.neuRimTop, DesignTokens.neuRimBottom],
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     ),
                     lineWidth: 1
                 )
             )
-            .shadow(color: .white.opacity(configuration.isPressed ? 0 : 0.04),
+            .shadow(color: configuration.isPressed ? Color.clear : DesignTokens.neuButtonHighlight,
                     radius: 11, x: -9, y: -9)
-            .shadow(color: .black.opacity(configuration.isPressed ? 0.20 : 0.62),
+            .shadow(color: configuration.isPressed ? DesignTokens.neuButtonShadePressedSoft : DesignTokens.neuButtonShade,
                     radius: configuration.isPressed ? 4 : 14,
                     x: configuration.isPressed ? 2 : 11,
                     y: configuration.isPressed ? 2 : 11)
@@ -522,11 +522,11 @@ struct NeuCircularPuck<Content: View>: View {
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     )
                 )
-                .shadow(color: .white.opacity(0.05), radius: 7, x: -6, y: -6)
-                .shadow(color: .black.opacity(0.55), radius: 9, x: 7, y: 7)
+                .shadow(color: DesignTokens.neuOuterHighlight, radius: 7, x: -6, y: -6)
+                .shadow(color: DesignTokens.neuOuterShade, radius: 9, x: 7, y: 7)
                 .overlay(
                     Circle().strokeBorder(
-                        LinearGradient(colors: [.white.opacity(0.07), .black.opacity(0.35)],
+                        LinearGradient(colors: [DesignTokens.neuRimTop, DesignTokens.neuRimBottom],
                                        startPoint: .topLeading, endPoint: .bottomTrailing),
                         lineWidth: 1
                     )

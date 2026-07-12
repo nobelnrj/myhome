@@ -136,6 +136,62 @@ enum DesignTokens {
     static let tabBarClearance:    CGFloat = 100   // safeAreaInset height for content (TABBAR_H)
     static let tabItemWidth:       CGFloat = 58
 
+    // MARK: - Neumorphic shadow colors (adaptive)
+    // D-05/D-06: every promoted inline surface/button/puck shadow, rim, and hairline color is a
+    // named adaptive pair. The DARK branch is the pre-refactor white/black opacity VERBATIM
+    // (byte-identical, enforced by DarkBitIdentityTests). The LIGHT branch is a top-left bright
+    // white highlight + a gray-blue shade/rim so light surfaces read as the same physical object
+    // under different lighting (tuned on device in Task 2 of Plan 04). Geometry never adapts —
+    // only these colors do.
+
+    /// Outer top-left highlight for a raised card / puck (was `.white.opacity(0.05)`).
+    static let neuOuterHighlight      = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.80,
+                                                       dark: "#FFFFFF", darkAlpha: 0.05)
+    /// Outer bottom-right depth for a raised card / puck (was `.black.opacity(0.55)`).
+    static let neuOuterShade          = Color.adaptive(light: "#8E97AD", lightAlpha: 0.50,
+                                                       dark: "#000000", darkAlpha: 0.55)
+    /// Outer top-left highlight for a floating/hero card (was `.white.opacity(0.055)`).
+    static let neuOuterHighlightFloat = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.90,
+                                                       dark: "#FFFFFF", darkAlpha: 0.055)
+    /// Outer bottom-right depth for a floating/hero card (was `.black.opacity(0.62)`).
+    static let neuOuterShadeFloat     = Color.adaptive(light: "#8E97AD", lightAlpha: 0.60,
+                                                       dark: "#000000", darkAlpha: 0.62)
+
+    /// Inner-rim catch-light (top-left) for raised/secondary/puck rims (was `.white.opacity(0.07)`).
+    static let neuRimTop              = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.90,
+                                                       dark: "#FFFFFF", darkAlpha: 0.07)
+    /// Inner-rim shade (bottom-right) for raised/secondary/puck rims (was `.black.opacity(0.35)`).
+    static let neuRimBottom           = Color.adaptive(light: "#9BA3B8", lightAlpha: 0.55,
+                                                       dark: "#000000", darkAlpha: 0.35)
+
+    /// Recessed-well dark inner arc, top-left pressed in (was `.black.opacity(0.55)`).
+    static let neuInnerShade          = Color.adaptive(light: "#99A1B5", lightAlpha: 0.70,
+                                                       dark: "#000000", darkAlpha: 0.55)
+    /// Recessed-well light inner rim, bottom-right rising (was `.white.opacity(0.05)`).
+    static let neuInnerRise           = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.85,
+                                                       dark: "#FFFFFF", darkAlpha: 0.05)
+
+    /// Crisp well-boundary hairline, dark end (was `.black.opacity(0.45)`).
+    static let neuHairlineDark        = Color.adaptive(light: "#9BA3B8", lightAlpha: 0.50,
+                                                       dark: "#000000", darkAlpha: 0.45)
+    /// Crisp well-boundary hairline, light end (was `.white.opacity(0.04)`).
+    static let neuHairlineLight       = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.70,
+                                                       dark: "#FFFFFF", darkAlpha: 0.04)
+
+    /// CTA-button top-left float highlight, unpressed (was `.white.opacity(0.04)`).
+    static let neuButtonHighlight     = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.80,
+                                                       dark: "#FFFFFF", darkAlpha: 0.04)
+    /// CTA-button bottom-right float depth, unpressed (was `.black.opacity(0.62)`).
+    static let neuButtonShade         = Color.adaptive(light: "#8E97AD", lightAlpha: 0.55,
+                                                       dark: "#000000", darkAlpha: 0.62)
+    /// CTA-button pressed float depth — primary style (was `.black.opacity(0.25)`).
+    /// Dedicated token: NEVER multiply an adaptive token's alpha (that would shift the dark branch).
+    static let neuButtonShadePressed  = Color.adaptive(light: "#8E97AD", lightAlpha: 0.25,
+                                                       dark: "#000000", darkAlpha: 0.25)
+    /// CTA-button pressed float depth — secondary style (was `.black.opacity(0.20)`).
+    static let neuButtonShadePressedSoft = Color.adaptive(light: "#8E97AD", lightAlpha: 0.20,
+                                                          dark: "#000000", darkAlpha: 0.20)
+
     // MARK: - Shadow Helpers
     // NOTE: @ScaledMetric cannot be a static stored property on an enum (Swift compiler error:
     // "property wrappers are not allowed on static stored properties").
@@ -157,14 +213,14 @@ enum DesignTokens {
     /// shadow spreads thinner than a CSS box-shadow at the same radius — 0.05 lands at
     /// the handoff's perceived brightness.
     static let shadowRaised = ShadowSpec(
-        lightColor: .white.opacity(0.05),  lightRadius: 7,  lightX: -6, lightY: -6,
-        darkColor:  .black.opacity(0.55),  darkRadius:  9,  darkX:   7, darkY:   7
+        lightColor: neuOuterHighlight,  lightRadius: 7,  lightX: -6, lightY: -6,
+        darkColor:  neuOuterShade,      darkRadius:  9,  darkX:   7, darkY:   7
     )
 
     /// Floating element (hero card, tab bar capsule, bottom sheet): deeper dual outer shadow
     static let shadowFloat = ShadowSpec(
-        lightColor: .white.opacity(0.055), lightRadius: 11, lightX: -9, lightY: -9,
-        darkColor:  .black.opacity(0.62),  darkRadius:  14, darkX:  11, darkY:  11
+        lightColor: neuOuterHighlightFloat, lightRadius: 11, lightX: -9, lightY: -9,
+        darkColor:  neuOuterShadeFloat,     darkRadius:  14, darkX:  11, darkY:  11
     )
 
     // MARK: - Spring Animations
