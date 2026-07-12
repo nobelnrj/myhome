@@ -99,7 +99,10 @@ struct RootView: View {
                     Label("Settings", systemImage: "gearshape")
                 }
                 .tag(4)        }
-        .tint(DesignTokens.accent)   // D-02: canary yellow selected-tab tint (#FFD60A)
+        // D-07/D-08: selected-tab icon/label is accent ICONOGRAPHY on the (light) bar — a
+        // text/icon role, so it uses accentText (dark amber in light for contrast). accentText's
+        // dark branch == #FFD60A, so dark rendering is byte-identical (D-06).
+        .tint(DesignTokens.accentText)
         .onChange(of: selectedTab) { _, _ in Haptics.selection() }
         .onAppear {
             // Inject the SwiftData context into the sync controller so sync() can persist
