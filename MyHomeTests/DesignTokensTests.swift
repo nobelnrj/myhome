@@ -332,22 +332,25 @@ struct ContrastTests {
         #expect(ratio(DesignTokens.accentOnYellow, on: DesignTokens.accent) >= 4.5)
     }
 
-    // Dish readouts render inside a FORCE-DARK subtree (D-11): the CONTENT tokens (label,
-    // accent) resolve to their DARK branch, while the dishSlate CHROME sits on the light
-    // canvas and resolves LIGHT. We assert the ACTUALLY-RENDERED pairing (dark content on
-    // light-resolved slate), not a same-env pairing — a light-env `label` (#23252E deep ink)
-    // on slate never renders and would be a meaningless ~1.5:1 assertion.
-    @Test("label readout (force-dark) ≥ 4.5:1 on dishSlate chrome (light) — D-13")
+    // D-13 (revised, user sign-off): in LIGHT the chart dishes are soft-white recessed wells
+    // (neumorphism), NOT dark instrument windows. The dish CONTENT is no longer force-dark — it
+    // resolves its LIGHT branch and renders MATTE on the light dish. We assert the actually-
+    // rendered light pairing: the readout label (deep ink) and the matte chart curve on the
+    // light dish must stay legible. Dark rendering is unchanged (force-dark override removed was
+    // a no-op in dark; ambient is already dark — DarkBitIdentityTests cover token dark identity).
+    @Test("label readout (light) ≥ 4.5:1 on dishSlate well (light) — D-13 matte-on-light")
     func labelOnDish() {
-        let r = contrastRatio(DesignTokens.label.resolve(in: env(.dark)),
+        let r = contrastRatio(DesignTokens.label.resolve(in: env(.light)),
                               DesignTokens.dishSlate.resolve(in: env(.light)))
         #expect(r >= 4.5)
     }
 
-    @Test("accent canary (force-dark) ≥ 4.5:1 on dishSlate chrome (light) — D-12")
+    @Test("matte chart curve (light) ≥ 3:1 on dishSlate well (light) — D-12 graphical")
     func accentOnDish() {
-        let r = contrastRatio(DesignTokens.accent.resolve(in: env(.dark)),
+        // chartAmber light is the matte trend-curve hue; a graphical line clears the WCAG
+        // non-text 3:1 bar against the light dish (it is no longer luminous amber on charcoal).
+        let r = contrastRatio(DesignTokens.chartAmber.resolve(in: env(.light)),
                               DesignTokens.dishSlate.resolve(in: env(.light)))
-        #expect(r >= 4.5)
+        #expect(r >= 3.0)
     }
 }
