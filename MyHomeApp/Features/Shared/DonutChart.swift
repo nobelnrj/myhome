@@ -311,6 +311,7 @@ struct GlowParticleRing<Center: View>: View {
     @ViewBuilder var center: () -> Center
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     @State private var animated: Double = 0
     @State private var pulsing = false
 
@@ -388,12 +389,16 @@ struct GlowParticleRing<Center: View>: View {
         // glows green when income-led, red when spend-led, echoing the status chip.
         let rimAccent = share >= 0.5 ? incomeColor : expenseColor
         let rimBright = rimAccent.lightened(0.55)
+        // D-13 light neumorphism: the orb's dark radial body + vignette are built for a dark
+        // dish; on a LIGHT dish they smear grey, so soften them in light while keeping DARK
+        // byte-identical. The dark-ink readout carries its own legibility on light.
+        let isDark = colorScheme == .dark
 
         return ZStack {
             // Colored aura bloom so the orb glows off the card and pulls the eye. Breathes when
             // `pulse` is set (over budget) to draw attention.
             Circle()
-                .fill(rimAccent.opacity(pulse ? 0.30 : 0.22))
+                .fill(rimAccent.opacity(isDark ? (pulse ? 0.30 : 0.22) : (pulse ? 0.16 : 0.10)))
                 .blur(radius: size * 0.18)
                 .frame(width: size * 0.96, height: size * 0.96)
                 .scaleEffect(pulsing ? 1.07 : 1.0)
@@ -402,7 +407,7 @@ struct GlowParticleRing<Center: View>: View {
             // Contact shadow — pools below the sphere (light source top-left), the cue
             // that the orb is resting in its dish rather than floating over it.
             Ellipse()
-                .fill(Color.black.opacity(0.45))
+                .fill(Color.black.opacity(isDark ? 0.45 : 0.10))
                 .frame(width: size * 0.70, height: size * 0.18)
                 .blur(radius: size * 0.05)
                 .offset(x: size * 0.02, y: size * 0.37)
@@ -423,8 +428,8 @@ struct GlowParticleRing<Center: View>: View {
                     // 1. Dark radial body — gives the orb depth without colour bias.
                     ctx.fill(blob, with: .radialGradient(
                         Gradient(stops: [
-                            .init(color: .black.opacity(0.45), location: 0),
-                            .init(color: .black.opacity(0.30), location: 0.55),
+                            .init(color: .black.opacity(isDark ? 0.45 : 0.05), location: 0),
+                            .init(color: .black.opacity(isDark ? 0.30 : 0.03), location: 0.55),
                             .init(color: .black.opacity(0.0), location: 1.0)
                         ]),
                         center: center, startRadius: 0, endRadius: outerR))
@@ -463,8 +468,8 @@ struct GlowParticleRing<Center: View>: View {
                         // quickly so the surrounding particle field stays bright and visible.
                         layer.fill(blob, with: .radialGradient(
                             Gradient(stops: [
-                                .init(color: .black.opacity(0.88), location: 0),
-                                .init(color: .black.opacity(0.62), location: 0.24),
+                                .init(color: isDark ? .black.opacity(0.88) : .white.opacity(0.75), location: 0),
+                                .init(color: isDark ? .black.opacity(0.62) : .white.opacity(0.45), location: 0.24),
                                 .init(color: .black.opacity(0.0), location: 0.46)
                             ]),
                             center: center, startRadius: 0, endRadius: outerR))

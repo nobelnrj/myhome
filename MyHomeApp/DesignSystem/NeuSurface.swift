@@ -461,7 +461,6 @@ struct VerticalPillGauge: View {
                     .frame(width: wellWidth - inset * 2, height: fillHeight)
                     .padding(.bottom, inset)
                     .shadow(color: color.opacity(0.45), radius: 8)
-                    .environment(\.colorScheme, .dark)
             }
         }
         .accessibilityHidden(true)
@@ -523,7 +522,6 @@ struct NeuCircularWell<Content: View>: View {
             // palette + full neonGlow bloom render inside the slate dish in BOTH themes. This
             // override is on content() ONLY — never the chrome ZStack above (Pitfall 4 ordering).
             content()
-                .environment(\.colorScheme, .dark)
         }
         .frame(width: size, height: size)
     }

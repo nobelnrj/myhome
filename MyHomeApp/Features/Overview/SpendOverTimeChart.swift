@@ -95,7 +95,7 @@ struct SpendOverTimeChart: View {
                 .chartXAxis {
                     AxisMarks(values: .automatic) { value in
                         AxisGridLine()
-                            .foregroundStyle(Color.white.opacity(0.045))
+                            .foregroundStyle(DesignTokens.chartGridline)
                         AxisValueLabel(format: xAxisDateFormat(for: selectedRange))
                             .font(.system(size: 11))
                             .foregroundStyle(DesignTokens.label3)
@@ -104,7 +104,7 @@ struct SpendOverTimeChart: View {
                 .chartYAxis {
                     AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
                         AxisGridLine()
-                            .foregroundStyle(Color.white.opacity(0.045))
+                            .foregroundStyle(DesignTokens.chartGridline)
                         AxisValueLabel {
                             if let d = value.as(Double.self) {
                                 Text(Decimal(d).formattedINRCompact())
@@ -121,7 +121,6 @@ struct SpendOverTimeChart: View {
                 // window in LIGHT ONLY. In dark this is a no-op (byte-identical, D-06): the chart
                 // keeps sitting directly on the .raised card exactly as before. In light the amber
                 // curve + gridlines glow inside a deep-slate window on the light card.
-                .environment(\.colorScheme, .dark)
                 .lightSlateInstrumentInset()
             }
         }

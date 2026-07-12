@@ -77,7 +77,6 @@ struct AnalyticsTrendChart: View {
                         )
                     chart
                         .padding(12)
-                        .environment(\.colorScheme, .dark)   // D-11: luminous palette + full glow inside the slate window
                 }
 
                 // Date labels below the inset
@@ -154,7 +153,7 @@ struct AnalyticsTrendChart: View {
         // Faint horizontal gridlines only — no axis labels inside the inset
         .chartYAxis {
             AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { _ in
-                AxisGridLine().foregroundStyle(Color.white.opacity(0.045))
+                AxisGridLine().foregroundStyle(DesignTokens.chartGridline)
             }
         }
         .chartXAxis(.hidden)

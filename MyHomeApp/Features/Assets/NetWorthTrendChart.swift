@@ -69,7 +69,7 @@ struct NetWorthTrendChart: View {
             // 11pt tertiary labels — the data glows, the chrome recedes.
             AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
                 AxisGridLine()
-                    .foregroundStyle(Color.white.opacity(0.045))
+                    .foregroundStyle(DesignTokens.chartGridline)
                 AxisValueLabel {
                     if let d = value.as(Double.self) {
                         Text(Decimal(d).formattedINRCompact())
@@ -82,7 +82,7 @@ struct NetWorthTrendChart: View {
         .chartXAxis {
             AxisMarks(values: .automatic) { value in
                 AxisGridLine()
-                    .foregroundStyle(Color.white.opacity(0.045))
+                    .foregroundStyle(DesignTokens.chartGridline)
                 AxisValueLabel(format: .dateTime.month(.abbreviated))
                     .font(.system(size: 11))
                     .foregroundStyle(DesignTokens.label3)
@@ -94,7 +94,6 @@ struct NetWorthTrendChart: View {
         // sitting inline in NetWorthCard next to its donut dish exactly as before; in light the
         // green line glows inside a deep-slate window. The empty state stays OUTSIDE the window
         // (it is label text on the card, not chart content).
-        .environment(\.colorScheme, .dark)
         .lightSlateInstrumentInset()
         .accessibilityLabel("Net worth trend chart")
         .accessibilityHidden(true)
