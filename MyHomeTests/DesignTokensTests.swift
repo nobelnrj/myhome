@@ -134,6 +134,7 @@ struct DarkBitIdentityTests {
         ("aiVioletTop",              DesignTokens.aiVioletTop,              "#C4A6FF"),
         ("aiVioletBottom",           DesignTokens.aiVioletBottom,           "#7C5CFF"),
         ("aiVioletGlow",             DesignTokens.aiVioletGlow,             "#8B5CF6"),
+        ("aiVioletText",             DesignTokens.aiVioletText,             "#C4A6FF"),
         ("label",                    DesignTokens.label,                    "#ECEDF4"),
         ("catGroceries",             DesignTokens.catGroceries,             "#2DD4BF"),
         ("catDining",                DesignTokens.catDining,                "#FB923C"),
@@ -192,6 +193,8 @@ struct DarkBitIdentityTests {
         ("segRimTop",                 DesignTokens.segRimTop,                 Color.white, 0.06),
         ("segRimBottom",              DesignTokens.segRimBottom,              Color.black, 0.30),
         ("segTrackRise",              DesignTokens.segTrackRise,              Color.white, 0.03),
+        // Plan 06 — AI breathing-orb core specular (dark = white@0.9 verbatim).
+        ("aiVioletOrbCore",           DesignTokens.aiVioletOrbCore,           Color.white, 0.9),
     ]
 
     @Test("plain token resolves in dark exactly to its pre-refactor hex",

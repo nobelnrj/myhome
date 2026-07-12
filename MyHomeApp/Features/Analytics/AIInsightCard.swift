@@ -87,14 +87,15 @@ struct AIInsightCard: View {
 
     private var headerRow: some View {
         HStack(spacing: 8) {
-            // sparkles SF Symbol label (D-04)
+            // sparkles SF Symbol label (D-04/D-15) — deepened violet text twin so the label +
+            // sparkle pass contrast on the LIGHT card (7.19:1); dark == #C4A6FF verbatim.
             Image(systemName: "sparkles")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(DesignTokens.aiVioletTop)
+                .foregroundStyle(DesignTokens.aiVioletText)
             Text("AI INSIGHT")
                 .font(.system(size: 11, weight: .bold))
                 .kerning(1.2)
-                .foregroundStyle(DesignTokens.aiVioletTop)
+                .foregroundStyle(DesignTokens.aiVioletText)
             Spacer()
             // Breathing orb: visible only while generating AND Reduce Motion is off (SC-3/D-04)
             if isGenerating && !reduceMotion {
@@ -169,7 +170,10 @@ struct AIInsightCard: View {
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [.white.opacity(0.9), DesignTokens.aiVioletGlow],
+                        // D-15: white specular core in dark (verbatim); a bright-violet core in
+                        // light so the orb reads as a violet sphere on the light card, not a blank
+                        // white dot. Token-level adaptation — no new @Environment read site.
+                        colors: [DesignTokens.aiVioletOrbCore, DesignTokens.aiVioletGlow],
                         center: UnitPoint(x: 0.35, y: 0.3),
                         startRadius: 0,
                         endRadius: 6

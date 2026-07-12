@@ -76,6 +76,14 @@ enum DesignTokens {
     /// dark rendering is unchanged. Violet stays AI-only.
     static let aiVioletText   = Color.adaptive(light: "#5B21B6", dark: "#C4A6FF")
 
+    /// D-15 breathing-orb core highlight. In DARK the orb's radial core is a bright white
+    /// specular (`.white.opacity(0.9)` VERBATIM) fading to `aiVioletGlow`. In LIGHT a white core
+    /// on the light card is invisible, so the core deepens to a bright violet (#7C3AED) — the orb
+    /// reads as a violet sphere on the light surface. Violet stays AI-only (name carries the
+    /// `aiViolet` prefix so the AI-only scope grep still resolves to exactly two files).
+    static let aiVioletOrbCore = Color.adaptive(light: "#7C3AED", lightAlpha: 1.0,
+                                                dark: "#FFFFFF", darkAlpha: 0.9)
+
     // MARK: - Labels
     // Base: #ECEDF4 for primary; #DCDFEE (rgb 220,223,238) with opacity for secondary tiers
     // Label tiers carry per-scheme baked alpha (dark = current #DCDFEE composite verbatim;
