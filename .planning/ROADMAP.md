@@ -201,7 +201,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 17-09-PLAN.md — Wave 5: accent role-split audit — Notes/Budgets + Overview/Assets/Analytics areas + app-wide accent gate
+- [x] 17-09-PLAN.md — Wave 5: accent role-split audit — Notes/Budgets + Overview/Assets/Analytics areas + app-wide accent gate
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
@@ -249,4 +249,4 @@ Why it's a phase, not a toggle:
 | 14. Restyle Existing Screens + Overview Donut | v1.2 | 8/8 | Complete   | 2026-06-22 |
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
 | 16. AI Insight Card | v1.2 | 5/5 | Complete    | 2026-06-27 |
-| 17. Light Mode Support | v1.2 | 4/9 | In Progress|  |
+| 17. Light Mode Support | v1.2 | 5/9 | In Progress|  |
