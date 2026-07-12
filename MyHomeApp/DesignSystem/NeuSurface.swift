@@ -474,19 +474,24 @@ struct NeuCircularWell<Content: View>: View {
             // Dish chrome rasterized as one layer (drawingGroup) — the animated content
             // (e.g. the hero orb's TimelineView) stays live on top, outside the group.
             ZStack {
+                // Dish CHROME uses adaptive dish* tokens: deep slate in light, `#15151B`
+                // charcoal VERBATIM in dark. The chrome MUST NOT receive the force-dark
+                // override below (RESEARCH Pitfall 4 / D-13) — wrapping the whole ZStack
+                // would resolve the chrome to charcoal on a light canvas = a "hole into
+                // dark mode". Only `content()` gets the override.
                 Circle()
-                    .fill(DesignTokens.fillRecessed3)
+                    .fill(DesignTokens.dishSlate)
 
                 // Dark inner shadow — top-left, pressed in
                 Circle()
-                    .stroke(Color.black.opacity(0.55), lineWidth: depth * 1.6)
+                    .stroke(DesignTokens.dishInnerShade, lineWidth: depth * 1.6)
                     .blur(radius: depth * 1.1)
                     .offset(x: depth * 0.55, y: depth * 0.7)
                     .mask(Circle())
 
                 // Light inner rim — bottom-right, rising
                 Circle()
-                    .stroke(Color.white.opacity(0.06), lineWidth: depth)
+                    .stroke(DesignTokens.dishInnerRise, lineWidth: depth)
                     .blur(radius: depth * 0.8)
                     .offset(x: -depth * 0.4, y: -depth * 0.55)
                     .mask(Circle())
@@ -494,14 +499,19 @@ struct NeuCircularWell<Content: View>: View {
                 // Crisp hairline edge so the well boundary stays defined under the blur
                 Circle()
                     .strokeBorder(
-                        LinearGradient(colors: [.black.opacity(0.50), .white.opacity(0.04)],
+                        LinearGradient(colors: [DesignTokens.dishHairlineDark, DesignTokens.dishHairlineLight],
                                        startPoint: .topLeading, endPoint: .bottomTrailing),
                         lineWidth: 1
                     )
             }
             .drawingGroup()
 
+            // D-11/D-12/D-13 instrument window: force the dish CONTENT (orb particles, donut
+            // segments, ring fills) into the dark environment so the original luminous chart
+            // palette + full neonGlow bloom render inside the slate dish in BOTH themes. This
+            // override is on content() ONLY — never the chrome ZStack above (Pitfall 4 ordering).
             content()
+                .environment(\.colorScheme, .dark)
         }
         .frame(width: size, height: size)
     }

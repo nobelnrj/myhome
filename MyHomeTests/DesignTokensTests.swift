@@ -173,6 +173,14 @@ struct DarkBitIdentityTests {
         ("neuButtonShade",            DesignTokens.neuButtonShade,            Color.black, 0.62),
         ("neuButtonShadePressed",     DesignTokens.neuButtonShadePressed,     Color.black, 0.25),
         ("neuButtonShadePressedSoft", DesignTokens.neuButtonShadePressedSoft, Color.black, 0.20),
+        // Plan 05 — instrument-window dish chrome + EmbossedBar emboss (dark = legacy opacity).
+        ("dishInnerShade",            DesignTokens.dishInnerShade,            Color.black, 0.55),
+        ("dishInnerRise",             DesignTokens.dishInnerRise,             Color.white, 0.06),
+        ("dishHairlineDark",          DesignTokens.dishHairlineDark,          Color.black, 0.50),
+        ("dishHairlineLight",         DesignTokens.dishHairlineLight,         Color.white, 0.04),
+        ("dishWellShade",             DesignTokens.dishWellShade,             Color.black, 0.35),
+        ("embossTop",                 DesignTokens.embossTop,                 Color.white, 0.28),
+        ("embossBottom",              DesignTokens.embossBottom,              Color.black, 0.28),
     ]
 
     @Test("plain token resolves in dark exactly to its pre-refactor hex",

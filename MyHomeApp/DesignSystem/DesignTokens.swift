@@ -192,6 +192,44 @@ enum DesignTokens {
     static let neuButtonShadePressedSoft = Color.adaptive(light: "#8E97AD", lightAlpha: 0.20,
                                                           dark: "#000000", darkAlpha: 0.20)
 
+    // MARK: - Instrument-window dish chrome (Plan 05 — D-11/D-12/D-13)
+    // The dish CHROME (fill + inner arcs + hairline of NeuCircularWell / VerticalPillGauge)
+    // is a deep-slate instrument window in light and BYTE-IDENTICAL to today in dark. The dish
+    // CONTENT (orb/donut/ring/gauge fills) is forced to the dark environment at the call site so
+    // luminous chart colors + full glow render as designed — these tokens govern chrome ONLY.
+    // Dark branches = the pre-refactor black/white opacity VERBATIM (DarkBitIdentityTests).
+    // Light branches are a navy-slate family harmonized with `dishSlate` (#3E4250) so the dish
+    // reads as a deliberate deep well on a light canvas — never a "hole into dark mode" (D-13).
+
+    /// Dish dark inner arc, top-left pressed in — NeuCircularWell (was `.black.opacity(0.55)`).
+    static let dishInnerShade    = Color.adaptive(light: "#23262F", lightAlpha: 0.60,
+                                                  dark: "#000000", darkAlpha: 0.55)
+    /// Dish light inner rim, bottom-right rising — NeuCircularWell (was `.white.opacity(0.06)`).
+    static let dishInnerRise     = Color.adaptive(light: "#565B6C", lightAlpha: 0.50,
+                                                  dark: "#FFFFFF", darkAlpha: 0.06)
+    /// Dish boundary hairline, dark end — NeuCircularWell (was `.black.opacity(0.50)`).
+    static let dishHairlineDark  = Color.adaptive(light: "#23262F", lightAlpha: 0.55,
+                                                  dark: "#000000", darkAlpha: 0.50)
+    /// Dish boundary hairline, light end — dish + gauge well (was `.white.opacity(0.04)`).
+    static let dishHairlineLight = Color.adaptive(light: "#565B6C", lightAlpha: 0.45,
+                                                  dark: "#FFFFFF", darkAlpha: 0.04)
+    /// Gauge-well top shade band — VerticalPillGauge dish (was `.black.opacity(0.35)`).
+    static let dishWellShade     = Color.adaptive(light: "#23262F", lightAlpha: 0.42,
+                                                  dark: "#000000", darkAlpha: 0.35)
+
+    // MARK: - EmbossedBar light glow language (Plan 05 — D-14, NOT a dish)
+    // EmbossedBar is a glow-on-light-surface element, not an instrument window: its track stays
+    // `fillRecessed3` (light-gray recessed well) and its fill carries an emboss top-highlight +
+    // bottom-shade. These fill-emboss colors are the only NEW tokens; the track shade/hairline
+    // reuse the Plan-04 neu* family (neuRimBottom / neuInnerShade / neuHairlineLight).
+
+    /// EmbossedBar fill top inner highlight (was `.white.opacity(0.28)`).
+    static let embossTop         = Color.adaptive(light: "#FFFFFF", lightAlpha: 0.45,
+                                                  dark: "#FFFFFF", darkAlpha: 0.28)
+    /// EmbossedBar fill bottom inner shade (was `.black.opacity(0.28)`).
+    static let embossBottom      = Color.adaptive(light: "#8E97AD", lightAlpha: 0.30,
+                                                  dark: "#000000", darkAlpha: 0.28)
+
     // MARK: - Shadow Helpers
     // NOTE: @ScaledMetric cannot be a static stored property on an enum (Swift compiler error:
     // "property wrappers are not allowed on static stored properties").
