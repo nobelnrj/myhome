@@ -146,6 +146,9 @@ struct DarkBitIdentityTests {
         ("catSubscriptions",         DesignTokens.catSubscriptions,         "#22D3EE"),
         ("catEntertainment",         DesignTokens.catEntertainment,         "#C084FC"),
         ("catOther",                 DesignTokens.catOther,                 "#94A3B8"),
+        // Plan 06 — trend-chart amber + slate-inset fill (dark = pre-refactor value verbatim).
+        ("chartAmber",               DesignTokens.chartAmber,               "#FFB43C"),
+        ("dishSlateInset",           DesignTokens.dishSlateInset,           "#16161C"),
     ]
 
     /// Alpha-carrying tokens → their legacy composite (base color + baked opacity).
@@ -181,6 +184,9 @@ struct DarkBitIdentityTests {
         ("dishWellShade",             DesignTokens.dishWellShade,             Color.black, 0.35),
         ("embossTop",                 DesignTokens.embossTop,                 Color.white, 0.28),
         ("embossBottom",              DesignTokens.embossBottom,              Color.black, 0.28),
+        // Plan 06 — trend-inset hairline (dark = AnalyticsTrendChart's prior black.45/white.03).
+        ("dishInsetHairDark",         DesignTokens.dishInsetHairDark,         Color.black, 0.45),
+        ("dishInsetHairLight",        DesignTokens.dishInsetHairLight,        Color.white, 0.03),
     ]
 
     @Test("plain token resolves in dark exactly to its pre-refactor hex",

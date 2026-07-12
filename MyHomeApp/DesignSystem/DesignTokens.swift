@@ -50,6 +50,12 @@ enum DesignTokens {
     static let negative      = Color.adaptive(light: "#B91C1C", dark: "#FF6B6B")
     static let orange        = Color.adaptive(light: "#A34209", dark: "#FFB020")
 
+    /// D-12: trend-chart line/area/glow amber. Same value in BOTH schemes — this hue only ever
+    /// renders inside a force-dark instrument window (the three trend-chart insets), so it stays
+    /// luminous #FFB43C regardless of app scheme. The named token replaces four inline
+    /// `Color(hex: "#FFB43C")` sites (SpendOverTimeChart, AnalyticsTrendChart) for auditability.
+    static let chartAmber    = Color.adaptive(light: "#FFB43C", dark: "#FFB43C")
+
     /// D-08 role split — text/icon accent (NOT a fill). Dark amber on light (5.12:1 on the
     /// #E3E6EE canvas per the RESEARCH WCAG table); canary in dark. The dark branch is
     /// identical to `accent` so dark rendering cannot shift when call sites migrate a text/icon
@@ -217,6 +223,25 @@ enum DesignTokens {
     static let dishWellShade     = Color.adaptive(light: "#23262F", lightAlpha: 0.42,
                                                   dark: "#000000", darkAlpha: 0.35)
 
+    // MARK: - Trend-chart instrument windows (Plan 06 — D-12 "ALL charts in deep dishes")
+    // The three trend charts (Analytics trend, spend-over-time, net-worth trend) render their
+    // luminous curve inside a slate instrument window. The window FILL + hairline are chrome
+    // (adaptive slate in light); the Chart CONTENT is force-dark at the call site so amber/neon
+    // stay luminous. AnalyticsTrendChart already had a recessed inset today, so its dish tokens
+    // keep the pre-refactor DARK values VERBATIM (#16161C fill, black.45/white.03 hairline) — a
+    // D-06-safe swap. SpendOverTimeChart + NetWorthTrendChart gain a NET-NEW inset that renders
+    // in LIGHT ONLY (scheme-gated at the call site), so their dark render is byte-identical.
+
+    /// Trend-inset dish fill. Slate in light; `fillRecessed` (#16161C) VERBATIM in dark — the
+    /// AnalyticsTrendChart inset fill today, so its dark render cannot shift (D-06).
+    static let dishSlateInset      = Color.adaptive(light: "#3E4250", dark: "#16161C")
+    /// Trend-inset boundary hairline, dark end (was `.black.opacity(0.45)` — AnalyticsTrendChart).
+    static let dishInsetHairDark   = Color.adaptive(light: "#23262F", lightAlpha: 0.55,
+                                                    dark: "#000000", darkAlpha: 0.45)
+    /// Trend-inset boundary hairline, light end (was `.white.opacity(0.03)` — AnalyticsTrendChart).
+    static let dishInsetHairLight  = Color.adaptive(light: "#565B6C", lightAlpha: 0.45,
+                                                    dark: "#FFFFFF", darkAlpha: 0.03)
+
     // MARK: - EmbossedBar light glow language (Plan 05 — D-14, NOT a dish)
     // EmbossedBar is a glow-on-light-surface element, not an instrument window: its track stays
     // `fillRecessed3` (light-gray recessed well) and its fill carries an emboss top-highlight +
@@ -346,6 +371,60 @@ extension View {
     /// untouched.
     func neonGlow(_ color: Color, radius: CGFloat = 8, intensity: Double = 1) -> some View {
         modifier(NeonGlowModifier(color: color, radius: radius, intensity: intensity))
+    }
+}
+
+// MARK: - Light-only slate instrument window (Plan 06 — D-12 / D-06)
+
+/// Wraps trend-chart CONTENT in a slate instrument window **in LIGHT ONLY**. In dark it returns
+/// the content untouched, so the chart's dark render stays byte-identical (D-06) — the inset is
+/// NET-NEW chrome and net-new pixels in dark would violate the dark-bit-identity guarantee. Used
+/// by the two trend charts that had NO inset before (SpendOverTimeChart, NetWorthTrendChart);
+/// AnalyticsTrendChart already had a recessed inset in both schemes and uses its dish tokens
+/// inline instead.
+///
+/// The modifier's own `@Environment(\.colorScheme)` reads the AMBIENT scheme (the chrome must
+/// resolve slate on the light canvas), while the caller separately forces the chart content to
+/// `.dark` so its amber/neon palette stays luminous inside the slate window. This is the THIRD
+/// and final sanctioned `@Environment(\.colorScheme)` read site (the others: `NeonGlowModifier`
+/// and the `NeuCircularWell` dish content override) — do NOT add scheme reads elsewhere.
+private struct LightSlateInstrumentInset: ViewModifier {
+    @Environment(\.colorScheme) private var scheme
+    var cornerRadius: CGFloat = 18
+    var padding: CGFloat = 12
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if scheme == .light {
+            ZStack {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(DesignTokens.dishSlateInset)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .stroke(
+                                LinearGradient(colors: [DesignTokens.dishInsetHairDark,
+                                                        DesignTokens.dishInsetHairLight],
+                                               startPoint: .top, endPoint: .bottom),
+                                lineWidth: 1.5
+                            )
+                            .blur(radius: 1)
+                            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                    )
+                content.padding(padding)
+            }
+        } else {
+            // D-06: dark render unchanged — no net-new inset pixels on the dark path.
+            content
+        }
+    }
+}
+
+extension View {
+    /// D-12 light-only slate instrument window for the two NET-NEW trend-chart insets
+    /// (SpendOverTimeChart, NetWorthTrendChart). Dark render is byte-identical (the modifier is a
+    /// no-op in dark). Force the wrapped chart content to `.dark` separately so its palette glows.
+    func lightSlateInstrumentInset(cornerRadius: CGFloat = 18, padding: CGFloat = 12) -> some View {
+        modifier(LightSlateInstrumentInset(cornerRadius: cornerRadius, padding: padding))
     }
 }
 

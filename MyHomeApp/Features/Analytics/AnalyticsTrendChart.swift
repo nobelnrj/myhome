@@ -53,23 +53,32 @@ struct AnalyticsTrendChart: View {
                 .frame(height: 180)
         } else {
             VStack(spacing: 8) {
-                // Recessed plot inset holding the glowing line
-                chart
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(DesignTokens.fillRecessed)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .stroke(
-                                        LinearGradient(colors: [.black.opacity(0.45), .white.opacity(0.03)],
-                                                       startPoint: .top, endPoint: .bottom),
-                                        lineWidth: 1.5
-                                    )
-                                    .blur(radius: 1)
-                                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                            )
-                    )
+                // Recessed SLATE instrument window holding the glowing line (D-12: "ALL charts
+                // in deep dishes"). The window CHROME (slate fill + hairline) resolves in the
+                // ambient scheme; the Chart CONTENT is forced to `.dark` so the amber curve,
+                // gridlines, and warm glow render luminous on slate in BOTH themes. Dark render
+                // is byte-identical — `dishSlateInset` dark == #16161C (the prior fillRecessed)
+                // and the hairline dark == black.45/white.03 verbatim (D-06). Chrome and content
+                // are ZStack SIBLINGS so the force-dark override never touches the slate chrome
+                // (no "hole into dark mode", D-13 / Pitfall 4).
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(DesignTokens.dishSlateInset)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(
+                                    LinearGradient(colors: [DesignTokens.dishInsetHairDark,
+                                                            DesignTokens.dishInsetHairLight],
+                                                   startPoint: .top, endPoint: .bottom),
+                                    lineWidth: 1.5
+                                )
+                                .blur(radius: 1)
+                                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        )
+                    chart
+                        .padding(12)
+                        .environment(\.colorScheme, .dark)   // D-11: luminous palette + full glow inside the slate window
+                }
 
                 // Date labels below the inset
                 axisLabels
@@ -89,7 +98,7 @@ struct AnalyticsTrendChart: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color(hex: "#FFB43C").opacity(0.26), .clear],
+                        colors: [DesignTokens.chartAmber.opacity(0.26), .clear],
                         startPoint: .top, endPoint: .bottom
                     )
                 )
@@ -151,7 +160,7 @@ struct AnalyticsTrendChart: View {
         .chartXAxis(.hidden)
         .frame(height: 150)
         // Warm glow under the line (the area fades to clear, so the line carries it)
-        .shadow(color: Color(hex: "#FFB43C").opacity(0.30), radius: 5, y: 5)
+        .shadow(color: DesignTokens.chartAmber.opacity(0.30), radius: 5, y: 5)
     }
 
     // MARK: - Axis labels (outside the inset)

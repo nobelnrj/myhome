@@ -89,6 +89,13 @@ struct NetWorthTrendChart: View {
             }
         }
         .frame(height: 140)
+        // D-12: force the neon-green palette luminous, then wrap the compact plot in a slate
+        // instrument window in LIGHT ONLY. Dark render is byte-identical (D-06): the chart keeps
+        // sitting inline in NetWorthCard next to its donut dish exactly as before; in light the
+        // green line glows inside a deep-slate window. The empty state stays OUTSIDE the window
+        // (it is label text on the card, not chart content).
+        .environment(\.colorScheme, .dark)
+        .lightSlateInstrumentInset()
         .accessibilityLabel("Net worth trend chart")
         .accessibilityHidden(true)
         .accessibilityElement(children: .combine)

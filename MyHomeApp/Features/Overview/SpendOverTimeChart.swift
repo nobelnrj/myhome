@@ -78,7 +78,7 @@ struct SpendOverTimeChart: View {
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(LinearGradient(
-                        colors: [Color(hex: "#FFB43C").opacity(0.26), .clear],
+                        colors: [DesignTokens.chartAmber.opacity(0.26), .clear],
                         startPoint: .top, endPoint: .bottom))
 
                     LineMark(
@@ -115,8 +115,14 @@ struct SpendOverTimeChart: View {
                     }
                 }
                 .frame(height: 200)
-                .shadow(color: Color(hex: "#FFB43C").opacity(0.30), radius: 5, y: 5)
+                .shadow(color: DesignTokens.chartAmber.opacity(0.30), radius: 5, y: 5)
                 .accessibilityLabel("Spend over time chart, \(selectedRange.label) view")
+                // D-12: force the chart palette luminous, then wrap it in a slate instrument
+                // window in LIGHT ONLY. In dark this is a no-op (byte-identical, D-06): the chart
+                // keeps sitting directly on the .raised card exactly as before. In light the amber
+                // curve + gridlines glow inside a deep-slate window on the light card.
+                .environment(\.colorScheme, .dark)
+                .lightSlateInstrumentInset()
             }
         }
         .neuSurface(.raised)
