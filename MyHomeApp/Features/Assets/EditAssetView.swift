@@ -222,7 +222,7 @@ struct EditAssetView: View {
                         saveAsset()
                     }
                     .disabled(!isValid)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
             .onAppear {

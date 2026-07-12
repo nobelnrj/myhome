@@ -150,7 +150,7 @@ private struct NeuSegmentedControl: View {
                 } label: {
                     Text(range.label)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(selection == range ? DesignTokens.accent : DesignTokens.label2)
+                        .foregroundStyle(selection == range ? DesignTokens.accentText : DesignTokens.label2)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background {

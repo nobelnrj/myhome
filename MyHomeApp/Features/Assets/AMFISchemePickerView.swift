@@ -77,7 +77,7 @@ struct AMFISchemePickerView: View {
             Button("Fetch Now") {
                 amfiNavService.forceRefresh()
             }
-            .tint(DesignTokens.accent)
+            .tint(DesignTokens.accentText)
             Spacer()
         }
     }
@@ -106,7 +106,7 @@ struct AMFISchemePickerView: View {
                         Spacer()
                         if selectedSchemeCode == scheme.code {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(DesignTokens.accent)
+                                .foregroundStyle(DesignTokens.accentText)
                         }
                     }
                     .frame(minHeight: 44)

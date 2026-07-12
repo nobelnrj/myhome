@@ -137,7 +137,7 @@ struct SpendBudgetCard: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
-                .tint(DesignTokens.accent)
+                .tint(DesignTokens.accentText)
             }
 
             // CTA row — one gradient primary, one raised secondary (v2 CTA system)

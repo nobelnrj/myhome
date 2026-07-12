@@ -92,7 +92,7 @@ struct ReconcileView: View {
                         reconcile()
                     }
                     .disabled(!isValid)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
             .onAppear {

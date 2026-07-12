@@ -250,7 +250,7 @@ struct SIPSetupView: View {
                         saveSIP()
                     }
                     .disabled(!isValid)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
             .onAppear {

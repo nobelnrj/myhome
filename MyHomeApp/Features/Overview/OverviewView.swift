@@ -325,8 +325,8 @@ private struct OverviewMonthContent: View {
             if let action {
                 Button(action.label, action: action.run)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(DesignTokens.accent)
-                    .tint(DesignTokens.accent)
+                    .foregroundStyle(DesignTokens.accentText)
+                    .tint(DesignTokens.accentText)
             }
         }
         .padding(.bottom, -8)

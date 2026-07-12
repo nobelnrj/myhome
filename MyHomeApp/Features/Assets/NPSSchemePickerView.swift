@@ -83,7 +83,7 @@ struct NPSSchemePickerView: View {
             Button("Fetch Now") {
                 npsNavService.forceRefresh()
             }
-            .tint(DesignTokens.accent)
+            .tint(DesignTokens.accentText)
             Spacer()
         }
     }
@@ -121,7 +121,7 @@ struct NPSSchemePickerView: View {
                         Spacer()
                         if selectedSchemeCode == scheme.code {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(DesignTokens.accent)
+                                .foregroundStyle(DesignTokens.accentText)
                         }
                     }
                     .frame(minHeight: 44)  // 44pt touch target

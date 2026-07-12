@@ -60,7 +60,7 @@ struct PinnedNoteCard: View {
                 } else {
                     Image(systemName: "pin.fill")
                         .font(.caption)
-                        .foregroundStyle(DesignTokens.accent)
+                        .foregroundStyle(DesignTokens.accentText)
                         .accessibilityHidden(true)
                 }
             }
@@ -88,7 +88,7 @@ struct PinnedNoteCard: View {
                         selectedTab = 3
                     }
                     .font(.subheadline)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                     .accessibilityLabel("Open \(note.title) in Notes tab")
                 }
             } else {
@@ -104,7 +104,7 @@ struct PinnedNoteCard: View {
                         selectedTab = 3
                     }
                     .font(.subheadline)
-                    .tint(DesignTokens.accent)
+                    .tint(DesignTokens.accentText)
                 }
             }
         }

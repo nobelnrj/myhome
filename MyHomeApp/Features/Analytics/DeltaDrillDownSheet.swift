@@ -77,7 +77,7 @@ struct DeltaDrillDownSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
-                        .foregroundStyle(DesignTokens.accent)
+                        .foregroundStyle(DesignTokens.accentText)
                         .fontWeight(.semibold)
                 }
             }
