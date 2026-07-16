@@ -2,26 +2,30 @@
 
 ## Current State
 
-**Shipped:** v1.1 Accounts, Assets & Household Polish (2026-06-20) — see [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md). The app is now a light household finance hub: account-aware spend with self-transfer detection, a net-worth Asset Tracker (free AMFI MF NAV + manual holdings + SIP automation), and daily-routine notes — on top of the v1.0 MVP (automated Gmail expense ingestion, budgets, notes/reminders, overview, Face ID).
+**Shipped:** v1.2 Neumorphic Redesign (2026-07-13) — see [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md). The app is now a polished, cohesive neumorphic (Soft UI) product with light + dark theming: a single-source design system, every screen restyled, a "where it's going" spend donut on Overview, a dedicated Analytics screen (trend chart, category bars, delta chips), and an on-device AI Insight card (Apple FoundationModels, iOS 26) — on top of the v1.1 finance hub and v1.0 MVP.
 
-## Current Milestone: v1.2 Neumorphic Redesign
+## Current Milestone: v1.3 (to be defined)
+
+**Goal:** _Scope not yet defined — run `/gsd-new-milestone` to gather context and generate requirements + roadmap._
+
+<details>
+<summary>Previous milestone: v1.2 Neumorphic Redesign (shipped 2026-07-13)</summary>
 
 **Goal:** A full neumorphic (Soft UI) visual redesign of the entire app, plus the design handoff's net-new surfaces — making My Home look and feel like a polished, cohesive personal-finance product rather than a stock SwiftUI app.
 
-**Target features:**
-- **Neumorphic design system** — implement the exact tokens (charcoal surfaces, dual light/dark shadows, canary-yellow accent, 26px radii, floating capsule tab bar, rolling money readouts) from `design/design_handoff_myhome_neumorphic/`.
-- **Restyle every screen** — Overview, Activity, Budgets, Notes, Settings AND the unshown surfaces (Accounts, Assets/Net-worth, Transfer Inbox, Gmail/Ingestion) to one consistent neumorphic look (decided: restyle all).
-- **Dedicated Analytics screen** (net-new) — time-range tabs, spending-trend area chart, by-category bars, delta chips.
-- **AI Insight card** (net-new) — natural-language spending insight powered by **Apple FoundationModels on-device** (free, private, offline; no API/keys).
-- **"Where it's going" spend donut** (net-new) on Overview.
+- Neumorphic design system — tokens, `NeuSurface` dual-shadow modifiers, `RollingMoneyText`, accessibility infra.
+- Restyle every screen — all nine screen groups to one consistent neumorphic look; zero regressions.
+- "Where it's going" spend donut on Overview with tap-to-filter into Activity.
+- Dedicated Analytics screen — time-range tabs, spending-trend area chart, by-category bars, inverted-color delta chips, single testable `AnalyticsAggregator`.
+- AI Insight card — on-device Apple FoundationModels (iOS 26), two-layer availability gating, guided generation, numeric-integrity verification, streaming typewriter.
+- Light mode support (added post-freeze, Phase 17) — full adaptive palette, reworked shadows, non-glow orb/rings, byte-identical dark rendering.
 
-**Key context:**
-- Still local-only (no CloudKit/sharing — remains the v2.0 trigger gated on the $99/yr upgrade).
-- AI Insight is **on-device only** (FoundationModels, iOS 26 / Apple Intelligence) — finance data never leaves the device; gracefully degrades where unsupported.
-- This is primarily a visual/UX milestone over a feature-complete app — redesign first, then layer in the net-new surfaces.
+Local-only, zero new dependencies, iOS 17 floor, no schema change. DS-03 floating tab bar reverted to native.
+
+</details>
 
 <details>
-<summary>Previous milestone: v1.1 Accounts, Assets & Household Polish (shipped 2026-06-20)</summary>
+<summary>Earlier milestone: v1.1 Accounts, Assets & Household Polish (shipped 2026-06-20)</summary>
 
 **Goal:** Grow My Home from an automated expense tracker into a light household finance + ops hub — account-aware spend with self-transfer detection, a net-worth asset tracker, smarter daily-routine reminders, and a stability/UX cleanup pass.
 

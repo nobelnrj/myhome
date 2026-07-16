@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Neumorphic Redesign
-status: milestone_complete
-last_updated: 2026-07-12T18:58:14.895Z
-last_activity: 2026-07-11 -- Phase 17 execution started
+milestone: v1.3
+milestone_name: (to be defined)
+status: milestone_archived
+last_updated: 2026-07-16
+last_activity: 2026-07-16 -- v1.2 archived & tagged; awaiting /gsd-new-milestone for v1.3
 progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 28
-  completed_plans: 86
-  percent: 80
-stopped_at: Milestone complete (Phase 17 was final phase)
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+stopped_at: v1.2 milestone archived (tag v1.2). Next: /gsd-new-milestone to scope v1.3
 ---
 
 # Project State
@@ -21,14 +21,14 @@ stopped_at: Milestone complete (Phase 17 was final phase)
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Milestone complete
+**Current focus:** v1.2 shipped & archived — scoping v1.3 next
 
 ## Current Position
 
-Phase: 17
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-07-12
+Phase: —
+Plan: —
+Status: v1.2 archived (tag v1.2); v1.3 not yet scoped
+Last activity: 2026-07-16 — run /gsd-new-milestone to begin v1.3
 
 ## Performance Metrics
 

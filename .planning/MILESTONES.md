@@ -1,5 +1,26 @@
 # Milestones
 
+## v1.2 Neumorphic Redesign (Shipped: 2026-07-13)
+
+**Phases completed:** 5 phases (13-17), 28 plans
+**Timeline:** 2026-06-20 → 2026-07-13 (~23 days)
+**Code:** 188 commits since v1.1
+**Requirements:** 28/29 v1.2 requirements complete (DS-03 floating tab bar intentionally reverted to native)
+
+**Delivered:** Transformed My Home from a stock-SwiftUI app into a polished, cohesive neumorphic (Soft UI) product with light + dark theming — a single-source design system, every screen restyled with zero regressions, a "where it's going" spend donut on Overview, a dedicated Analytics screen, and an on-device AI Insight card. Zero new dependencies, iOS 17 floor, no schema change, local-only.
+
+**Key accomplishments:**
+
+- **Phase 13 — Design System Foundation:** Single-source `DesignTokens` (charcoal palette, canary-yellow accent, dual light/dark shadows, 26px radii, spacing scale), reusable `NeuSurface` raised/recessed/floating modifier family, `RollingMoneyText` numeric-transition readout, and accessibility infrastructure (WCAG 1.4.11, Dynamic Type, Reduce Motion).
+- **Phase 14 — Restyle Existing Screens + Overview Donut:** All nine screen groups restyled to the neumorphic look with no regressions and full pbxproj registration; added the "where it's going" spend donut (SectorMark, top-4 + Others, rolling center total, self-transfer exclusion) with tap-to-filter into Activity.
+- **Phase 15 — Analytics Screen:** New push-in Analytics screen with week/month/year range tabs, spending-trend `AreaMark` (IST-correct bucketing), by-category `BarMark`, and inverted-color period delta chips — all fed by a single pure/testable `AnalyticsAggregator` producing a reusable `SpendSummary`.
+- **Phase 16 — AI Insight Card:** On-device natural-language spending insight via Apple FoundationModels (iOS 26), two-layer availability gating (silent absence where unsupported), `@Generable` guided generation, numeric-integrity verification (model never invents figures), and a streaming typewriter that honors Reduce Motion.
+- **Phase 17 — Light Mode Support (promoted from backlog):** Full adaptive palette, reworked neumorphic shadow directions/opacities for a light canvas, non-glow treatment for the particle orb + activity rings, System/Light/Dark theme setting — with a byte-identical dark-rendering guarantee (DarkBitIdentityTests).
+
+**Known deferred items at close:** DS-03 floating tab bar reverted to native (design decision). Retroactive doc debt: phases 13–14 have no VERIFICATION.md; Nyquist VALIDATION gaps on phases 14/15/16. No functional blockers — integration/E2E verified empirically by building and running on two physical devices. See `.planning/v1.2-MILESTONE-AUDIT.md`.
+
+---
+
 ## v1.1 Accounts, Assets & Household Polish (Shipped: 2026-06-20)
 
 **Phases completed:** 6 phases (8-12, incl. inserted 11.1), 26 plans
