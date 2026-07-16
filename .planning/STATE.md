@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.3
-milestone_name: (to be defined)
-status: milestone_archived
+milestone_name: Private Sync & Kitchen
+status: planning
 last_updated: 2026-07-16
-last_activity: 2026-07-16 -- v1.2 archived & tagged; awaiting /gsd-new-milestone for v1.3
+last_activity: 2026-07-16 -- v1.3 requirements defined; roadmap next
 progress:
   total_phases: 0
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
   percent: 0
-stopped_at: v1.2 milestone archived (tag v1.2). Next: /gsd-new-milestone to scope v1.3
+stopped_at: v1.3 requirements defined (SYNC/KTCH/OVF). Next: create roadmap
 ---
 
 # Project State
@@ -21,14 +21,14 @@ stopped_at: v1.2 milestone archived (tag v1.2). Next: /gsd-new-milestone to scop
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** v1.2 shipped & archived — scoping v1.3 next
+**Current focus:** v1.3 Private Sync & Kitchen — requirements defined, roadmap next
 
 ## Current Position
 
-Phase: —
+Phase: Not started (defining roadmap)
 Plan: —
-Status: v1.2 archived (tag v1.2); v1.3 not yet scoped
-Last activity: 2026-07-16 — run /gsd-new-milestone to begin v1.3
+Status: v1.3 requirements defined (SYNC/KTCH/OVF)
+Last activity: 2026-07-16 — Milestone v1.3 started
 
 ## Performance Metrics
 

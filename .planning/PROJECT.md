@@ -4,9 +4,19 @@
 
 **Shipped:** v1.2 Neumorphic Redesign (2026-07-13) — see [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md). The app is now a polished, cohesive neumorphic (Soft UI) product with light + dark theming: a single-source design system, every screen restyled, a "where it's going" spend donut on Overview, a dedicated Analytics screen (trend chart, category bars, delta chips), and an on-device AI Insight card (Apple FoundationModels, iOS 26) — on top of the v1.1 finance hub and v1.0 MVP.
 
-## Current Milestone: v1.3 (to be defined)
+## Current Milestone: v1.3 Private Sync & Kitchen
 
-**Goal:** _Scope not yet defined — run `/gsd-new-milestone` to gather context and generate requirements + roadmap._
+**Goal:** Let both phones share household data privately for free (no cloud, no $99 Apple Developer account), add a kitchen inventory + shopping list, and make the Overview filterable by account and date — turning My Home into a genuinely shared two-person hub.
+
+**Target features:**
+- **Private P2P sync** — a transport-agnostic merge engine (syncID + last-writer-wins + tombstones) with two free, on-device transports: AirDrop snapshot exchange and automatic MultipeerConnectivity sync over home WiFi. No cloud, no third party, schema stays CloudKit-ready.
+- **Kitchen inventory** — pantry stock tracking, per-item low-stock thresholds, and an auto-populated shopping list that restocks on check-off; a first-class neumorphic surface that syncs.
+- **Overview filtering** — filter the Overview (cash flow, spend donut, totals) by account or a subset of accounts, combinable with a custom date range.
+
+**Key context:**
+- Free-tier constraints confirmed by research (2026): CloudKit/iCloud/Push are paid-only; MultipeerConnectivity + Network.framework need no entitlement and work on a free Personal Team. Sync is foreground-only P2P (no background sync without paid Push) — fine for a two-person household on shared WiFi.
+- The 7-day free-provisioning app expiry is handled OUT of the app by `scripts/auto-deploy.sh` (launchd-scheduled xcodebuild + devicectl reinstall), not by a milestone requirement.
+- **Deferred to v1.4:** deepen finance (bill reminders, recurring detection, exports) and smarter AI (Overview insight, follow-ups, trend narratives) — scoped when they become active.
 
 <details>
 <summary>Previous milestone: v1.2 Neumorphic Redesign (shipped 2026-07-13)</summary>
