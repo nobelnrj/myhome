@@ -118,7 +118,14 @@ Plans:
   3. A first-time "bootstrap this phone" flow seeds a fresh install with a full copy of the other phone's data.
   4. The sync surface shows last-synced time and current status with a clear affordance.
   5. Local edits are never silently lost during a sync or merge.
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 19-01-PLAN.md — SyncTransport seam + SyncEnvelope wire format + MultipeerSyncTransport (encrypted MCSession, invite tie-break, Info.plist local-network keys)
+- [ ] 19-02-PLAN.md — SyncCoordinator + SyncStatusStore: connect/change-triggered exchange over the seam, echo suppression, retry, Sync now, scenePhase foreground-only wiring
+- [ ] 19-03-PLAN.md — Neumorphic Sync surface in Settings: status, peer name, last-synced, merge results, Sync Now (SyncStatusPresentation tested)
+- [ ] 19-04-PLAN.md — Bootstrap flow: first-run "set up from your other phone" sheet + BootstrapAdvisor (merge-never-clobber proven)
+- [ ] 19-05-PLAN.md — Phase gate: full-suite + regression sweep, UI review set, two-device end-of-phase human verification
 **UI hint**: yes
 
 ### Phase 20: Kitchen Inventory & Shopping List
@@ -154,6 +161,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 0/5 | Not started | - |
-| 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 0/? | Not started | - |
+| 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 0/5 | Not started | - |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 0/? | Not started | - |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
