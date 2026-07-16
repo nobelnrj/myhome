@@ -98,7 +98,14 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
   3. A snapshot exported on phone A and sent via the share sheet / AirDrop opens on phone B and merges its data in â fully device-to-device, no cloud or third party.
   4. Exportâimportâexport is idempotent (golden round-trip test passes) and all `Decimal` values survive as strings (never JSON-Double).
   5. A snapshot stamped with a mismatched schema version is refused rather than corrupting the store.
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 18-01-PLAN.md — SchemaV10 (syncID/updatedAt on all 11 models) + DeletionLog + V9→V10 backfill migration + atomic typealias flip
+- [ ] 18-02-PLAN.md — SyncSnapshot Codable document layer (Decimal-as-string, version-stamped codec) + pure LWW SyncMergePolicy
+- [ ] 18-03-PLAN.md — SnapshotExporter/SnapshotImporter merge engine + golden round-trip test
+- [ ] 18-04-PLAN.md — Tombstone-on-delete (deleteSynced) at all delete sites + updatedAt touch() stamping
+- [ ] 18-05-PLAN.md — .myhomesnap UTType + share-sheet/AirDrop export + onOpenURL import + confirm-merge UI
 **UI hint**: yes
 
 ### Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap
@@ -146,7 +153,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 0/? | Not started | - |
+| 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 0/5 | Not started | - |
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 0/? | Not started | - |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 0/? | Not started | - |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
