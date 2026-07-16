@@ -134,7 +134,12 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
   1. User can filter the Overview (net cash flow hero, spend donut, totals) to a single account or a chosen subset; all-accounts remains the default.
   2. The account filter combines with a custom date range, and every Overview figure recomputes correctly for the account Ã date-range selection (reusing the confirmed-self-transfer exclusion).
   3. The active filter is clearly shown and clears in one tap, with no stale/unfiltered figure left behind.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 21-01-PLAN.md — Filter model + pure filtering engine + tests (OverviewFilter, OverviewFilterEngine)
+- [ ] 21-02-PLAN.md — Thread the filter through Overview aggregation (recompute + stale-figure suppression)
+- [ ] 21-03-PLAN.md — Filter UI: sheet, active-filter chip bar, one-tap clear
 **UI hint**: yes
 
 ## Progress â v1.3
@@ -144,4 +149,4 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 | 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 0/? | Not started | - |
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 0/? | Not started | - |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 0/? | Not started | - |
-| 21. Overview Filtering | v1.3 | 0/? | Not started | - |
+| 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
