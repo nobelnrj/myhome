@@ -66,15 +66,15 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| SYNC-01 | TBD | Pending |
-| SYNC-02 | TBD | Pending |
-| SYNC-03 | TBD | Pending |
-| SYNC-04 | TBD | Pending |
-| SYNC-05 | TBD | Pending |
-| KTCH-01 | TBD | Pending |
-| KTCH-02 | TBD | Pending |
-| KTCH-03 | TBD | Pending |
-| KTCH-04 | TBD | Pending |
-| OVF-01 | TBD | Pending |
-| OVF-02 | TBD | Pending |
-| OVF-03 | TBD | Pending |
+| SYNC-01 | Phase 18 | Pending |
+| SYNC-02 | Phase 18 | Pending |
+| SYNC-03 | Phase 18 | Pending |
+| SYNC-04 | Phase 19 | Pending |
+| SYNC-05 | Phase 19 | Pending |
+| KTCH-01 | Phase 20 | Pending |
+| KTCH-02 | Phase 20 | Pending |
+| KTCH-03 | Phase 20 | Pending |
+| KTCH-04 | Phase 20 | Pending |
+| OVF-01 | Phase 21 | Pending |
+| OVF-02 | Phase 21 | Pending |
+| OVF-03 | Phase 21 | Pending |

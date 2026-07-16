@@ -6,49 +6,50 @@ My Home is a single-user (v1) iOS app for a two-person Indian household, built a
 
 ## Milestones
 
-- â **v1.0 MVP** â Phases 1-7 (shipped 2026-06-03) â see [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
-- â **v1.1 Accounts, Assets & Household Polish** â Phases 8-12 (shipped 2026-06-20) â see [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md)
-- â **v1.2 Neumorphic Redesign** â Phases 13-17 (shipped 2026-07-13) â see [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
+- Ã¢ÂÂ **v1.0 MVP** Ã¢ÂÂ Phases 1-7 (shipped 2026-06-03) Ã¢ÂÂ see [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
+- Ã¢ÂÂ **v1.1 Accounts, Assets & Household Polish** Ã¢ÂÂ Phases 8-12 (shipped 2026-06-20) Ã¢ÂÂ see [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md)
+- Ã¢ÂÂ **v1.2 Neumorphic Redesign** Ã¢ Phases 13-17 (shipped 2026-07-13) Ã¢ see [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
+- ⭐ **v1.3 Private Sync & Kitchen** — Phases 18-21 (in progress) — details below
 
 ## Phases
 
 <details>
-<summary>â v1.0 MVP (Phases 1-7) â SHIPPED 2026-06-03</summary>
+<summary>Ã¢ÂÂ v1.0 MVP (Phases 1-7) Ã¢ÂÂ SHIPPED 2026-06-03</summary>
 
-- [x] Phase 1: Foundation & Manual Expense Spine (4/4 plans) â completed 2026-05-29
-- [x] Phase 2: Categories, Tags & Budgets (5/5 plans) â completed 2026-05-30
-- [x] Phase 3: Notes & Checklists (6/6 plans) â completed 2026-05-30
-- [x] Phase 4: Overview & Charts (5/5 plans) â completed 2026-06-01
-- [x] Phase 5: Face ID Gate & Settings (2/2 plans) â completed 2026-06-01
-- [x] Phase 6: Gmail Sign-In & Client (4/4 plans) â completed 2026-06-02
-- [x] Phase 7: Bank Parsers & Ingestion Pipeline (6/6 plans) â completed 2026-06-03
+- [x] Phase 1: Foundation & Manual Expense Spine (4/4 plans) Ã¢ÂÂ completed 2026-05-29
+- [x] Phase 2: Categories, Tags & Budgets (5/5 plans) Ã¢ÂÂ completed 2026-05-30
+- [x] Phase 3: Notes & Checklists (6/6 plans) Ã¢ÂÂ completed 2026-05-30
+- [x] Phase 4: Overview & Charts (5/5 plans) Ã¢ÂÂ completed 2026-06-01
+- [x] Phase 5: Face ID Gate & Settings (2/2 plans) Ã¢ÂÂ completed 2026-06-01
+- [x] Phase 6: Gmail Sign-In & Client (4/4 plans) Ã¢ÂÂ completed 2026-06-02
+- [x] Phase 7: Bank Parsers & Ingestion Pipeline (6/6 plans) Ã¢ÂÂ completed 2026-06-03
 
 Full phase details archived in [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md).
 
 </details>
 
 <details>
-<summary>â v1.1 Accounts, Assets & Household Polish (Phases 8-12) â SHIPPED 2026-06-20</summary>
+<summary>Ã¢ÂÂ v1.1 Accounts, Assets & Household Polish (Phases 8-12) Ã¢ÂÂ SHIPPED 2026-06-20</summary>
 
-- [x] Phase 8: Stabilization (4/4 plans) â completed 2026-06-09
-- [x] Phase 9: SchemaV6 & Accounts Management (4/4 plans) â completed 2026-06-10
-- [x] Phase 10: Self-Transfer Detection (4/4 plans) â completed 2026-06-10
-- [x] Phase 11: Asset Tracker (4/4 plans) â completed 2026-06-12
-- [x] Phase 11.1: SIP Automation & NPS NAV auto-refresh (INSERTED) (5/5 plans) â completed 2026-06-12
-- [x] Phase 12: Notes & Daily Routine Enhancement (5/5 plans) â completed 2026-06-20
+- [x] Phase 8: Stabilization (4/4 plans) Ã¢ÂÂ completed 2026-06-09
+- [x] Phase 9: SchemaV6 & Accounts Management (4/4 plans) Ã¢ÂÂ completed 2026-06-10
+- [x] Phase 10: Self-Transfer Detection (4/4 plans) Ã¢ÂÂ completed 2026-06-10
+- [x] Phase 11: Asset Tracker (4/4 plans) Ã¢ÂÂ completed 2026-06-12
+- [x] Phase 11.1: SIP Automation & NPS NAV auto-refresh (INSERTED) (5/5 plans) Ã¢ÂÂ completed 2026-06-12
+- [x] Phase 12: Notes & Daily Routine Enhancement (5/5 plans) Ã¢ÂÂ completed 2026-06-20
 
 Full phase details archived in [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md).
 
 </details>
 
 <details>
-<summary>â v1.2 Neumorphic Redesign (Phases 13-17) â SHIPPED 2026-07-13</summary>
+<summary>Ã¢ v1.2 Neumorphic Redesign (Phases 13-17) Ã¢ SHIPPED 2026-07-13</summary>
 
-- [x] Phase 13: Design System Foundation (3/3 plans) â completed 2026-06-22
-- [x] Phase 14: Restyle Existing Screens + Overview Donut (8/8 plans) â completed 2026-06-22
-- [x] Phase 15: Analytics Screen (3/3 plans) â completed 2026-06-25
-- [x] Phase 16: AI Insight Card (5/5 plans) â completed 2026-06-27
-- [x] Phase 17: Light Mode Support (9/9 plans) â completed 2026-07-12
+- [x] Phase 13: Design System Foundation (3/3 plans) Ã¢ completed 2026-06-22
+- [x] Phase 14: Restyle Existing Screens + Overview Donut (8/8 plans) Ã¢ completed 2026-06-22
+- [x] Phase 15: Analytics Screen (3/3 plans) Ã¢ completed 2026-06-25
+- [x] Phase 16: AI Insight Card (5/5 plans) Ã¢ completed 2026-06-27
+- [x] Phase 17: Light Mode Support (9/9 plans) Ã¢ completed 2026-07-12
 
 Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md).
 
@@ -72,3 +73,75 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
 | 16. AI Insight Card | v1.2 | 5/5 | Complete    | 2026-06-27 |
 | 17. Light Mode Support | v1.2 | 9/9 | Complete    | 2026-07-12 |
+
+---
+
+## Phases â v1.3 Private Sync & Kitchen (Active)
+
+**Milestone:** v1.3 Private Sync & Kitchen â Phases 18-21 (started 2026-07-16)
+**Granularity:** standard Â· **Coverage:** 12/12 requirements mapped
+
+- [ ] **Phase 18: Sync Foundation â Schema, Merge Engine & AirDrop** - Syncable schema (syncID/updatedAt + tombstones), a pure tested merge engine, and device-to-device AirDrop snapshot exchange.
+- [ ] **Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap** - Automatic foreground P2P sync over WiFi with a first-run bootstrap and a trustworthy sync surface.
+- [ ] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface.
+- [ ] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range.
+
+## Phase Details â v1.3
+
+### Phase 18: Sync Foundation â Schema, Merge Engine & AirDrop
+**Goal**: Two phones can exchange a full data snapshot device-to-device and merge it losslessly through a tested, transport-agnostic engine.
+**Depends on**: Nothing new (extends the existing SwiftData schema; first v1.3 phase)
+**Requirements**: SYNC-01, SYNC-02, SYNC-03
+**Success Criteria** (what must be TRUE):
+  1. Every syncable record carries a stable `syncID` and an `updatedAt` that survive an exportâimport round-trip, and re-importing the same snapshot creates no duplicates.
+  2. A record deleted on one phone stays deleted when the other phone's older snapshot arrives (tombstones/`DeletionLog` honored, no resurrection).
+  3. A snapshot exported on phone A and sent via the share sheet / AirDrop opens on phone B and merges its data in â fully device-to-device, no cloud or third party.
+  4. Exportâimportâexport is idempotent (golden round-trip test passes) and all `Decimal` values survive as strings (never JSON-Double).
+  5. A snapshot stamped with a mismatched schema version is refused rather than corrupting the store.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap
+**Goal**: The two phones keep each other up to date automatically over home WiFi, with a first-run bootstrap and a clear sync surface that never loses local edits.
+**Depends on**: Phase 18 (reuses the SYNC-02 merge engine as the transport-agnostic core)
+**Requirements**: SYNC-04, SYNC-05
+**Success Criteria** (what must be TRUE):
+  1. With both apps foregrounded on the same network, a change made on one phone appears on the other automatically over MultipeerConnectivity (encrypted `MCSession`).
+  2. A manual "Sync now" action always works as a fallback when auto-sync is unavailable.
+  3. A first-time "bootstrap this phone" flow seeds a fresh install with a full copy of the other phone's data.
+  4. The sync surface shows last-synced time and current status with a clear affordance.
+  5. Local edits are never silently lost during a sync or merge.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 20: Kitchen Inventory & Shopping List
+**Goal**: The household can track pantry stock and shop from an auto-populated list, on a first-class neumorphic surface whose data syncs between phones.
+**Depends on**: Phase 18 (kitchen models must adopt `syncID`/`updatedAt` from birth so they flow through the sync engine â KTCH-04)
+**Requirements**: KTCH-01, KTCH-02, KTCH-03, KTCH-04
+**Success Criteria** (what must be TRUE):
+  1. User can add/edit pantry items with a quantity and unit and mark an item used (decrement) or restocked (increment).
+  2. Items at or below their per-item low-stock threshold are visually flagged as low/out of stock.
+  3. Low/out-of-stock items auto-populate a shopping list; checking an item off while shopping restocks the pantry quantity, and manually-added shopping items are supported.
+  4. Kitchen matches the v1.2 neumorphic design system in light + dark, and its data syncs to the other phone through the SYNC engine.
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 21: Overview Filtering
+**Goal**: The Overview can be narrowed to any account subset combined with a custom date range, with every figure recomputing consistently.
+**Depends on**: Nothing sync-related â extends the existing Overview/donut/expense-query plumbing (can be sequenced independently)
+**Requirements**: OVF-01, OVF-02, OVF-03
+**Success Criteria** (what must be TRUE):
+  1. User can filter the Overview (net cash flow hero, spend donut, totals) to a single account or a chosen subset; all-accounts remains the default.
+  2. The account filter combines with a custom date range, and every Overview figure recomputes correctly for the account Ã date-range selection (reusing the confirmed-self-transfer exclusion).
+  3. The active filter is clearly shown and clears in one tap, with no stale/unfiltered figure left behind.
+**Plans**: TBD
+**UI hint**: yes
+
+## Progress â v1.3
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 0/? | Not started | - |
+| 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 0/? | Not started | - |
+| 20. Kitchen Inventory & Shopping List | v1.3 | 0/? | Not started | - |
+| 21. Overview Filtering | v1.3 | 0/? | Not started | - |
