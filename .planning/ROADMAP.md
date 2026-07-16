@@ -137,7 +137,14 @@ Plans:
   2. Items at or below their per-item low-stock threshold are visually flagged as low/out of stock.
   3. Low/out-of-stock items auto-populate a shopping list; checking an item off while shopping restocks the pantry quantity, and manually-added shopping items are supported.
   4. Kitchen matches the v1.2 neumorphic design system in light + dark, and its data syncs to the other phone through the SYNC engine.
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 20-01-PLAN.md — SchemaV11 (PantryItem + ShoppingListItem, SyncStamped from birth) + V10→V11 migration + atomic typealias flip
+- [ ] 20-02-PLAN.md — Sync wiring: kitchen DTOs, SyncEntityKind cases, snapshot version 10→11, exporter/importer + adoption + round-trip tests
+- [ ] 20-03-PLAN.md — Pantry UI: neumorphic list, add/edit, used/restocked steppers, low/out-of-stock flags + Overview navigation entry
+- [ ] 20-04-PLAN.md — Shopping list: auto-populated from low/out pantry, check-off restocks pantry, manual extras + segmented Kitchen host
+- [ ] 20-05-PLAN.md — Phase gate: full-suite + invariants + both-theme review set + end-of-phase human verification
 **UI hint**: yes
 
 ### Phase 21: Overview Filtering
@@ -162,5 +169,5 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 0/5 | Not started | - |
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 0/5 | Not started | - |
-| 20. Kitchen Inventory & Shopping List | v1.3 | 0/? | Not started | - |
+| 20. Kitchen Inventory & Shopping List | v1.3 | 0/5 | Not started | - |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
