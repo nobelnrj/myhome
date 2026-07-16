@@ -68,6 +68,10 @@
 		A1201SCT /* StreakCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SCT /* StreakCalculatorTests.swift */; };
 		A1201SV9 /* SchemaV9.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9 /* SchemaV9.swift */; };
 		A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9MT /* SchemaV9MigrationTests.swift */; };
+		A1801SV10 /* SchemaV10.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801SV10 /* SchemaV10.swift */; };
+		A1801SS /* SyncStamped.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801SS /* SyncStamped.swift */; };
+		A1801DL /* DeletionLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801DL /* DeletionLog.swift */; };
+		A1801SV10MT /* SchemaV10MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801SV10MT /* SchemaV10MigrationTests.swift */; };
 		A1202SC /* StreakCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1202SC /* StreakCalculator.swift */; };
 		A1203RDV /* RoutineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RDV /* RoutineDetailView.swift */; };
 		A1203RNS /* RoutineNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RNS /* RoutineNotificationService.swift */; };
@@ -303,6 +307,10 @@
 		F1201SCT /* StreakCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculatorTests.swift; sourceTree = "<group>"; };
 		F1201SV9 /* SchemaV9.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9.swift; sourceTree = "<group>"; };
 		F1201SV9MT /* SchemaV9MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9MigrationTests.swift; sourceTree = "<group>"; };
+		F1801SV10 /* SchemaV10.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV10.swift; sourceTree = "<group>"; };
+		F1801SS /* SyncStamped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStamped.swift; sourceTree = "<group>"; };
+		F1801DL /* DeletionLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionLog.swift; sourceTree = "<group>"; };
+		F1801SV10MT /* SchemaV10MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV10MigrationTests.swift; sourceTree = "<group>"; };
 		F1202SC /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		F1203RDV /* RoutineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineDetailView.swift; sourceTree = "<group>"; };
 		F1203RNS /* RoutineNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationService.swift; sourceTree = "<group>"; };
@@ -691,6 +699,7 @@
 				F701SV7 /* SchemaV7.swift */,
 				F1101SV8 /* SchemaV8.swift */,
 				F1201SV9 /* SchemaV9.swift */,
+				F1801SV10 /* SchemaV10.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -710,6 +719,8 @@
 				F1101SAC /* SIPAmountChange.swift */,
 				F1101CON /* Contribution.swift */,
 				F1201RC /* RoutineCompletion.swift */,
+				F1801SS /* SyncStamped.swift */,
+				F1801DL /* DeletionLog.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -827,6 +838,7 @@
 				F1006EETT /* EditExpenseTransferTests.swift */,
 				F1101SV8MT /* SchemaV8MigrationTests.swift */,
 				F1201SV9MT /* SchemaV9MigrationTests.swift */,
+				F1801SV10MT /* SchemaV10MigrationTests.swift */,
 				F1201SCT /* StreakCalculatorTests.swift */,
 				F1201RNST /* RoutineNotificationServiceTests.swift */,
 				F1201NRT /* NoteReorderTests.swift */,
@@ -1111,6 +1123,9 @@
 				A701SV7 /* SchemaV7.swift in Sources */,
 				A1101SV8 /* SchemaV8.swift in Sources */,
 				A1201SV9 /* SchemaV9.swift in Sources */,
+				A1801SV10 /* SchemaV10.swift in Sources */,
+				A1801SS /* SyncStamped.swift in Sources */,
+				A1801DL /* DeletionLog.swift in Sources */,
 				A901ACC /* Account.swift in Sources */,
 				A902AST /* Asset.swift in Sources */,
 				A911NWS /* NetWorthSnapshot.swift in Sources */,
@@ -1216,6 +1231,7 @@
 				A1006EETT /* EditExpenseTransferTests.swift in Sources */,
 				A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */,
 				A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */,
+				A1801SV10MT /* SchemaV10MigrationTests.swift in Sources */,
 				A1201SCT /* StreakCalculatorTests.swift in Sources */,
 				A1201RNST /* RoutineNotificationServiceTests.swift in Sources */,
 				A1201NRT /* NoteReorderTests.swift in Sources */,
