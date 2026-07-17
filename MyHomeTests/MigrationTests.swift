@@ -38,7 +38,7 @@ struct MigrationTests {
         // 3. Open with the full migration plan targeting SchemaV6 (live schema post Phase 9).
         //    V1 → V2 → V3 → V4 → V5 → V6 chain via AppMigrationPlan.
         //    If migration fails, ModelContainer.init throws — the test fails with a clear error.
-        let schema = Schema(versionedSchema: SchemaV9.self)
+        let schema = Schema(versionedSchema: SchemaV10.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
@@ -79,7 +79,7 @@ struct MigrationTests {
         try FileManager.default.copyItem(at: bundledStoreURL, to: tempURL)
 
         // 3. Open with the full migration plan targeting SchemaV6 (V2 → V3 → V4 → V5 → V6 via AppMigrationPlan).
-        let schema = Schema(versionedSchema: SchemaV9.self)
+        let schema = Schema(versionedSchema: SchemaV10.self)
         let config = ModelConfiguration(schema: schema, url: tempURL)
         let container = try ModelContainer(
             for: schema,
@@ -140,7 +140,7 @@ struct MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 3. Re-open under AppMigrationPlan targeting SchemaV6 — triggers v3ToV4 + v4ToV5 + v5ToV6 stages.
-        let v6Schema = Schema(versionedSchema: SchemaV9.self)
+        let v6Schema = Schema(versionedSchema: SchemaV10.self)
         let migrateConfig = ModelConfiguration(schema: v6Schema, url: migrateURL)
         let migratedContainer = try ModelContainer(
             for: v6Schema,
@@ -177,7 +177,7 @@ struct MigrationTests {
     /// STAB-08 — proves an existing V4 store that already contains notes (the real on-device
     /// situation: a phone running shipped v1.0/V4 with notes) upgrades to V5 WITHOUT data loss
     /// and WITHOUT the notes-save crash. Mirrors the production path exactly:
-    /// `Schema(versionedSchema: SchemaV9.self)` + `AppMigrationPlan`.
+    /// `Schema(versionedSchema: SchemaV10.self)` + `AppMigrationPlan`.
     ///
     /// Before the typealias fix, the app wrote/read `SchemaV4.Note` under a V5 container and
     /// crashed. This test seeds a genuine V4 store with a note + block, migrates it to V5, and
@@ -213,7 +213,7 @@ struct MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 3. Re-open EXACTLY like appContainer(): versionedSchema V6 + AppMigrationPlan (runs v4ToV5 + v5ToV6).
-        let v6Schema = Schema(versionedSchema: SchemaV9.self)
+        let v6Schema = Schema(versionedSchema: SchemaV10.self)
         let migrateConfig = ModelConfiguration(schema: v6Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v6Schema,

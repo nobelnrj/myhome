@@ -227,8 +227,15 @@ enum AppMigrationPlan: SchemaMigrationPlan {
 }
 
 /// Reassigns a distinct `syncID` to every row of `type` whose syncID collides with an
-/// earlier row's — defeating the SwiftData constant-default footgun where an additively-added
-/// `UUID()` default is evaluated once and shared across all migrated rows (SYNC-01).
+/// earlier row's — insurance against the SwiftData constant-default footgun, where an
+/// additively-added `UUID()` default is evaluated once and shared across all migrated rows,
+/// which would make the merge engine treat unrelated records as one identity (SYNC-01).
+///
+/// The footgun does NOT reproduce on Xcode 26.5 / iOS 26 (verified in Phase 18 by disabling this
+/// backfill: SchemaV10MigrationTests.distinctSyncIDsAcrossAllRows still passed, so SwiftData
+/// assigned per-row UUIDs). This is kept as a guard for OS versions and device migration paths
+/// we cannot exercise in tests; on a passing path it is a no-op beyond one fetch per table,
+/// once. Note that the tests therefore do NOT fail if this is removed.
 ///
 /// Idempotent: a table whose syncIDs are already all-distinct is left untouched, so a re-run
 /// after a mid-stage throw is a no-op. Constrained to `SyncStamped` so it reads/writes syncID
