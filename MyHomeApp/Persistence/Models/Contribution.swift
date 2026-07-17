@@ -15,4 +15,9 @@ import SwiftData
 /// SchemaV9.Contribution is copied verbatim from SchemaV8.Contribution — no V9 changes.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias Contribution = SchemaV9.Contribution      // was SchemaV8.Contribution
+/// Flipped from SchemaV9.Contribution → SchemaV10.Contribution in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.Contribution adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Contribution = SchemaV10.Contribution      // was SchemaV9.Contribution

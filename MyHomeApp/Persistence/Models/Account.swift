@@ -18,4 +18,9 @@ import SwiftData
 /// copied verbatim from SchemaV8.Account — no V9 changes to Account.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias Account = SchemaV9.Account      // was SchemaV8.Account
+/// Flipped from SchemaV9.Account → SchemaV10.Account in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.Account adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Account = SchemaV10.Account      // was SchemaV9.Account

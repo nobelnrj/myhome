@@ -20,4 +20,9 @@ import SwiftData
 /// copied verbatim from SchemaV8.Category — no V9 changes to Category.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias Category = SchemaV9.Category      // was SchemaV8.Category
+/// Flipped from SchemaV9.Category → SchemaV10.Category in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.Category adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Category = SchemaV10.Category      // was SchemaV9.Category

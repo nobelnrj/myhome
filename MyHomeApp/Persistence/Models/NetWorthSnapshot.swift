@@ -17,4 +17,9 @@ import SwiftData
 /// SchemaV9.NetWorthSnapshot is copied verbatim from SchemaV8.NetWorthSnapshot — no V9 changes.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias NetWorthSnapshot = SchemaV9.NetWorthSnapshot      // was SchemaV8.NetWorthSnapshot
+/// Flipped from SchemaV9.NetWorthSnapshot → SchemaV10.NetWorthSnapshot in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.NetWorthSnapshot adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias NetWorthSnapshot = SchemaV10.NetWorthSnapshot      // was SchemaV9.NetWorthSnapshot
