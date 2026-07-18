@@ -103,7 +103,7 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 Plans:
 - [x] 18-01-PLAN.md — SchemaV10 (syncID/updatedAt on all 11 models) + DeletionLog + V9→V10 backfill migration + atomic typealias flip
 - [x] 18-02-PLAN.md — SyncSnapshot Codable document layer (Decimal-as-string, version-stamped codec) + pure LWW SyncMergePolicy
-- [ ] 18-03-PLAN.md — SnapshotExporter/SnapshotImporter merge engine + golden round-trip test
+- [x] 18-03-PLAN.md — SnapshotExporter/SnapshotImporter merge engine + golden round-trip test
 - [ ] 18-04-PLAN.md — Tombstone-on-delete (deleteSynced) at all delete sites + updatedAt touch() stamping
 - [ ] 18-05-PLAN.md — .myhomesnap UTType + share-sheet/AirDrop export + onOpenURL import + confirm-merge UI
 **UI hint**: yes
