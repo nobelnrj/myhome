@@ -94,6 +94,7 @@ struct AccountsListView: View {
 
                                 Button {
                                     account.isArchived = true
+                                    account.touch()   // SYNC-02: archive toggled — stamp LWW clock
                                     try? context.save()  // CR-01: explicit save
                                 } label: {
                                     Label("Archive", systemImage: "archivebox")
@@ -117,6 +118,7 @@ struct AccountsListView: View {
                                         .swipeActions(edge: .trailing) {
                                             Button {
                                                 account.isArchived = false
+                                                account.touch()   // SYNC-02: unarchive toggled — stamp LWW clock
                                                 try? context.save()  // CR-01: explicit save
                                             } label: {
                                                 Label("Unarchive", systemImage: "arrow.uturn.left")

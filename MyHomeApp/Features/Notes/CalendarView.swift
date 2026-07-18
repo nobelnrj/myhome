@@ -453,6 +453,7 @@ struct DayAgendaView: View {
             guard block.modelContext != nil else { return }  // STAB-01: defensive guard
             let newChecked = !block.isChecked
             block.isChecked = newChecked
+            block.touch()   // SYNC-02: isChecked changed — stamp block LWW clock
             if newChecked {
                 // Cancel pending alerts and disable the reminder (mirrors D3-04)
                 cancelBlockReminder(block)
@@ -467,6 +468,7 @@ struct DayAgendaView: View {
                 let newChecked = !allChecked
                 for block in blocks {
                     block.isChecked = newChecked
+                    block.touch()   // SYNC-02: isChecked changed — stamp block LWW clock
                 }
                 if newChecked {
                     cancelNoteReminder(note)

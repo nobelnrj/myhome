@@ -233,6 +233,7 @@ struct ManageCategoriesView: View {
             }
         }
         category.name = trimmed
+        category.touch()   // SYNC-02: rename is a user edit — stamp LWW clock
         do {
             try context.save()  // CR-01: explicit save
             nameError = nil

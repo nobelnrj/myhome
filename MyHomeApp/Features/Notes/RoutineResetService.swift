@@ -43,11 +43,13 @@ final class RoutineResetService {
                 for block in note.blocks ?? [] {
                     if block.kindRaw == "checkbox" && block.isChecked {
                         block.isChecked = false
+                        block.touch()   // SYNC-02: daily reset is a real state change — must win LWW over a stale remote check
                         didChange = true
                     }
                 }
                 // Stamp the reset date even if no blocks were checked (note-level tracking)
                 note.routineLastResetDate = startOfTodayIST
+                note.touch()   // SYNC-02: routineLastResetDate advanced — stamp LWW clock
                 didChange = true
             }
             if didChange { try context.save() }   // CR-01: explicit save

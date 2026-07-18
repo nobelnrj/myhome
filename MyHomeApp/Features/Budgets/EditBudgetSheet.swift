@@ -94,6 +94,7 @@ struct EditBudgetSheet: View {
             ) {
                 Button("Remove Budget", role: .destructive) {
                     category.monthlyBudget = nil
+                    category.touch()   // SYNC-02: budget cleared — stamp LWW clock
                     // CR-01: persist explicitly — configuration write (T-02-10)
                     do {
                         try context.save()
@@ -173,6 +174,7 @@ struct EditBudgetSheet: View {
             return
         }
         category.monthlyBudget = amount
+        category.touch()   // SYNC-02: budget set — stamp LWW clock
         // CR-01: persist explicitly — configuration write (T-02-10)
         do {
             try context.save()
