@@ -32,6 +32,12 @@ struct MyHomeApp: App {
     /// (follow the device) via the optional-init fallback below — no migration, no opt-in gate.
     @AppStorage("appearanceTheme") private var appearanceThemeRaw = AppearanceTheme.system.rawValue
 
+    /// SYNC-03: a received `.myhomesnap` file URL awaiting the confirm-merge sheet. Set ONLY by
+    /// the `.onOpenURL` handler when the incoming URL is a snapshot document — never populated
+    /// for Google OAuth callback URLs (those are filtered by the pathExtension guard) so the
+    /// import sheet never hijacks the OAuth flow.
+    @State private var pendingImportURL: IdentifiableURL?
+
     // MARK: - Scene
 
     var body: some Scene {
@@ -49,6 +55,19 @@ struct MyHomeApp: App {
                     #if DEBUG
                     seedSampleDataIfRequested()
                     #endif
+                }
+                // SYNC-03: route an opened `.myhomesnap` (AirDrop accept, Files "open in", or
+                // any onOpenURL delivery) into the confirm-merge sheet. The guard filters on the
+                // file extension so Google OAuth callback URLs (and any future custom scheme) fall
+                // straight through untouched — only snapshot documents are claimed.
+                .onOpenURL { url in
+                    guard url.pathExtension.lowercased() == "myhomesnap" else { return }
+                    pendingImportURL = IdentifiableURL(url: url)
+                }
+                // Nothing touches the store here: the sheet decodes-then-confirms and only merges
+                // when the user explicitly taps Merge (T-18-11).
+                .sheet(item: $pendingImportURL) { item in
+                    SnapshotImportSheet(fileURL: item.url)
                 }
         }
         .modelContainer(container)

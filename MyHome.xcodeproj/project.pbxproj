@@ -79,6 +79,8 @@
 		A1803SNEX /* SnapshotExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNEX /* SnapshotExporter.swift */; };
 		A1803SNIM /* SnapshotImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNIM /* SnapshotImporter.swift */; };
 		A1804DELT /* DeletionTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1804DELT /* DeletionTracker.swift */; };
+		A1805SNFT /* SnapshotFileType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1805SNFT /* SnapshotFileType.swift */; };
+		A1805SSV /* SyncSnapshotViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1805SSV /* SyncSnapshotViews.swift */; };
 		A1803SRTT /* SnapshotRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SRTT /* SnapshotRoundTripTests.swift */; };
 		A1803SNIT /* SnapshotImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNIT /* SnapshotImporterTests.swift */; };
 		A1804DTT /* DeletionTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1804DTT /* DeletionTrackingTests.swift */; };
@@ -328,6 +330,8 @@
 		F1803SNEX /* SnapshotExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotExporter.swift; sourceTree = "<group>"; };
 		F1803SNIM /* SnapshotImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotImporter.swift; sourceTree = "<group>"; };
 		F1804DELT /* DeletionTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionTracker.swift; sourceTree = "<group>"; };
+		F1805SNFT /* SnapshotFileType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotFileType.swift; sourceTree = "<group>"; };
+		F1805SSV /* SyncSnapshotViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSnapshotViews.swift; sourceTree = "<group>"; };
 		F1803SRTT /* SnapshotRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotRoundTripTests.swift; sourceTree = "<group>"; };
 		F1803SNIT /* SnapshotImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotImporterTests.swift; sourceTree = "<group>"; };
 		F1804DTT /* DeletionTrackingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionTrackingTests.swift; sourceTree = "<group>"; };
@@ -544,6 +548,7 @@
 				F1803SNEX /* SnapshotExporter.swift */,
 				F1803SNIM /* SnapshotImporter.swift */,
 				F1804DELT /* DeletionTracker.swift */,
+				F1805SNFT /* SnapshotFileType.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -660,6 +665,7 @@
 			children = (
 				F601 /* UnlockView.swift */,
 				F602 /* SettingsView.swift */,
+				F1805SSV /* SyncSnapshotViews.swift */,
 				F910ALV /* AccountsListView.swift */,
 				F911EAV /* EditAccountView.swift */,
 				F911MAV /* MergeAccountView.swift */,
@@ -1169,6 +1175,8 @@
 				A1803SNEX /* SnapshotExporter.swift in Sources */,
 				A1803SNIM /* SnapshotImporter.swift in Sources */,
 				A1804DELT /* DeletionTracker.swift in Sources */,
+				A1805SNFT /* SnapshotFileType.swift in Sources */,
+				A1805SSV /* SyncSnapshotViews.swift in Sources */,
 				A901ACC /* Account.swift in Sources */,
 				A902AST /* Asset.swift in Sources */,
 				A911NWS /* NetWorthSnapshot.swift in Sources */,
