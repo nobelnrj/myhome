@@ -7,10 +7,10 @@ last_updated: "2026-07-18T10:24:51.331Z"
 last_activity: 2026-07-18 -- Plan 18-03 complete (SnapshotExporter/Importer merge engine, SYNC-02; finalized after ENOSPC recovery)
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 18
-  completed_plans: 4
-  percent: 22
+  completed_plans: 5
+  percent: 28
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 18 (Sync Foundation — Schema, Merge Engine & AirDrop) — EXECUTING
-Plan: 4 of 5 complete — 18-05 code-complete, BLOCKED on human AirDrop UAT
-Status: Awaiting human verification (18-05 Task 3)
-Last activity: 2026-07-18 -- Plans 18-04 (deleteSynced tombstones + touch, SYNC-01 done) and 18-05 code (UTType/onOpenURL/share-sheet/confirm-merge UI) complete; full suite green; 18-05 awaiting two-phone AirDrop UAT
+Plan: 5 of 5 complete — Phase 18 DONE (SYNC-01/02/03 delivered, AirDrop UAT approved)
+Status: Phase 18 complete — next: Phase 19 (Auto-Sync / Multipeer)
+Last activity: 2026-07-18 -- Phase 18 closed: 18-05 AirDrop UAT approved; SYNC-03 complete; all 5 plans green
 
 ## Performance Metrics
 

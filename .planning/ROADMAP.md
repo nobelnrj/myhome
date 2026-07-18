@@ -105,7 +105,7 @@ Plans:
 - [x] 18-02-PLAN.md — SyncSnapshot Codable document layer (Decimal-as-string, version-stamped codec) + pure LWW SyncMergePolicy
 - [x] 18-03-PLAN.md — SnapshotExporter/SnapshotImporter merge engine + golden round-trip test
 - [x] 18-04-PLAN.md — Tombstone-on-delete (deleteSynced) at all delete sites + updatedAt touch() stamping
-- [ ] 18-05-PLAN.md — .myhomesnap UTType + share-sheet/AirDrop export + onOpenURL import + confirm-merge UI (code-complete; pending human AirDrop UAT)
+- [x] 18-05-PLAN.md — .myhomesnap UTType + share-sheet/AirDrop export + onOpenURL import + confirm-merge UI (human AirDrop UAT approved)
 **UI hint**: yes
 
 ### Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap
