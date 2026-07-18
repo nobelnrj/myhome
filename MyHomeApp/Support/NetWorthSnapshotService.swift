@@ -61,7 +61,7 @@ final class NetWorthSnapshotService {
             if let first = existing.first {
                 snapshot = first
                 // Defensive: if duplicate today-rows somehow exist, keep one and delete the rest.
-                for dup in existing.dropFirst() { context.delete(dup) }
+                for dup in existing.dropFirst() { context.deleteSynced(dup, kind: .netWorthSnapshot) }
             } else {
                 let s = NetWorthSnapshot()
                 context.insert(s)

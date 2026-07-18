@@ -289,7 +289,9 @@ enum SnapshotImporter {
             let key = tombstoneKey(kindRaw: kind.rawValue, syncID: syncID(row))
             guard let deletedAt = tombstone[key] else { continue }
             if SyncMergePolicy.tombstoneWins(deletedAt: deletedAt, recordUpdatedAt: updatedAt(row)) {
-                context.delete(row)
+                // Engine-side application of an already-recorded tombstone — NOT a user delete.
+                // deleteAppliedTombstone avoids writing a duplicate/fresher DeletionLog (see DeletionTracker).
+                context.deleteAppliedTombstone(row)
                 deleted += 1
             }
         }

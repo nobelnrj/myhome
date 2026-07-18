@@ -245,7 +245,7 @@ struct EditAssetView: View {
         ) {
             Button("Delete Holding", role: .destructive) {
                 if let a = asset {
-                    context.delete(a)
+                    context.deleteSynced(a, kind: .asset)
                     try? context.save()  // CR-01
                     dismiss()
                 }

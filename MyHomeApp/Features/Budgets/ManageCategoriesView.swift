@@ -245,7 +245,7 @@ struct ManageCategoriesView: View {
 
     /// Deletes a category and persists (CR-01). .nullify delete rule clears expense.categories links.
     private func deleteCategory(_ category: Category) {
-        context.delete(category)
+        context.deleteSynced(category, kind: .category)
         do {
             try context.save()  // CR-01: explicit save
         } catch {

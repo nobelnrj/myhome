@@ -234,7 +234,7 @@ struct AccountsListView: View {
     // MARK: - CRUD Actions
 
     private func deleteAccount(_ account: Account) {
-        context.delete(account)
+        context.deleteSynced(account, kind: .account)
         do {
             try context.save()  // CR-01: explicit save
         } catch {

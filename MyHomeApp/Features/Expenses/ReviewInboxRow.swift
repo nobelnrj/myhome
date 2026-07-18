@@ -139,7 +139,7 @@ struct ReviewInboxRow: View {
             // D7-07: Persist the dismissed message ID so future syncs skip this email
             DismissedMessageStore.dismiss(messageID)
         }
-        context.delete(expense)
+        context.deleteSynced(expense, kind: .expense)
         do {
             try context.save()
         } catch {

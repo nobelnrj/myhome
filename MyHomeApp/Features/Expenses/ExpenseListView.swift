@@ -482,7 +482,7 @@ struct ExpenseListView: View {
 
     /// Delete a single expense (context-menu action; EditExpenseView also offers Delete).
     private func deleteExpense(_ expense: Expense) {
-        context.delete(expense)
+        context.deleteSynced(expense, kind: .expense)
         // CR-01: persist the delete explicitly — do not rely on implicit autosave.
         do {
             try context.save()

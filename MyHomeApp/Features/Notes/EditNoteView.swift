@@ -526,7 +526,7 @@ struct EditNoteView: View {
         if trimmed.isEmpty {
             // T-03-10: discard-on-empty-title (D3-03)
             noteRemoved = true   // WR-09: block any in-flight debounced save
-            context.delete(note)
+            context.deleteSynced(note, kind: .note)
             do {
                 try context.save()
             } catch {
@@ -631,7 +631,7 @@ struct EditNoteView: View {
         noteRemoved = true   // WR-09: block any in-flight debounced save
         // T-12-06: cancel routine notification before deleting (no orphaned notifications)
         RoutineNotificationService().cancel(noteID: note.id)
-        context.delete(note)
+        context.deleteSynced(note, kind: .note)
         do {
             try context.save()
         } catch {

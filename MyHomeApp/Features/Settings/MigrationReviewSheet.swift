@@ -61,7 +61,7 @@ struct MigrationReviewSheet: View {
             ) {
                 Button("Delete Account", role: .destructive) {
                     if let acc = accountToDelete {
-                        context.delete(acc)
+                        context.deleteSynced(acc, kind: .account)
                         try? context.save()  // CR-01
                     }
                 }
