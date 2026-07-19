@@ -267,6 +267,7 @@ struct EditNoteView: View {
                     get: { block.text },
                     set: { newValue in
                         block.text = newValue
+                        block.touch()   // SYNC-02: this block changed — stamp its own LWW clock
                         markDirty()
                     }
                 ),
@@ -488,6 +489,7 @@ struct EditNoteView: View {
     private func markDirty() {
         isDirty = true
         note.modifiedAt = Date()
+        note.touch()   // SYNC-02: stamp LWW clock so a user edit wins over a stale remote note
         // Debounced auto-save: fires ~500ms after last edit (NOT-05)
         debouncer.schedule { [self] in
             saveIfDirty()
@@ -526,7 +528,7 @@ struct EditNoteView: View {
         if trimmed.isEmpty {
             // T-03-10: discard-on-empty-title (D3-03)
             noteRemoved = true   // WR-09: block any in-flight debounced save
-            context.delete(note)
+            context.deleteSynced(note, kind: .note)
             do {
                 try context.save()
             } catch {
@@ -552,6 +554,7 @@ struct EditNoteView: View {
 
     private func toggleCheck(_ block: NoteBlock) {
         block.isChecked.toggle()
+        block.touch()   // SYNC-02: isChecked changed — stamp block LWW clock
         // 03-06: when a row is checked, cancel its future reminder/advance alerts (D3-04)
         if block.isChecked && block.reminderEnabled {
             cancelBlockReminder(block)
@@ -602,6 +605,7 @@ struct EditNoteView: View {
         ordered.move(fromOffsets: source, toOffset: destination)
         for (idx, block) in ordered.enumerated() {
             block.order = idx   // re-index: 0, 1, 2, ...
+            block.touch()       // SYNC-02: order changed — stamp block LWW clock
         }
         markDirty()
     }
@@ -631,7 +635,7 @@ struct EditNoteView: View {
         noteRemoved = true   // WR-09: block any in-flight debounced save
         // T-12-06: cancel routine notification before deleting (no orphaned notifications)
         RoutineNotificationService().cancel(noteID: note.id)
-        context.delete(note)
+        context.deleteSynced(note, kind: .note)
         do {
             try context.save()
         } catch {

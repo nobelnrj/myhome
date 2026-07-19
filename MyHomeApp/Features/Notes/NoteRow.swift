@@ -137,6 +137,7 @@ struct NoteRow: View {
     private func togglePin() {
         note.isPinned.toggle()
         note.modifiedAt = Date()
+        note.touch()   // SYNC-02: pin state changed — stamp LWW clock
         do {
             try context.save()
         } catch {

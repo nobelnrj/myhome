@@ -57,7 +57,7 @@ enum DuplicateExpenseCleanup {
         guard let expenses = try? context.fetch(FetchDescriptor<Expense>()) else { return 0 }
         let victims = duplicatesToDelete(in: expenses)
         guard !victims.isEmpty else { return 0 }
-        for expense in victims { context.delete(expense) }
+        for expense in victims { context.deleteSynced(expense, kind: .expense) }
         try? context.save()
         return victims.count
     }

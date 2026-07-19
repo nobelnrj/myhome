@@ -23,4 +23,9 @@ import SwiftData
 /// copied verbatim from SchemaV8.Expense — no V9 changes to Expense.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias Expense = SchemaV9.Expense      // was SchemaV8.Expense
+/// Flipped from SchemaV9.Expense → SchemaV10.Expense in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.Expense adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Expense = SchemaV10.Expense      // was SchemaV9.Expense

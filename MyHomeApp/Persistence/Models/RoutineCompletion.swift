@@ -11,4 +11,9 @@ import SwiftData
 /// Usage:
 ///   let completion = RoutineCompletion(noteID: note.id, dayKey: dayKey)
 ///   @Query var completions: [RoutineCompletion]
-typealias RoutineCompletion = SchemaV9.RoutineCompletion
+/// Flipped from SchemaV9.RoutineCompletion → SchemaV10.RoutineCompletion in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.RoutineCompletion adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias RoutineCompletion = SchemaV10.RoutineCompletion      // was SchemaV9.RoutineCompletion

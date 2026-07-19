@@ -59,6 +59,7 @@ enum AccountMerger {
         var repointed: [UUID] = []
         for expense in allExpenses where expense.accountID == absorbed.id {
             expense.accountID = survivor.id
+            expense.touch()   // SYNC-02: expense re-pointed to survivor — stamp LWW clock
             repointed.append(expense.id)
         }
 
@@ -71,6 +72,8 @@ enum AccountMerger {
         if (survivor.last4?.isEmpty ?? true), let absorbedLast4 = absorbed.last4, !absorbedLast4.isEmpty {
             survivor.last4 = absorbedLast4
         }
+
+        survivor.touch()   // SYNC-02: survivor absorbed aliases/last4 — stamp LWW clock
 
         return MergeResult(
             survivorID: survivor.id,

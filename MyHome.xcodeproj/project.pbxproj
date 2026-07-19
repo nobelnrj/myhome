@@ -68,6 +68,22 @@
 		A1201SCT /* StreakCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SCT /* StreakCalculatorTests.swift */; };
 		A1201SV9 /* SchemaV9.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9 /* SchemaV9.swift */; };
 		A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1201SV9MT /* SchemaV9MigrationTests.swift */; };
+		A1801SV10 /* SchemaV10.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801SV10 /* SchemaV10.swift */; };
+		A1801SS /* SyncStamped.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801SS /* SyncStamped.swift */; };
+		A1801DL /* DeletionLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801DL /* DeletionLog.swift */; };
+		A1801SV10MT /* SchemaV10MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801SV10MT /* SchemaV10MigrationTests.swift */; };
+		A1802SNAP /* SyncSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1802SNAP /* SyncSnapshot.swift */; };
+		A1802SMP /* SyncMergePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1802SMP /* SyncMergePolicy.swift */; };
+		A1802SNCT /* SnapshotCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1802SNCT /* SnapshotCodecTests.swift */; };
+		A1802SMPT /* SyncMergePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1802SMPT /* SyncMergePolicyTests.swift */; };
+		A1803SNEX /* SnapshotExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNEX /* SnapshotExporter.swift */; };
+		A1803SNIM /* SnapshotImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNIM /* SnapshotImporter.swift */; };
+		A1804DELT /* DeletionTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1804DELT /* DeletionTracker.swift */; };
+		A1805SNFT /* SnapshotFileType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1805SNFT /* SnapshotFileType.swift */; };
+		A1805SSV /* SyncSnapshotViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1805SSV /* SyncSnapshotViews.swift */; };
+		A1803SRTT /* SnapshotRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SRTT /* SnapshotRoundTripTests.swift */; };
+		A1803SNIT /* SnapshotImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNIT /* SnapshotImporterTests.swift */; };
+		A1804DTT /* DeletionTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1804DTT /* DeletionTrackingTests.swift */; };
 		A1202SC /* StreakCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1202SC /* StreakCalculator.swift */; };
 		A1203RDV /* RoutineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RDV /* RoutineDetailView.swift */; };
 		A1203RNS /* RoutineNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1203RNS /* RoutineNotificationService.swift */; };
@@ -303,6 +319,22 @@
 		F1201SCT /* StreakCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculatorTests.swift; sourceTree = "<group>"; };
 		F1201SV9 /* SchemaV9.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9.swift; sourceTree = "<group>"; };
 		F1201SV9MT /* SchemaV9MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV9MigrationTests.swift; sourceTree = "<group>"; };
+		F1801SV10 /* SchemaV10.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV10.swift; sourceTree = "<group>"; };
+		F1801SS /* SyncStamped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStamped.swift; sourceTree = "<group>"; };
+		F1801DL /* DeletionLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionLog.swift; sourceTree = "<group>"; };
+		F1801SV10MT /* SchemaV10MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV10MigrationTests.swift; sourceTree = "<group>"; };
+		F1802SNAP /* SyncSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSnapshot.swift; sourceTree = "<group>"; };
+		F1802SMP /* SyncMergePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMergePolicy.swift; sourceTree = "<group>"; };
+		F1802SNCT /* SnapshotCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCodecTests.swift; sourceTree = "<group>"; };
+		F1802SMPT /* SyncMergePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMergePolicyTests.swift; sourceTree = "<group>"; };
+		F1803SNEX /* SnapshotExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotExporter.swift; sourceTree = "<group>"; };
+		F1803SNIM /* SnapshotImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotImporter.swift; sourceTree = "<group>"; };
+		F1804DELT /* DeletionTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionTracker.swift; sourceTree = "<group>"; };
+		F1805SNFT /* SnapshotFileType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotFileType.swift; sourceTree = "<group>"; };
+		F1805SSV /* SyncSnapshotViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSnapshotViews.swift; sourceTree = "<group>"; };
+		F1803SRTT /* SnapshotRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotRoundTripTests.swift; sourceTree = "<group>"; };
+		F1803SNIT /* SnapshotImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotImporterTests.swift; sourceTree = "<group>"; };
+		F1804DTT /* DeletionTrackingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionTrackingTests.swift; sourceTree = "<group>"; };
 		F1202SC /* StreakCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculator.swift; sourceTree = "<group>"; };
 		F1203RDV /* RoutineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineDetailView.swift; sourceTree = "<group>"; };
 		F1203RNS /* RoutineNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineNotificationService.swift; sourceTree = "<group>"; };
@@ -503,8 +535,22 @@
 				G140 /* Support */,
 				G150 /* Security */,
 				G160 /* Gmail */,
+				G_SYNC /* Sync */,
 			);
 			path = MyHomeApp;
+			sourceTree = "<group>";
+		};
+		G_SYNC /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				F1802SNAP /* SyncSnapshot.swift */,
+				F1802SMP /* SyncMergePolicy.swift */,
+				F1803SNEX /* SnapshotExporter.swift */,
+				F1803SNIM /* SnapshotImporter.swift */,
+				F1804DELT /* DeletionTracker.swift */,
+				F1805SNFT /* SnapshotFileType.swift */,
+			);
+			path = Sync;
 			sourceTree = "<group>";
 		};
 		G110 /* Resources */ = {
@@ -619,6 +665,7 @@
 			children = (
 				F601 /* UnlockView.swift */,
 				F602 /* SettingsView.swift */,
+				F1805SSV /* SyncSnapshotViews.swift */,
 				F910ALV /* AccountsListView.swift */,
 				F911EAV /* EditAccountView.swift */,
 				F911MAV /* MergeAccountView.swift */,
@@ -691,6 +738,7 @@
 				F701SV7 /* SchemaV7.swift */,
 				F1101SV8 /* SchemaV8.swift */,
 				F1201SV9 /* SchemaV9.swift */,
+				F1801SV10 /* SchemaV10.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -710,6 +758,8 @@
 				F1101SAC /* SIPAmountChange.swift */,
 				F1101CON /* Contribution.swift */,
 				F1201RC /* RoutineCompletion.swift */,
+				F1801SS /* SyncStamped.swift */,
+				F1801DL /* DeletionLog.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -827,6 +877,7 @@
 				F1006EETT /* EditExpenseTransferTests.swift */,
 				F1101SV8MT /* SchemaV8MigrationTests.swift */,
 				F1201SV9MT /* SchemaV9MigrationTests.swift */,
+				F1801SV10MT /* SchemaV10MigrationTests.swift */,
 				F1201SCT /* StreakCalculatorTests.swift */,
 				F1201RNST /* RoutineNotificationServiceTests.swift */,
 				F1201NRT /* NoteReorderTests.swift */,
@@ -840,6 +891,11 @@
 				FANL07 /* AnalyticsAggregatorTests.swift */,
 				F1601IST /* InsightServiceTests.swift */,
 				F1601IVT /* InsightVerifierTests.swift */,
+				F1802SNCT /* SnapshotCodecTests.swift */,
+				F1802SMPT /* SyncMergePolicyTests.swift */,
+				F1803SRTT /* SnapshotRoundTripTests.swift */,
+				F1803SNIT /* SnapshotImporterTests.swift */,
+				F1804DTT /* DeletionTrackingTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -1111,6 +1167,16 @@
 				A701SV7 /* SchemaV7.swift in Sources */,
 				A1101SV8 /* SchemaV8.swift in Sources */,
 				A1201SV9 /* SchemaV9.swift in Sources */,
+				A1801SV10 /* SchemaV10.swift in Sources */,
+				A1801SS /* SyncStamped.swift in Sources */,
+				A1801DL /* DeletionLog.swift in Sources */,
+				A1802SNAP /* SyncSnapshot.swift in Sources */,
+				A1802SMP /* SyncMergePolicy.swift in Sources */,
+				A1803SNEX /* SnapshotExporter.swift in Sources */,
+				A1803SNIM /* SnapshotImporter.swift in Sources */,
+				A1804DELT /* DeletionTracker.swift in Sources */,
+				A1805SNFT /* SnapshotFileType.swift in Sources */,
+				A1805SSV /* SyncSnapshotViews.swift in Sources */,
 				A901ACC /* Account.swift in Sources */,
 				A902AST /* Asset.swift in Sources */,
 				A911NWS /* NetWorthSnapshot.swift in Sources */,
@@ -1216,6 +1282,12 @@
 				A1006EETT /* EditExpenseTransferTests.swift in Sources */,
 				A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */,
 				A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */,
+				A1801SV10MT /* SchemaV10MigrationTests.swift in Sources */,
+				A1802SNCT /* SnapshotCodecTests.swift in Sources */,
+				A1802SMPT /* SyncMergePolicyTests.swift in Sources */,
+				A1803SRTT /* SnapshotRoundTripTests.swift in Sources */,
+				A1803SNIT /* SnapshotImporterTests.swift in Sources */,
+				A1804DTT /* DeletionTrackingTests.swift in Sources */,
 				A1201SCT /* StreakCalculatorTests.swift in Sources */,
 				A1201RNST /* RoutineNotificationServiceTests.swift in Sources */,
 				A1201NRT /* NoteReorderTests.swift in Sources */,

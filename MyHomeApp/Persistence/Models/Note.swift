@@ -25,4 +25,9 @@ import SwiftData
 /// Usage:
 ///   let note = Note(title: "Grocery List")
 ///   @Query var notes: [Note]
-typealias Note = SchemaV9.Note      // was SchemaV8.Note
+/// Flipped from SchemaV9.Note → SchemaV10.Note in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.Note adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Note = SchemaV10.Note      // was SchemaV9.Note

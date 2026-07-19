@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import UIKit
+import UniformTypeIdentifiers
 
 /// Settings tab (tag 4) — Face ID toggle, Manage Categories sheet, Budgets deep-link, About footer.
 ///
@@ -19,9 +21,21 @@ struct SettingsView: View {
     let gmailSyncController: GmailSyncController
     let transferScanService: TransferScanService
 
+    @Environment(\.modelContext) private var modelContext
+
     @State private var showManageCategories = false
     @State private var showSignOutAllConfirmation = false
     @State private var pendingDisconnectEmail: String? = nil
+
+    // MARK: Sync snapshot (SYNC-03)
+    /// The exported `.myhomesnap` temp file to share (drives the share sheet). Nil when idle.
+    @State private var exportShareURL: IdentifiableURL? = nil
+    /// Drives the Files picker for choosing a snapshot to import.
+    @State private var showSnapshotImporter = false
+    /// The snapshot file the user picked to import (drives the confirm-merge sheet).
+    @State private var importPickedURL: IdentifiableURL? = nil
+    /// Export failure message (plain alert).
+    @State private var exportErrorMessage: String? = nil
     @State private var accountReviewPending: Bool =
         UserDefaults.standard.bool(forKey: "accountReviewPending")
 
@@ -243,6 +257,23 @@ struct SettingsView: View {
                         }
                     }
                     .foregroundStyle(DesignTokens.label2)
+
+                    // MARK: Sync snapshot (SYNC-03) — export via share sheet / AirDrop
+                    Button {
+                        exportSnapshot()
+                    } label: {
+                        rowLabel("Export Sync Snapshot", symbol: "square.and.arrow.up", color: DesignTokens.positive)
+                    }
+                    .foregroundStyle(DesignTokens.label2)
+
+                    // Import a `.myhomesnap` via the Files picker (AirDrop-open also routes here
+                    // through onOpenURL). Feeds the same confirm-merge sheet.
+                    Button {
+                        showSnapshotImporter = true
+                    } label: {
+                        rowLabel("Import Snapshot…", symbol: "square.and.arrow.down", color: DesignTokens.accent)
+                    }
+                    .foregroundStyle(DesignTokens.label2)
                 }
                 .listRowBackground(DesignTokens.surfaceRaised)
 
@@ -275,6 +306,52 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showManageCategories) {
             ManageCategoriesView()
+        }
+        // SYNC-03: export share sheet (AirDrop / Save to Files) for the generated snapshot file.
+        .sheet(item: $exportShareURL) { item in
+            ActivityShareSheet(activityItems: [item.url])
+        }
+        // SYNC-03: confirm-merge sheet for a Files-picked snapshot.
+        .sheet(item: $importPickedURL) { item in
+            SnapshotImportSheet(fileURL: item.url)
+        }
+        // SYNC-03: Files picker filtered to the custom UTType.
+        .fileImporter(
+            isPresented: $showSnapshotImporter,
+            allowedContentTypes: [.myHomeSnapshot],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case let .success(urls):
+                if let url = urls.first { importPickedURL = IdentifiableURL(url: url) }
+            case let .failure(error):
+                exportErrorMessage = error.localizedDescription
+            }
+        }
+        .alert(
+            "Export failed",
+            isPresented: Binding(
+                get: { exportErrorMessage != nil },
+                set: { if !$0 { exportErrorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { exportErrorMessage = nil }
+        } message: {
+            Text(exportErrorMessage ?? "")
+        }
+    }
+
+    // MARK: - Sync snapshot export (SYNC-03)
+
+    /// Export the full store to canonical `.myhomesnap` bytes, write a temp file, and present the
+    /// share sheet (the user picks AirDrop / Save to Files there). Errors surface in a plain alert.
+    private func exportSnapshot() {
+        do {
+            let data = try SnapshotExporter.exportData(context: modelContext, deviceName: UIDevice.current.name)
+            let url = try SnapshotFile.writeTemporary(data: data, deviceName: UIDevice.current.name)
+            exportShareURL = IdentifiableURL(url: url)
+        } catch {
+            exportErrorMessage = error.localizedDescription
         }
     }
 

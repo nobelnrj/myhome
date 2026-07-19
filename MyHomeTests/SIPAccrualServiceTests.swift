@@ -23,10 +23,13 @@ struct SIPAccrualServiceTests {
         return c
     }
 
-    /// Build an in-memory SchemaV9 ModelContainer for orchestration tests.
+    /// Build an in-memory SchemaV10 ModelContainer for orchestration tests.
     /// (Updated from SchemaV8 → SchemaV9 in Phase 12 plan 12-01: atomic typealias flip.)
+    /// (Updated from SchemaV9 → SchemaV10 in Phase 18 plan 18-01: atomic typealias flip.)
+    /// Must track the production schema: a container built one version behind the active
+    /// typealias traps in ModelContext with "Failed to cast model" (STAB-08).
     private func makeContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV9.self)
+        let schema = Schema(versionedSchema: SchemaV10.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         return try ModelContainer(for: schema, configurations: [config])
     }

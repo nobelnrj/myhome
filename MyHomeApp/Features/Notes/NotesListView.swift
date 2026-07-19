@@ -213,7 +213,7 @@ struct NotesListView: View {
 
     private func deleteNotes(_ sectionNotes: [Note], at offsets: IndexSet) {
         for index in offsets {
-            context.delete(sectionNotes[index])
+            context.deleteSynced(sectionNotes[index], kind: .note)
         }
         // CR-01: persist the delete explicitly
         do {

@@ -149,7 +149,7 @@ struct MergeAccountView: View {
 
     private func performMerge(into survivor: Account) {
         AccountMerger.merge(absorbed: absorbed, into: survivor, allExpenses: allExpenses)
-        context.delete(absorbed)
+        context.deleteSynced(absorbed, kind: .account)
         do {
             try context.save()   // CR-01: explicit save
         } catch {

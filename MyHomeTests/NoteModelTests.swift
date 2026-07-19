@@ -154,7 +154,8 @@ struct NoteModelTests {
         // Updated in Phase 9 (plan 09-01): SchemaV5 → SchemaV6 (STAB-08: container schema must
         // match the active typealias; Note is now SchemaV9.Note, so the container must be V9).
         // Updated in Phase 12 (plan 12-01): SchemaV8 → SchemaV9 (atomic typealias flip; STAB-08).
-        let schema = Schema(versionedSchema: SchemaV9.self)
+        // Updated in Phase 18 (plan 18-01): SchemaV9 → SchemaV10 (atomic typealias flip; STAB-08).
+        let schema = Schema(versionedSchema: SchemaV10.self)
         let config = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .none)
         let container = try ModelContainer(for: schema, configurations: [config])
         let context = container.mainContext

@@ -25,4 +25,9 @@ import SwiftData
 /// copied verbatim from SchemaV8.NoteBlock — no V9 changes to NoteBlock.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias NoteBlock = SchemaV9.NoteBlock      // was SchemaV8.NoteBlock
+/// Flipped from SchemaV9.NoteBlock → SchemaV10.NoteBlock in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.NoteBlock adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias NoteBlock = SchemaV10.NoteBlock      // was SchemaV9.NoteBlock

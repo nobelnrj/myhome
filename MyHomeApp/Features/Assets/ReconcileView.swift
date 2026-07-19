@@ -115,6 +115,7 @@ struct ReconcileView: View {
         guard let units = reconciledUnits, units > 0 else { return }
         do {
             asset.units = units                     // D-05: whole-holding total-units overwrite
+            asset.touch()                           // SYNC-02: units reconciled — stamp LWW clock
             // Contribution log entries are NOT deleted — estimates stay as history (D-05, T-115-02)
             try context.save()                      // CR-01: explicit save
             dismiss()

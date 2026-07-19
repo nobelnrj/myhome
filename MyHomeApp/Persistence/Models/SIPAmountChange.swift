@@ -14,4 +14,9 @@ import SwiftData
 /// SchemaV9.SIPAmountChange is copied verbatim from SchemaV8.SIPAmountChange — no V9 changes.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias SIPAmountChange = SchemaV9.SIPAmountChange      // was SchemaV8.SIPAmountChange
+/// Flipped from SchemaV9.SIPAmountChange → SchemaV10.SIPAmountChange in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.SIPAmountChange adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias SIPAmountChange = SchemaV10.SIPAmountChange      // was SchemaV9.SIPAmountChange

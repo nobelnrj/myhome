@@ -245,7 +245,7 @@ struct EditAssetView: View {
         ) {
             Button("Delete Holding", role: .destructive) {
                 if let a = asset {
-                    context.delete(a)
+                    context.deleteSynced(a, kind: .asset)
                     try? context.save()  // CR-01
                     dismiss()
                 }
@@ -295,6 +295,7 @@ struct EditAssetView: View {
             target.costBasisPerUnit = costBasisPerUnit
             target.currentNAV = currentNAV > 0 ? currentNAV : nil
             target.navAsOfDate = currentNAV > 0 ? navAsOfDate : nil
+            target.touch()   // SYNC-02: user edited asset fields — stamp LWW clock (harmless on new)
 
             try context.save()  // CR-01: explicit save
             nameError = nil

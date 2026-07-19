@@ -176,7 +176,7 @@ struct AssetsListView: View {
     // MARK: - CRUD Actions
 
     private func deleteAsset(_ asset: Asset) {
-        context.delete(asset)
+        context.deleteSynced(asset, kind: .asset)
         do {
             try context.save()  // CR-01: explicit save
         } catch {

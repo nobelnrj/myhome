@@ -10,6 +10,14 @@ enum ReminderTarget {
     case note(Note)
     case block(NoteBlock)
 
+    /// SYNC-02: stamp the underlying model's LWW clock after a user reminder edit.
+    func touch() {
+        switch self {
+        case .note(let n): n.touch()
+        case .block(let b): b.touch()
+        }
+    }
+
     var reminderEnabled: Bool {
         get {
             switch self {
@@ -557,6 +565,7 @@ struct ReminderEditView: View {
         target.reminderRecurrenceData = recurrenceData
         target.reminderEndRuleData = endRuleData
         target.reminderLeadMinutes = max(0, leadMinutes)  // T-03-13
+        target.touch()   // SYNC-02: reminder configured — stamp LWW clock
 
         // Yearly auto-pin (D3-09). WR-08: apply only on the transition *into* yearly, so editing
         // an existing yearly reminder (or switching away) leaves manual pin control authoritative.
@@ -626,6 +635,7 @@ struct ReminderEditView: View {
         target.reminderRecurrenceData = nil
         target.reminderEndRuleData = nil
         target.reminderLeadMinutes = 0
+        target.touch()   // SYNC-02: reminder removed — stamp LWW clock
 
         do {
             try context.save()

@@ -19,4 +19,9 @@ import SwiftData
 /// copied verbatim from SchemaV8.Asset — no V9 changes to Asset.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias Asset = SchemaV9.Asset      // was SchemaV8.Asset
+/// Flipped from SchemaV9.Asset → SchemaV10.Asset in Phase 18 (plan 18-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV10.self)`. SchemaV10.Asset adds
+/// syncID + updatedAt (SYNC-01); no other changes.
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Asset = SchemaV10.Asset      // was SchemaV9.Asset

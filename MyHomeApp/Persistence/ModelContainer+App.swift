@@ -40,7 +40,7 @@ extension ModelContainer {
 
     @MainActor
     static func appContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV9.self)
+        let schema = Schema(versionedSchema: SchemaV10.self)
 
         // Single source of truth: the App Group store. No fallback — fail loudly instead of
         // silently switching stores and splitting the database.

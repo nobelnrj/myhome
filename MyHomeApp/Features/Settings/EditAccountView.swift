@@ -276,6 +276,7 @@ struct EditAccountView: View {
             target.last4 = last4.isEmpty ? nil : last4
             target.balanceBaseline = balanceBaseline
             target.balanceAsOfDate = balanceAsOfDate
+            target.touch()   // SYNC-02: user edited account fields — stamp LWW clock (harmless on new)
 
             try context.save()  // CR-01: explicit save
             nameError = nil
