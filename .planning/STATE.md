@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
 status: executing
-last_updated: "2026-07-18T10:24:51.331Z"
-last_activity: 2026-07-18 -- Plan 18-03 complete (SnapshotExporter/Importer merge engine, SYNC-02; finalized after ENOSPC recovery)
+last_updated: "2026-07-19T11:40:00.000Z"
+last_activity: 2026-07-19 -- Phase 18 merged to main (PR #37, V10 migration device-validated on Nobel's phone); Phase 19 started on feat/19-auto-sync-multipeer
 progress:
   total_phases: 4
   completed_phases: 1
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 18 — Sync Foundation — Schema, Merge Engine & AirDrop
+**Current focus:** Phase 19 — Auto-Sync — Sync UX, Multipeer & Bootstrap
 
 ## Current Position
 
-Phase: 18 (Sync Foundation — Schema, Merge Engine & AirDrop) — EXECUTING
-Plan: 5 of 5 complete — Phase 18 DONE (SYNC-01/02/03 delivered, AirDrop UAT approved)
-Status: Phase 18 complete — next: Phase 19 (Auto-Sync / Multipeer)
-Last activity: 2026-07-18 -- Phase 18 closed: 18-05 AirDrop UAT approved; SYNC-03 complete; all 5 plans green
+Phase: 19 (Auto-Sync — Sync UX, Multipeer & Bootstrap) — EXECUTING
+Plan: 0 of 5 complete — next: 19-01 (SyncTransport / Multipeer transport layer)
+Status: Executing Phase 19 on feat/19-auto-sync-multipeer
+Last activity: 2026-07-19 -- Phase 18 merged (PR #37, V10 device-validated); Phase 19 started
 
 ## Performance Metrics
 
