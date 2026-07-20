@@ -87,6 +87,7 @@
 		A1902SSS /* SyncStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SSS /* SyncStatusStore.swift */; };
 		A1902SC /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SC /* SyncCoordinator.swift */; };
 		A1902SCT /* SyncCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SCT /* SyncCoordinatorTests.swift */; };
+		A1904BAT /* BootstrapAdvisorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1904BAT /* BootstrapAdvisorTests.swift */; };
 		A1803SRTT /* SnapshotRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SRTT /* SnapshotRoundTripTests.swift */; };
 		A1803SNIT /* SnapshotImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNIT /* SnapshotImporterTests.swift */; };
 		A1804DTT /* DeletionTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1804DTT /* DeletionTrackingTests.swift */; };
@@ -237,6 +238,8 @@
 		A908CHX /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F908CHX /* Color+Hex.swift */; };
 		A910ALV /* AccountsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F910ALV /* AccountsListView.swift */; };
 		A1903SSV /* SyncStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1903SSV /* SyncStatusView.swift */; };
+		A1904BA /* BootstrapAdvisor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1904BA /* BootstrapAdvisor.swift */; };
+		A1904SBV /* SyncBootstrapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1904SBV /* SyncBootstrapView.swift */; };
 		A911EAV /* EditAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911EAV /* EditAccountView.swift */; };
 		A911MAV /* MergeAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911MAV /* MergeAccountView.swift */; };
 		A911NWS /* NetWorthSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911NWS /* NetWorthSnapshot.swift */; };
@@ -345,7 +348,9 @@
 		F1901STT /* SyncTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTransportTests.swift; sourceTree = "<group>"; };
 		F1902SSS /* SyncStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusStore.swift; sourceTree = "<group>"; };
 		F1902SC /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
+		F1904BA /* BootstrapAdvisor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BootstrapAdvisor.swift; sourceTree = "<group>"; };
 		F1902SCT /* SyncCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinatorTests.swift; sourceTree = "<group>"; };
+		F1904BAT /* BootstrapAdvisorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BootstrapAdvisorTests.swift; sourceTree = "<group>"; };
 		F1803SRTT /* SnapshotRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotRoundTripTests.swift; sourceTree = "<group>"; };
 		F1803SNIT /* SnapshotImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotImporterTests.swift; sourceTree = "<group>"; };
 		F1804DTT /* DeletionTrackingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionTrackingTests.swift; sourceTree = "<group>"; };
@@ -496,6 +501,7 @@
 		F908CHX /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		F910ALV /* AccountsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsListView.swift; sourceTree = "<group>"; };
 		F1903SSV /* SyncStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusView.swift; sourceTree = "<group>"; };
+		F1904SBV /* SyncBootstrapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBootstrapView.swift; sourceTree = "<group>"; };
 		F911EAV /* EditAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccountView.swift; sourceTree = "<group>"; };
 		F911MAV /* MergeAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeAccountView.swift; sourceTree = "<group>"; };
 		F911NWS /* NetWorthSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthSnapshot.swift; sourceTree = "<group>"; };
@@ -569,6 +575,7 @@
 				F1901MST /* MultipeerSyncTransport.swift */,
 				F1902SSS /* SyncStatusStore.swift */,
 				F1902SC /* SyncCoordinator.swift */,
+				F1904BA /* BootstrapAdvisor.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -686,6 +693,7 @@
 				F601 /* UnlockView.swift */,
 				F602 /* SettingsView.swift */,
 				F1903SSV /* SyncStatusView.swift */,
+				F1904SBV /* SyncBootstrapView.swift */,
 				F1805SSV /* SyncSnapshotViews.swift */,
 				F910ALV /* AccountsListView.swift */,
 				F911EAV /* EditAccountView.swift */,
@@ -920,6 +928,7 @@
 				F1901STT /* SyncTransportTests.swift */,
 				F1902SCT /* SyncCoordinatorTests.swift */,
 				F1903SPT /* SyncStatusPresentationTests.swift */,
+				F1904BAT /* BootstrapAdvisorTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -1161,6 +1170,8 @@
 				A601 /* UnlockView.swift in Sources */,
 				A602 /* SettingsView.swift in Sources */,
 				A1903SSV /* SyncStatusView.swift in Sources */,
+				A1904BA /* BootstrapAdvisor.swift in Sources */,
+				A1904SBV /* SyncBootstrapView.swift in Sources */,
 				A910ALV /* AccountsListView.swift in Sources */,
 				A911EAV /* EditAccountView.swift in Sources */,
 				A911MAV /* MergeAccountView.swift in Sources */,
@@ -1320,6 +1331,7 @@
 				A1901STT /* SyncTransportTests.swift in Sources */,
 				A1902SCT /* SyncCoordinatorTests.swift in Sources */,
 				A1903SPT /* SyncStatusPresentationTests.swift in Sources */,
+				A1904BAT /* BootstrapAdvisorTests.swift in Sources */,
 				A1201SCT /* StreakCalculatorTests.swift in Sources */,
 				A1201RNST /* RoutineNotificationServiceTests.swift in Sources */,
 				A1201NRT /* NoteReorderTests.swift in Sources */,
