@@ -121,7 +121,7 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — SyncTransport seam + SyncEnvelope wire format + MultipeerSyncTransport (encrypted MCSession, invite tie-break, Info.plist local-network keys)
+- [x] 19-01-PLAN.md — SyncTransport seam + SyncEnvelope wire format + MultipeerSyncTransport (encrypted MCSession, invite tie-break, Info.plist local-network keys)
 - [ ] 19-02-PLAN.md — SyncCoordinator + SyncStatusStore: connect/change-triggered exchange over the seam, echo suppression, retry, Sync now, scenePhase foreground-only wiring
 - [ ] 19-03-PLAN.md — Neumorphic Sync surface in Settings: status, peer name, last-synced, merge results, Sync Now (SyncStatusPresentation tested)
 - [ ] 19-04-PLAN.md — Bootstrap flow: first-run "set up from your other phone" sheet + BootstrapAdvisor (merge-never-clobber proven)
@@ -168,6 +168,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 2/5 | In Progress|  |
-| 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 0/5 | Not started | - |
+| 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 1/5 | In Progress|  |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 0/5 | Not started | - |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
