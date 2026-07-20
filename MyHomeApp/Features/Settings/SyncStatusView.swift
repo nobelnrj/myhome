@@ -72,3 +72,101 @@ enum SyncStatusPresentation {
         return parts.joined(separator: " · ")
     }
 }
+
+// MARK: - SyncStatusView
+
+/// SYNC-05 — the neumorphic sync surface, reachable from Settings → Sync. A thin view over the
+/// Plan-02 `SyncStatusStore` (read through the coordinator): every string/symbol/tint comes from
+/// the pure `SyncStatusPresentation` mapper above. Uses ONLY existing `DesignTokens` + `NeuSurface`
+/// — zero token/dark-branch edits (DarkBitIdentityTests is the tripwire).
+struct SyncStatusView: View {
+
+    @Environment(SyncCoordinator.self) private var coordinator
+
+    private var store: SyncStatusStore { coordinator.statusStore }
+
+    private var isSyncing: Bool { store.status == .syncing }
+
+    /// The connected peer's display name is the T-19-02 visibility mitigation — an unexpected
+    /// household peer is user-visible. When not connected, say so plainly.
+    private var peerLine: String {
+        if let name = store.connectedPeerName { return "Connected to \(name)" }
+        return "No phone nearby"
+    }
+
+    /// Foreground-only expectation + the Local-Network privacy hint when the error implicates it.
+    private var footerText: String {
+        let base = "Syncing works when both phones have MyHome open on the same Wi-Fi."
+        if case .error(let message) = store.status,
+           message.localizedCaseInsensitiveContains("Local Network") {
+            return base + " Enable it in Settings → Privacy → Local Network."
+        }
+        return base
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: DesignTokens.spacing22) {
+                statusCard
+                if let summary = SyncStatusPresentation.mergeSummary(store.lastMergeStats) {
+                    Text(summary)
+                        .font(.system(size: 13))
+                        .foregroundStyle(DesignTokens.label2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                syncNowButton
+                Text(footerText)
+                    .font(.system(size: 12))
+                    .foregroundStyle(DesignTokens.label3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(DesignTokens.spacing16)
+        }
+        .background(DesignTokens.bgCanvas)
+        .navigationTitle("Sync")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: - Status card
+
+    private var statusCard: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.spacing12) {
+            HStack(spacing: DesignTokens.spacing12) {
+                Image(systemName: SyncStatusPresentation.systemImage(for: store.status))
+                    .font(.title2)
+                    .foregroundStyle(SyncStatusPresentation.tint(for: store.status))
+                    .symbolEffect(.pulse, isActive: isSyncing)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(SyncStatusPresentation.label(for: store.status, lastSyncedAt: store.lastSyncedAt))
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(DesignTokens.label)
+                    Text(peerLine)
+                        .font(.system(size: 13))
+                        .foregroundStyle(DesignTokens.label2)
+                }
+                Spacer(minLength: 0)
+            }
+            // Re-render the relative time every 30s so "Just now" ages without interaction.
+            TimelineView(.periodic(from: .now, by: 30)) { context in
+                Text(SyncStatusPresentation.relativeLastSynced(store.lastSyncedAt, now: context.date))
+                    .font(.system(size: 13))
+                    .foregroundStyle(DesignTokens.label2)
+            }
+        }
+        .neuSurface(.raised)
+    }
+
+    // MARK: - Sync Now
+
+    private var syncNowButton: some View {
+        Button {
+            Haptics.tap()
+            coordinator.syncNow()
+        } label: {
+            Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
+        }
+        .buttonStyle(NeuPrimaryButtonStyle())
+        .disabled(isSyncing)
+        .opacity(isSyncing ? 0.6 : 1)
+    }
+}
