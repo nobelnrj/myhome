@@ -71,6 +71,10 @@ struct RootView: View {
     /// Review-inbox badge count — updated by ExpenseListView via @Binding (D7-04).
     @State private var reviewBadgeCount: Int = 0
 
+    /// SYNC-05: first-run bootstrap prompt. Set true in onAppear only for a fresh (effectively
+    /// empty) install whose owner hasn't answered the prompt; presents SyncBootstrapView once.
+    @State private var showBootstrapSheet = false
+
     var body: some View {
         TabView(selection: $selectedTab) {
             OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID, activityCategoryFilter: $activityCategoryFilter)
@@ -119,6 +123,12 @@ struct RootView: View {
             // Phase 11.1: inject context into NPS NAV service + SIP accrual service (D-01, D-04)
             npsNavService.modelContext = modelContext
             sipAccrualService.modelContext = modelContext
+            // SYNC-05: offer the one-shot bootstrap sheet on a genuinely fresh install. The DEBUG
+            // launch-arg suppression keeps the screenshot/UI-verify loops unblocked (release: false).
+            if !BootstrapAdvisor.isSuppressedByLaunchArguments,
+               BootstrapAdvisor.shouldOfferBootstrap(context: modelContext) {
+                showBootstrapSheet = true
+            }
         }
         // Deep-link observer: notification banner tap → switch to Notes tab + open note
         .onReceive(NotificationCenter.default.publisher(for: kOpenNoteNotification)) { notification in
@@ -145,6 +155,11 @@ struct RootView: View {
             if let sipID = deepLinkReconcileSIPID {
                 reconcileSheetView(for: sipID)
             }
+        }
+        // SYNC-05: first-run bootstrap sheet. Presented once for a fresh install; SyncBootstrapView
+        // persists the one-shot resolved flag on complete/later/swipe so it never re-appears.
+        .sheet(isPresented: $showBootstrapSheet) {
+            SyncBootstrapView(onResolved: { showBootstrapSheet = false })
         }
         // Privacy blur: active on inactive + background so app-switcher snapshot is obscured (T-05-04, D5-02)
         .blur(radius: lockController.isBlurred ? 20 : 0)

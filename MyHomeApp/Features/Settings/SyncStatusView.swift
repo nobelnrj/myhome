@@ -83,6 +83,10 @@ struct SyncStatusView: View {
 
     @Environment(SyncCoordinator.self) private var coordinator
 
+    /// SYNC-05: manual entry to the bootstrap flow for users who skipped the first-run prompt.
+    /// Works on non-empty stores too — the underlying exchange merges (never clobbers).
+    @State private var showBootstrap = false
+
     private var store: SyncStatusStore { coordinator.statusStore }
 
     private var isSyncing: Bool { store.status == .syncing }
@@ -115,6 +119,7 @@ struct SyncStatusView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 syncNowButton
+                setUpFromOtherPhoneButton
                 Text(footerText)
                     .font(.system(size: 12))
                     .foregroundStyle(DesignTokens.label3)
@@ -125,6 +130,26 @@ struct SyncStatusView: View {
         .background(DesignTokens.bgCanvas)
         .navigationTitle("Sync")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showBootstrap) {
+            SyncBootstrapView()
+        }
+    }
+
+    // MARK: - Manual bootstrap entry (SYNC-05)
+
+    /// Quiet secondary affordance — the manual path into the bootstrap flow for users who tapped
+    /// "Set up later" on first run. Merges on non-empty stores; never clobbers.
+    private var setUpFromOtherPhoneButton: some View {
+        Button {
+            Haptics.tap()
+            showBootstrap = true
+        } label: {
+            Label("Set up from your other phone…", systemImage: "iphone.radiowaves.left.and.right")
+                .font(.system(size: 14))
+                .foregroundStyle(DesignTokens.accentText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Status card
