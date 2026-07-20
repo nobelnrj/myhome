@@ -84,6 +84,8 @@
 		A1901ST /* SyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1901ST /* SyncTransport.swift */; };
 		A1901MST /* MultipeerSyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1901MST /* MultipeerSyncTransport.swift */; };
 		A1901STT /* SyncTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1901STT /* SyncTransportTests.swift */; };
+		A1902SSS /* SyncStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SSS /* SyncStatusStore.swift */; };
+		A1902SC /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SC /* SyncCoordinator.swift */; };
 		A1803SRTT /* SnapshotRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SRTT /* SnapshotRoundTripTests.swift */; };
 		A1803SNIT /* SnapshotImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNIT /* SnapshotImporterTests.swift */; };
 		A1804DTT /* DeletionTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1804DTT /* DeletionTrackingTests.swift */; };
@@ -338,6 +340,8 @@
 		F1901ST /* SyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTransport.swift; sourceTree = "<group>"; };
 		F1901MST /* MultipeerSyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerSyncTransport.swift; sourceTree = "<group>"; };
 		F1901STT /* SyncTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTransportTests.swift; sourceTree = "<group>"; };
+		F1902SSS /* SyncStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusStore.swift; sourceTree = "<group>"; };
+		F1902SC /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
 		F1803SRTT /* SnapshotRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotRoundTripTests.swift; sourceTree = "<group>"; };
 		F1803SNIT /* SnapshotImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotImporterTests.swift; sourceTree = "<group>"; };
 		F1804DTT /* DeletionTrackingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionTrackingTests.swift; sourceTree = "<group>"; };
@@ -557,6 +561,8 @@
 				F1805SNFT /* SnapshotFileType.swift */,
 				F1901ST /* SyncTransport.swift */,
 				F1901MST /* MultipeerSyncTransport.swift */,
+				F1902SSS /* SyncStatusStore.swift */,
+				F1902SC /* SyncCoordinator.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -1188,6 +1194,8 @@
 				A1805SSV /* SyncSnapshotViews.swift in Sources */,
 				A1901ST /* SyncTransport.swift in Sources */,
 				A1901MST /* MultipeerSyncTransport.swift in Sources */,
+				A1902SSS /* SyncStatusStore.swift in Sources */,
+				A1902SC /* SyncCoordinator.swift in Sources */,
 				A901ACC /* Account.swift in Sources */,
 				A902AST /* Asset.swift in Sources */,
 				A911NWS /* NetWorthSnapshot.swift in Sources */,
