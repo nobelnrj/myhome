@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 19 (Auto-Sync — Sync UX, Multipeer & Bootstrap) — EXECUTING
-Plan: 1 of 5 complete — next: 19-01 (SyncTransport / Multipeer transport layer)
+Plan: 1 of 5 complete — next: 19-02 (SyncCoordinator orchestration)
 Status: Ready to execute
 Last activity: 2026-07-20
 
