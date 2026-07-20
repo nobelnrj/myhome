@@ -81,13 +81,17 @@ final class SyncCoordinator {
             didSaveObserver = nil
         }
         self.context = context
+        // queue: nil → SYNCHRONOUS delivery on the posting thread. Our main context
+        // always saves on the MainActor, so the observer fires inline within save() —
+        // this is what keeps the `isMerging` echo guard effective (a merge's save is
+        // observed WHILE isMerging is still true, so no push is scheduled). A `.main`/
+        // Task-hopped delivery would run after isMerging reset, defeating the guard.
         didSaveObserver = NotificationCenter.default.addObserver(
             forName: ModelContext.didSave,
             object: context,
-            queue: .main
+            queue: nil
         ) { [weak self] _ in
-            // `.main` queue delivery is on the MainActor; hop explicitly for Swift 6.
-            Task { @MainActor in self?.localStoreDidChange() }
+            MainActor.assumeIsolated { self?.localStoreDidChange() }
         }
     }
 

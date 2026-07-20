@@ -86,6 +86,7 @@
 		A1901STT /* SyncTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1901STT /* SyncTransportTests.swift */; };
 		A1902SSS /* SyncStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SSS /* SyncStatusStore.swift */; };
 		A1902SC /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SC /* SyncCoordinator.swift */; };
+		A1902SCT /* SyncCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SCT /* SyncCoordinatorTests.swift */; };
 		A1803SRTT /* SnapshotRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SRTT /* SnapshotRoundTripTests.swift */; };
 		A1803SNIT /* SnapshotImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNIT /* SnapshotImporterTests.swift */; };
 		A1804DTT /* DeletionTrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1804DTT /* DeletionTrackingTests.swift */; };
@@ -342,6 +343,7 @@
 		F1901STT /* SyncTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTransportTests.swift; sourceTree = "<group>"; };
 		F1902SSS /* SyncStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusStore.swift; sourceTree = "<group>"; };
 		F1902SC /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
+		F1902SCT /* SyncCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinatorTests.swift; sourceTree = "<group>"; };
 		F1803SRTT /* SnapshotRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotRoundTripTests.swift; sourceTree = "<group>"; };
 		F1803SNIT /* SnapshotImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotImporterTests.swift; sourceTree = "<group>"; };
 		F1804DTT /* DeletionTrackingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionTrackingTests.swift; sourceTree = "<group>"; };
@@ -911,6 +913,7 @@
 				F1803SNIT /* SnapshotImporterTests.swift */,
 				F1804DTT /* DeletionTrackingTests.swift */,
 				F1901STT /* SyncTransportTests.swift */,
+				F1902SCT /* SyncCoordinatorTests.swift */,
 				G210 /* Resources */,
 				G220 /* Support */,
 			);
@@ -1308,6 +1311,7 @@
 				A1803SNIT /* SnapshotImporterTests.swift in Sources */,
 				A1804DTT /* DeletionTrackingTests.swift in Sources */,
 				A1901STT /* SyncTransportTests.swift in Sources */,
+				A1902SCT /* SyncCoordinatorTests.swift in Sources */,
 				A1201SCT /* StreakCalculatorTests.swift in Sources */,
 				A1201RNST /* RoutineNotificationServiceTests.swift in Sources */,
 				A1201NRT /* NoteReorderTests.swift in Sources */,
