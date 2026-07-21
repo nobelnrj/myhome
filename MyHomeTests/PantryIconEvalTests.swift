@@ -7,13 +7,14 @@ import FoundationModels
 //
 // OPT-IN. This suite does not run on a routine invocation. To run it:
 //
-//   PANTRY_ICON_EVAL=1 xcodebuild test -scheme MyHome \
+//   TEST_RUNNER_PANTRY_ICON_EVAL=1 xcodebuild test -scheme MyHome \
 //     -destination 'platform=iOS Simulator,name=iPhone 17' \
 //     -parallel-testing-enabled NO \
 //     -only-testing:MyHomeTests/PantryIconEvalTests
 //
-// (xcodebuild forwards the process environment to the test runner, so exporting the variable on
-// the command line is enough.)
+// NOTE the `TEST_RUNNER_` prefix. xcodebuild does NOT forward the host process environment into
+// the test runner; it forwards variables prefixed with `TEST_RUNNER_`, stripping the prefix. A
+// bare `PANTRY_ICON_EVAL=1` silently leaves the suite skipped, which looks exactly like a pass.
 
 /// PantryIconEvalTests — measures how well the real on-device model classifies this household's
 /// vocabulary, against the committed `PantryIconFixture`.

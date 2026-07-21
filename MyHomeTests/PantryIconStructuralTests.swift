@@ -132,8 +132,7 @@ struct PantryIconStructuralTests {
             #expect(keyword != nil, "'\(entry.name)' lost its keyword rule")
             #expect(
                 keyword?.presentation.symbol == entry.expected.presentation.symbol,
-                "'\(entry.name)' keyword symbol drifted: got \(keyword?.presentation.symbol ?? "nil"), "
-                + "expected \(entry.expected.presentation.symbol)"
+                "'\(entry.name)' keyword symbol drifted: got \(keyword?.presentation.symbol ?? "nil"), expected \(entry.expected.presentation.symbol)"
             )
             // The shipped synchronous entry point must agree with the category path.
             #expect(KitchenLogic.icon(forName: entry.name).symbol == entry.expected.presentation.symbol)
