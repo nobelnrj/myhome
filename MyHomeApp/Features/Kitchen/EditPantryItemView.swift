@@ -152,30 +152,36 @@ struct EditPantryItemView: View {
             }
             Spacer(minLength: 8)
 
-            StepperCircle(symbol: "minus", enabled: value.wrappedValue > 0) {
-                value.wrappedValue = max(0, value.wrappedValue - 1)
-                Haptics.selection()
-            }
-            .accessibilityLabel("Decrease \(title)")
-
-            HStack(alignment: .firstTextBaseline, spacing: 3) {
-                Text(KitchenFormat.quantity(value.wrappedValue))
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(DesignTokens.label)
-                    .monospacedDigit()
-                if !unit.trimmingCharacters(in: .whitespaces).isEmpty {
-                    Text(unit)
-                        .font(.footnote)
-                        .foregroundStyle(DesignTokens.label2)
+            // Fixed-width trailing group so all three cards' steppers line up even when a title wraps.
+            HStack(spacing: 8) {
+                StepperCircle(symbol: "minus", enabled: value.wrappedValue > 0) {
+                    value.wrappedValue = max(0, value.wrappedValue - 1)
+                    Haptics.selection()
                 }
-            }
-            .frame(minWidth: 44)
+                .accessibilityLabel("Decrease \(title)")
 
-            StepperCircle(symbol: "plus", enabled: true) {
-                value.wrappedValue += 1
-                Haptics.selection()
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text(KitchenFormat.quantity(value.wrappedValue))
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(DesignTokens.label)
+                        .monospacedDigit()
+                    if !unit.trimmingCharacters(in: .whitespaces).isEmpty {
+                        Text(unit)
+                            .font(.footnote)
+                            .foregroundStyle(DesignTokens.label2)
+                    }
+                }
+                .frame(width: 56)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+                StepperCircle(symbol: "plus", enabled: true) {
+                    value.wrappedValue += 1
+                    Haptics.selection()
+                }
+                .accessibilityLabel("Increase \(title)")
             }
-            .accessibilityLabel("Increase \(title)")
+            .fixedSize()
         }
         .neuSurface(.raised, radius: 20, padding: 14)
     }

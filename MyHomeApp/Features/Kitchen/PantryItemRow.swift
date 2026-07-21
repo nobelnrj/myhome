@@ -34,7 +34,9 @@ struct PantryItemRow: View {
                                 .font(.system(size: 17, weight: .semibold))
                                 .foregroundStyle(DesignTokens.label)
                                 .lineLimit(1)
+                                .minimumScaleFactor(0.75)
                             StockBadge(status: status)
+                                .fixedSize()   // badge keeps its intrinsic width; the name shrinks first
                         }
                         Text(stockLine)
                             .font(.subheadline)
@@ -136,6 +138,7 @@ struct StepperCircle: View {
                 .foregroundStyle(enabled ? DesignTokens.label : DesignTokens.label3)
                 .frame(width: 44, height: 44)
                 .neuSurface(enabled ? .raised : .recessed, radius: 22, padding: nil, isInteractive: enabled)
+                .fixedSize()   // stay a 44pt circle instead of stretching to fill the row HStack
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)

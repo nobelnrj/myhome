@@ -77,6 +77,17 @@ struct KitchenView: View {
         .sheet(item: $editingItem) { item in
             EditPantryItemView(item: item)
         }
+        #if DEBUG
+        // Screenshot-verify hook: `-editFirstPantryItem` opens the edit sheet on the first row
+        // (the sheet is otherwise only reachable by tapping, which simctl cannot do).
+        .onAppear {
+            if ProcessInfo.processInfo.arguments.contains("-editFirstPantryItem") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    editingItem = lowOrOut.first ?? pantry.first
+                }
+            }
+        }
+        #endif
     }
 
     // MARK: - Pieces

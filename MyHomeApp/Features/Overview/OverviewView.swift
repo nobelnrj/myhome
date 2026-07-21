@@ -92,10 +92,16 @@ private struct OverviewMonthContent: View {
     @Query(sort: \NetWorthSnapshot.date, order: .reverse) private var netWorthSnapshots: [NetWorthSnapshot]
     @Query private var allAccounts: [Account]
     @Query private var allGlobalExpenses: [Expense]
+    /// Phase 20 (KTCH-01/02): lightweight pantry query behind the Kitchen entry card's one-line
+    /// summary. Stock state is derived at render time via KitchenLogic — never stored.
+    @Query(sort: \PantryItem.name) private var pantry: [PantryItem]
 
     @State private var editingExpense: Expense?
     @State private var navigateToAssets = false
     @State private var navigateToAnalytics = false
+    /// Phase 20: Kitchen is a PUSHED surface from Overview (Assets/Analytics precedent) — the
+    /// native tab bar stays at 5 tabs and the `-startTab` indices 0–4 are untouched.
+    @State private var navigateToKitchen = false
 
     init(start: Date, end: Date, monthLabel: String,
          selectedTab: Binding<Int>,
@@ -278,6 +284,12 @@ private struct OverviewMonthContent: View {
                     .neuSurface(.raised, padding: nil)
                     .entrance(8)
                 }
+
+                // Kitchen — entry into the pushed pantry surface (Phase 20, KTCH-01/02)
+                sectionHeader("Kitchen", action: ("Open pantry", { navigateToKitchen = true }))
+                    .id("kitchen")
+                KitchenGlanceCard(pantry: pantry) { navigateToKitchen = true }
+                    .entrance(9)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -293,6 +305,9 @@ private struct OverviewMonthContent: View {
         .navigationDestination(isPresented: $navigateToAnalytics) {
             AnalyticsView(expenses: allGlobalExpenses, categories: categories)
         }
+        .navigationDestination(isPresented: $navigateToKitchen) {
+            KitchenView()
+        }
         #if DEBUG
         // Screenshot-verify hooks: `-openAnalytics` pushes the Analytics screen on launch
         // (a navigation push, unreachable via -startTab); `-scrollTo <id>` jumps the
@@ -301,6 +316,9 @@ private struct OverviewMonthContent: View {
             let args = ProcessInfo.processInfo.arguments
             if args.contains("-openAnalytics") {
                 navigateToAnalytics = true
+            }
+            if args.contains("-openKitchen") {
+                navigateToKitchen = true
             }
             if let i = args.firstIndex(of: "-scrollTo"), i + 1 < args.count {
                 let target = args[i + 1]
@@ -370,6 +388,76 @@ private struct ReviewBanner: View {
         .buttonStyle(.plain)
     }
 }
+// MARK: - Kitchen glance card
+
+/// Compact Overview entry into the pushed Kitchen surface (Phase 20). One line of pantry state:
+/// total tracked items plus how many need restocking, tinted with the SAME semantic twins as the
+/// pantry row badges (negative when something is out, orange when only low). Colour is never the
+/// sole signal — the text states the count, and an SF Symbol carries the state.
+private struct KitchenGlanceCard: View {
+    let pantry: [PantryItem]
+    let action: () -> Void
+
+    private var outCount: Int {
+        pantry.filter { KitchenLogic.stockStatus(for: $0) == .out }.count
+    }
+    private var lowCount: Int {
+        pantry.filter { KitchenLogic.stockStatus(for: $0) == .low }.count
+    }
+    private var needsRestock: Int { outCount + lowCount }
+
+    private var statusColor: Color {
+        if outCount > 0 { return DesignTokens.negative }
+        if lowCount > 0 { return DesignTokens.orange }
+        return DesignTokens.positive
+    }
+
+    private var statusSymbol: String {
+        if outCount > 0 { return "minus.circle.fill" }
+        if lowCount > 0 { return "exclamationmark.triangle.fill" }
+        return "checkmark.circle.fill"
+    }
+
+    private var subtitle: String {
+        guard !pantry.isEmpty else { return "Set up your pantry" }
+        if needsRestock == 0 { return "\(pantry.count) items · all stocked" }
+        return "\(pantry.count) items · \(needsRestock) need restocking"
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                IconTile(symbol: "basket.fill", color: DesignTokens.catGroceries, size: 38, cornerRadius: 11)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Pantry")
+                        .font(.headline)
+                        .foregroundStyle(DesignTokens.label)
+                    HStack(spacing: 5) {
+                        if !pantry.isEmpty {
+                            Image(systemName: statusSymbol)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(statusColor)
+                        }
+                        Text(subtitle)
+                            .font(.subheadline)
+                            .foregroundStyle(needsRestock > 0 ? statusColor : DesignTokens.label2)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(DesignTokens.label3)
+            }
+            .neuSurface(.raised, radius: 20, padding: 14, isInteractive: true)
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Pantry. \(subtitle)")
+        .accessibilityHint("Opens the kitchen")
+    }
+}
+
 // MARK: - Budgets glance pills
 
 /// Budgets glance as pill-well gauges — the same chart language as "By category", but the
