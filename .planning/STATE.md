@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
-status: verifying
-last_updated: "2026-07-21T16:56:29.380Z"
-last_activity: 2026-07-21
+status: executing
+last_updated: "2026-07-21T17:02:50.062Z"
+last_activity: 2026-07-21 -- Phase 20 marked complete
 progress:
   total_phases: 4
   completed_phases: 3
@@ -20,14 +20,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 20 — kitchen-inventory-shopping-list
+**Current focus:** Phase 21 — Overview Filtering (last phase of v1.3)
 
 ## Current Position
 
-Phase: 20 (kitchen-inventory-shopping-list) — EXECUTING
+Phase: 20 — COMPLETE (merged to main via PR #39, 2026-07-21)
 Plan: 5 of 5
-Status: Code-complete, verified, PR #39 open. Icon palette retuned to warm (20-06, user call). BLOCKING on 9-step human UAT — most importantly the two-phone AirDrop sync check (see 20-VERIFICATION.md). Only the user merges.
-Last activity: 2026-07-21
+Status: Phase 20 shipped. Kitchen is live on main. Two-phone AirDrop UAT (20-VERIFICATION.md, 9 steps) was NOT run before merge — user merged deliberately; treat it as outstanding.
+Next: Phase 21 (Overview Filtering) — 3 plans already written, 0 executed. Last phase of v1.3.
+Last activity: 2026-07-21 -- Phase 20 marked complete
 
 ## Performance Metrics
 
