@@ -60,7 +60,7 @@ struct SchemaV9MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 3. Migrate to V9 using the production AppMigrationPlan (SchemaV8 → SchemaV9).
-        let v9Schema = Schema(versionedSchema: SchemaV10.self)
+        let v9Schema = Schema(versionedSchema: SchemaV11.self)
         let migrateConfig = ModelConfiguration(schema: v9Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v9Schema,
@@ -115,7 +115,7 @@ struct SchemaV9MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 2. Migrate to V9 and verify RoutineCompletion entity is accessible.
-        let v9Schema = Schema(versionedSchema: SchemaV10.self)
+        let v9Schema = Schema(versionedSchema: SchemaV11.self)
         let config = ModelConfiguration(schema: v9Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v9Schema,

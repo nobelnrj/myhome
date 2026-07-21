@@ -86,7 +86,7 @@ struct SchemaV10MigrationTests {
         try FileManager.default.copyItem(at: seedURL, to: migrateURL)
 
         // 3. Reopen under the production AppMigrationPlan — runs V9→V10.
-        let v10Schema = Schema(versionedSchema: SchemaV10.self)
+        let v10Schema = Schema(versionedSchema: SchemaV11.self)
         let migrateConfig = ModelConfiguration(schema: v10Schema, url: migrateURL)
         let container = try ModelContainer(
             for: v10Schema,
@@ -157,10 +157,10 @@ struct SchemaV10MigrationTests {
         // syncID default were evaluated lazily per read rather than written by the migration,
         // identity would silently change here and every device would resync as new records.
         let reopened = try ModelContainer(
-            for: Schema(versionedSchema: SchemaV10.self),
+            for: Schema(versionedSchema: SchemaV11.self),
             migrationPlan: AppMigrationPlan.self,
             configurations: [ModelConfiguration(
-                schema: Schema(versionedSchema: SchemaV10.self), url: storeURL)]
+                schema: Schema(versionedSchema: SchemaV11.self), url: storeURL)]
         )
         for expense in try reopened.mainContext.fetch(FetchDescriptor<Expense>()) {
             #expect(expense.syncID == idsByNote[expense.note ?? ""],

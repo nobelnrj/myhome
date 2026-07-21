@@ -29,7 +29,7 @@ struct SIPAccrualServiceTests {
     /// Must track the production schema: a container built one version behind the active
     /// typealias traps in ModelContext with "Failed to cast model" (STAB-08).
     private func makeContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV10.self)
+        let schema = Schema(versionedSchema: SchemaV11.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         return try ModelContainer(for: schema, configurations: [config])
     }

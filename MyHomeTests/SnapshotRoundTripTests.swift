@@ -16,7 +16,7 @@ enum SyncTestSupport {
 
     /// A fresh in-memory container registering the whole SchemaV10 model set.
     static func makeStore() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV10.self)
+        let schema = Schema(versionedSchema: SchemaV11.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         return try ModelContainer(for: schema, configurations: [config])
     }
