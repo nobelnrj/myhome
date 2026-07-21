@@ -211,7 +211,34 @@ struct MyHomeApp: App {
             snap.totalNetWorth = snap.mfValue + snap.stockValue
             ctx.insert(snap)
         }
+        seedSamplePantry(ctx)
+
         try? ctx.save()
+    }
+
+    /// Seeds a pantry covering all three stock states (in stock / LOW / OUT) so the Kitchen
+    /// screenshots show the badges without any UI interaction. Idempotent: skipped once any
+    /// PantryItem exists.
+    @MainActor
+    private func seedSamplePantry(_ ctx: ModelContext) {
+        let existingPantry = (try? ctx.fetch(FetchDescriptor<PantryItem>())) ?? []
+        guard existingPantry.isEmpty else { return }
+
+        // (name, quantity, unit, lowStockThreshold, restockQuantity)
+        let items: [(String, Double, String, Double, Double)] = [
+            ("Sona Masoori rice", 5, "kg",   1, 5),
+            ("Atta",              4, "kg",   1, 5),
+            ("Milk",              1, "L",    1, 3),   // LOW (at threshold)
+            ("Eggs",              2, "pcs",  4, 12),  // LOW (below threshold)
+            ("Filter coffee",     0, "pack", 1, 2),   // OUT
+            ("Dishwash liquid",   3, "btl",  1, 1)
+        ]
+        for (name, qty, unit, threshold, restock) in items {
+            ctx.insert(PantryItem(
+                name: name, quantity: qty, unit: unit,
+                lowStockThreshold: threshold, restockQuantity: restock
+            ))
+        }
     }
     #endif
 
