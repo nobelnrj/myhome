@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
-status: executing
-last_updated: "2026-07-20T20:02:19.661Z"
+status: verifying
+last_updated: "2026-07-21T16:56:29.380Z"
 last_activity: 2026-07-21
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 3
   total_plans: 18
-  completed_plans: 9
-  percent: 50
+  completed_plans: 16
+  percent: 75
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 19 — Auto-Sync — Sync UX, Multipeer & Bootstrap
+**Current focus:** Phase 20 — kitchen-inventory-shopping-list
 
 ## Current Position
 
-Phase: 19 (Auto-Sync — Sync UX, Multipeer & Bootstrap) — EXECUTING
-Plan: 5 of 5 complete, plus unplanned 19-06 (SyncScope — notes-only sync)
-Status: Code-complete & suite-green (703 tests). Deployed to both phones from feat/19-auto-sync-multipeer. BLOCKING on two-phone UAT (see 19-05-SUMMARY.md, steps corrected for notes-only scope).
+Phase: 20 (kitchen-inventory-shopping-list) — EXECUTING
+Plan: 5 of 5
+Status: Code-complete, verified, PR #39 open. Icon palette retuned to warm (20-06, user call). BLOCKING on 9-step human UAT — most importantly the two-phone AirDrop sync check (see 20-VERIFICATION.md). Only the user merges.
 Last activity: 2026-07-21
 
 ## Performance Metrics
@@ -98,6 +98,10 @@ Last activity: 2026-07-21
 | Phase 19 P02 | ~40 min | 3 tasks | 5 files |
 | Phase 19 P03 | ~18 min | 2 tasks | 5 files |
 | Phase 19 P04 | 35 min | 2 tasks | 7 files |
+| Phase 20 P02 | ~1h | 3 tasks | 8 files |
+| Phase 20 P03 | 55m | 3 tasks | 8 files |
+| Phase 20 P04 | 50m | 2 tasks | 7 files |
+| Phase 20 P05 | 40m | 2 tasks | 9 files |
 
 ## Quick Tasks Completed
 
@@ -154,6 +158,13 @@ Recent decisions affecting current work:
 - [Phase 13→14, 2026-06-21]: DS-03 floating capsule tab bar REVERTED to native iOS tab bar per user (commit 92e3e61). NeuTabBar.swift now orphaned/unused (delete during Phase 14). Phase 14 restyles the NATIVE bar's colors only — do NOT rebuild a custom tab bar. Reference design's yellow-active-pill bar is explicitly out of scope.
 - [Phase 14 SKIN DECISION, 2026-06-21]: Design handoff ships 6 interchangeable skins (Liquid Glass / Glassmorphism / Neomorphism / Minimalism / Bento / Spatial). User's reference screenshots = the DEFAULT 'liquid' (Liquid Glass) skin; Phase 13 DesignTokens.swift translated the 'neuro' (Neomorphism) branch — hence the mismatch. After a side-by-side comparison (design/skin-comparison.html), user CHOSE **Neomorphism** (keep what Phase 13 built) over matching the glass reference. So: NO rework of DesignTokens/NeuSurface; Phase 14 applies the existing neuro tokens + canary-yellow accent + colored category palette + "Where it's going" donut + net-cash-flow card across all 67 feature view files. Do NOT pursue Liquid Glass / translucent material.
 - [Phase 14 verified state, 2026-06-21]: Phase 13 components (DesignTokens/NeuSurface/RollingMoneyText/NeuTabBar) exist + pushed to main + compile, but are applied to 0 real screens (only CardStyle.swift deprecation shim references them). All 67 feature views still use system colors (secondarySystemBackground, .accentColor blue). Phase 14 is the wiring/restyle pass. CardStyle is marked "removed in Phase 14".
+- [Phase ?]: 20-02: SyncScope.production widened to notes+kitchen — DTOs alone would have left KTCH-04 false on device; financial exclusions unchanged and still asserted
+- [Phase ?]: 20-03: Kitchen is a pushed Overview surface, not a 6th tab (5-tab bar and -startTab 0-4 untouched)
+- [Phase ?]: 20-03: Pantry item icons are DERIVED from the item name (KitchenLogic.icon) — no schema field, no picker
+- [Phase ?]: Shopping extras delete via context menu + Clear checked instead of swipe (mockup card is a neu VStack, not a List)
+- [Phase 20]: Shopping empty state keeps an Add item field the mockup omits — manual extras would otherwise be unreachable when the list is empty
+- [Phase ?]: 20-05: BootstrapAdvisor emptiness now counts kitchen rows — scope-relative emptiness must follow SyncScope widening
+- [Phase ?]: 20-05: share-sheet/Files UI loop is not simctl-automatable; automated the export-decode-self-merge bytes instead and left the taps to the human check
 
 ### Pending Todos
 
@@ -215,7 +226,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ## Session Continuity
 
-Last session: 2026-07-20T20:02:11.982Z
+Last session: 2026-07-21T14:40:05.447Z
 Stopped at: Completed 19-03-PLAN.md
 Resume file: None
 

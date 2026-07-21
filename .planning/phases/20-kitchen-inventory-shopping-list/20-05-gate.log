@@ -1,0 +1,769 @@
+# Phase 20 gate — full-suite regression (authoritative)
+Command: xcodebuild test -scheme MyHome -destination 'platform=iOS Simulator,name=iPhone 17' -parallel-testing-enabled NO
+Date: 2026-07-21T14:38:31Z   HEAD: 0b67ebc  branch: feat/20-kitchen-inventory
+
+## Structural invariants (integrated tree)
+1. typealias ... = SchemaV10. under Persistence/Models: 0 (expect 0)
+2. bare context.delete( outside DeletionTracker: 0 (expect 0)
+3. currentSchemaVersion = 11 in SyncSnapshot.swift: 1 (expect 1)
+4. DesignTokens.swift last touched by: 032d6b9 feat(17): light-mode chart dishes → soft-white neumorphism (D-13 revised) (Phase 17 — predates Phase 20)
+5. Kitchen files registered 'in Sources':
+   A2001PI /* PantryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2001PI /* PantryItem.swift */; };
+   A2001SLI /* ShoppingListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2001SLI /* ShoppingListItem.swift */; };
+   A2003KL /* KitchenLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KL /* KitchenLogic.swift */; };
+   A2003KLT /* KitchenLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KLT /* KitchenLogicTests.swift */; };
+   A2004SLT /* ShoppingListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SLT /* ShoppingListTests.swift */; };
+   A2003KV /* KitchenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KV /* KitchenView.swift */; };
+   A2003PIR /* PantryItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003PIR /* PantryItemRow.swift */; };
+   A2004SLV /* ShoppingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SLV /* ShoppingListView.swift */; };
+   A2004SR /* ShoppingRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SR /* ShoppingRow.swift */; };
+   A2003EPI /* EditPantryItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003EPI /* EditPantryItemView.swift */; };
+   A2002KST /* KitchenSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2002KST /* KitchenSyncTests.swift */; };
+
+## Test results
+✔ Test "parseNAVAll: valid data row returns one AMFIScheme with correct code, name, nav, navDate" passed after 0.002 seconds.
+✔ Test "parseNAVAll: nav field is Decimal — not Double" passed after 0.001 seconds.
+✔ Test "parseNAVAll: navDate is parsed from DD-MMM-yyyy string using Asia/Kolkata calendar" passed after 0.001 seconds.
+✔ Test "parseNAVAll: section-header line (no semicolons) is skipped — not counted as a record" passed after 0.001 seconds.
+✔ Test "parseNAVAll: row with fewer than 6 semicolon-delimited fields is skipped" passed after 0.001 seconds.
+✔ Test "parseNAVAll: row with non-numeric NAV is skipped — never fatalError" passed after 0.001 seconds.
+✔ Test "parseNAVAll: column header line (first line) is skipped by dropFirst" passed after 0.001 seconds.
+✔ Test "AMFIScheme.id equals code (Identifiable conformance)" passed after 0.001 seconds.
+✔ Test "refreshIfNeeded is a no-op when lastFetchDate equals startOfTodayIST" passed after 0.001 seconds.
+✔ Test "refreshIfNeeded kicks a fetch when lastFetchDate is .distantPast" passed after 0.001 seconds.
+✔ Test "refreshIfNeeded kicks a fetch when lastFetchDate is yesterday IST" passed after 0.001 seconds.
+✔ Suite AMFINavServiceTests passed after 0.005 seconds.
+✔ Test "liveBalance equals baseline minus net of attributed post-asOf spends (pre-asOf excluded)" passed after 0.032 seconds.
+✔ Test "savingsSpendDecreasesRefundIncreases: spend(+500) lowers, refund(−200) raises a savings baseline" passed after 0.049 seconds.
+✔ Test "creditCardIsNegative: CC baseline -5000 + spend(+1000) yields -6000 owed (D-09)" passed after 0.014 seconds.
+✔ Test "nilBaselineYieldsZero: account with nil balanceBaseline yields 0" passed after 0.001 seconds.
+✔ Test "nilAsOfYieldsZero: account with nil asOf yields 0" passed after 0.001 seconds.
+✔ Suite AccountBalanceTests passed after 0.097 seconds.
+✔ Test "confirmedTransferIncludedInBalance: a confirmed transfer leg (isTransfer == true) attributed to an account IS included in compute (not excluded)" passed after 0.055 seconds.
+✔ Test "netWorthUnchangedByTransfer: a linked confirmed pair with equal-magnitude opposite-sign amounts → total net worth unchanged (sum of both account balances = sum of baselines)" passed after 0.003 seconds.
+✔ Test "balanceMoveDirection: debit leg (amount > 0) DECREASES its source account; credit leg (amount < 0) INCREASES its destination account" passed after 0.003 seconds.
+✔ Test "e2e: real ICICI-NEFT-out + HDFC-credit-in pair and move balances correctly — 07-07" passed after 0.003 seconds.
+✔ Suite AccountBalanceTransferTests passed after 0.065 seconds.
+✔ Test "archiveHidesFromActive: setting isArchived=true hides from active but both remain in store" passed after 0.002 seconds.
+✔ Test "duplicateNameRejected: case-insensitive lookup-before-insert prevents duplicate accounts" passed after 0.011 seconds.
+✔ Suite AccountCRUDTests passed after 0.014 seconds.
+✔ Test "merge re-points the absorbed account's expenses onto the survivor" passed after 0.004 seconds.
+✔ Test "merge folds both identities into the survivor's sourceLabel alias set" passed after 0.011 seconds.
+✔ Test "merge keeps the survivor's baseline and adopts last4 only when survivor lacks one" passed after 0.002 seconds.
+✔ Test "merged balance sums both identities' expenses against the survivor baseline" passed after 0.002 seconds.
+✔ Test "merging an account into itself is a no-op" passed after 0.002 seconds.
+✔ Suite AccountMergeTests passed after 0.022 seconds.
+✔ Test "inference: CC/credit/card keywords → credit_card; others → savings (D-03)" passed after 0.001 seconds.
+✔ Suite AccountTypeInferenceTests passed after 0.001 seconds.
+✔ Test "testMidnightISTBucketBoundary: 18:29Z and 18:31Z on the same UTC date land in different IST day buckets" passed after 0.032 seconds.
+✔ Test "testYearNoFutureBuckets: .year range trendBuckets count <= current month number" passed after 0.002 seconds.
+✔ Test "testSelfTransferExclusion: expense with isTransfer == true excluded from totalSpend and all trendBuckets" passed after 0.001 seconds.
+✔ Test "testDelta: current spend > prior spend → positive delta and positive deltaFraction" passed after 0.001 seconds.
+✔ Test "testDeltaZeroGuard: deltaFraction == 0 when priorTotalSpend == 0 (zero-guard, Pitfall 7)" passed after 0.001 seconds.
+✔ Suite AnalyticsAggregatorTests passed after 0.039 seconds.
+✔ Test "insert: inserting an Asset and saving produces one persisted row with correct fields" passed after 0.002 seconds.
+✔ Test "edit: updating currentNAV and saving reflects the new value on re-fetch" passed after 0.002 seconds.
+✔ Test "delete: deleting an Asset and saving returns zero rows on re-fetch" passed after 0.001 seconds.
+✔ Test "ASSET-04: manually set currentNAV on a stock/NPS asset persists unchanged across fetch cycles" passed after 0.001 seconds.
+✔ Test "amfiSchemeCode: setting amfiSchemeCode on an Asset persists and is queryable" passed after 0.009 seconds.
+✔ Suite AssetCRUDTests passed after 0.017 seconds.
+✔ Test "positive gain: both absolute and percent gain are positive" passed after 0.001 seconds.
+✔ Test "negative gain: both absolute and percent gain are negative" passed after 0.001 seconds.
+✔ Test "zero cost basis: percentGain is nil, absoluteGain is currentValue" passed after 0.001 seconds.
+✔ Test "nil cost basis: percentGain is nil, absoluteGain is currentValue" passed after 0.001 seconds.
+✔ Test "currentValue: units * currentNAV" passed after 0.001 seconds.
+✔ Test "totalCost: units * costBasisPerUnit" passed after 0.001 seconds.
+✔ Test "nil units treated as 0 for all calculations" passed after 0.001 seconds.
+✔ Suite AssetGainLossTests passed after 0.001 seconds.
+✔ Test "ASSET-02: currentValue equals units × currentNAV (exact Decimal equality)" passed after 0.001 seconds.
+✔ Test "ASSET-02: larger holding — 1000 units at 234.56 yields 234560.00" passed after 0.001 seconds.
+✔ Test "ASSET-02: nil units yields currentValue of 0 (no crash)" passed after 0.001 seconds.
+✔ Test "ASSET-02: nil currentNAV yields currentValue of 0 (no crash)" passed after 0.001 seconds.
+✔ Test "ASSET-02: nil units and nil currentNAV yields currentValue of 0 (no crash)" passed after 0.009 seconds.
+✔ Suite AssetValueTests passed after 0.016 seconds.
+✔ Test "debounceCommitsAfterQuiet: save fires ~500ms after last keystroke, not before — NOT-05" passed after 0.204 seconds.
+✔ Test "debounceCancel: cancelled debouncer never fires — NOT-05" passed after 0.202 seconds.
+✔ Suite AutoSaveTests passed after 0.407 seconds.
+✔ Test "A brand-new store is effectively empty" passed after 0.012 seconds.
+✔ Test "A store holding only seeded Categories is still effectively empty" passed after 0.004 seconds.
+​✔ Test "ANY single IN-SCOPE user entity makes the store non-empty" with 3 test cases passed after 0.029 seconds.
+​✔ Test "An OUT-OF-SCOPE entity leaves the store effectively empty (bootstrap stays available)" with 5 test cases passed after 0.036 seconds.
+✔ Test "Under a widened scope, an expense DOES make the store non-empty" passed after 0.011 seconds.
+✔ Test "shouldOfferBootstrap == true only for an empty store with the flag unset" passed after 0.004 seconds.
+✔ Test "shouldOfferBootstrap == false once the resolved flag is set (regardless of emptiness)" passed after 0.011 seconds.
+✔ Test "shouldOfferBootstrap == false for a non-empty store even with the flag unset" passed after 0.004 seconds.
+✔ Test "Bootstrap MERGES a non-empty store: B keeps its newer edit, gains A's records, loses nothing" passed after 0.024 seconds.
+✔ Suite BootstrapAdvisorTests passed after 0.140 seconds.
+✔ Test "colorThreshold: budget 1000, spent 700 → fractionUsed 0.7, .normal, remaining 300" passed after 0.002 seconds.
+✔ Test "colorThreshold: budget 1000, spent 850 → fractionUsed 0.85, .warning" passed after 0.001 seconds.
+✔ Test "colorThreshold: budget 1000, spent 1200 → .overBudget, remaining -200" passed after 0.001 seconds.
+✔ Test "exactly80: budget 1000, spent 800 → fractionUsed 0.8 → .warning (boundary inclusive)" passed after 0.001 seconds.
+✔ Test "exactly100: budget 1000, spent 1000 → .overBudget (boundary inclusive)" passed after 0.010 seconds.
+✔ Test "noBudget: budget nil → fractionUsed nil, remaining nil, colorThreshold .normal" passed after 0.002 seconds.
+✔ Test "zeroBudgetGuard: budget 0 → fractionUsed nil (no divide-by-zero)" passed after 0.001 seconds.
+✔ Test "monthlyAggregation: expenses across two categories sum per category; refund reduces total" passed after 0.002 seconds.
+✔ Test "uncategorizedBucket: expense with empty categories sums into uncategorized total, not per-category" passed after 0.011 seconds.
+✔ Test "confirmedTransferExcludedFromBudget: categorized expense with isTransfer == true is NOT counted in monthlySpend" passed after 0.002 seconds.
+✔ Test "soloTransferExcludedFromBudget: isTransfer == true with transferPairID == nil is also excluded (D-15)" passed after 0.002 seconds.
+✔ Test "normalAndNilTransferStillCounted: expenses with isTransfer == nil or false ARE counted in monthlySpend" passed after 0.012 seconds.
+✔ Test "confirmedTransferExcludedFromUncategorized: uncategorized expense with isTransfer == true is NOT counted in uncategorizedSpend" passed after 0.002 seconds.
+✔ Test "monthBoundaries: start is first instant of month, end is last second — timezone-correct" passed after 0.001 seconds.
+✔ Test "grossSpend sums only positive amounts — never goes negative when credits dwarf debits" passed after 0.001 seconds.
+✔ Test "grossIncome sums |credits| only; grossSpend ignores them" passed after 0.001 seconds.
+✔ Test "Pending transfer pair (transferPairID set, isTransfer nil) is excluded from both totals" passed after 0.001 seconds.
+✔ Test "Confirmed transfer (isTransfer true) excluded; user-rejected (isTransfer false) included" passed after 0.001 seconds.
+✔ Test "Regression: income 157,038 + spent-shaped credits → spend positive, orb pct > 0" passed after 0.001 seconds.
+✔ Suite BudgetCalculatorTests passed after 0.059 seconds.
+✔ Test "Category monthlyBudget stores and round-trips as Decimal unchanged" passed after 0.009 seconds.
+✔ Test "nil monthlyBudget round-trips as nil" passed after 0.002 seconds.
+✔ Suite BudgetModelTests passed after 0.011 seconds.
+✔ Test "canHandle: accepts CUB transaction alert subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects statement subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects OTP subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects promotional subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects non-CUB sender — ING-08" passed after 0.001 seconds.
+✔ Test "parse: returns nil when required fingerprint literals missing — ING-07" passed after 0.001 seconds.
+✔ Test "parse: CUB savings debit → INR 10000, NACH merchant, not reversal — ING-06" passed after 0.017 seconds.
+✔ Test "parse: CUB savings debit date → 03-JUN-2026 (IST) — ING-06" passed after 0.001 seconds.
+✔ Test "parse: REAL CUB direct debit #1 → INR 5000, NACH merchant, 03-JUN-2026 — ING-06" passed after 0.002 seconds.
+✔ Test "parse: REAL CUB direct debit #2 → INR 10000, NACH merchant, 03-JUN-2026 — ING-06" passed after 0.009 seconds.
+✔ Test "canHandle: REAL CUB direct sender + subject accepted — ING-08" passed after 0.001 seconds.
+✔ Test "parse: fingerprintScore and extractionScore are in [0,1] — ING-07" passed after 0.001 seconds.
+✔ Test "parse: normalizedMerchant is populated — ING-15" passed after 0.001 seconds.
+✔ Suite CUBParserTests passed after 0.033 seconds.
+✔ Test "perDayCountsAndProgress: per-day counts and x/y completion math correct — SC-R4(a,b)" passed after 0.020 seconds.
+✔ Test "tombstonedNoteIsFilteredFromAggregation — STAB-01" passed after 0.010 seconds.
+✔ Test "tombstonedBlockIsFilteredFromAggregation — STAB-01" passed after 0.003 seconds.
+✔ Suite CalendarAggregationTests passed after 0.034 seconds.
+✔ Test "Category can be inserted and fetched" passed after 0.002 seconds.
+✔ Test "Category name can be renamed and persisted" passed after 0.002 seconds.
+✔ Test "Deleting a category nullifies expense.categories link" passed after 0.014 seconds.
+✔ Test "Category uniqueness enforced via lookup-before-insert (no @Attribute(.unique))" passed after 0.010 seconds.
+✔ Test "STAB-03: new category prepends at min(sortOrder)-1, not the bottom" passed after 0.003 seconds.
+✔ Suite CategoryCRUDTests passed after 0.033 seconds.
+✔ Test "16 predefined categories are seeded on empty store" passed after 0.002 seconds.
+✔ Test "Seeding is idempotent — no duplicates on second run" passed after 0.012 seconds.
+✔ Test "Top-up seeding adds only missing categories, preserves existing — 07-07" passed after 0.003 seconds.
+✔ Suite CategorySeedTests passed after 0.018 seconds.
+✔ Test "score: full fingerprint + all fields present → score ≥ 0.85 (autoSaved) — ING-12" passed after 0.001 seconds.
+✔ Test "score: full fingerprint + missing card only → score ≥ 0.85 — ING-12" passed after 0.001 seconds.
+✔ Test "score: missing amount → score < 0.85 (needsReview) — ING-12" passed after 0.001 seconds.
+✔ Test "score: partial fingerprint + partial extraction → score < 0.85 — ING-12" passed after 0.001 seconds.
+✔ Suite ConfidenceScorerTests passed after 0.001 seconds.
+✔ Test "below1000: Decimal(500).formattedINRCompact() == "₹500"" passed after 0.001 seconds.
+✔ Test "below1000_singleDigit: Decimal(1).formattedINRCompact() == "₹1"" passed after 0.001 seconds.
+✔ Test "below1000_boundaryMinus1: Decimal(999).formattedINRCompact() == "₹999"" passed after 0.001 seconds.
+✔ Test "atBoundary1000: Decimal(1000).formattedINRCompact() == "₹1k"" passed after 0.001 seconds.
+✔ Test "inThousands: Decimal(5000).formattedINRCompact() == "₹5k"" passed after 0.001 seconds.
+✔ Test "inThousandsMid: Decimal(50000).formattedINRCompact() == "₹50k"" passed after 0.001 seconds.
+✔ Test "justBelow100000: Decimal(99000).formattedINRCompact() == "₹99k"" passed after 0.001 seconds.
+✔ Test "atBoundary100000: Decimal(100000).formattedINRCompact() == "₹1L"" passed after 0.001 seconds.
+✔ Test "inLakhs: Decimal(150000).formattedINRCompact() == "₹1L"" passed after 0.001 seconds.
+✔ Test "inLakhsLarge: Decimal(500000).formattedINRCompact() == "₹5L"" passed after 0.001 seconds.
+✔ Test "negativeUnits: Decimal(-500).formattedINRCompact() == "-₹500"" passed after 0.001 seconds.
+✔ Test "negativeThousands: Decimal(-50000).formattedINRCompact() == "-₹50k"" passed after 0.001 seconds.
+✔ Test "negativeLakhs: Decimal(-150000).formattedINRCompact() == "-₹1L"" passed after 0.001 seconds.
+✔ Suite DecimalINRTests passed after 0.004 seconds.
+✔ Test "findDuplicate: same amount + overlapping merchant + date within ±1 day → returns match — ING-14, D7-13" passed after 0.008 seconds.
+✔ Test "findDuplicate: same amount + merchant but date > 1 day apart → no match — D7-13" passed after 0.002 seconds.
+✔ Test "findDuplicate: different amount + same merchant + same date → no match — D7-13" passed after 0.010 seconds.
+✔ Test "findDuplicate: same amount + different merchant + same date → no match — D7-13" passed after 0.002 seconds.
+✔ Suite DedupCheckerTests passed after 0.024 seconds.
+✔ Test "deleteSynced writes a matching tombstone and removes the record" passed after 0.013 seconds.
+✔ Test "deleteSynced on a Note tombstones the note AND every block (cascade)" passed after 0.005 seconds.
+✔ Test "tombstoning the same record twice does not crash (importer dedupes downstream)" passed after 0.011 seconds.
+✔ Test "a deleteSynced tombstone flows through export→merge and removes the record on a peer" passed after 0.010 seconds.
+✔ Suite DeletionTrackingTests passed after 0.042 seconds.
+✔ Test "system → nil (follow device), light → .light, dark → .dark" passed after 0.001 seconds.
+✔ Test "labels are System/Light/Dark for the Settings segmented row" passed after 0.001 seconds.
+✔ Test "garbage persisted value falls back to .system (T-17-03)" passed after 0.001 seconds.
+✔ Test "empty-string raw value is nil (optional-init contract)" passed after 0.001 seconds.
+✔ Test "all cases round-trip through their rawValue" passed after 0.001 seconds.
+✔ Suite AppearanceThemeTests passed after 0.001 seconds.
+✔ Test "DesignTokens.accent resolves in dark to #FFD60A" passed after 0.001 seconds.
+✔ Test "DesignTokens.shadowRaised light x=-6, dark x=7" passed after 0.001 seconds.
+✔ Test "DesignTokens.radiusCard equals 26" passed after 0.001 seconds.
+✔ Test "DesignTokens.tabBarClearance equals 100" passed after 0.002 seconds.
+✔ Suite DesignTokensTests passed after 0.002 seconds.
+​✔ Test "plain token resolves in dark exactly to its pre-refactor hex" with 34 test cases passed after 0.038 seconds.
+​✔ Test "alpha token resolves in dark exactly to its legacy composite" with 35 test cases passed after 0.033 seconds.
+✔ Suite DarkBitIdentityTests passed after 0.072 seconds.
+✔ Test "Color.adaptive resolves light vs dark branch by environment (A1)" passed after 0.001 seconds.
+✔ Test "adaptive dark branch is component-identical to legacy Color(hex:) (A3)" passed after 0.001 seconds.
+✔ Suite AdaptiveFactoryTests passed after 0.001 seconds.
+✔ Test "white-on-black contrast ratio is 21.0" passed after 0.001 seconds.
+✔ Suite ContrastHelperTests passed after 0.001 seconds.
+✔ Test "accentText ≥ 4.5:1 on bgCanvas — small text/icon accent (D-08)" passed after 0.001 seconds.
+​✔ Test "semantic delta text ≥ 4.5:1 on bgCanvas (D-10)" with 3 test cases passed after 0.001 seconds.
+✔ Test "aiVioletText ≥ 4.5:1 on bgCanvas — sparkle/text violet (D-15)" passed after 0.001 seconds.
+✔ Test "label ≥ 7.0:1 on bgCanvas — primary text" passed after 0.001 seconds.
+​✔ Test "category color ≥ 3.0:1 on bgCanvas — icons/tiles/fills (D-09)" with 11 test cases passed after 0.027 seconds.
+✔ Test "iconTileGlyph (light) ≥ 3.0:1 on the lightest category twin catOther — D-09" passed after 0.001 seconds.
+✔ Test "accentOnYellow ≥ 4.5:1 on accent (canary CTA fill) — light env (D-08)" passed after 0.001 seconds.
+✔ Test "label readout (light) ≥ 4.5:1 on dishSlate well (light) — D-13 matte-on-light" passed after 0.001 seconds.
+✔ Test "matte chart curve (light) ≥ 3:1 on dishSlate well (light) — D-12 graphical" passed after 0.001 seconds.
+✔ Suite ContrastTests passed after 0.029 seconds.
+✔ Test "Collapses a duplicate pair to one, keeping the earliest createdAt" passed after 0.001 seconds.
+✔ Test "Never deletes manual expenses (nil gmailMessageID), even with identical amounts" passed after 0.001 seconds.
+✔ Test "Same messageID but different accounts are not merged" passed after 0.001 seconds.
+✔ Test "Four copies of one message collapse to one deletion of three" passed after 0.001 seconds.
+✔ Test "run(in:) actually deletes duplicate rows and returns the count" passed after 0.011 seconds.
+✔ Suite DuplicateExpenseCleanupTests passed after 0.016 seconds.
+✔ Test "Marking an unpaired expense sets isTransfer = true, leaves transferPairID nil" passed after 0.002 seconds.
+✔ Test "Unmarking a solo transfer (no pair) resets isTransfer to nil, transferPairID stays nil" passed after 0.002 seconds.
+✔ Test "Unmarking one leg of a confirmed pair resets BOTH legs (cascade unlink)" passed after 0.010 seconds.
+✔ Test "Marking a PENDING-paired expense goes solo (own pairID cleared) and releases the partner (CR-01)" passed after 0.002 seconds.
+✔ Suite EditExpenseTransferTests passed after 0.019 seconds.
+✔ Test "Expense can have a category assigned and persisted" passed after 0.002 seconds.
+✔ Test "Expense category can be cleared and persists as empty" passed after 0.010 seconds.
+✔ Suite ExpenseCategoryTests passed after 0.013 seconds.
+✔ Test "Expense CRUD lifecycle — insert, fetch, delete" passed after 0.002 seconds.
+✔ Test "Expense update — edit fields and persist" passed after 0.002 seconds.
+✔ Test "Currency formatting — en-IN lakh grouping" passed after 0.001 seconds.
+✔ Test "Expense @Model: all properties are optional or have defaults (CloudKit-readiness)" passed after 0.008 seconds.
+✔ Suite ExpenseModelTests passed after 0.014 seconds.
+✔ Test "sourceLabel → accountID: matching account is returned" passed after 0.002 seconds.
+✔ Test "archived account is NOT returned by attribution resolver (T-09-09 / Pitfall 6)" passed after 0.002 seconds.
+✔ Test "unmatchedSourceLabels: returns distinct labels with no matching account; skips matched — 07-07" passed after 0.002 seconds.
+✔ Test "multi-line sourceLabel: every alias resolves to the same account" passed after 0.009 seconds.
+✔ Test "aliases(of:) / sourceLabel(fromAliases:) round-trips and de-dupes" passed after 0.001 seconds.
+✔ Test "labelIdentity splits prefix and trailing digits, ignoring mask glyphs" passed after 0.001 seconds.
+✔ Test "digitsMatchBySuffix: 843 ⊂ 6843 matches; short/unrelated tails do not" passed after 0.001 seconds.
+✔ Test "accountIDBySuffix resolves ••843 to the existing ••6843 ICICI account" passed after 0.002 seconds.
+✔ Test "suffix match never merges a savings account with its debit card (different prefix)" passed after 0.002 seconds.
+✔ Test "value-typed suffix index (used in the sync loop) resolves ••843 to ••6843" passed after 0.002 seconds.
+✔ Test "unmatchedSourceLabels collapses ••843 and ••6843 into a single auto-create" passed after 0.009 seconds.
+✔ Suite GmailAccountAttributionTests passed after 0.034 seconds.
+✔ Test "containsClientID: buildAuthorizationURL includes client_id — ING-01" passed after 0.001 seconds.
+✔ Test "containsRedirectURI: buildAuthorizationURL includes redirect_uri — ING-01" passed after 0.001 seconds.
+✔ Test "containsResponseTypeCode: buildAuthorizationURL includes response_type=code — ING-01" passed after 0.001 seconds.
+✔ Test "containsGmailScope: buildAuthorizationURL includes scope=gmail.readonly — ING-01" passed after 0.001 seconds.
+✔ Test "containsCodeChallenge: buildAuthorizationURL includes code_challenge from PKCE — ING-01" passed after 0.001 seconds.
+✔ Test "containsCodeChallengeMethodS256: buildAuthorizationURL includes code_challenge_method=S256 — ING-01" passed after 0.001 seconds.
+✔ Test "containsAccessTypeOffline: buildAuthorizationURL includes access_type=offline — ING-01" passed after 0.001 seconds.
+✔ Test "containsState: buildAuthorizationURL includes state parameter — ING-01" passed after 0.001 seconds.
+✔ Test "containsPromptConsent: buildAuthorizationURL includes prompt=consent — ING-01" passed after 0.001 seconds.
+✔ Suite GmailAuthURLTests passed after 0.003 seconds.
+✔ Test "signInDrivesSyncStatusToDone: signIn() sets syncStatus=.done and writes lastSyncedAt — ING-02" passed after 0.015 seconds.
+✔ Test "signInStoresRefreshTokenInKeychain: signIn() stores refresh_token under per-account key — ING-02, SEC-03, D-MA-02" passed after 0.002 seconds.
+✔ Test "initSeedsIsConnectedFromKeychain: legacy refresh_token makes isConnected true at launch — SET-05" passed after 0.001 seconds.
+✔ Test "signInSetsIsConnectedTrue: a successful signIn flips isConnected to true — SET-05" passed after 0.002 seconds.
+✔ Test "signOutSetsIsConnectedFalse: signOut() flips isConnected back to false — SET-04" passed after 0.001 seconds.
+✔ Test "signInPassesGeneratedStateToAuthorize: signIn binds callback to state in auth URL — T-06-CSRF" passed after 0.009 seconds.
+✔ Test "signInRejectsStateMismatch: a stateMismatch surfaces an error and stores no token — T-06-CSRF" passed after 0.001 seconds.
+✔ Test "syncTransitionsIdleSyncingDone: sync() transitions syncStatus idle → syncing → done — ING-03" passed after 0.002 seconds.
+✔ Test "syncWritesLastSyncedAt: sync() updates lastSyncedAt after completing — ING-03, ING-05" passed after 0.001 seconds.
+✔ Test "needsProactiveRefreshTrueWhenExpiryLessThan5Min: expiry < 5 min → needsProactiveRefresh=true — ING-16" passed after 0.009 seconds.
+✔ Test "needsProactiveRefreshFalseWhenExpiryMoreThan5Min: expiry > 5 min → needsProactiveRefresh=false — ING-16" passed after 0.001 seconds.
+✔ Test "needsProactiveRefreshTrueWhenExpiryNil: nil expiry → needsProactiveRefresh=true — ING-16" passed after 0.001 seconds.
+✔ Test "scenePhaseActiveWithExpiredToken: expired token → .active → .tokenExpired — ING-16" passed after 0.001 seconds.
+✔ Test "signOutDeletesRefreshTokenFromKeychain: signOut() deletes all per-account tokens — SET-04" passed after 0.001 seconds.
+✔ Test "signOutClearsUserDefaultsFields: signOut() clears account state — SET-04" passed after 0.009 seconds.
+✔ Test "signInTwiceSameEmailOverwritesToken: second signIn() for same email updates token — SEC-03, D-MA-02" passed after 0.003 seconds.
+✔ Test "syncResolvesCategoryByPersistentIDAcrossAwait: category resolved after await — STAB-02" passed after 0.007 seconds.
+✔ Test "syncCompletesWhenCategoryHintMissing: missing category hint → expense still inserted — STAB-02 D-03" passed after 0.014 seconds.
+✔ Suite GmailSyncControllerTests passed after 0.088 seconds.
+✔ Test "canHandle: accepts HDFC UPI debit subject — ING-08" passed after 0.007 seconds.
+✔ Test "canHandle: accepts HDFC debit-card subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: accepts HDFC account-update subject (refund/credit) — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects OTP subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects one time password subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects promotional subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects verification code subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects statement subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects non-HDFC sender — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects Amazon Pay sender — ING-08" passed after 0.001 seconds.
+✔ Test "parse: returns nil when required fingerprint literals missing — ING-07" passed after 0.001 seconds.
+✔ Test "parse: HDFC UPI debit fixture → INR 1500, FRESHALICIOUS SUPER BAZAAR, not reversal — ING-06" passed after 0.003 seconds.
+✔ Test "parse: HDFC debit-card fixture → INR 537, Delightful Gourmet Pvt, not reversal — ING-06" passed after 0.002 seconds.
+✔ Test "parse: HDFC refund fixture → INR -167, Google India Digital Services Pvt Ltd, isReversal=true — ING-09" passed after 0.010 seconds.
+✔ Test "parse: HDFC UPI P2P credit → credit with sender as merchant — 07-08 (was skip under ING-06)" passed after 0.002 seconds.
+✔ Test "parse: fingerprintScore and extractionScore are in [0,1] — ING-07" passed after 0.002 seconds.
+✔ Test "parse: normalizedMerchant is populated (may differ from rawMerchant) — ING-15" passed after 0.002 seconds.
+✔ Test "parse: HDFC account credit → negative amount, isReversal true — 07-07" passed after 0.008 seconds.
+✔ Test "parse: HDFC New Deposit Alert credit → negative amount, isReversal true — 07-07 (2nd corpus)" passed after 0.001 seconds.
+✔ Test "parse: HDFC balance-drop notification is NOT parsed as a transaction — 07-07 guard" passed after 0.001 seconds.
+✔ Test "parse: HDFC old P2P credit (to your account **NNNN … Sender:) still returns nil — 07-07 guard" passed after 0.001 seconds.
+✔ Test "parse: HDFC UPI P2P credit (account ending in … Sender:) → credit with sender as merchant — 07-08" passed after 0.001 seconds.
+✔ Suite HDFCParserTests passed after 0.042 seconds.
+✔ Test "canHandle: accepts ICICI CC spend subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects ICICI statement subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects OTP subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects promotional subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects verification code subject — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects non-ICICI sender — ING-08" passed after 0.001 seconds.
+✔ Test "canHandle: rejects Amazon Pay sender — ING-08" passed after 0.001 seconds.
+✔ Test "parse: returns nil when required fingerprint literals missing — ING-07" passed after 0.001 seconds.
+✔ Test "parse: ICICI CC spend 1 → INR 833, AMAZON PAY IN E COMMERCE, not reversal — ING-06" passed after 0.001 seconds.
+✔ Test "parse: ICICI CC spend 2 → INR 1791.28, BOOKMYSHOW COM, not reversal — ING-06" passed after 0.011 seconds.
+✔ Test "parse: ICICI statement reject fixture → nil — ING-07/08" passed after 0.001 seconds.
+✔ Test "parse: fingerprintScore and extractionScore are in [0,1] — ING-07" passed after 0.001 seconds.
+✔ Test "parse: normalizedMerchant is populated — ING-15" passed after 0.001 seconds.
+✔ Test "parse: ICICI CC spend in USD → amount 23.60, currencyCode USD — 07-07" passed after 0.001 seconds.
+✔ Test "parse: ICICI CC spend in INR still defaults currencyCode INR — 07-07 regression" passed after 0.001 seconds.
+✔ Test "parse: ICICI CC reversal → negative amount, isReversal true, full month date — 07-07" passed after 0.001 seconds.
+✔ Test "parse: ICICI savings NEFT outflow → amount 50000, payee extracted, not reversal — 07-07" passed after 0.001 seconds.
+✔ Test "parse: ICICI account interest credit → negative amount, isReversal true — 07-07" passed after 0.001 seconds.
+✔ Suite ICICIParserTests passed after 0.022 seconds.
+✔ Test "toINR: converts USD to INR using supplied rate — 07-07" passed after 0.001 seconds.
+✔ Test "toINR: INR passes through at 1:1 — 07-07" passed after 0.001 seconds.
+✔ Test "toINR: case-insensitive currency code — 07-07" passed after 0.001 seconds.
+✔ Test "toINR: unknown currency → nil (caller keeps original) — 07-07" passed after 0.008 seconds.
+✔ Test "staticRatesToINR: offline fallback contains INR identity and USD — 07-07" passed after 0.001 seconds.
+✔ Suite CurrencyConverterTests passed after 0.008 seconds.
+✔ Test "pipeline: USD card spend is converted to INR at ingestion using live rate — 07-07" passed after 0.008 seconds.
+✔ Test "pipeline: fresh sync auto-creates an account from sourceLabel and attributes the expense — 07-07" passed after 0.016 seconds.
+✔ Test "sync: connectedEmail is populated via getProfile after successful sync — UAT-6-05" passed after 0.013 seconds.
+✔ Test "pipeline: ingested ICICI expense stores rawEmailBody, parserID, parserVersion — ING-10, ING-11" passed after 0.015 seconds.
+✔ Test "pipeline: high-confidence ICICI parse → ingestionStateRaw = autoSaved — ING-12" passed after 0.007 seconds.
+✔ Test "pipeline: parseConfidence is stored on ingested expense; ingestionStateRaw is set — ING-12" passed after 0.015 seconds.
+✔ Test "pipeline: message already in DismissedMessageStore is skipped — D7-07" passed after 0.013 seconds.
+✔ Test "pipeline: expense matching existing → ingestionStateRaw = possibleDuplicate — ING-14" passed after 0.015 seconds.
+✔ Test "pipeline: bank mail with no matching template is queued, then ingested by a later sync once it parses — 07-08" passed after 0.017 seconds.
+✔ Test "sync: parser signature change widens the query window to the full backfill — 07-08" passed after 0.015 seconds.
+✔ Suite IngestionPipelineTests passed after 0.138 seconds.
+✔ Test "isInsightAvailable(.available) returns true" passed after 0.001 seconds.
+✔ Test "isInsightAvailable(.unavailable(.deviceNotEligible)) returns false" passed after 0.001 seconds.
+✔ Test "isInsightAvailable(.unavailable(.appleIntelligenceNotEnabled)) returns false" passed after 0.001 seconds.
+✔ Test "isInsightAvailable(.unavailable(.modelNotReady)) returns false" passed after 0.001 seconds.
+✔ Test "guardrailViolation error routes to fallback (no throw escapes)" passed after 0.001 seconds.
+✔ Test "exceededContextWindowSize error routes to fallback (no throw escapes)" passed after 0.002 seconds.
+✔ Suite InsightServiceTests passed after 0.003 seconds.
+✔ Test "InsightVerifier rejects observation with model-invented rupee amount" passed after 0.001 seconds.
+✔ Test "InsightVerifier passes observation that uses only fact values" passed after 0.001 seconds.
+✔ Test "InsightVerifier ignores small prose integers (no ₹ or % marker, magnitude < 100)" passed after 0.001 seconds.
+✔ Test "InsightVerifier passes model's whole-rupee echo when the underlying fact has paise" passed after 0.001 seconds.
+✔ Test "InsightFallbackBuilder produces self-consistent insight that passes its own verifier" passed after 0.001 seconds.
+✔ Test "InsightFallbackBuilder returns nil suggestion (never invents a nudge)" passed after 0.012 seconds.
+✔ Suite InsightVerifierTests passed after 0.013 seconds.
+✔ Test "saveThenLoadReturnsValue: SpyKeychainStore save then load returns the stored value — SEC-03" passed after 0.001 seconds.
+✔ Test "deleteThenLoadReturnsNil: SpyKeychainStore delete then load returns nil — SEC-03" passed after 0.001 seconds.
+✔ Test "overwriteReturnsLatestValue: SpyKeychainStore save twice overwrites and load returns latest — SEC-03" passed after 0.001 seconds.
+✔ Test "loadUnknownKeyReturnsNil: SpyKeychainStore load of unknown key returns nil without error — SEC-03" passed after 0.001 seconds.
+✔ Test "deleteUnknownKeyDoesNotThrow: SpyKeychainStore delete of unknown key is a no-op — SEC-03" passed after 0.001 seconds.
+✔ Suite KeychainPortTests passed after 0.001 seconds.
+✔ Test "Zero quantity is always out of stock, even with a zero threshold" passed after 0.001 seconds.
+✔ Test "At the threshold flags LOW — KTCH-02 says at OR below" passed after 0.001 seconds.
+✔ Test "Above the threshold is in stock" passed after 0.001 seconds.
+✔ Test "The item overload reads the row's own threshold" passed after 0.001 seconds.
+✔ Test "markUsed decrements by one and bumps the LWW clock" passed after 0.013 seconds.
+✔ Test "markUsed clamps at zero — stock never goes negative" passed after 0.003 seconds.
+✔ Test "markRestocked adds restockQuantity and bumps the LWW clock" passed after 0.011 seconds.
+✔ Test "deleteSynced leaves a pantryItem tombstone and removes the row" passed after 0.004 seconds.
+✔ Test "Keyword rules resolve the mockup's items to distinct tiles" passed after 0.001 seconds.
+✔ Test "Icon matching is case-insensitive and trims whitespace" passed after 0.001 seconds.
+✔ Test "Unmatched and empty names fall back to the neutral tile" passed after 0.001 seconds.
+✔ Suite KitchenLogicTests passed after 0.034 seconds.
+✔ Test "Kitchen survives export A → merge into empty B with identical values and syncIDs" passed after 0.019 seconds.
+✔ Test "Re-importing the same kitchen snapshot inserts nothing and creates no duplicates" passed after 0.010 seconds.
+✔ Test "Self-merging a phone's own exported BYTES is a no-op with kitchen data aboard" passed after 0.013 seconds.
+✔ Test "Two phones independently adding the same pantry item converge to ONE row" passed after 0.015 seconds.
+✔ Test "Two phones independently adding the same shopping row converge to ONE row" passed after 0.015 seconds.
+✔ Test "A schema-v10 payload is refused and leaves the kitchen tables untouched" passed after 0.021 seconds.
+✔ Test "A deleted pantry item is never resurrected by an older snapshot that still has it" passed after 0.018 seconds.
+✔ Test "A deleted shopping row is never resurrected and tombstones with the right kind" passed after 0.017 seconds.
+✔ Test "Newer remote quantity overwrites the local row in place" passed after 0.012 seconds.
+✔ Test "Older remote quantity is skipped and the local row is kept" passed after 0.005 seconds.
+✔ Test "Checked state on a shopping row syncs to the other phone" passed after 0.016 seconds.
+✔ Suite KitchenSyncTests passed after 0.168 seconds.
+✔ Test "enableLockSetsFlagOnAuthSuccess: enableLock() sets lockEnabled=true when auth succeeds — SET-01" passed after 0.001 seconds.
+✔ Test "enableLockBlockedOnAuthFailure: enableLock() keeps lockEnabled=false when auth fails — SET-01, T-05-03" passed after 0.007 seconds.
+✔ Test "disableLockClearsFlagOnAuthSuccess: disableLock() sets lockEnabled=false when auth succeeds — SET-01" passed after 0.001 seconds.
+✔ Test "lockEnabledPersistsToDefaults: lockEnabled round-trips through a fresh LockController — SEC-01, T-05-03" passed after 0.001 seconds.
+✔ Suite LockSettingsTests passed after 0.010 seconds.
+✔ Test "lockEnabledPersists: setting lockEnabled writes to UserDefaults and reads back — SEC-01" passed after 0.001 seconds.
+✔ Test "coldLaunchLocked: LockController with lockEnabled=true is locked at init — D5-01" passed after 0.001 seconds.
+✔ Test "successUnlocks: successful auth clears isLocked and authError — SEC-02" passed after 0.001 seconds.
+✔ Test "passcodeNotSetHardBlock: canEvaluate passcodeNotSet → authError=.noPasscode, isLocked stays true — D5-05, SEC-02" passed after 0.001 seconds.
+✔ Test "cancelKeepsLocked: userCancel/appCancel/systemCancel → authError=nil AND isLocked stays true — D5-06" passed after 0.001 seconds.
+✔ Test "biometryLockoutMapped: biometryLockout → authError=.biometryLocked — D5-06" passed after 0.001 seconds.
+✔ Test "authFailedMapped: authenticationFailed → authError=.failed — D5-06" passed after 0.004 seconds.
+✔ Test "silentFallbacksMapped: biometryNotAvailable/biometryNotEnrolled/userFallback → authError=nil — D5-04, D5-06" passed after 0.001 seconds.
+✔ Test "graceWindowNoRelock: backgrounded then foregrounded within 180s → isLocked stays false — D5-01" passed after 0.001 seconds.
+✔ Test "expiredGraceRelocks: backgrounded then foregrounded after >180s → isLocked=true — D5-01" passed after 0.001 seconds.
+✔ Test "enableLockRequiresAuth: enableLock() with successful auth sets lockEnabled=true — D5-07a" passed after 0.005 seconds.
+✔ Test "enableLockAuthFailed: enableLock() with failed auth keeps lockEnabled false — D5-07a" passed after 0.001 seconds.
+✔ Test "disableLockRequiresAuth: disableLock() with successful auth sets lockEnabled=false — D5-07b" passed after 0.001 seconds.
+✔ Suite LockStateTests passed after 0.022 seconds.
+✔ Test "normalize: AMAZON IN BLR → Amazon, categoryHint Shopping — ING-15" passed after 0.001 seconds.
+✔ Test "normalize: ZOMATO ONL BANGAL → Zomato, categoryHint Dining — ING-15" passed after 0.008 seconds.
+✔ Test "normalize: AMAZON IN wins over AMAZON (longest prefix match) — D7-09" passed after 0.001 seconds.
+✔ Test "normalize: unknown merchant passes through raw string, categoryHint nil — D7-12" passed after 0.001 seconds.
+✔ Test "normalize: SWIGGY prefix matches → Swiggy, Dining — ING-15" passed after 0.001 seconds.
+✔ Test "normalize: UBER match → Uber, Auto/Cab — ING-15" passed after 0.001 seconds.
+✔ Test "normalize: real-corpus merchants resolve to expected category — 07-07" passed after 0.001 seconds.
+✔ Test "normalize: AMAZON PAY IN GROCERY → Groceries (more specific than AMAZON) — 07-07" passed after 0.001 seconds.
+✔ Test "normalize: unknown merchant with category keyword → hint set, raw name kept — 07-07" passed after 0.001 seconds.
+✔ Test "normalize: keyword fallback does not fire for a truly unknown merchant — 07-07" passed after 0.001 seconds.
+✔ Suite MerchantNormalizerTests passed after 0.012 seconds.
+✔ Test "v1 store loads successfully under AppMigrationPlan" passed after 1.363 seconds.
+✔ Test "v2 store loads and Expense rows survive under AppMigrationPlan (V2→V3→V4)" passed after 0.158 seconds.
+✔ Test "v3 store migrates to V5; ingestion fields and sourceAccount default to nil (T-07-04, D-MA-03)" passed after 0.154 seconds.
+✔ Test "v4 store WITH notes migrates to V5; old notes survive and new notes save (STAB-08)" passed after 0.152 seconds.
+✔ Suite MigrationTests passed after 1.829 seconds.
+✔ Test "MA-01: addOrUpdate two different emails results in accounts.count == 2 — no clobber (D-MA-02)" passed after 0.002 seconds.
+✔ Test "MA-01b: addOrUpdate the same email twice results in accounts.count == 1 (upsert)" passed after 0.001 seconds.
+✔ Test "MA-01c: emails are lowercased — D-MA-01" passed after 0.001 seconds.
+✔ Test "MA-02: remove(email:) deletes only the named account, others remain (D-MA-02)" passed after 0.002 seconds.
+✔ Test "MA-03: accessTokenExpiry, lastSyncedAt, needsReconnect round-trip through UserDefaults — D-MA-02" passed after 0.010 seconds.
+✔ Test "MA-04: migrateLegacyIfNeeded migrates legacy gmail_connected_email + refresh_token (T-MA-06, D-MA-06a)" passed after 0.002 seconds.
+✔ Test "MA-04b: legacy token is NOT deleted if per-account copy cannot be confirmed (T-MA-06 safety)" passed after 0.001 seconds.
+✔ Test "MA-05a: migrateLegacyIfNeeded is a no-op when migration flag is already set" passed after 0.001 seconds.
+✔ Test "MA-05b: migrateLegacyIfNeeded is a no-op when no legacy email exists (clean install)" passed after 0.001 seconds.
+✔ Test "MA-05c: migrateLegacyIfNeeded running twice does not duplicate accounts" passed after 0.014 seconds.
+✔ Test "MA-06: signIn() for a second email preserves the first account — two per-account Keychain keys (D-MA-02)" passed after 0.003 seconds.
+✔ Test "MA-07: account-scoped dedup — same messageID from two accounts produces two expenses (T-MA-05)" passed after 0.016 seconds.
+✔ Test "MA-08: One expired account does not abort sync for the remaining accounts (T-MA-04)" passed after 0.015 seconds.
+✔ Test "MA-09: signOut(email:) removes only the named account; others remain connected (D-MA-05)" passed after 0.010 seconds.
+✔ Suite MultiAccountGmailTests passed after 0.085 seconds.
+✔ Test "parseNPSLatest: fixture latest-min.json returns >0 NPSSchemes with non-zero Decimal NAVs" passed after 0.001 seconds.
+✔ Test "parseNPSLatest: live {"data":[...],"metadata":{...}} wrapper parses (metadata sibling ignored)" passed after 0.001 seconds.
+✔ Test "parseNPSLatest: JSON Number nav 49.5429 round-trips to Decimal via String intermediary" passed after 0.001 seconds.
+✔ Test "parseNPSLatest: garbage Data yields [] — silent fail, no throw" passed after 0.001 seconds.
+✔ Test "parseNPSLatest: empty Data yields [] — silent fail" passed after 0.001 seconds.
+✔ Test "parseNPSLatest: malformed JSON (object instead of array) yields []" passed after 0.001 seconds.
+✔ Test "shouldFetch: false when lastFetchDate == startOfTodayIST" passed after 0.001 seconds.
+✔ Test "shouldFetch: false when lastFetchDate is after startOfTodayIST (same day, later hour)" passed after 0.001 seconds.
+✔ Test "shouldFetch: true when lastFetchDate is yesterday IST" passed after 0.001 seconds.
+✔ Test "shouldFetch: true when lastFetch is .distantPast" passed after 0.001 seconds.
+✔ Test "NPSScheme.id equals code (Identifiable conformance)" passed after 0.001 seconds.
+✔ Suite "NPSNavServiceTests" passed after 0.003 seconds.
+✔ Test "ASSET-05 mfValue: mutual_fund assets with units and nav contribute to mfValue" passed after 0.001 seconds.
+✔ Test "ASSET-05 stockValue and npsValue: each class aggregates independently" passed after 0.001 seconds.
+✔ Test "ASSET-02 nil units: asset with nil units contributes 0 to its class sub-total" passed after 0.001 seconds.
+✔ Test "ASSET-02 nil currentNAV: asset with nil currentNAV contributes 0 to its class sub-total" passed after 0.001 seconds.
+✔ Test "ASSET-02 both nil: asset with nil units AND nil currentNAV contributes 0" passed after 0.001 seconds.
+✔ Test "ASSET-05 cashValue: savings account with positive balance adds to cashValue" passed after 0.004 seconds.
+✔ Test "ASSET-05 CC debt: CC account (negative baseline) reduces cashValue — sign convention honored" passed after 0.010 seconds.
+✔ Test "ASSET-05 CC-heavy: cashValue is negative when CC debt exceeds all savings (D-11)" passed after 0.002 seconds.
+✔ Test "ASSET-05 archived accounts are excluded from cashValue" passed after 0.002 seconds.
+✔ Test "ASSET-05 totalNetWorth: holdings + account balances with correct sign convention" passed after 0.010 seconds.
+✔ Suite NetWorthAggregationTests passed after 0.046 seconds.
+✔ Test "ASSET-08 model: insert a NetWorthSnapshot with all Decimal sub-totals and fetch returns exact values" passed after 0.003 seconds.
+✔ Test "ASSET-08 model: snapshot defaults — all Decimal fields default to 0, not nil" passed after 0.002 seconds.
+✔ Test "ASSET-08 model: negative cashValue (CC debt > savings) persists without clamping" passed after 0.009 seconds.
+✔ Test "ASSET-08 model: createdAt and id are auto-populated on init" passed after 0.002 seconds.
+✔ Test "ASSET-08 upsert: calling upsertIfNeeded twice on same IST day produces exactly one snapshot row" passed after 0.214 seconds.
+✔ Test "ASSET-08 upsert: second call on same day overwrites totalNetWorth — not duplicate insert" passed after 0.155 seconds.
+✔ Test "ASSET-08 snapshot: snapshot carries all 4 sub-totals + total (D-09)" passed after 0.161 seconds.
+✔ Suite NetWorthSnapshotTests passed after 0.549 seconds.
+✔ Test "sectionOrdering: Daily Routine → Pinned → Other ordering correct — NOT-03" passed after 0.004 seconds.
+✔ Test "pinMovesToPinnedSection: toggling isPinned moves note into Pinned section — NOT-04" passed after 0.002 seconds.
+✔ Test "dailyRoutineFilter: daily-recurring notes appear in Daily Routine section — SC-R5" passed after 0.010 seconds.
+✔ Suite NoteListOrderingTests passed after 0.016 seconds.
+✔ Test "noteWithTitlePersists: create note with title, fetch, title intact — NOT-01" passed after 0.001 seconds.
+✔ Test "blockListPreservesOrder: interleaved text + checkbox blocks preserve order field — NOT-02" passed after 0.001 seconds.
+✔ Test "Note @Model: all properties are optional or have defaults (CloudKit-readiness)" passed after 0.001 seconds.
+✔ Test "NoteBlock @Model: all properties are optional or have defaults (CloudKit-readiness)" passed after 0.001 seconds.
+✔ Test "noteSavesUnderProductionVersionedSchema — STAB-08" passed after 0.019 seconds.
+✔ Suite NoteModelTests passed after 0.025 seconds.
+✔ Test "onMove re-indexes order and persists across save" passed after 0.002 seconds.
+✔ Suite NoteReorderTests passed after 0.002 seconds.
+✔ Test "matchesTitleAndBlockText: predicate matches title and block text; non-matches excluded — NOT-06" passed after 0.002 seconds.
+✔ Suite NoteSearchTests passed after 0.002 seconds.
+✔ Test "buildRequestsLeadAlerts: timed reminder with 2 lead offsets builds 3 requests — SC-R1" passed after 0.001 seconds.
+✔ Test "weeklyMultiWeekday: weekly Mon/Wed/Fri produces one repeating trigger per weekday — SC-R1/SC-R2" passed after 0.001 seconds.
+✔ Test "pendingCountUnderCap: pending count stays ≤ 64 under multi-weekday + after-N load — D3-15" passed after 0.001 seconds.
+✔ Suite NotificationSchedulerTests passed after 0.001 seconds.
+✔ Test "aggregateThreshold_normal: totalSpend / totalBudget = 0.5 → fractionUsed ≈ 0.5, color .normal" passed after 0.001 seconds.
+✔ Test "aggregateThreshold_warning: totalSpend / totalBudget = 0.85 → color .warning" passed after 0.001 seconds.
+✔ Test "aggregateThreshold_overBudget: totalSpend / totalBudget = 1.1 → color .overBudget" passed after 0.001 seconds.
+✔ Test "aggregateThreshold_noBudget: totalBudget 0 → fractionUsed nil, color .normal (no divide-by-zero)" passed after 0.001 seconds.
+✔ Test "aggregateThreshold_includesUncategorized: totalSpend is caller-computed sum of categorized + uncategorized" passed after 0.001 seconds.
+✔ Test "topCategories_top3Descending: 4 categories with spend → exactly 3 returned, sorted descending by spend" passed after 0.002 seconds.
+✔ Test "topCategories_alphabeticalTieBreak: equal-spend pair → tie-broken alphabetically by category.name" passed after 0.002 seconds.
+✔ Test "topCategories_sparseSpend: only 1 category with spend > 0 → returns 1 row (no placeholders)" passed after 0.002 seconds.
+✔ Test "pinnedOrChecklistNote_pinned: pinned note present → returned as display note" passed after 0.010 seconds.
+✔ Test "pinnedOrChecklistNote_checklistFallback: no pinned, checklist note present → returns checklist note" passed after 0.002 seconds.
+✔ Test "pinnedOrChecklistNote_usesNoteListOrganizer: dailyRoutine-and-pinned note is excluded from pinned card" passed after 0.002 seconds.
+✔ Test "pinnedOrChecklistNote_emptyState: no pinned, no checklist → nil" passed after 0.010 seconds.
+✔ Test "pinnedOrChecklistNote_emptyArray: empty notes array → nil" passed after 0.001 seconds.
+✔ Suite OverviewAggregationTests passed after 0.034 seconds.
+✔ Test "verifierLength: generated verifier is 43-128 characters — ING-01" passed after 0.001 seconds.
+✔ Test "challengeIsNonEmptyAndDiffersFromVerifier: challenge != verifier and challenge is non-empty — ING-01" passed after 0.001 seconds.
+✔ Test "twoCallsYieldDifferentVerifiers: generate() twice produces different verifiers — ING-01" passed after 0.001 seconds.
+✔ Suite PKCETests passed after 0.001 seconds.
+✔ Test "parseReconciledUnits returns nil for empty string" passed after 0.001 seconds.
+✔ Test "parseReconciledUnits returns nil for whitespace-only string" passed after 0.001 seconds.
+✔ Test "parseReconciledUnits returns nil for non-numeric string" passed after 0.001 seconds.
+✔ Test "parseReconciledUnits returns nil for negative value" passed after 0.001 seconds.
+✔ Test "parseReconciledUnits returns nil for zero" passed after 0.001 seconds.
+✔ Test "parseReconciledUnits returns non-nil Decimal for valid positive value" passed after 0.001 seconds.
+✔ Test "parseReconciledUnits returns non-nil Decimal for integer string" passed after 0.001 seconds.
+✔ Test "parseReconciledUnits trims whitespace before parsing" passed after 0.001 seconds.
+✔ Test "reconcile overwrites Asset.units with the authoritative figure" passed after 0.003 seconds.
+✔ Test "reconcile preserves existing Contribution rows (estimate history retained — D-05)" passed after 0.014 seconds.
+✔ Test "reconcile with no prior contributions only sets Asset.units (no crash)" passed after 0.002 seconds.
+✔ Test "reconcile with existing SIP estimates: estimates stay, Asset.units overwritten" passed after 0.011 seconds.
+✔ Suite "ReconcileTests" passed after 0.033 seconds.
+✔ Test "afterNStops: after-N end rule stops rescheduling after Nth occurrence — SC-R2" passed after 0.001 seconds.
+✔ Test "endOnDateStops: end-on-date end rule stops rescheduling after the cutoff date — SC-R2" passed after 0.001 seconds.
+✔ Test "afterNExpandsToDiscreteTriggers: daily after-3 builds 3 non-repeating -occ triggers — WR-02/SC-R2" passed after 0.001 seconds.
+✔ Test "endOnDateExpandsBounded: daily end-on-date 6 days out builds a bounded set of dated triggers — WR-02/SC-R2" passed after 0.001 seconds.
+✔ Test "monthlyClampsDayToSafeRange: day-31 monthly (never) clamps to day-28 — WR-01/D3-14" passed after 0.001 seconds.
+✔ Test "allDayDailyFiresAtNine: all-day daily fires at 09:00 local, not midnight — WR-03" passed after 0.001 seconds.
+✔ Suite RecurrenceTests passed after 0.001 seconds.
+✔ Test "twoHoursAgoContainsHour: a date 2 hours in the past produces a string containing 'hour' — ING-05, SET-05" passed after 0.001 seconds.
+✔ Test "oneMinuteAgoContainsMinute: a date 1 minute in the past produces a string containing 'minute' — SET-05" passed after 0.001 seconds.
+✔ Test "relativeToNowIsNonEmpty: relativeToNow is non-empty for any date — SET-05" passed after 0.001 seconds.
+✔ Suite RelativeTimestampTests passed after 0.001 seconds.
+✔ Test "INR formatting: Decimal(123456) formats with lakh grouping" passed after 0.001 seconds.
+✔ Test "INR formatting: Decimal(1000000) formats with lakh-crore grouping" passed after 0.001 seconds.
+✔ Suite RollingMoneyTextTests passed after 0.001 seconds.
+✔ Test "routineNoteIncludedInFilter: isDailyRoutine == true is included — NOTE-01" passed after 0.002 seconds.
+✔ Test "normalNoteExcludedFromFilter: isDailyRoutine == false is excluded — NOTE-01" passed after 0.010 seconds.
+✔ Test "routineWithoutReminderDoesNotProduceDotCount — D-02" passed after 0.002 seconds.
+✔ Test "routineWithReminderStillProducesDot — D-02 correct existing behaviour preserved" passed after 0.002 seconds.
+✔ Test "completionIsIdempotentPerDay — D-06/D-08" passed after 0.013 seconds.
+✔ Suite RoutineCalendarTests passed after 0.031 seconds.
+✔ Test "identifier(for:) returns the stable 'routine-daily-' prefixed string" passed after 0.001 seconds.
+✔ Test "D-05: re-scheduling cancels prior request before adding new one" passed after 0.001 seconds.
+✔ Test "D-05: exactly one pending request per routine note after multiple schedules" passed after 0.001 seconds.
+✔ Test "cancel removes pending request for that noteID" passed after 0.001 seconds.
+✔ Test "cancel for one noteID does not remove requests for another noteID" passed after 0.001 seconds.
+✔ Test "userInfo contains exactly noteID and isRoutineReminder keys — no note body text" passed after 0.001 seconds.
+✔ Test "content.categoryIdentifier equals kReminderCategoryID so the Complete action is available" passed after 0.001 seconds.
+✔ Test "trigger is UNCalendarNotificationTrigger with repeats: true" passed after 0.001 seconds.
+✔ Suite RoutineNotificationServiceTests passed after 0.002 seconds.
+✔ Test "MF history: nav String field parses to non-zero Decimal" passed after 0.002 seconds.
+✔ Test "NPS history: nav Number field parses to non-zero Decimal via String intermediary" passed after 0.009 seconds.
+✔ Test "historyDateFormatter: dd-MM-yyyy parses correctly" passed after 0.001 seconds.
+✔ Test "historyDateFormatter: correctly parses dd-MM-yyyy and distinguishes from dd-MMM-yyyy" passed after 0.001 seconds.
+✔ Test "navEntry: exact date hit returns that entry" passed after 0.001 seconds.
+✔ Test "navEntry: weekend target returns nearest prior published NAV (prior Friday)" passed after 0.001 seconds.
+✔ Test "navEntry: target before oldest entry returns nil" passed after 0.001 seconds.
+✔ Test "navEntry: empty history returns nil" passed after 0.001 seconds.
+✔ Test "parseMFHistory: malformed JSON returns empty array" passed after 0.001 seconds.
+✔ Test "parseNPSHistory: malformed JSON returns empty array" passed after 0.001 seconds.
+✔ Test "elapsedInstallmentDates: dayOfMonth=31 in Feb uses Feb 28 (non-leap year)" passed after 0.001 seconds.
+✔ Test "elapsedInstallmentDates: dayOfMonth=29 in Feb 2028 (leap year) returns Feb 29" passed after 0.001 seconds.
+✔ Test "elapsedInstallmentDates: lastAccruedDate=nil accrues from startDate" passed after 0.001 seconds.
+✔ Test "elapsedInstallmentDates: no double-accrual for already-accrued dates" passed after 0.001 seconds.
+✔ Test "elapsedInstallmentDates: future date not included" passed after 0.001 seconds.
+✔ Test "elapsedInstallmentDates: dayOfMonth=31 never skips Feb (clamps and includes)" passed after 0.001 seconds.
+✔ Test "effectiveAmount: returns SIP.amount when no changes precede the date" passed after 0.001 seconds.
+✔ Test "effectiveAmount: returns older amount for date before a change" passed after 0.001 seconds.
+✔ Test "effectiveAmount: returns newer amount for date after a change" passed after 0.001 seconds.
+✔ Test "effectiveAmount: stacked changes — picks the latest applicable change" passed after 0.011 seconds.
+✔ Test "effectiveAmount: change for a different SIP ID does not apply" passed after 0.001 seconds.
+✔ Test "splitAmount: E50/C30/G20 sums exactly to total" passed after 0.001 seconds.
+✔ Test "splitAmount: E50/C30/G20 remainder on largest slice (E)" passed after 0.001 seconds.
+✔ Test "splitAmount: odd total forces remainder onto largest slice" passed after 0.001 seconds.
+✔ Test "splitAmount: MF SIP (100% E, 0% C, 0% G) returns full amount on E" passed after 0.001 seconds.
+✔ Test "units: returns nil when nav is 0 (T-112-02)" passed after 0.001 seconds.
+✔ Test "units: returns nil when nav is negative (T-112-02)" passed after 0.001 seconds.
+✔ Test "units: rounds down to 4 decimal places" passed after 0.001 seconds.
+✔ Test "units: NPS NAV computation is accurate" passed after 0.001 seconds.
+✔ Test "accrueIfNeeded: isActive=false SIP produces zero Contribution rows" passed after 0.004 seconds.
+✔ Test "accrueIfNeeded: isAccruing guard prevents re-entrant call" passed after 0.001 seconds.
+✔ Test "NPS split: 3 Contributions per installment summing to installment amount" passed after 0.001 seconds.
+✔ Test "lastAccruedDate remains nil when no dates have been accrued" passed after 0.013 seconds.
+✔ Test "kReconcileCategoryID is distinct from kReminderCategoryID" passed after 0.001 seconds.
+✔ Test "scheduleReconcileReminder identifier contains sip-reconcile prefix" passed after 0.001 seconds.
+✔ Test "cancelReconcileReminder uses correct identifier" passed after 0.001 seconds.
+✔ Test "reconcile reminder day clamped to maxSafeMonthlyDay for dayOfMonth=31" passed after 0.001 seconds.
+✔ Suite "SIPAccrualServiceTests" passed after 0.050 seconds.
+✔ Test "NPS SIP with E50/C30/G20 is valid" passed after 0.001 seconds.
+✔ Test "NPS SIP with E50/C30/G10 (sum=90) is rejected" passed after 0.001 seconds.
+✔ Test "Amount = 0 is rejected for any SIP type" passed after 0.001 seconds.
+✔ Test "dayOfMonth = 0 is rejected" passed after 0.001 seconds.
+✔ Test "dayOfMonth = 32 is rejected" passed after 0.001 seconds.
+✔ Test "MF SIP with amount > 0 and valid dayOfMonth is valid regardless of allocation" passed after 0.001 seconds.
+✔ Test "MF SIP with allocation 50/0/0 is still valid (isNPS false)" passed after 0.001 seconds.
+✔ Test "dayOfMonth = 1 and 31 are at the boundary and should be valid" passed after 0.001 seconds.
+✔ Test "nextInstallmentDate: dayOfMonth 5 after 2026-06-12 returns 2026-07-05" passed after 0.001 seconds.
+✔ Test "nextInstallmentDate: dayOfMonth 20 after 2026-06-12 returns 2026-06-20" passed after 0.001 seconds.
+✔ Test "nextInstallmentDate: dayOfMonth 12 after 2026-06-12 (exact same day, not strictly after) returns 2026-07-12" passed after 0.001 seconds.
+✔ Test "nextInstallmentDate: dayOfMonth 31 in January reference returns 2026-01-31" passed after 0.001 seconds.
+✔ Test "nextInstallmentDate: dayOfMonth 31 in February reference clamps to Feb 28" passed after 0.001 seconds.
+✔ Test "nextInstallmentDate: dayOfMonth 31 in leap-year February clamps to Feb 29" passed after 0.001 seconds.
+✔ Test "nextInstallmentDate: result is always strictly after reference" passed after 0.001 seconds.
+✔ Suite "SIPSetupValidationTests" passed after 0.002 seconds.
+✔ Test "V9→V10: every migrated row has a distinct syncID within its table" passed after 0.082 seconds.
+✔ Test "V9→V10: migrated syncIDs are persisted and identical after closing and reopening the store" passed after 0.078 seconds.
+✔ Test "V9→V10: Expense keeps its pre-migration updatedAt; others backfill from their own clock" passed after 0.073 seconds.
+✔ Test "V9→V10: DeletionLog is queryable and round-trips after migration" passed after 0.074 seconds.
+✔ Test "V9→V10: bare Expense typealias inserts and fetches under the production plan (STAB-08)" passed after 0.075 seconds.
+✔ Suite SchemaV10MigrationTests passed after 0.384 seconds.
+✔ Test "V10→V11: every pre-existing row survives with its amount, syncID and updatedAt unchanged" passed after 0.054 seconds.
+✔ Test "V10→V11: PantryItem and ShoppingListItem are queryable and empty after migration" passed after 0.047 seconds.
+✔ Test "V10→V11: PantryItem round-trips with its quantity fields and a syncID" passed after 0.049 seconds.
+✔ Test "V10→V11: two PantryItems get DISTINCT syncIDs (assigned at init, not a constant default)" passed after 0.051 seconds.
+✔ Test "V10→V11: ShoppingListItem round-trips with isChecked defaulting to false" passed after 0.049 seconds.
+✔ Test "V10→V11: kitchen models are SyncStamped — touch() bumps updatedAt" passed after 0.051 seconds.
+✔ Test "V10→V11: bare PantryItem and Expense typealiases round-trip under the production plan (STAB-08)" passed after 0.049 seconds.
+✔ Suite SchemaV11MigrationTests passed after 0.353 seconds.
+✔ Test "V5→V6: expenses with sourceLabel backfilled with accountID; sourceAccount unchanged (ACCT-08)" passed after 0.136 seconds.
+✔ Test "V5→V6 migration is idempotent — re-running does not duplicate Account rows" passed after 0.130 seconds.
+✔ Suite SchemaV6MigrationTests passed after 0.267 seconds.
+✔ Test "V6→V7: existing Asset rows survive migration with amfiSchemeCode == nil" passed after 0.118 seconds.
+✔ Test "V6→V7: NetWorthSnapshot entity is queryable (FetchDescriptor returns empty, not a crash)" passed after 0.112 seconds.
+✔ Suite SchemaV7MigrationTests passed after 0.231 seconds.
+✔ Test "V7→V8: existing Asset rows survive migration with npsSchemeCode == nil" passed after 0.053 seconds.
+✔ Test "V7→V8: SIP, SIPAmountChange, Contribution entities are queryable after migration" passed after 0.048 seconds.
+✔ Test "V7→V8: Note, Asset, SIP, Contribution can be inserted and queried in migrated store" passed after 0.043 seconds.
+✔ Suite SchemaV8MigrationTests passed after 0.145 seconds.
+✔ Test "V8→V9: existing Note rows survive migration with routineDailyReminderTime == nil" passed after 0.088 seconds.
+✔ Test "V8→V9: RoutineCompletion entity queryable after migration" passed after 0.083 seconds.
+✔ Suite SchemaV9MigrationTests passed after 0.172 seconds.
+✔ Test "Derivation returns only low+out rows, out first, alphabetical within each group" passed after 0.003 seconds.
+✔ Test "Unnamed rows sort last within their group" passed after 0.003 seconds.
+✔ Test "Auto-population reacts to state: dropping to the threshold adds, restocking removes" passed after 0.003 seconds.
+✔ Test "Checking off a derived row restocks the pantry and drops it from the list" passed after 0.011 seconds.
+✔ Test "An insufficient restockQuantity legitimately leaves the row on the list" passed after 0.003 seconds.
+✔ Test "Derivation and check-off never write ShoppingListItem rows" passed after 0.012 seconds.
+✔ Test "A manual extra round-trips through the store" passed after 0.003 seconds.
+✔ Test "Toggling a manual extra sets isChecked + checkedAt and bumps the LWW clock" passed after 0.003 seconds.
+✔ Test "Checking off a manual extra never touches the pantry" passed after 0.012 seconds.
+✔ Test "Clearing checked extras tombstones each deleted row as shoppingListItem" passed after 0.004 seconds.
+✔ Suite ShoppingListTests passed after 0.062 seconds.
+✔ Test "Decimal money encodes as a JSON string, never a JSON number" passed after 0.005 seconds.
+✔ Test "SyncDecimal round-trips every representative money value" passed after 0.001 seconds.
+✔ Test "encode -> decode -> encode is byte-identical" passed after 0.001 seconds.
+✔ Test "decode refuses a schemaVersion-10 snapshot before decoding entities" passed after 0.001 seconds.
+✔ Test "decode of garbage bytes throws malformedSnapshot" passed after 0.003 seconds.
+✔ Test "decode of truncated valid JSON throws malformedSnapshot" passed after 0.001 seconds.
+✔ Suite SnapshotCodecTests passed after 0.009 seconds.
+✔ Test "No resurrection: an older remote snapshot cannot revive a tombstoned local row" passed after 0.030 seconds.
+✔ Test "LWW: newer remote overwrites local text in place; older remote is ignored" passed after 0.005 seconds.
+✔ Test "Adoption: same-name categories converge to one row with the min syncID" passed after 0.004 seconds.
+✔ Test "Adoption: same (sourceAccount, gmailMessageID) expenses converge to one row, min syncID" passed after 0.012 seconds.
+✔ Test "Wiring: imported expense links both categories; imported block points at its note" passed after 0.021 seconds.
+✔ Test "Version refusal: a schema-10 payload throws and leaves local counts untouched" passed after 0.012 seconds.
+✔ Test "Orphan blocks (nil / unresolvable noteSyncID) are never inserted" passed after 0.003 seconds.
+✔ Suite SnapshotImporterTests passed after 0.091 seconds.
+✔ Test "Golden: export A → import into empty B → export B yields an equal snapshot" passed after 0.021 seconds.
+✔ Test "Golden seed touches all 13 entity types + DeletionLog" passed after 0.006 seconds.
+✔ Test "Re-import: merging the same snapshot twice inserts zero and changes no row counts" passed after 0.030 seconds.
+✔ Test "Decimal integrity: imported expense amount equals Decimal(string:) exactly" passed after 0.020 seconds.
+✔ Test "Production export carries notes/blocks/routines/kitchen and NOTHING financial" passed after 0.013 seconds.
+✔ Test "Money never appears in the exported BYTES, not merely in the decoded arrays" passed after 0.005 seconds.
+✔ Test "Import REJECTS out-of-scope rows even when a peer sends them" passed after 0.018 seconds.
+✔ Test "An out-of-scope TOMBSTONE cannot delete local rows" passed after 0.012 seconds.
+✔ Suite SnapshotRoundTripTests passed after 0.128 seconds.
+✔ Test "donutSegments_top4PlusOthers: 6 categories with spend → 4 named + 1 Others" passed after 0.003 seconds.
+✔ Test "donutSegments_alphabeticalTieBreak: equal spend → tie-broken alphabetically by category.name" passed after 0.012 seconds.
+✔ Test "donutSegments_selfTransferExclusion: isTransfer==true expense contributes zero" passed after 0.002 seconds.
+✔ Test "donutSegments_nilTransferIncluded: isTransfer==nil expense is included in totals" passed after 0.002 seconds.
+✔ Test "donutSegments_fewerThan5_noOthers: 4 categories with spend → 4 entries, no Others" passed after 0.011 seconds.
+✔ Test "donutSegments_othersZero_noOthersEntry: 5th+ category with zero spend → no Others emitted" passed after 0.003 seconds.
+✔ Test "donutSegments_zeroSpend_emptyArray: no expenses → returns empty array with no crash" passed after 0.009 seconds.
+✔ Test "donutSegments_emptyCategories_emptyArray: empty categories → returns empty array" passed after 0.001 seconds.
+✔ Suite SpendDonutAggregationTests passed after 0.046 seconds.
+✔ Test "onCategoryTap_singleCategory: closure receives the category UUID on tap" passed after 0.001 seconds.
+✔ Test "onCategoryTap_multipleLegendRows: each row carries its own UUID" passed after 0.001 seconds.
+✔ Test "onCategoryTap_othersRow: closure receives nil for Others roll-up" passed after 0.001 seconds.
+✔ Test "segmentOrdering_preservesTop4Descending: ranked input order is preserved in output" passed after 0.001 seconds.
+✔ Test "segmentOrdering_emptyRanked: no segments when ranked is empty" passed after 0.001 seconds.
+✔ Suite SpendDonutCardTests passed after 0.005 seconds.
+✔ Test "weekBucketCount: week range returns exactly 7 SpendBucket entries (one per day)" passed after 0.001 seconds.
+✔ Test "monthBucketCount: month range returns 28-31 SpendBucket entries (all days in current month)" passed after 0.009 seconds.
+✔ Test "yearBucketCount: year range returns exactly 12 SpendBucket entries (one per month)" passed after 0.001 seconds.
+✔ Test "zeroSpendWeek: empty expense array → all 7 buckets present with spent == 0.0 (no omitted slots)" passed after 0.001 seconds.
+✔ Test "zeroSpendYear: empty expense array → all 12 monthly buckets present with spent == 0.0" passed after 0.001 seconds.
+✔ Test "decimalDoubleBoundary: Decimal(1234.56) on one day produces bucket with spent ≈ 1234.56" passed after 0.002 seconds.
+✔ Test "confirmedTransferExcludedFromChart: expense with isTransfer == true is absent from every bucket total" passed after 0.001 seconds.
+✔ Test "normalExpensesStillBucketed: nil/false isTransfer expenses still appear in their buckets" passed after 0.001 seconds.
+✔ Test "refundReducesBucket: negative-amount expense reduces the bucket for that day" passed after 0.010 seconds.
+✔ Suite SpendOverTimeAggregatorTests passed after 0.028 seconds.
+✔ Test "navAsOfDate == today (diff 0) → not stale" passed after 0.001 seconds.
+✔ Test "navAsOfDate == yesterday (diff 1) → not stale" passed after 0.001 seconds.
+✔ Test "navAsOfDate == 2 days ago (diff 2) → stale" passed after 0.001 seconds.
+✔ Test "navAsOfDate == nil → not stale (badge hidden)" passed after 0.001 seconds.
+✔ Test "navAsOfDate == 10 days ago → stale" passed after 0.001 seconds.
+✔ Suite StalenessBadgeTests passed after 0.001 seconds.
+✔ Test "OQ-1: fetch RoutineCompletion by noteID UUID predicate compiles and works" passed after 0.002 seconds.
+✔ Test "streak is 0 when no completions exist" passed after 0.001 seconds.
+✔ Test "D-07: incomplete today does NOT break streak — shows yesterday's run" passed after 0.001 seconds.
+✔ Test "D-07: streak breaks on fully-missed past day" passed after 0.002 seconds.
+✔ Test "D-07: completing today extends streak by 1" passed after 0.010 seconds.
+✔ Test "D-08: idempotent — second tap on same day upserts, not inserts" passed after 0.002 seconds.
+✔ Test "completions for other noteIDs are ignored" passed after 0.001 seconds.
+✔ Test "history array always has exactly 30 entries" passed after 0.001 seconds.
+✔ Suite StreakCalculatorTests passed after 0.021 seconds.
+✔ Test "Connect exchange: a note in A appears in B, and B's note appears in A — no tap" passed after 0.027 seconds.
+✔ Test "A merge that saves does NOT enqueue a push (isMerging guard) — pendingPushTask stays nil" passed after 0.018 seconds.
+✔ Test "Converged pair re-exchanging stays bounded — no infinite ping-pong" passed after 3.332 seconds.
+✔ Test "snapshotRequest → exactly one snapshot envelope is sent in reply" passed after 0.004 seconds.
+✔ Test "syncNow while connected sends both a snapshot AND a snapshotRequest" passed after 0.012 seconds.
+✔ Test "syncNow while disconnected restarts discovery instead of failing silently" passed after 0.003 seconds.
+✔ Test "Disconnected while active auto-retries; after stop() a disconnect does NOT restart" passed after 0.362 seconds.
+✔ Test "stop() sets status idle, clears peer name, and tears the transport down" passed after 0.003 seconds.
+✔ Test "lastSyncedAt is nil before any sync and set after a successful merge (UserDefaults-written)" passed after 0.017 seconds.
+✔ Test "Garbage snapshot → status .error, store unchanged, lastSyncedAt NOT updated" passed after 0.015 seconds.
+✔ Test "Newer local edit survives an older remote snapshot for the same record (LWW)" passed after 0.017 seconds.
+✔ Test "An expense on A never reaches B, even over a fully connected auto-sync link" passed after 0.018 seconds.
+✔ Suite SyncCoordinatorTests passed after 3.834 seconds.
+✔ Test "newer remote wins" passed after 0.001 seconds.
+✔ Test "older remote loses" passed after 0.001 seconds.
+✔ Test "exact tie, different bytes: both vantage points agree on ONE winner" passed after 0.001 seconds.
+✔ Test "exact tie, identical bytes: no-op from both sides (idempotent)" passed after 0.001 seconds.
+✔ Test "deletion after the last edit wins" passed after 0.001 seconds.
+✔ Test "deletion exactly at the last edit still wins (no resurrection)" passed after 0.001 seconds.
+✔ Test "edit strictly after the delete survives (intentional LWW resurrection)" passed after 0.001 seconds.
+✔ Suite SyncMergePolicyTests passed after 0.001 seconds.
+✔ Test "idle label depends on whether a sync ever happened" passed after 0.001 seconds.
+✔ Test "connecting / syncing labels" passed after 0.001 seconds.
+✔ Test "error label passes the message through verbatim" passed after 0.008 seconds.
+✔ Test "status symbols" passed after 0.001 seconds.
+✔ Test "status tints resolve to existing DesignTokens members" passed after 0.001 seconds.
+✔ Test "nil date reads Never synced" passed after 0.001 seconds.
+✔ Test "sub-minute reads Just now" passed after 0.001 seconds.
+✔ Test "90 seconds ago mentions minutes" passed after 0.001 seconds.
+✔ Test "nil stats yields no summary row" passed after 0.001 seconds.
+✔ Test "mixed stats list only non-zero components" passed after 0.001 seconds.
+✔ Test "zero-activity merge reads as already in sync" passed after 0.001 seconds.
+✔ Test "omits zero leading components but keeps at least one" passed after 0.001 seconds.
+✔ Suite SyncStatusPresentationTests passed after 0.009 seconds.
+✔ Test snapshotRequestRoundTrips() passed after 0.001 seconds.
+✔ Test snapshotPayloadRoundTripsBytesExactly() passed after 0.001 seconds.
+✔ Test emptySnapshotPayloadRoundTrips() passed after 0.001 seconds.
+✔ Test garbageBytesThrowNeverCrash() passed after 0.007 seconds.
+✔ Test emptyDataThrows() passed after 0.001 seconds.
+✔ Test wrongShapeJSONThrows() passed after 0.002 seconds.
+✔ Test shouldInviteIsAntisymmetricForDistinctNames() passed after 0.001 seconds.
+✔ Test shouldInviteIsFalseBothWaysForEqualNames() passed after 0.001 seconds.
+✔ Test shouldInviteFollowsStrictOrdering() passed after 0.001 seconds.
+✔ Test displayNameContainsSuffixAndIsBounded() passed after 0.001 seconds.
+✔ Test displayNameSurvivesEmojiAndLongNames() passed after 0.014 seconds.
+✔ Test displayNameFallsBackWhenSanitationEmpties() passed after 0.001 seconds.
+✔ Test displayNamesAreDistinctForSameDeviceDifferentInstall() passed after 0.001 seconds.
+✔ Test serviceTypeMeetsMCConstraints() passed after 0.001 seconds.
+✔ Suite SyncTransportTests passed after 0.026 seconds.
+✔ Test "detectsExactAmountPair: same-magnitude opposite-sign same-day pair produces exactly 1 CandidatePair" passed after 0.001 seconds.
+✔ Test "amountMismatchNotPaired: debit 500.00 vs credit -500.01 produces 0 pairs (D-02 exact Decimal)" passed after 0.001 seconds.
+✔ Test "sameSignNotPaired: two debits of equal magnitude produce 0 pairs (D-03)" passed after 0.001 seconds.
+✔ Test "unassignedLegNotPaired: credit with accountID == nil produces 0 pairs (D-04)" passed after 0.001 seconds.
+✔ Test "sameAccountNotPaired: debit and credit both on account A produce 0 pairs (D-04)" passed after 0.001 seconds.
+✔ Test "outsideWindowNotPaired: legs 4 IST days apart produce 0 pairs; exactly 3 days apart produce 1 pair (D-05 inclusive)" passed after 0.001 seconds.
+✔ Test "confirmedLegSkipped: credit with isTransfer == true is never selected as a candidate (D-10)" passed after 0.001 seconds.
+✔ Test "rejectedLegSkipped: credit with isTransfer == false is never selected as a candidate (D-10)" passed after 0.001 seconds.
+✔ Test "tieBreakClosestTimeWins: one debit + two candidate credits at +1 day and +2 days → pairs with the +1-day credit" passed after 0.001 seconds.
+✔ Test "tieBreakUUIDStableOnEqualDistance: two equidistant credits → lower uuidString wins; permuted input yields identical result" passed after 0.001 seconds.
+✔ Test "deterministicOnEqualInput: shuffled input array produces identical CandidatePair set" passed after 0.001 seconds.
+✔ Test "eachCreditClaimedOnce: two debits and one credit → only one pair (claimed credit not reused)" passed after 0.001 seconds.
+✔ Suite TransferDetectionScorerTests passed after 0.013 seconds.
+✔ Test "legsAreCrossLinkedAndConfirmed: debit is positive on `from`, credit is negative on `to`, both isTransfer==true, pairIDs cross-set" passed after 0.010 seconds.
+✔ Test "negativeAmountIsNormalised: a stray negative amount can't invert the legs (abs applied)" passed after 0.001 seconds.
+✔ Test "autoNotesNameCounterpart: nil note yields 'Transfer to <to>' / 'Transfer from <from>'; a user note overrides both" passed after 0.001 seconds.
+✔ Test "movesBalancesAndPreservesNetWorth: source ↓, destination ↑, sum unchanged" passed after 0.002 seconds.
+✔ Test "excludedFromCashFlow: neither leg counts as hero income or spend" passed after 0.011 seconds.
+✔ Suite TransferFactoryTests passed after 0.027 seconds.
+✔ Test "scanWritesPendingPairs: matching debit+credit on two accounts same day → transferPairID cross-set, isTransfer stays nil" passed after 0.004 seconds.
+✔ Test "scanLeavesUnmatchedAlone: lone debit with no matching credit → transferPairID stays nil" passed after 0.016 seconds.
+✔ Test "secondScanIdempotent: after first scan pairs two legs and both are confirmed (isTransfer = true), second scan produces no new pairs" passed after 0.013 seconds.
+✔ Test "confirmedLegSkipped (D-10): expense with isTransfer == true is never selected as a candidate" passed after 0.004 seconds.
+✔ Test "rejectedLegSkipped (D-10): expense with isTransfer == false is never selected as a candidate" passed after 0.010 seconds.
+✔ Test "firstRunFlagSet: after scan(), UserDefaults key 'transferScanFirstRunDone' is true (D-09)" passed after 0.003 seconds.
+✔ Suite TransferScanServiceTests passed after 0.052 seconds.
+✔ Test "record + ids: queued IDs round-trip in insertion order" passed after 0.001 seconds.
+✔ Test "record is idempotent: re-recording an ID neither duplicates nor reorders it" passed after 0.001 seconds.
+✔ Test "accounts are isolated and keys are case-insensitive (D-MA-01 lowercased identity)" passed after 0.001 seconds.
+✔ Test "remove deletes only the target ID; removing an absent ID is a no-op" passed after 0.002 seconds.
+✔ Test "cap evicts the oldest entries first once maxPerAccount is exceeded" passed after 0.107 seconds.
+✔ Test "removeAll clears one account's queue without touching others (sign-out)" passed after 0.002 seconds.
+✔ Suite UnparsedMessageStoreTests passed after 0.117 seconds.
+✔ Test run with 652 tests in 90 suites passed after 10.623 seconds.
+
+✔ Test run with 652 tests in 90 suites passed after 10.623 seconds.
+** TEST SUCCEEDED **

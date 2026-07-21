@@ -19,4 +19,10 @@ import SwiftData
 /// syncID + updatedAt (SYNC-01); no other changes.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias SIPAmountChange = SchemaV10.SIPAmountChange      // was SchemaV9.SIPAmountChange
+/// Flipped from SchemaV10.SIPAmountChange → SchemaV11.SIPAmountChange in Phase 20 (plan 20-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV11.self)`. SchemaV11.SIPAmountChange is
+/// copied verbatim from SchemaV10.SIPAmountChange — V11 adds only the two new kitchen @Models
+/// (PantryItem, ShoppingListItem).
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias SIPAmountChange = SchemaV11.SIPAmountChange      // was SchemaV10.SIPAmountChange

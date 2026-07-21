@@ -8,11 +8,11 @@ import Foundation
 /// existing schema versions from this list).
 enum AppMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self, SchemaV8.self, SchemaV9.self, SchemaV10.self]   // append V10 — never remove V1–V9
+        [SchemaV1.self, SchemaV2.self, SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self, SchemaV8.self, SchemaV9.self, SchemaV10.self, SchemaV11.self]   // append V11 — never remove V1–V10
     }
 
     static var stages: [MigrationStage] {
-        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6, v6ToV7, v7ToV8, v8ToV9, v9ToV10]   // append v9ToV10
+        [v1ToV2, v2ToV3, v3ToV4, v4ToV5, v5ToV6, v6ToV7, v7ToV8, v8ToV9, v9ToV10, v10ToV11]   // append v10ToV11
     }
 
     // Use .custom(willMigrate: nil, didMigrate: nil) rather than .lightweight
@@ -169,17 +169,17 @@ enum AppMigrationPlan: SchemaMigrationPlan {
             // 1. syncID backfill — defeat the constant-default footgun for all 11 syncable models.
             //    Idempotent per-row dedup (see backfillDistinctSyncIDs). DeletionLog is a new,
             //    empty table and is not SyncStamped — nothing to backfill there.
-            try backfillDistinctSyncIDs(SchemaV10.Expense.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.Category.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.Note.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.NoteBlock.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.Account.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.Asset.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.NetWorthSnapshot.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.SIP.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.SIPAmountChange.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.Contribution.self, in: context)
-            try backfillDistinctSyncIDs(SchemaV10.RoutineCompletion.self, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.Expense.self, syncID: \SchemaV10.Expense.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.Category.self, syncID: \SchemaV10.Category.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.Note.self, syncID: \SchemaV10.Note.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.NoteBlock.self, syncID: \SchemaV10.NoteBlock.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.Account.self, syncID: \SchemaV10.Account.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.Asset.self, syncID: \SchemaV10.Asset.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.NetWorthSnapshot.self, syncID: \SchemaV10.NetWorthSnapshot.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.SIP.self, syncID: \SchemaV10.SIP.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.SIPAmountChange.self, syncID: \SchemaV10.SIPAmountChange.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.Contribution.self, syncID: \SchemaV10.Contribution.syncID, in: context)
+            try backfillDistinctSyncIDs(SchemaV10.RoutineCompletion.self, syncID: \SchemaV10.RoutineCompletion.syncID, in: context)
 
             // 2. updatedAt backfill — idempotent by construction (source fields never change).
             //    Expense: DO NOT touch — it has a real updatedAt since V4 (the constant default on
@@ -222,6 +222,25 @@ enum AppMigrationPlan: SchemaMigrationPlan {
         }
     )
 
+    // V11 adds the two kitchen @Models (PantryItem, ShoppingListItem — KTCH-01/KTCH-03,
+    // Phase 20) and changes NOTHING about the 12 classes copied forward from V10: not one
+    // field, default, or @Relationship. Purely additive.
+    // .custom over .lightweight: FB13812722 workaround preserved for all stages.
+    //
+    // didMigrate is nil BY DESIGN — and this is the interesting part, because v9ToV10 needed a
+    // non-nil one. That backfill existed to defeat the SwiftData constant-default footgun: a
+    // `UUID()`/`Date()` default expression added to an EXISTING model via additive migration is
+    // evaluated once, so every already-persisted row would share one syncID. V11 adds no fields
+    // to any existing model — its only additions are two brand-new tables with zero existing
+    // rows — so there is literally nothing to backfill. Every kitchen row's syncID/updatedAt is
+    // assigned at `init` time on a live device (KTCH-04: syncable from birth).
+    static let v10ToV11 = MigrationStage.custom(
+        fromVersion: SchemaV10.self,
+        toVersion: SchemaV11.self,
+        willMigrate: nil,
+        didMigrate: nil   // PantryItem/ShoppingListItem are new EMPTY tables — nothing to backfill
+    )
+
     // Note: inferAccountType(from:) is now the module-level free function in
     // MyHomeApp/Support/AccountBalance.swift — reused here by reference (D-03).
 }
@@ -238,18 +257,23 @@ enum AppMigrationPlan: SchemaMigrationPlan {
 /// once. Note that the tests therefore do NOT fail if this is removed.
 ///
 /// Idempotent: a table whose syncIDs are already all-distinct is left untouched, so a re-run
-/// after a mid-stage throw is a no-op. Constrained to `SyncStamped` so it reads/writes syncID
-/// uniformly across all 11 model types.
-private func backfillDistinctSyncIDs<T: PersistentModel & SyncStamped>(
+/// after a mid-stage throw is a no-op.
+///
+/// Takes the syncID key path rather than constraining to `SyncStamped` (Phase 20, 20-01):
+/// `SyncStamped` conformance always points at the CURRENT schema version (SchemaV11 today), but
+/// this helper operates on the frozen SchemaV10 types inside the v9ToV10 stage. Binding it to the
+/// protocol would re-break this stage on every future schema bump; the key path is version-agnostic.
+private func backfillDistinctSyncIDs<T: PersistentModel>(
     _ type: T.Type,
+    syncID syncIDPath: ReferenceWritableKeyPath<T, UUID>,
     in context: ModelContext
 ) throws {
     let rows = try context.fetch(FetchDescriptor<T>())
     var seen = Set<UUID>()
     for row in rows {
-        if seen.contains(row.syncID) {
-            row.syncID = UUID()   // duplicate (constant default) → assign a fresh distinct identity
+        if seen.contains(row[keyPath: syncIDPath]) {
+            row[keyPath: syncIDPath] = UUID()   // duplicate (constant default) → fresh distinct identity
         }
-        seen.insert(row.syncID)
+        seen.insert(row[keyPath: syncIDPath])
     }
 }

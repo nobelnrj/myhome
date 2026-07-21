@@ -24,21 +24,31 @@ extension SyncStamped {
     }
 }
 
-// MARK: - Conformances for all 11 SchemaV10 syncable models
+// MARK: - Conformances for all 13 SchemaV11 syncable models
 //
 // Empty conformance extensions — every model already declares matching stored `syncID`/`updatedAt`
-// properties in SchemaV10.swift, so the protocol requirements are satisfied structurally.
+// properties in SchemaV11.swift, so the protocol requirements are satisfied structurally.
 // DeletionLog is intentionally NOT SyncStamped: it is itself the delete-propagation mechanism,
 // not a merge-target (it keys on entitySyncID, not its own syncID).
+//
+// STAB-08: these are EXPLICIT schema-version references that the typealias flip does NOT catch.
+// They must be re-pointed by hand in the SAME commit as the container flip — a conformance left
+// on the previous version silently detaches from the typealiased types and breaks every
+// `touch()` / `deleteSynced` call site.
 
-extension SchemaV10.Expense: SyncStamped {}
-extension SchemaV10.Category: SyncStamped {}
-extension SchemaV10.Note: SyncStamped {}
-extension SchemaV10.NoteBlock: SyncStamped {}
-extension SchemaV10.Account: SyncStamped {}
-extension SchemaV10.Asset: SyncStamped {}
-extension SchemaV10.NetWorthSnapshot: SyncStamped {}
-extension SchemaV10.SIP: SyncStamped {}
-extension SchemaV10.SIPAmountChange: SyncStamped {}
-extension SchemaV10.Contribution: SyncStamped {}
-extension SchemaV10.RoutineCompletion: SyncStamped {}
+extension SchemaV11.Expense: SyncStamped {}
+extension SchemaV11.Category: SyncStamped {}
+extension SchemaV11.Note: SyncStamped {}
+extension SchemaV11.NoteBlock: SyncStamped {}
+extension SchemaV11.Account: SyncStamped {}
+extension SchemaV11.Asset: SyncStamped {}
+extension SchemaV11.NetWorthSnapshot: SyncStamped {}
+extension SchemaV11.SIP: SyncStamped {}
+extension SchemaV11.SIPAmountChange: SyncStamped {}
+extension SchemaV11.Contribution: SyncStamped {}
+extension SchemaV11.RoutineCompletion: SyncStamped {}
+
+// NEW in SchemaV11 (Phase 20, plan 20-01) — the kitchen models are SyncStamped from birth
+// (KTCH-04), so they flow through the Phase 18 merge engine exactly like every other record.
+extension SchemaV11.PantryItem: SyncStamped {}
+extension SchemaV11.ShoppingListItem: SyncStamped {}

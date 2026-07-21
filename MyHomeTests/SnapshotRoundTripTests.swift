@@ -8,22 +8,23 @@ private typealias Cat = MyHome.Category
 
 // MARK: - Shared fixtures (used by SnapshotRoundTripTests + SnapshotImporterTests)
 
-/// Test support for the merge engine — fresh in-memory SchemaV10 containers and a full-store
-/// seed touching every one of the 11 syncable entities + DeletionLog. The engine is proven
+/// Test support for the merge engine — fresh in-memory SchemaV11 containers and a full-store
+/// seed touching every one of the 13 syncable entities + DeletionLog. The engine is proven
 /// WITHOUT a device or the App-Group store.
 @MainActor
 enum SyncTestSupport {
 
-    /// A fresh in-memory container registering the whole SchemaV10 model set.
+    /// A fresh in-memory container registering the whole SchemaV11 model set.
     static func makeStore() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV10.self)
+        let schema = Schema(versionedSchema: SchemaV11.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         return try ModelContainer(for: schema, configurations: [config])
     }
 
     /// Seed one of every syncable entity: 2 categories, 1 expense linked to both, 1 note + 2
     /// blocks (one carrying a reminderRecurrence blob), 1 account, 1 asset, 1 netWorthSnapshot,
-    /// 1 SIP + 1 SIPAmountChange + 1 contribution, 1 routineCompletion, and 1 DeletionLog row.
+    /// 1 SIP + 1 SIPAmountChange + 1 contribution, 1 routineCompletion, 1 pantryItem,
+    /// 1 shoppingListItem, and 1 DeletionLog row.
     @discardableResult
     static func seedFullStore(_ ctx: ModelContext) throws -> UUID {
         let cat1 = Cat(name: "Food", symbolName: "fork.knife", sortOrder: 0)
@@ -79,6 +80,12 @@ enum SyncTestSupport {
         let rc = RoutineCompletion(noteID: note.id, dayKey: Date())
         ctx.insert(rc)
 
+        let rice = PantryItem(name: "Rice", quantity: 2.0, unit: "kg", lowStockThreshold: 1.0)
+        ctx.insert(rice)
+
+        let sponges = ShoppingListItem(name: "Sponges", quantity: 1.0)
+        ctx.insert(sponges)
+
         let del = DeletionLog(
             entitySyncID: UUID(),
             entityKindRaw: SyncEntityKind.expense.rawValue,
@@ -91,7 +98,7 @@ enum SyncTestSupport {
     }
 
     /// Compares every entity collection + deletions of two snapshots (exportedAt/deviceName
-    /// deliberately excluded — they always differ). Returns true iff all 12 collections are equal.
+    /// deliberately excluded — they always differ). Returns true iff all 14 collections are equal.
     static func entitiesEqual(_ a: SyncSnapshot, _ b: SyncSnapshot) -> Bool {
         a.categories == b.categories
             && a.expenses == b.expenses
@@ -104,6 +111,8 @@ enum SyncTestSupport {
             && a.sipAmountChanges == b.sipAmountChanges
             && a.contributions == b.contributions
             && a.routineCompletions == b.routineCompletions
+            && a.pantryItems == b.pantryItems
+            && a.shoppingListItems == b.shoppingListItems
             && a.deletions == b.deletions
     }
 }
@@ -132,7 +141,7 @@ struct SnapshotRoundTripTests {
         #expect(stats.adopted == 0)
     }
 
-    @Test("Golden seed touches all 11 entity types + DeletionLog")
+    @Test("Golden seed touches all 13 entity types + DeletionLog")
     func goldenSeedIsComplete() throws {
         let a = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(a.mainContext)
@@ -149,6 +158,8 @@ struct SnapshotRoundTripTests {
         #expect(snap.sipAmountChanges.count == 1)
         #expect(snap.contributions.count == 1)
         #expect(snap.routineCompletions.count == 1)
+        #expect(snap.pantryItems.count == 1)
+        #expect(snap.shoppingListItems.count == 1)
         #expect(snap.deletions.count == 1)
     }
 
@@ -189,10 +200,10 @@ struct SnapshotRoundTripTests {
         #expect(expenses.first?.amount == Decimal(string: "1234.56"))
     }
 
-    // MARK: - SyncScope (v1.3: notes only — money never leaves the device)
+    // MARK: - SyncScope (v1.3: notes + kitchen — money never leaves the device)
 
-    @Test("Production export carries notes/blocks/routines and NOTHING else")
-    func productionExportIsNotesOnly() throws {
+    @Test("Production export carries notes/blocks/routines/kitchen and NOTHING financial")
+    func productionExportExcludesAllMoney() throws {
         let a = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(a.mainContext)
 
@@ -203,6 +214,9 @@ struct SnapshotRoundTripTests {
         #expect(snap.notes.count == 1)
         #expect(snap.noteBlocks.count == 2)
         #expect(snap.routineCompletions.count == 1)
+        // Kitchen joined the scope in Phase 20 (KTCH-04) — a shared pantry is the point.
+        #expect(snap.pantryItems.count == 1)
+        #expect(snap.shoppingListItems.count == 1)
 
         #expect(snap.expenses.isEmpty)
         #expect(snap.categories.isEmpty)
@@ -239,12 +253,13 @@ struct SnapshotRoundTripTests {
         )
         #expect(!fullSnap.expenses.isEmpty)   // the payload really does contain money
 
-        // … and B, running the production scope, still takes only the notes.
+        // … and B, running the production scope, still takes only notes + kitchen.
         let b = try SyncTestSupport.makeStore()
         _ = try SnapshotImporter.merge(fullSnap, into: b.mainContext)
 
         #expect(try b.mainContext.fetch(FetchDescriptor<Note>()).count == 1)
         #expect(try b.mainContext.fetch(FetchDescriptor<NoteBlock>()).count == 2)
+        #expect(try b.mainContext.fetch(FetchDescriptor<PantryItem>()).count == 1)
         #expect(try b.mainContext.fetch(FetchDescriptor<Expense>()).isEmpty)
         #expect(try b.mainContext.fetch(FetchDescriptor<Account>()).isEmpty)
         #expect(try b.mainContext.fetch(FetchDescriptor<Asset>()).isEmpty)

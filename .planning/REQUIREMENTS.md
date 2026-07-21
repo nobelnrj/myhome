@@ -29,10 +29,10 @@
 
 <!-- New household surface. CRUD over SwiftData, neumorphic, synced via the SYNC engine. -->
 
-- [ ] **KTCH-01**: User can track pantry stock — add/edit items with a quantity and unit, and mark an item as used (decrement) or restocked (increment).
-- [ ] **KTCH-02**: User can set a per-item low-stock threshold; items at or below their threshold are visually flagged as low/out of stock.
-- [ ] **KTCH-03**: A shopping list auto-populates from low/out-of-stock items; the user can check an item off while shopping, which restocks it (updates the pantry quantity); manually-added shopping items are also supported.
-- [ ] **KTCH-04**: Kitchen is a first-class neumorphic surface in the app (styled to the v1.2 design system, light + dark) and all kitchen models are registered as syncable so they flow through the SYNC engine.
+- [x] **KTCH-01**: User can track pantry stock — add/edit items with a quantity and unit, and mark an item as used (decrement) or restocked (increment).
+- [x] **KTCH-02**: User can set a per-item low-stock threshold; items at or below their threshold are visually flagged as low/out of stock.
+- [x] **KTCH-03**: A shopping list auto-populates from low/out-of-stock items; the user can check an item off while shopping, which restocks it (updates the pantry quantity); manually-added shopping items are also supported.
+- [x] **KTCH-04**: Kitchen is a first-class neumorphic surface in the app (styled to the v1.2 design system, light + dark) and all kitchen models are registered as syncable so they flow through the SYNC engine.
 
 ### Overview Filtering (OVF)
 
@@ -71,10 +71,10 @@
 | SYNC-03 | Phase 18 | Complete |
 | SYNC-04 | Phase 19 | Complete |
 | SYNC-05 | Phase 19 | Complete |
-| KTCH-01 | Phase 20 | Pending |
-| KTCH-02 | Phase 20 | Pending |
-| KTCH-03 | Phase 20 | Pending |
-| KTCH-04 | Phase 20 | Pending |
+| KTCH-01 | Phase 20 | Complete |
+| KTCH-02 | Phase 20 | Complete |
+| KTCH-03 | Phase 20 | Complete |
+| KTCH-04 | Phase 20 | Complete |
 | OVF-01 | Phase 21 | Pending |
 | OVF-02 | Phase 21 | Pending |
 | OVF-03 | Phase 21 | Pending |

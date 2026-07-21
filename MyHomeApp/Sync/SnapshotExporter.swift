@@ -218,6 +218,38 @@ enum SnapshotExporter {
         )
     }
 
+    /// Kitchen quantities pass through as `Double` unchanged — they are measurements, not money,
+    /// so `SyncDecimal` deliberately does not appear here (see `PantryItemDTO`).
+    static func dto(_ p: PantryItem) -> PantryItemDTO {
+        PantryItemDTO(
+            id: p.id,
+            syncID: p.syncID,
+            updatedAt: p.updatedAt,
+            name: p.name,
+            quantity: p.quantity,
+            unit: p.unit,
+            lowStockThreshold: p.lowStockThreshold,
+            restockQuantity: p.restockQuantity,
+            category: p.category,
+            notes: p.notes,
+            createdAt: p.createdAt
+        )
+    }
+
+    static func dto(_ s: ShoppingListItem) -> ShoppingListItemDTO {
+        ShoppingListItemDTO(
+            id: s.id,
+            syncID: s.syncID,
+            updatedAt: s.updatedAt,
+            name: s.name,
+            quantity: s.quantity,
+            unit: s.unit,
+            isChecked: s.isChecked,
+            checkedAt: s.checkedAt,
+            createdAt: s.createdAt
+        )
+    }
+
     static func dto(_ d: DeletionLog) -> DeletionDTO {
         DeletionDTO(
             entitySyncID: d.entitySyncID,
@@ -270,6 +302,10 @@ enum SnapshotExporter {
         let routineCompletions = try rows(
             .routineCompletion, dto(_:) as (RoutineCompletion) -> RoutineCompletionDTO, \.syncID
         )
+        let pantryItems = try rows(.pantryItem, dto(_:) as (PantryItem) -> PantryItemDTO, \.syncID)
+        let shoppingListItems = try rows(
+            .shoppingListItem, dto(_:) as (ShoppingListItem) -> ShoppingListItemDTO, \.syncID
+        )
         // Tombstones for out-of-scope kinds are dropped too — an excluded deletion must not
         // travel, or one phone could delete rows of a kind it is not allowed to see.
         let deletions = try context.fetch(FetchDescriptor<DeletionLog>())
@@ -297,6 +333,8 @@ enum SnapshotExporter {
             sipAmountChanges: sipAmountChanges,
             contributions: contributions,
             routineCompletions: routineCompletions,
+            pantryItems: pantryItems,
+            shoppingListItems: shoppingListItems,
             deletions: deletions
         )
     }
