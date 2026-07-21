@@ -50,6 +50,16 @@ enum BootstrapAdvisor {
         if scope.isSynced(.netWorthSnapshot) {
             counts.append((try? context.fetchCount(FetchDescriptor<NetWorthSnapshot>())) ?? 0)
         }
+        // Phase 20: kitchen joined the sync scope (20-02 widened `SyncScope.production` to
+        // notes + kitchen). Emptiness is SCOPE-relative, so kitchen rows MUST count now —
+        // a phone whose only user data is a stocked pantry is not a fresh install and must
+        // not be offered the first-run bootstrap sheet.
+        if scope.isSynced(.pantryItem) {
+            counts.append((try? context.fetchCount(FetchDescriptor<PantryItem>())) ?? 0)
+        }
+        if scope.isSynced(.shoppingListItem) {
+            counts.append((try? context.fetchCount(FetchDescriptor<ShoppingListItem>())) ?? 0)
+        }
         return counts.allSatisfy { $0 == 0 }
     }
 

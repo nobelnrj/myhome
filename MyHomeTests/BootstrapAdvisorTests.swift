@@ -16,11 +16,15 @@ import Foundation
 /// copy count, because only those can be clobbered. `syncable` drives "makes the store
 /// non-empty"; `outOfScope` drives the inverse assertion.
 enum BootstrapUserEntity: CaseIterable {
-    case expense, note, account, asset, sip, netWorth
+    case expense, note, account, asset, sip, netWorth, pantryItem, shoppingListItem
 
     @MainActor
     func insert(into ctx: ModelContext) {
         switch self {
+        case .pantryItem:
+            ctx.insert(PantryItem(name: "Milk", quantity: 1.0, unit: "L", lowStockThreshold: 1.0))
+        case .shoppingListItem:
+            ctx.insert(ShoppingListItem(name: "Sponges"))
         case .expense:  ctx.insert(Expense(amount: Decimal(string: "100")!))
         case .note:     ctx.insert(Note(title: "n"))
         case .account:  ctx.insert(Account(name: "a"))
@@ -38,6 +42,8 @@ enum BootstrapUserEntity: CaseIterable {
         case .asset:    return .asset
         case .sip:      return .sip
         case .netWorth: return .netWorthSnapshot
+        case .pantryItem: return .pantryItem
+        case .shoppingListItem: return .shoppingListItem
         }
     }
 
