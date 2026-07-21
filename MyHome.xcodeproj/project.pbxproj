@@ -98,6 +98,8 @@
 		A2004SLT /* ShoppingListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SLT /* ShoppingListTests.swift */; };
 		A2003KV /* KitchenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KV /* KitchenView.swift */; };
 		A2003PIR /* PantryItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003PIR /* PantryItemRow.swift */; };
+		A2004SLV /* ShoppingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SLV /* ShoppingListView.swift */; };
+		A2004SR /* ShoppingRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SR /* ShoppingRow.swift */; };
 		A2003EPI /* EditPantryItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003EPI /* EditPantryItemView.swift */; };
 		A2002KST /* KitchenSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2002KST /* KitchenSyncTests.swift */; };
 		A1803SNIT /* SnapshotImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SNIT /* SnapshotImporterTests.swift */; };
@@ -372,6 +374,8 @@
 		F2004SLT /* ShoppingListTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListTests.swift; sourceTree = "<group>"; };
 		F2003KV /* KitchenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenView.swift; sourceTree = "<group>"; };
 		F2003PIR /* PantryItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryItemRow.swift; sourceTree = "<group>"; };
+		F2004SLV /* ShoppingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListView.swift; sourceTree = "<group>"; };
+		F2004SR /* ShoppingRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingRow.swift; sourceTree = "<group>"; };
 		F2003EPI /* EditPantryItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPantryItemView.swift; sourceTree = "<group>"; };
 		F2002KST /* KitchenSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenSyncTests.swift; sourceTree = "<group>"; };
 		F1803SNIT /* SnapshotImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotImporterTests.swift; sourceTree = "<group>"; };
@@ -590,6 +594,8 @@
 				F2003KL /* KitchenLogic.swift */,
 				F2003EPI /* EditPantryItemView.swift */,
 				F2003PIR /* PantryItemRow.swift */,
+				F2004SR /* ShoppingRow.swift */,
+				F2004SLV /* ShoppingListView.swift */,
 				F2003KV /* KitchenView.swift */,
 			);
 			path = Kitchen;
@@ -1253,6 +1259,8 @@
 				A2003KL /* KitchenLogic.swift in Sources */,
 				A2003KV /* KitchenView.swift in Sources */,
 				A2003PIR /* PantryItemRow.swift in Sources */,
+				A2004SR /* ShoppingRow.swift in Sources */,
+				A2004SLV /* ShoppingListView.swift in Sources */,
 				A2003EPI /* EditPantryItemView.swift in Sources */,
 				A1802SNAP /* SyncSnapshot.swift in Sources */,
 				A1802SMP /* SyncMergePolicy.swift in Sources */,

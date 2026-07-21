@@ -212,6 +212,7 @@ struct MyHomeApp: App {
             ctx.insert(snap)
         }
         seedSamplePantry(ctx)
+        seedSampleShoppingExtras(ctx)
 
         try? ctx.save()
     }
@@ -239,6 +240,22 @@ struct MyHomeApp: App {
                 lowStockThreshold: threshold, restockQuantity: restock
             ))
         }
+    }
+
+    /// Seeds two MANUAL shopping extras (one unchecked, one checked) so the Shopping segment
+    /// screenshots show both the plain and struck-through row styling. The RESTOCK section needs
+    /// no seed — it is derived from the pantry above. Idempotent: skipped once any row exists.
+    @MainActor
+    private func seedSampleShoppingExtras(_ ctx: ModelContext) {
+        let existing = (try? ctx.fetch(FetchDescriptor<ShoppingListItem>())) ?? []
+        guard existing.isEmpty else { return }
+
+        ctx.insert(ShoppingListItem(name: "Aluminium foil"))
+        ctx.insert(ShoppingListItem(name: "Paper napkins", quantity: 2, unit: "pack"))
+        let bought = ShoppingListItem(name: "Batteries", quantity: 4, unit: "pcs")
+        bought.isChecked = true
+        bought.checkedAt = Date()
+        ctx.insert(bought)
     }
     #endif
 
