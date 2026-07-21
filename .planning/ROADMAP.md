@@ -140,7 +140,7 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 20-01-PLAN.md — SchemaV11 (PantryItem + ShoppingListItem, SyncStamped from birth) + V10→V11 migration + atomic typealias flip
+- [x] 20-01-PLAN.md — SchemaV11 (PantryItem + ShoppingListItem, SyncStamped from birth) + V10→V11 migration + atomic typealias flip
 - [ ] 20-02-PLAN.md — Sync wiring: kitchen DTOs, SyncEntityKind cases, snapshot version 10→11, exporter/importer + adoption + round-trip tests
 - [ ] 20-03-PLAN.md — Pantry UI: neumorphic list, add/edit, used/restocked steppers, low/out-of-stock flags + Overview navigation entry
 - [ ] 20-04-PLAN.md — Shopping list: auto-populated from low/out pantry, check-off restocks pantry, manual extras + segmented Kitchen host
@@ -169,5 +169,5 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 2/5 | In Progress|  |
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 4/5 | In Progress|  |
-| 20. Kitchen Inventory & Shopping List | v1.3 | 0/5 | Not started | - |
+| 20. Kitchen Inventory & Shopping List | v1.3 | 1/5 | In Progress|  |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
