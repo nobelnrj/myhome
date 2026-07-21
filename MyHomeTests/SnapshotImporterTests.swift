@@ -19,11 +19,11 @@ struct SnapshotImporterTests {
         // A seeds + exports (this snapshot is the OLDER one).
         let a = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(a.mainContext)
-        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A")
+        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A", scope: .all)
 
         // B imports A, then deletes the expense with a tombstone dated AFTER the expense's edit.
         let b = try SyncTestSupport.makeStore()
-        _ = try SnapshotImporter.merge(snapA, into: b.mainContext)
+        _ = try SnapshotImporter.merge(snapA, into: b.mainContext, scope: .all)
 
         let expense = try #require(try b.mainContext.fetch(FetchDescriptor<Expense>()).first)
         let expenseSync = expense.syncID
@@ -37,13 +37,13 @@ struct SnapshotImporterTests {
         try b.mainContext.save()
 
         // Re-merge A's OLDER snapshot: the expense must stay gone and be counted as skipped.
-        let stats = try SnapshotImporter.merge(snapA, into: b.mainContext)
+        let stats = try SnapshotImporter.merge(snapA, into: b.mainContext, scope: .all)
 
         #expect(try b.mainContext.fetch(FetchDescriptor<Expense>()).isEmpty)
         #expect(stats.skipped >= 1)
 
         // Tombstone propagates: B's export now carries the expense's DeletionDTO.
-        let snapB = try SnapshotExporter.makeSnapshot(context: b.mainContext, deviceName: "B")
+        let snapB = try SnapshotExporter.makeSnapshot(context: b.mainContext, deviceName: "B", scope: .all)
         #expect(snapB.deletions.contains { $0.entitySyncID == expenseSync })
     }
 
@@ -63,7 +63,7 @@ struct SnapshotImporterTests {
         newer.updatedAt = note.updatedAt.addingTimeInterval(100)
         newer.title = "Remote wins"
         let newerSnap = SyncSnapshot(exportedAt: Date(), deviceName: "R", notes: [newer])
-        _ = try SnapshotImporter.merge(newerSnap, into: b.mainContext)
+        _ = try SnapshotImporter.merge(newerSnap, into: b.mainContext, scope: .all)
 
         var notes = try b.mainContext.fetch(FetchDescriptor<Note>())
         #expect(notes.count == 1)
@@ -74,7 +74,7 @@ struct SnapshotImporterTests {
         older.updatedAt = note.updatedAt.addingTimeInterval(-100)
         older.title = "Should be ignored"
         let olderSnap = SyncSnapshot(exportedAt: Date(), deviceName: "R", notes: [older])
-        _ = try SnapshotImporter.merge(olderSnap, into: b.mainContext)
+        _ = try SnapshotImporter.merge(olderSnap, into: b.mainContext, scope: .all)
 
         notes = try b.mainContext.fetch(FetchDescriptor<Note>())
         #expect(notes.count == 1)
@@ -100,7 +100,7 @@ struct SnapshotImporterTests {
             monthlyBudget: nil, currencyCode: "INR", createdAt: Date()
         )
         let snap = SyncSnapshot(exportedAt: Date(), deviceName: "R", categories: [dto])
-        let stats = try SnapshotImporter.merge(snap, into: b.mainContext)
+        let stats = try SnapshotImporter.merge(snap, into: b.mainContext, scope: .all)
 
         let cats = try b.mainContext.fetch(FetchDescriptor<Cat>())
         #expect(cats.count == 1)
@@ -130,7 +130,7 @@ struct SnapshotImporterTests {
             isTransfer: nil, transferPairID: nil
         )
         let snap = SyncSnapshot(exportedAt: Date(), deviceName: "R", expenses: [dto])
-        let stats = try SnapshotImporter.merge(snap, into: b.mainContext)
+        let stats = try SnapshotImporter.merge(snap, into: b.mainContext, scope: .all)
 
         let expenses = try b.mainContext.fetch(FetchDescriptor<Expense>())
         #expect(expenses.count == 1)
@@ -144,10 +144,10 @@ struct SnapshotImporterTests {
     func relationshipWiring() throws {
         let a = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(a.mainContext)
-        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A")
+        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A", scope: .all)
 
         let b = try SyncTestSupport.makeStore()
-        _ = try SnapshotImporter.merge(snapA, into: b.mainContext)
+        _ = try SnapshotImporter.merge(snapA, into: b.mainContext, scope: .all)
 
         let expense = try #require(try b.mainContext.fetch(FetchDescriptor<Expense>()).first)
         #expect(expense.categories.count == 2)
@@ -171,7 +171,7 @@ struct SnapshotImporterTests {
         let data = try SnapshotCodec.encode(stale)
 
         #expect(throws: SyncError.schemaVersionMismatch(found: 9, expected: 10)) {
-            _ = try SnapshotImporter.mergeData(data, into: b.mainContext)
+            _ = try SnapshotImporter.mergeData(data, into: b.mainContext, scope: .all)
         }
 
         #expect(try b.mainContext.fetch(FetchDescriptor<Expense>()).count == expensesBefore)
@@ -197,7 +197,7 @@ struct SnapshotImporterTests {
             reminderEndRuleData: nil, reminderLeadMinutes: 0
         )
         let snap = SyncSnapshot(exportedAt: Date(), deviceName: "R", noteBlocks: [nilBlock, danglingBlock])
-        let stats = try SnapshotImporter.merge(snap, into: b.mainContext)
+        let stats = try SnapshotImporter.merge(snap, into: b.mainContext, scope: .all)
 
         #expect(try b.mainContext.fetch(FetchDescriptor<NoteBlock>()).isEmpty)
         #expect(stats.skipped >= 2)

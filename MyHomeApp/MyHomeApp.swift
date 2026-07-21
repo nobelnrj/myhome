@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import UserNotifications
 import BackgroundTasks
+import UIKit
 
 @main
 struct MyHomeApp: App {
@@ -22,6 +23,14 @@ struct MyHomeApp: App {
     /// Gmail sync controller — moved from RootView to MyHomeApp so the BGTask handler
     /// can capture it (RESEARCH Open Question 2, 07-PATTERNS.md §MyHomeApp.swift).
     @State private var gmailSyncController = GmailSyncController()
+
+    /// SYNC-04: foreground-only P2P auto-sync orchestrator. Injected with the production
+    /// MultipeerConnectivity transport; `deviceName` comes from UIDevice so the coordinator
+    /// itself never touches UIKit. Started/stopped by scenePhase below.
+    @State private var syncCoordinator = SyncCoordinator(
+        transport: MultipeerSyncTransport(),
+        deviceName: UIDevice.current.name
+    )
 
     /// scenePhase for scheduling background refresh on app-backgrounding.
     @Environment(\.scenePhase) private var scenePhase
@@ -46,12 +55,18 @@ struct MyHomeApp: App {
                 // D-01: root scheme is AppStorage-driven (System/Light/Dark) — supersedes the
                 // former forced-dark DS-05 pin. Garbage/missing key → .system (D-02).
                 .preferredColorScheme((AppearanceTheme(rawValue: appearanceThemeRaw) ?? .system).colorScheme)
+                .environment(syncCoordinator)
                 .onAppear {
                     setupNotifications()
                     // One-time repair for stores that accumulated duplicate ingested expenses
                     // from overlapping pre-guard sync runs (doubled Overview totals). No-op once
                     // the store is clean, so it is safe to run on every launch.
                     DuplicateExpenseCleanup.run(in: container.mainContext)
+                    // SYNC-04: wire auto-sync to the production store and start discovery.
+                    // App launches foregrounded; the scenePhase .active branch does not reliably
+                    // fire for the initial transition on all iOS versions, so start here.
+                    syncCoordinator.setContext(container.mainContext)
+                    syncCoordinator.start()
                     #if DEBUG
                     seedSampleDataIfRequested()
                     #endif
@@ -101,10 +116,19 @@ struct MyHomeApp: App {
                 }
             }
         }
-        // Schedule background refresh when app goes to background (ING-04).
+        // Schedule background refresh when app goes to background (ING-04) and drive the
+        // foreground-only P2P sync lifecycle (SYNC-04). MC sessions die in the background
+        // anyway; a clean teardown avoids zombie sessions. `.inactive` is deliberately a
+        // no-op so share sheets and the Face ID overlay never kill an in-flight sync.
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .background {
+            switch newPhase {
+            case .background:
                 scheduleBackgroundRefresh()
+                syncCoordinator.stop()
+            case .active:
+                syncCoordinator.start()   // guarded idempotent
+            default:
+                break                     // .inactive → untouched
             }
         }
     }

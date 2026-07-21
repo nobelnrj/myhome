@@ -34,12 +34,24 @@ enum SnapshotImporter {
 
     /// Decode untrusted bytes (version refusal happens in `SnapshotCodec.decode` BEFORE any store
     /// mutation) then merge.
-    static func mergeData(_ data: Data, into context: ModelContext) throws -> MergeStats {
+    static func mergeData(
+        _ data: Data,
+        into context: ModelContext,
+        scope: SyncScope = .production
+    ) throws -> MergeStats {
         let snapshot = try SnapshotCodec.decode(data)
-        return try merge(snapshot, into: context)
+        return try merge(snapshot, into: context, scope: scope)
     }
 
-    static func merge(_ snapshot: SyncSnapshot, into context: ModelContext) throws -> MergeStats {
+    static func merge(
+        _ rawSnapshot: SyncSnapshot,
+        into context: ModelContext,
+        scope: SyncScope = .production
+    ) throws -> MergeStats {
+        // Scope gate — re-applied on the receiving side so a peer running an older or tampered
+        // build cannot push out-of-scope rows (or out-of-scope tombstones) into this store.
+        // The exporter already withholds them; this is the defence-in-depth half.
+        let snapshot = rawSnapshot.scoped(to: scope)
         var stats = MergeStats()
 
         // ── 1. Tombstone union ────────────────────────────────────────────────────────────────

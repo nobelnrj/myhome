@@ -54,6 +54,13 @@
 	<array>
 		<string>fetch</string>
 	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>MyHome uses your local network to find your other phone and keep your household data in sync while both phones are open.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_myhome-sync._tcp</string>
+		<string>_myhome-sync._udp</string>
+	</array>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>

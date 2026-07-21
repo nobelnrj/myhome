@@ -22,8 +22,8 @@
 - [x] **SYNC-01**: Every syncable `@Model` carries a stable `syncID: UUID = UUID()` and an `updatedAt: Date` stamped on every save (both additive/defaulted → still CloudKit-ready), and a `DeletionLog` model records `{syncID, deletedAt}` so a record deleted on one phone does not resurrect when the other phone's snapshot arrives.
 - [x] **SYNC-02**: A pure, unit-tested merge engine imports a Codable snapshot via fetch-then-upsert keyed on `syncID` (no duplicates), resolves conflicts by last-writer-wins on `updatedAt` with a deterministic tiebreak, applies tombstoned deletes before upserts, wires relationships in a two-pass (create-then-link) order, string-encodes all `Decimal` values, and stamps + verifies a schema version — refusing imports from a mismatched schema. A golden round-trip test (export→import→export is idempotent) is a required exit criterion.
 - [x] **SYNC-03**: User can export a data snapshot and send it to the other phone via the system share sheet / **AirDrop**; the receiving phone opens it via `onOpenURL`/document import and merges it through the SYNC-02 engine — fully device-to-device, no third party.
-- [ ] **SYNC-04**: When both phones have the app foregrounded on the same network, data **auto-syncs over MultipeerConnectivity** (encrypted P2P via `MCSession` with `.required` encryption; `NSLocalNetworkUsageDescription` + `NSBonjourServices` declared), with a manual "Sync now" action as an always-works fallback.
-- [ ] **SYNC-05**: A first-time "bootstrap this phone" flow can seed the second install with a full copy of the first phone's data; the sync surface shows last-synced time, current status, and a clear affordance — and never silently loses local edits.
+- [x] **SYNC-04**: When both phones have the app foregrounded on the same network, data **auto-syncs over MultipeerConnectivity** (encrypted P2P via `MCSession` with `.required` encryption; `NSLocalNetworkUsageDescription` + `NSBonjourServices` declared), with a manual "Sync now" action as an always-works fallback.
+- [x] **SYNC-05**: A first-time "bootstrap this phone" flow can seed the second install with a full copy of the first phone's data; the sync surface shows last-synced time, current status, and a clear affordance — and never silently loses local edits.
 
 ### Kitchen Inventory (KTCH)
 
@@ -69,8 +69,8 @@
 | SYNC-01 | Phase 18 | Complete |
 | SYNC-02 | Phase 18 | Complete |
 | SYNC-03 | Phase 18 | Complete |
-| SYNC-04 | Phase 19 | Pending |
-| SYNC-05 | Phase 19 | Pending |
+| SYNC-04 | Phase 19 | Complete |
+| SYNC-05 | Phase 19 | Complete |
 | KTCH-01 | Phase 20 | Pending |
 | KTCH-02 | Phase 20 | Pending |
 | KTCH-03 | Phase 20 | Pending |

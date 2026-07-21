@@ -33,6 +33,82 @@ public enum SyncEntityKind: String, Codable, CaseIterable, Sendable {
     case routineCompletion
 }
 
+// MARK: - SyncScope
+
+/// The single source of truth for WHICH entity kinds are allowed to cross the wire.
+///
+/// v1.3 ships a deliberately narrow scope: **notes only**. Financial data — expenses,
+/// categories, accounts, assets, net-worth history, SIPs and contributions — is private to
+/// the device that entered it and is never exported, never transmitted, and never accepted
+/// on import. A combined household asset view is a separate, later feature with its own
+/// explicit exchange; it must not be smuggled in through the general sync path.
+///
+/// Enforcement is deliberately doubled:
+///   - `SnapshotExporter` never even fetches an excluded kind, so excluded rows cannot leave
+///     the device (the guarantee that matters — data at rest stays at rest).
+///   - `SnapshotImporter` re-applies the scope to every incoming snapshot, so a peer running
+///     an older or tampered build cannot push excluded rows into this store.
+///
+/// The wire format is UNCHANGED — excluded arrays simply travel empty — so this is fully
+/// compatible with the Plan-02 snapshot document and needs no schema bump.
+/// It is a value, not a hardcoded constant, for one reason: the merge engine's handling of
+/// out-of-scope kinds (Expense identity adoption by gmailMessageID, Expense↔Category wiring)
+/// stays fully unit-tested via `.all`, so widening the scope later — e.g. for a combined
+/// household asset view — is a one-line change against already-proven machinery.
+public struct SyncScope: Equatable, Sendable {
+
+    /// Entity kinds allowed to cross the wire. Everything else stays on-device.
+    public let synced: Set<SyncEntityKind>
+
+    public init(synced: Set<SyncEntityKind>) { self.synced = synced }
+
+    /// PRODUCTION SCOPE (v1.3) — notes and their blocks plus routine completions. All money
+    /// data is deliberately absent. Every production call path defaults to this.
+    public static let production = SyncScope(synced: [.note, .noteBlock, .routineCompletion])
+
+    /// Every kind. TEST-ONLY: it is what keeps the merge engine's out-of-scope paths covered.
+    /// Never pass this from app code — doing so would ship expenses to the other phone.
+    public static let all = SyncScope(synced: Set(SyncEntityKind.allCases))
+
+    public func isSynced(_ kind: SyncEntityKind) -> Bool { synced.contains(kind) }
+
+    /// Kinds explicitly held back — the complement of `synced`. Used by tests and by the UI
+    /// copy that tells the user what does *not* leave the phone.
+    public var excluded: Set<SyncEntityKind> {
+        Set(SyncEntityKind.allCases).subtracting(synced)
+    }
+}
+
+extension SyncSnapshot {
+    /// A copy carrying only in-scope entities. Excluded arrays are emptied and tombstones for
+    /// excluded kinds are dropped — an out-of-scope deletion must not travel either, since it
+    /// would let one phone delete rows of a kind it is not allowed to see.
+    ///
+    /// Applied on both sides of the wire (export builds in-scope; import re-filters).
+    public func scoped(to scope: SyncScope = .production) -> SyncSnapshot {
+        SyncSnapshot(
+            schemaVersion: schemaVersion,
+            exportedAt: exportedAt,
+            deviceName: deviceName,
+            categories: scope.isSynced(.category) ? categories : [],
+            expenses: scope.isSynced(.expense) ? expenses : [],
+            notes: scope.isSynced(.note) ? notes : [],
+            noteBlocks: scope.isSynced(.noteBlock) ? noteBlocks : [],
+            accounts: scope.isSynced(.account) ? accounts : [],
+            assets: scope.isSynced(.asset) ? assets : [],
+            netWorthSnapshots: scope.isSynced(.netWorthSnapshot) ? netWorthSnapshots : [],
+            sips: scope.isSynced(.sip) ? sips : [],
+            sipAmountChanges: scope.isSynced(.sipAmountChange) ? sipAmountChanges : [],
+            contributions: scope.isSynced(.contribution) ? contributions : [],
+            routineCompletions: scope.isSynced(.routineCompletion) ? routineCompletions : [],
+            deletions: deletions.filter {
+                guard let kind = SyncEntityKind(rawValue: $0.entityKindRaw) else { return false }
+                return scope.isSynced(kind)
+            }
+        )
+    }
+}
+
 // MARK: - SyncDecimal
 
 /// Locale-independent Decimal <-> String bridge. Money NEVER crosses the wire as a

@@ -22,8 +22,14 @@ struct SettingsView: View {
     let transferScanService: TransferScanService
 
     @Environment(\.modelContext) private var modelContext
+    /// SYNC-05: the P2P auto-sync coordinator (injected in MyHomeApp) — drives the Sync row's
+    /// glanceable last-synced text and the Sync destination screen.
+    @Environment(SyncCoordinator.self) private var syncCoordinator
 
     @State private var showManageCategories = false
+    /// DEBUG screenshot-verify hook: `-openSync` pushes the Sync screen on launch (a navigation
+    /// push, unreachable via -startTab) — mirrors OverviewView's `-openAnalytics` convention.
+    @State private var navigateToSync = false
     @State private var showSignOutAllConfirmation = false
     @State private var pendingDisconnectEmail: String? = nil
 
@@ -258,6 +264,18 @@ struct SettingsView: View {
                     }
                     .foregroundStyle(DesignTokens.label2)
 
+                    // MARK: P2P auto-sync surface (SYNC-05) — status + Sync Now
+                    NavigationLink(destination: SyncStatusView()) {
+                        HStack {
+                            rowLabel("Sync", symbol: "arrow.triangle.2.circlepath", color: DesignTokens.catAuto)
+                            Spacer()
+                            // Glanceable last-synced so the state is legible without drilling in.
+                            Text(SyncStatusPresentation.relativeLastSynced(syncCoordinator.statusStore.lastSyncedAt))
+                                .font(.subheadline)
+                                .foregroundStyle(DesignTokens.label3)
+                        }
+                    }
+
                     // MARK: Sync snapshot (SYNC-03) — export via share sheet / AirDrop
                     Button {
                         exportSnapshot()
@@ -303,6 +321,16 @@ struct SettingsView: View {
             .background(DesignTokens.bgCanvas)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $navigateToSync) {
+                SyncStatusView()
+            }
+            #if DEBUG
+            .onAppear {
+                if ProcessInfo.processInfo.arguments.contains("-openSync") {
+                    navigateToSync = true
+                }
+            }
+            #endif
         }
         .sheet(isPresented: $showManageCategories) {
             ManageCategoriesView()

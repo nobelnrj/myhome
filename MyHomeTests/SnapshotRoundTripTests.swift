@@ -118,12 +118,12 @@ struct SnapshotRoundTripTests {
         let a = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(a.mainContext)
 
-        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A")
+        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A", scope: .all)
 
         let b = try SyncTestSupport.makeStore()
-        let stats = try SnapshotImporter.merge(snapA, into: b.mainContext)
+        let stats = try SnapshotImporter.merge(snapA, into: b.mainContext, scope: .all)
 
-        let snapB = try SnapshotExporter.makeSnapshot(context: b.mainContext, deviceName: "B")
+        let snapB = try SnapshotExporter.makeSnapshot(context: b.mainContext, deviceName: "B", scope: .all)
 
         #expect(SyncTestSupport.entitiesEqual(snapA, snapB))
         // Empty B → everything inserted, nothing deleted/adopted.
@@ -136,7 +136,7 @@ struct SnapshotRoundTripTests {
     func goldenSeedIsComplete() throws {
         let a = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(a.mainContext)
-        let snap = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A")
+        let snap = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A", scope: .all)
 
         #expect(snap.categories.count == 2)
         #expect(snap.expenses.count == 1)
@@ -156,16 +156,16 @@ struct SnapshotRoundTripTests {
     func reImportIsIdempotent() throws {
         let a = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(a.mainContext)
-        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A")
+        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A", scope: .all)
 
         let b = try SyncTestSupport.makeStore()
-        _ = try SnapshotImporter.merge(snapA, into: b.mainContext)
+        _ = try SnapshotImporter.merge(snapA, into: b.mainContext, scope: .all)
 
         let expensesBefore = try b.mainContext.fetch(FetchDescriptor<Expense>()).count
         let catsBefore = try b.mainContext.fetch(FetchDescriptor<Cat>()).count
         let blocksBefore = try b.mainContext.fetch(FetchDescriptor<NoteBlock>()).count
 
-        let stats2 = try SnapshotImporter.merge(snapA, into: b.mainContext)
+        let stats2 = try SnapshotImporter.merge(snapA, into: b.mainContext, scope: .all)
 
         #expect(stats2.inserted == 0)
         #expect(stats2.deleted == 0)
@@ -179,13 +179,97 @@ struct SnapshotRoundTripTests {
     func decimalIntegrity() throws {
         let a = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(a.mainContext)
-        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A")
+        let snapA = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A", scope: .all)
 
         let b = try SyncTestSupport.makeStore()
-        _ = try SnapshotImporter.merge(snapA, into: b.mainContext)
+        _ = try SnapshotImporter.merge(snapA, into: b.mainContext, scope: .all)
 
         let expenses = try b.mainContext.fetch(FetchDescriptor<Expense>())
         #expect(expenses.count == 1)
         #expect(expenses.first?.amount == Decimal(string: "1234.56"))
+    }
+
+    // MARK: - SyncScope (v1.3: notes only — money never leaves the device)
+
+    @Test("Production export carries notes/blocks/routines and NOTHING else")
+    func productionExportIsNotesOnly() throws {
+        let a = try SyncTestSupport.makeStore()
+        try SyncTestSupport.seedFullStore(a.mainContext)
+
+        // Default scope == production. The fully-seeded store has one of every entity, so any
+        // leak shows up as a non-empty array here.
+        let snap = try SnapshotExporter.makeSnapshot(context: a.mainContext, deviceName: "A")
+
+        #expect(snap.notes.count == 1)
+        #expect(snap.noteBlocks.count == 2)
+        #expect(snap.routineCompletions.count == 1)
+
+        #expect(snap.expenses.isEmpty)
+        #expect(snap.categories.isEmpty)
+        #expect(snap.accounts.isEmpty)
+        #expect(snap.assets.isEmpty)
+        #expect(snap.netWorthSnapshots.isEmpty)
+        #expect(snap.sips.isEmpty)
+        #expect(snap.sipAmountChanges.isEmpty)
+        #expect(snap.contributions.isEmpty)
+    }
+
+    @Test("Money never appears in the exported BYTES, not merely in the decoded arrays")
+    func exportedBytesContainNoMoney() throws {
+        let a = try SyncTestSupport.makeStore()
+        try SyncTestSupport.seedFullStore(a.mainContext)
+
+        let data = try SnapshotExporter.exportData(context: a.mainContext, deviceName: "A")
+        let json = String(decoding: data, as: UTF8.self)
+
+        // Seeded money values and their identifying strings, verbatim from seedFullStore.
+        for needle in ["1234.56", "Weekly groceries", "msg-1", "HDFC", "50000",
+                       "Nifty Index", "250.75"] {
+            #expect(!json.contains(needle), "exported snapshot leaked \(needle)")
+        }
+    }
+
+    @Test("Import REJECTS out-of-scope rows even when a peer sends them")
+    func importRefusesOutOfScopeRows() throws {
+        // A hostile/stale peer exports EVERYTHING (scope: .all) …
+        let a = try SyncTestSupport.makeStore()
+        try SyncTestSupport.seedFullStore(a.mainContext)
+        let fullSnap = try SnapshotExporter.makeSnapshot(
+            context: a.mainContext, deviceName: "A", scope: .all
+        )
+        #expect(!fullSnap.expenses.isEmpty)   // the payload really does contain money
+
+        // … and B, running the production scope, still takes only the notes.
+        let b = try SyncTestSupport.makeStore()
+        _ = try SnapshotImporter.merge(fullSnap, into: b.mainContext)
+
+        #expect(try b.mainContext.fetch(FetchDescriptor<Note>()).count == 1)
+        #expect(try b.mainContext.fetch(FetchDescriptor<NoteBlock>()).count == 2)
+        #expect(try b.mainContext.fetch(FetchDescriptor<Expense>()).isEmpty)
+        #expect(try b.mainContext.fetch(FetchDescriptor<Account>()).isEmpty)
+        #expect(try b.mainContext.fetch(FetchDescriptor<Asset>()).isEmpty)
+    }
+
+    @Test("An out-of-scope TOMBSTONE cannot delete local rows")
+    func importRefusesOutOfScopeTombstones() throws {
+        // B has a local expense the peer must not be able to reach.
+        let b = try SyncTestSupport.makeStore()
+        let local = Expense(amount: Decimal(string: "999")!)
+        b.mainContext.insert(local)
+        try b.mainContext.save()
+
+        // A sends a tombstone naming that exact expense.
+        let snap = SyncSnapshot(
+            exportedAt: Date(),
+            deviceName: "A",
+            deletions: [DeletionDTO(
+                entitySyncID: local.syncID,
+                entityKindRaw: SyncEntityKind.expense.rawValue,
+                deletedAt: Date().addingTimeInterval(60)   // newer than the local row
+            )]
+        )
+        _ = try SnapshotImporter.merge(snap, into: b.mainContext)
+
+        #expect(try b.mainContext.fetch(FetchDescriptor<Expense>()).count == 1)
     }
 }
