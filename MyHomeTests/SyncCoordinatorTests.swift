@@ -116,6 +116,10 @@ struct SyncCoordinatorTests {
         return try SnapshotExporter.exportData(context: c.mainContext, deviceName: device)
     }
 
+    private func fetchNote(_ ctx: ModelContext, syncID: UUID) throws -> Note? {
+        try ctx.fetch(FetchDescriptor<Note>()).first { $0.syncID == syncID }
+    }
+
     private func fetchExpense(_ ctx: ModelContext, syncID: UUID) throws -> Expense? {
         try ctx.fetch(FetchDescriptor<Expense>()).first { $0.syncID == syncID }
     }
@@ -130,23 +134,24 @@ struct SyncCoordinatorTests {
 
     // MARK: change-on-A-appears-on-B
 
-    @Test("Connect exchange: an expense in A appears in B, and B's record appears in A — no tap")
+    @Test("Connect exchange: a note in A appears in B, and B's note appears in A — no tap")
     func connectExchangePropagatesBothWays() throws {
         let (ca, actx) = try makeStore()
         let (cb, bctx) = try makeStore()
         _ = ca; _ = cb  // retain containers
 
-        let ea = Expense(amount: Decimal(string: "100")!)
-        ea.note = "from-A"
-        actx.insert(ea)
+        // Notes, not expenses: `SyncScope.production` carries notes only, so a note IS the
+        // production payload. Expense propagation is proven NOT to happen — see
+        // `expensesNeverCrossTheWire` below.
+        let na = Note(title: "from-A")
+        actx.insert(na)
         try actx.save()
-        let eaSync = ea.syncID
+        let eaSync = na.syncID
 
-        let eb = Expense(amount: Decimal(string: "200")!)
-        eb.note = "from-B"
-        bctx.insert(eb)
+        let nb = Note(title: "from-B")
+        bctx.insert(nb)
         try bctx.save()
-        let ebSync = eb.syncID
+        let ebSync = nb.syncID
 
         let (ta, tb) = FakeSyncTransport.linkedPair()
         let coordA = makeCoordinator(transport: ta, context: actx)
@@ -158,8 +163,8 @@ struct SyncCoordinatorTests {
         ta.simulateConnected(peerName: "PhoneB")
         tb.simulateConnected(peerName: "PhoneA")
 
-        #expect(try fetchExpense(bctx, syncID: eaSync)?.note == "from-A")
-        #expect(try fetchExpense(actx, syncID: ebSync)?.note == "from-B")
+        #expect(try fetchNote(bctx, syncID: eaSync)?.title == "from-A")
+        #expect(try fetchNote(actx, syncID: ebSync)?.title == "from-B")
     }
 
     // MARK: echo suppression
@@ -173,17 +178,16 @@ struct SyncCoordinatorTests {
         let coord = makeCoordinator(transport: t, context: bctx)
         coord.start()  // isActive = true, so ONLY the isMerging guard can prevent scheduling
 
-        // Snapshot that DOES change B (a brand-new expense) → merge saves → didSave fires.
+        // Snapshot that DOES change B (a brand-new note) → merge saves → didSave fires.
         let data = try snapshotBytes { ctx in
-            let e = Expense(amount: Decimal(string: "42")!)
-            e.note = "remote"
-            ctx.insert(e)
+            let n = Note(title: "remote")
+            ctx.insert(n)
             try ctx.save()
         }
         coord.handle(.received(.snapshot(data)))
 
         #expect(coord.pendingPushTask == nil)
-        #expect(try bctx.fetch(FetchDescriptor<Expense>()).count == 1)
+        #expect(try bctx.fetch(FetchDescriptor<Note>()).count == 1)
     }
 
     @Test("Converged pair re-exchanging stays bounded — no infinite ping-pong")
@@ -192,9 +196,9 @@ struct SyncCoordinatorTests {
         let (cb, bctx) = try makeStore()
         _ = ca; _ = cb
 
-        let ea = Expense(amount: Decimal(string: "100")!)
+        let ea = Note(title: "A")
         actx.insert(ea); try actx.save()
-        let eb = Expense(amount: Decimal(string: "200")!)
+        let eb = Note(title: "B")
         bctx.insert(eb); try bctx.save()
 
         let (ta, tb) = FakeSyncTransport.linkedPair()
@@ -325,8 +329,7 @@ struct SyncCoordinatorTests {
         #expect(coord.statusStore.lastSyncedAt == nil)   // "Never" state for the UI
 
         let data = try snapshotBytes { ctx in
-            let e = Expense(amount: Decimal(string: "7")!)
-            ctx.insert(e)
+            ctx.insert(Note(title: "seven"))
             try ctx.save()
         }
         coord.handle(.received(.snapshot(data)))
@@ -341,10 +344,10 @@ struct SyncCoordinatorTests {
     func mergeFailureIsIsolated() throws {
         let (cb, bctx) = try makeStore()
         _ = cb
-        let existing = Expense(amount: Decimal(string: "500")!)
+        let existing = Note(title: "local")
         bctx.insert(existing)
         try bctx.save()
-        let countBefore = try bctx.fetch(FetchDescriptor<Expense>()).count
+        let countBefore = try bctx.fetch(FetchDescriptor<Note>()).count
 
         let t = FakeSyncTransport()
         t.isConnected = true
@@ -356,7 +359,7 @@ struct SyncCoordinatorTests {
         if case .error = coord.statusStore.status {} else {
             Issue.record("Expected .error status after garbage merge, got \(coord.statusStore.status)")
         }
-        #expect(try bctx.fetch(FetchDescriptor<Expense>()).count == countBefore)
+        #expect(try bctx.fetch(FetchDescriptor<Note>()).count == countBefore)
         #expect(coord.statusStore.lastSyncedAt == nil)
     }
 
@@ -367,17 +370,15 @@ struct SyncCoordinatorTests {
         // B holds the record with a NEWER edit; A sends the same syncID with an OLDER updatedAt.
         let (cb, bctx) = try makeStore()
         _ = cb
-        let eb = Expense(amount: Decimal(string: "300")!)
-        eb.note = "B-newer"
+        let eb = Note(title: "B-newer")
         bctx.insert(eb)
         try bctx.save()
         let sharedSync = eb.syncID
         let bTime = eb.updatedAt
 
         let olderRemote = try snapshotBytes(device: "A") { ctx in
-            let ea = Expense(amount: Decimal(string: "300")!)
+            let ea = Note(title: "A-older")
             ea.syncID = sharedSync
-            ea.note = "A-older"
             ea.updatedAt = bTime.addingTimeInterval(-100)   // strictly older → must lose
             ctx.insert(ea)
             try ctx.save()
@@ -390,6 +391,44 @@ struct SyncCoordinatorTests {
 
         coord.handle(.received(.snapshot(olderRemote)))
 
-        #expect(try fetchExpense(bctx, syncID: sharedSync)?.note == "B-newer")
+        #expect(try fetchNote(bctx, syncID: sharedSync)?.title == "B-newer")
+    }
+
+    // MARK: scope — money never leaves the phone
+
+    @Test("An expense on A never reaches B, even over a fully connected auto-sync link")
+    func expensesNeverCrossTheWire() throws {
+        let (ca, actx) = try makeStore()
+        let (cb, bctx) = try makeStore()
+        _ = ca; _ = cb
+
+        // A holds BOTH an expense and a note. Only the note may travel.
+        let secret = Expense(amount: Decimal(string: "1234.56")!)
+        secret.note = "private-spend"
+        actx.insert(secret)
+        let shared = Note(title: "shared-note")
+        actx.insert(shared)
+        try actx.save()
+        let noteSync = shared.syncID
+
+        let (ta, tb) = FakeSyncTransport.linkedPair()
+        let coordA = makeCoordinator(transport: ta, context: actx)
+        let coordB = makeCoordinator(transport: tb, context: bctx)
+        coordA.start()
+        coordB.start()
+        ta.simulateConnected(peerName: "PhoneB")
+        tb.simulateConnected(peerName: "PhoneA")
+
+        // The note crossed…
+        #expect(try fetchNote(bctx, syncID: noteSync)?.title == "shared-note")
+        // …and the expense did not, by any path.
+        #expect(try bctx.fetch(FetchDescriptor<Expense>()).isEmpty)
+
+        // Stronger: it is not even present in the bytes A put on the wire.
+        for envelope in ta.sentEnvelopes {
+            guard case .snapshot(let data) = envelope else { continue }
+            #expect(!String(decoding: data, as: UTF8.self).contains("private-spend"))
+            #expect(try SnapshotCodec.decode(data).expenses.isEmpty)
+        }
     }
 }

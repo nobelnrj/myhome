@@ -100,7 +100,7 @@ struct SyncBootstrapView: View {
                 .font(.system(size: 22, weight: .semibold))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(DesignTokens.label)
-            Text("Open MyHome on your other phone and keep both on the same Wi-Fi. Everything — expenses, notes, accounts, assets — will be copied over. Anything already on this phone is kept and merged, never deleted.")
+            Text("Open MyHome on your other phone and keep both on the same Wi-Fi. Your notes and reminders will be copied over. Expenses, accounts and investments stay private to each phone and are never sent. Anything already on this phone is kept and merged, never deleted.")
                 .font(.system(size: 14))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(DesignTokens.label2)

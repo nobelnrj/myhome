@@ -124,10 +124,10 @@ struct DeletionTrackingTests {
         ctxA.deleteSynced(expA, kind: .expense)
         try ctxA.save()
 
-        let snapshotData = try SnapshotExporter.exportData(context: ctxA, deviceName: "PhoneA")
+        let snapshotData = try SnapshotExporter.exportData(context: ctxA, deviceName: "PhoneA", scope: .all)
 
         // Merge A's snapshot into B — the record must be removed (no resurrection).
-        let stats = try SnapshotImporter.mergeData(snapshotData, into: ctxB)
+        let stats = try SnapshotImporter.mergeData(snapshotData, into: ctxB, scope: .all)
         #expect(stats.deleted >= 1)
         #expect(try ctxB.fetch(FetchDescriptor<Expense>()).isEmpty)
     }

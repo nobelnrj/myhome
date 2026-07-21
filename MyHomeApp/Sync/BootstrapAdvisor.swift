@@ -21,26 +21,45 @@ enum BootstrapAdvisor {
     /// "Set up later", or swipe-dismissed). Once set, the prompt never auto-appears again.
     static let resolvedFlagKey = "sync.bootstrapResolved"
 
-    /// True when the store holds NO user-entered data. Uses `fetchCount` (cheap — no row
-    /// materialization) across the six entities that represent user data. Categories, routine
-    /// templates, and `DeletionLog` are EXCLUDED (seeded/derived, not user-entered).
-    static func isStoreEffectivelyEmpty(context: ModelContext) -> Bool {
-        let counts = [
-            (try? context.fetchCount(FetchDescriptor<Expense>())) ?? 0,
-            (try? context.fetchCount(FetchDescriptor<Note>())) ?? 0,
-            (try? context.fetchCount(FetchDescriptor<Account>())) ?? 0,
-            (try? context.fetchCount(FetchDescriptor<Asset>())) ?? 0,
-            (try? context.fetchCount(FetchDescriptor<SIP>())) ?? 0,
-            (try? context.fetchCount(FetchDescriptor<NetWorthSnapshot>())) ?? 0,
-        ]
+    /// True when the store holds no user-entered data OF A SYNCABLE KIND. Uses `fetchCount`
+    /// (cheap — no row materialization).
+    ///
+    /// Scoped to `SyncScope.synced` on purpose: bootstrap can only ever copy in-scope data, so
+    /// it can only ever clobber in-scope data. Counting out-of-scope rows here would mean a
+    /// fresh phone that has already auto-ingested a bank mail (an Expense — private, never
+    /// synced) could never be offered the notes bootstrap it genuinely needs. `DeletionLog` is
+    /// still excluded (derived, not user-entered).
+    static func isStoreEffectivelyEmpty(context: ModelContext,
+                                        scope: SyncScope = .production) -> Bool {
+        var counts: [Int] = []
+        if scope.isSynced(.note) {
+            counts.append((try? context.fetchCount(FetchDescriptor<Note>())) ?? 0)
+        }
+        if scope.isSynced(.expense) {
+            counts.append((try? context.fetchCount(FetchDescriptor<Expense>())) ?? 0)
+        }
+        if scope.isSynced(.account) {
+            counts.append((try? context.fetchCount(FetchDescriptor<Account>())) ?? 0)
+        }
+        if scope.isSynced(.asset) {
+            counts.append((try? context.fetchCount(FetchDescriptor<Asset>())) ?? 0)
+        }
+        if scope.isSynced(.sip) {
+            counts.append((try? context.fetchCount(FetchDescriptor<SIP>())) ?? 0)
+        }
+        if scope.isSynced(.netWorthSnapshot) {
+            counts.append((try? context.fetchCount(FetchDescriptor<NetWorthSnapshot>())) ?? 0)
+        }
         return counts.allSatisfy { $0 == 0 }
     }
 
     /// Should the first-run bootstrap sheet be offered? Only for a genuinely fresh install
     /// whose owner has not already answered the prompt.
     static func shouldOfferBootstrap(context: ModelContext,
-                                     defaults: UserDefaults = .standard) -> Bool {
-        !defaults.bool(forKey: resolvedFlagKey) && isStoreEffectivelyEmpty(context: context)
+                                     defaults: UserDefaults = .standard,
+                                     scope: SyncScope = .production) -> Bool {
+        !defaults.bool(forKey: resolvedFlagKey)
+            && isStoreEffectivelyEmpty(context: context, scope: scope)
     }
 
     /// Persist that the prompt has been answered — it never auto-appears again.

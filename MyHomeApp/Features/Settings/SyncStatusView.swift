@@ -98,9 +98,13 @@ struct SyncStatusView: View {
         return "No phone nearby"
     }
 
-    /// Foreground-only expectation + the Local-Network privacy hint when the error implicates it.
+    /// Foreground-only expectation + what is (and is not) shared + the Local-Network privacy
+    /// hint when the error implicates it. The scope sentence is not decoration: the user must be
+    /// able to see, on this screen, that money data never leaves the phone (`SyncScope`).
     private var footerText: String {
-        let base = "Syncing works when both phones have MyHome open on the same Wi-Fi."
+        let base = "Syncing works when both phones have MyHome open on the same Wi-Fi. "
+            + "Only notes and reminders are shared — expenses, accounts and investments stay on "
+            + "this phone."
         if case .error(let message) = store.status,
            message.localizedCaseInsensitiveContains("Local Network") {
             return base + " Enable it in Settings → Privacy → Local Network."

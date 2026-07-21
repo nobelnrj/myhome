@@ -228,36 +228,52 @@ enum SnapshotExporter {
 
     // MARK: - Full-store snapshot
 
-    /// Fetch ALL rows of the 11 syncable models plus DeletionLog, map to DTOs, and sort every
-    /// array deterministically by syncID so identical stores export identical canonical bytes.
+    /// Fetch every IN-SCOPE row (see `SyncScope`) plus the matching tombstones, map to DTOs, and
+    /// sort every array deterministically by syncID so identical stores export identical
+    /// canonical bytes. Out-of-scope kinds — all financial data in v1.3 — are not fetched, so
+    /// they never leave the device.
     static func makeSnapshot(
         context: ModelContext,
         deviceName: String,
-        exportedAt: Date = Date()
+        exportedAt: Date = Date(),
+        scope: SyncScope = .production
     ) throws -> SyncSnapshot {
-        let categories = try context.fetch(FetchDescriptor<Category>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let expenses = try context.fetch(FetchDescriptor<Expense>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let notes = try context.fetch(FetchDescriptor<Note>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let noteBlocks = try context.fetch(FetchDescriptor<NoteBlock>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let accounts = try context.fetch(FetchDescriptor<Account>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let assets = try context.fetch(FetchDescriptor<Asset>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let netWorthSnapshots = try context.fetch(FetchDescriptor<NetWorthSnapshot>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let sips = try context.fetch(FetchDescriptor<SIP>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let sipAmountChanges = try context.fetch(FetchDescriptor<SIPAmountChange>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let contributions = try context.fetch(FetchDescriptor<Contribution>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
-        let routineCompletions = try context.fetch(FetchDescriptor<RoutineCompletion>())
-            .map(dto).sorted { $0.syncID.uuidString < $1.syncID.uuidString }
+        // Out-of-scope kinds are never fetched, so their rows cannot leave this device even
+        // in memory. `SyncScope` is the single source of truth; see its doc comment.
+        func rows<Model: PersistentModel, D>(
+            _ kind: SyncEntityKind,
+            _ map: (Model) -> D,
+            _ syncID: (D) -> UUID
+        ) throws -> [D] {
+            guard scope.isSynced(kind) else { return [] }
+            return try context.fetch(FetchDescriptor<Model>())
+                .map(map)
+                .sorted { syncID($0).uuidString < syncID($1).uuidString }
+        }
+
+        let categories = try rows(.category, dto(_:) as (Category) -> CategoryDTO, \.syncID)
+        let expenses = try rows(.expense, dto(_:) as (Expense) -> ExpenseDTO, \.syncID)
+        let notes = try rows(.note, dto(_:) as (Note) -> NoteDTO, \.syncID)
+        let noteBlocks = try rows(.noteBlock, dto(_:) as (NoteBlock) -> NoteBlockDTO, \.syncID)
+        let accounts = try rows(.account, dto(_:) as (Account) -> AccountDTO, \.syncID)
+        let assets = try rows(.asset, dto(_:) as (Asset) -> AssetDTO, \.syncID)
+        let netWorthSnapshots = try rows(
+            .netWorthSnapshot, dto(_:) as (NetWorthSnapshot) -> NetWorthSnapshotDTO, \.syncID
+        )
+        let sips = try rows(.sip, dto(_:) as (SIP) -> SIPDTO, \.syncID)
+        let sipAmountChanges = try rows(
+            .sipAmountChange, dto(_:) as (SIPAmountChange) -> SIPAmountChangeDTO, \.syncID
+        )
+        let contributions = try rows(
+            .contribution, dto(_:) as (Contribution) -> ContributionDTO, \.syncID
+        )
+        let routineCompletions = try rows(
+            .routineCompletion, dto(_:) as (RoutineCompletion) -> RoutineCompletionDTO, \.syncID
+        )
+        // Tombstones for out-of-scope kinds are dropped too — an excluded deletion must not
+        // travel, or one phone could delete rows of a kind it is not allowed to see.
         let deletions = try context.fetch(FetchDescriptor<DeletionLog>())
+            .filter { SyncEntityKind(rawValue: $0.entityKindRaw).map(scope.isSynced) ?? false }
             .map(dto)
             .sorted {
                 if $0.entitySyncID.uuidString != $1.entitySyncID.uuidString {
@@ -286,7 +302,13 @@ enum SnapshotExporter {
     }
 
     /// Canonical bytes of the full-store snapshot — what Phase 19's transport sends on the wire.
-    static func exportData(context: ModelContext, deviceName: String) throws -> Data {
-        try SnapshotCodec.encode(makeSnapshot(context: context, deviceName: deviceName))
+    static func exportData(
+        context: ModelContext,
+        deviceName: String,
+        scope: SyncScope = .production
+    ) throws -> Data {
+        try SnapshotCodec.encode(
+            makeSnapshot(context: context, deviceName: deviceName, scope: scope)
+        )
     }
 }

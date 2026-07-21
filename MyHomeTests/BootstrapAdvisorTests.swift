@@ -12,7 +12,9 @@ import Foundation
 /// `FakeSyncTransport` pair + `SyncTestSupport` in-memory SchemaV10 containers (SyncCoordinatorTests
 /// / SnapshotRoundTripTests fixtures) — the bootstrap path IS the coordinator's snapshot exchange.
 
-/// One user-data entity kind — parameterizes "ANY user entity makes the store non-empty".
+/// One user-data entity kind. Emptiness is SCOPE-relative: only kinds bootstrap can actually
+/// copy count, because only those can be clobbered. `syncable` drives "makes the store
+/// non-empty"; `outOfScope` drives the inverse assertion.
 enum BootstrapUserEntity: CaseIterable {
     case expense, note, account, asset, sip, netWorth
 
@@ -26,6 +28,25 @@ enum BootstrapUserEntity: CaseIterable {
         case .sip:      ctx.insert(SIP(assetID: UUID(), amount: Decimal(string: "500")!))
         case .netWorth: ctx.insert(NetWorthSnapshot())
         }
+    }
+
+    var kind: SyncEntityKind {
+        switch self {
+        case .expense:  return .expense
+        case .note:     return .note
+        case .account:  return .account
+        case .asset:    return .asset
+        case .sip:      return .sip
+        case .netWorth: return .netWorthSnapshot
+        }
+    }
+
+    static var syncable: [BootstrapUserEntity] {
+        allCases.filter { SyncScope.production.isSynced($0.kind) }
+    }
+
+    static var outOfScope: [BootstrapUserEntity] {
+        allCases.filter { !SyncScope.production.isSynced($0.kind) }
     }
 }
 
@@ -65,13 +86,33 @@ struct BootstrapAdvisorTests {
         #expect(BootstrapAdvisor.isStoreEffectivelyEmpty(context: ctx))
     }
 
-    @Test("ANY single user entity makes the store non-empty",
-          arguments: BootstrapUserEntity.allCases)
+    @Test("ANY single IN-SCOPE user entity makes the store non-empty",
+          arguments: BootstrapUserEntity.syncable)
     func userEntityMakesNonEmpty(_ entity: BootstrapUserEntity) throws {
         let (c, ctx) = try makeContext(); _ = c
         entity.insert(into: ctx)
         try ctx.save()
         #expect(BootstrapAdvisor.isStoreEffectivelyEmpty(context: ctx) == false)
+    }
+
+    /// The regression this guards: a fresh phone that has already auto-ingested a bank mail
+    /// holds an Expense — private, never synced, never clobberable — and must STILL be offered
+    /// the notes bootstrap it genuinely needs.
+    @Test("An OUT-OF-SCOPE entity leaves the store effectively empty (bootstrap stays available)",
+          arguments: BootstrapUserEntity.outOfScope)
+    func outOfScopeEntityKeepsStoreEmpty(_ entity: BootstrapUserEntity) throws {
+        let (c, ctx) = try makeContext(); _ = c
+        entity.insert(into: ctx)
+        try ctx.save()
+        #expect(BootstrapAdvisor.isStoreEffectivelyEmpty(context: ctx))
+    }
+
+    @Test("Under a widened scope, an expense DOES make the store non-empty")
+    func emptinessFollowsTheScope() throws {
+        let (c, ctx) = try makeContext(); _ = c
+        ctx.insert(Expense(amount: Decimal(string: "100")!))
+        try ctx.save()
+        #expect(BootstrapAdvisor.isStoreEffectivelyEmpty(context: ctx, scope: .all) == false)
     }
 
     // MARK: - Offer gate
@@ -94,7 +135,7 @@ struct BootstrapAdvisorTests {
     @Test("shouldOfferBootstrap == false for a non-empty store even with the flag unset")
     func offerGateNonEmpty() throws {
         let (c, ctx) = try makeContext(); _ = c
-        ctx.insert(Expense(amount: Decimal(string: "100")!))
+        ctx.insert(Note(title: "already here"))
         try ctx.save()
         let d = freshDefaults()
         #expect(BootstrapAdvisor.shouldOfferBootstrap(context: ctx, defaults: d) == false)
@@ -112,14 +153,16 @@ struct BootstrapAdvisorTests {
         let sharedSyncID = UUID()
         let now = Date()
 
-        // A: an OLDER copy of the shared note + an expense that exists ONLY on A (proves seeding).
+        // A: an OLDER copy of the shared note + a note that exists ONLY on A (proves seeding),
+        // plus an expense that must NOT be seeded (out of scope).
         let noteA = Note(title: "A-older")
         noteA.syncID = sharedSyncID
         noteA.updatedAt = now.addingTimeInterval(-100)   // strictly older → must lose
         actx.insert(noteA)
-        let onlyOnA = Expense(amount: Decimal(string: "777")!)
-        onlyOnA.note = "seeded-from-A"
+        let onlyOnA = Note(title: "seeded-from-A")
         actx.insert(onlyOnA)
+        let moneyOnA = Expense(amount: Decimal(string: "777")!)
+        actx.insert(moneyOnA)
         try actx.save()
         let onlyOnASyncID = onlyOnA.syncID
 
@@ -131,7 +174,6 @@ struct BootstrapAdvisorTests {
         try bctx.save()
 
         let notesBefore = try bctx.fetchCount(FetchDescriptor<Note>())
-        let expensesBefore = try bctx.fetchCount(FetchDescriptor<Expense>())
 
         // The bootstrap path IS the coordinator's connect-time snapshot exchange.
         let (ta, tb) = FakeSyncTransport.linkedPair()
@@ -145,13 +187,15 @@ struct BootstrapAdvisorTests {
         tb.simulateConnected(peerName: "PhoneA")
 
         // B gained A's record it lacked (SEED) …
-        let seeded = try bctx.fetch(FetchDescriptor<Expense>()).first { $0.syncID == onlyOnASyncID }
-        #expect(seeded?.note == "seeded-from-A")
+        let seeded = try bctx.fetch(FetchDescriptor<Note>()).first { $0.syncID == onlyOnASyncID }
+        #expect(seeded?.title == "seeded-from-A")
         // … B's newer edit SURVIVED (never clobbered by A's older copy) …
         let mergedNote = try bctx.fetch(FetchDescriptor<Note>()).first { $0.syncID == sharedSyncID }
         #expect(mergedNote?.title == "B-newer")
-        // … and B lost NOTHING: the shared note stayed a single row, the expense count only grew.
-        #expect(try bctx.fetchCount(FetchDescriptor<Note>()) == notesBefore)         // no dup, no delete
-        #expect(try bctx.fetchCount(FetchDescriptor<Expense>()) >= expensesBefore + 1)
+        // … and B lost NOTHING: the shared note stayed a single row and gained exactly the one
+        // note it lacked (no dup, no delete) …
+        #expect(try bctx.fetchCount(FetchDescriptor<Note>()) == notesBefore + 1)
+        // … while A's money stayed on A.
+        #expect(try bctx.fetch(FetchDescriptor<Expense>()).isEmpty)
     }
 }
