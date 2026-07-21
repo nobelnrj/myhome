@@ -95,6 +95,7 @@
 		A1803SRTT /* SnapshotRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SRTT /* SnapshotRoundTripTests.swift */; };
 		A2003KL /* KitchenLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KL /* KitchenLogic.swift */; };
 		A2003KLT /* KitchenLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KLT /* KitchenLogicTests.swift */; };
+		A2201PCT /* PantryCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2201PCT /* PantryCategoryTests.swift */; };
 		A2004SLT /* ShoppingListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SLT /* ShoppingListTests.swift */; };
 		A2003KV /* KitchenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KV /* KitchenView.swift */; };
 		A2003PIR /* PantryItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003PIR /* PantryItemRow.swift */; };
@@ -371,6 +372,7 @@
 		F1803SRTT /* SnapshotRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotRoundTripTests.swift; sourceTree = "<group>"; };
 		F2003KL /* KitchenLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenLogic.swift; sourceTree = "<group>"; };
 		F2003KLT /* KitchenLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenLogicTests.swift; sourceTree = "<group>"; };
+		F2201PCT /* PantryCategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryCategoryTests.swift; sourceTree = "<group>"; };
 		F2004SLT /* ShoppingListTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListTests.swift; sourceTree = "<group>"; };
 		F2003KV /* KitchenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenView.swift; sourceTree = "<group>"; };
 		F2003PIR /* PantryItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryItemRow.swift; sourceTree = "<group>"; };
@@ -969,6 +971,7 @@
 				F1803SRTT /* SnapshotRoundTripTests.swift */,
 				F2002KST /* KitchenSyncTests.swift */,
 				F2003KLT /* KitchenLogicTests.swift */,
+				F2201PCT /* PantryCategoryTests.swift */,
 				F2004SLT /* ShoppingListTests.swift */,
 				F1803SNIT /* SnapshotImporterTests.swift */,
 				F1804DTT /* DeletionTrackingTests.swift */,
@@ -1384,6 +1387,7 @@
 				A1802SMPT /* SyncMergePolicyTests.swift in Sources */,
 				A1803SRTT /* SnapshotRoundTripTests.swift in Sources */,
 				A2003KLT /* KitchenLogicTests.swift in Sources */,
+				A2201PCT /* PantryCategoryTests.swift in Sources */,
 				A2004SLT /* ShoppingListTests.swift in Sources */,
 				A2002KST /* KitchenSyncTests.swift in Sources */,
 				A1803SNIT /* SnapshotImporterTests.swift in Sources */,
