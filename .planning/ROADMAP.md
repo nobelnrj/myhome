@@ -81,7 +81,7 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 **Milestone:** v1.3 Private Sync & Kitchen â Phases 18-21 (started 2026-07-16)
 **Granularity:** standard Â· **Coverage:** 12/12 requirements mapped
 
-- [ ] **Phase 18: Sync Foundation â Schema, Merge Engine & AirDrop** - Syncable schema (syncID/updatedAt + tombstones), a pure tested merge engine, and device-to-device AirDrop snapshot exchange.
+- [x] **Phase 18: Sync Foundation â Schema, Merge Engine & AirDrop** - Syncable schema (syncID/updatedAt + tombstones), a pure tested merge engine, and device-to-device AirDrop snapshot exchange. (completed 2026-07-17)
 - [x] **Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap** - Automatic foreground P2P sync over WiFi with a first-run bootstrap and a trustworthy sync surface. (completed 2026-07-20)
 - [x] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface. (completed 2026-07-21)
 - [ ] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range.
