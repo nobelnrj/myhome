@@ -60,6 +60,49 @@ enum KitchenLogic {
         item.touch()
     }
 
+    // MARK: - Derived shopping list (KTCH-03)
+
+    /// The auto half of the shopping list: every pantry row that is NOT `.inStock`, out-of-stock
+    /// first, then low, alphabetical (case-insensitive) within each group with unnamed rows last.
+    ///
+    /// PURE — takes rows, returns rows. It never touches a `ModelContext` and, critically, it
+    /// **never inserts `ShoppingListItem` rows for auto entries** (20-01 locked sync design):
+    /// materialising derived rows would let two phones mint duplicate "auto" entries that the
+    /// merge engine could not reconcile, and it would break check-off restock, which is
+    /// unambiguous precisely because a derived row IS its `PantryItem`. `ShoppingListItem` exists
+    /// only for MANUAL extras. `ShoppingListTests.derivationNeverMaterialisesRows` pins this.
+    static func deriveShoppingItems(from pantry: [PantryItem]) -> [PantryItem] {
+        pantry
+            .filter { stockStatus(for: $0) != .inStock }
+            .sorted { a, b in
+                let sa = stockStatus(for: a)
+                let sb = stockStatus(for: b)
+                if sa != sb { return sa == .out }          // out of stock first
+                return sortKey(a) < sortKey(b)             // then alphabetical, unnamed last
+            }
+    }
+
+    /// Alphabetical key: case-insensitive, and nil/blank names sort last (`"\u{10FFFF}"` beats any
+    /// real name) so an unnamed row never jumps to the top of the list.
+    private static func sortKey(_ item: PantryItem) -> String {
+        let name = (item.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? "\u{10FFFF}" : name.lowercased()
+    }
+
+    // MARK: - Manual shopping rows (KTCH-03)
+
+    /// Flips a MANUAL shopping row's checked state and stamps the LWW clock. Caller saves.
+    ///
+    /// Deliberately does NOT touch the pantry: only DERIVED rows restock (via `markRestocked`).
+    /// A manual extra ("Batteries") has no pantry row to restock — that is the whole point of the
+    /// two-section split.
+    @MainActor
+    static func toggleChecked(_ item: ShoppingListItem) {
+        item.isChecked.toggle()
+        item.checkedAt = item.isChecked ? Date() : nil
+        item.touch()
+    }
+
     // MARK: - Derived item iconography (user decision, 2026-07-21 — DERIVED, never stored)
 
     /// SF Symbol + tile colour for a pantry item, derived from its NAME.
