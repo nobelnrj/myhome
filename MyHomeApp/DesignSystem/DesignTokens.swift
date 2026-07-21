@@ -127,6 +127,13 @@ enum DesignTokens {
     static let catEntertainment = Color.adaptive(light: "#7E22CE", dark: "#C084FC")
     static let catOther         = Color.adaptive(light: "#475569", dark: "#94A3B8")
 
+    // Phase 20 (kitchen): two WARM pantry twins. The category palette above is money-domain and
+    // runs cool/jewel — dry staples and brews landed on purple/orange tiles, which read wrong
+    // against the user's reference mockup (warm amber jars, brown brew). Same adaptive
+    // deepened-light / luminous-dark construction as every token above; no existing value touched.
+    static let catPantryGrain   = Color.adaptive(light: "#B45309", dark: "#FBBF24")
+    static let catPantryBrew    = Color.adaptive(light: "#78350F", dark: "#D9A066")
+
     /// D-09: IconTile glyph color. In DARK the fill is a LUMINOUS category twin (e.g. #2DD4BF),
     /// so a near-black glyph reads best — `#16161C` @0.85 VERBATIM (byte-identical, D-06). In
     /// LIGHT the fill is a DEEPENED category twin (e.g. #0F766E dark teal), where a dark glyph

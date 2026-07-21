@@ -147,6 +147,8 @@ struct DarkBitIdentityTests {
         ("catSubscriptions",         DesignTokens.catSubscriptions,         "#22D3EE"),
         ("catEntertainment",         DesignTokens.catEntertainment,         "#C084FC"),
         ("catOther",                 DesignTokens.catOther,                 "#94A3B8"),
+        ("catPantryGrain",           DesignTokens.catPantryGrain,           "#FBBF24"),
+        ("catPantryBrew",            DesignTokens.catPantryBrew,            "#D9A066"),
         // Plan 06 — trend-chart amber + slate-inset fill (dark = pre-refactor value verbatim).
         ("chartAmber",               DesignTokens.chartAmber,               "#FFB43C"),
         ("dishSlateInset",           DesignTokens.dishSlateInset,           "#16161C"),

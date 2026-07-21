@@ -145,7 +145,7 @@ enum KitchenLogic {
         IconRule(keywords: ["egg"],
                  symbol: "oval.fill", color: DesignTokens.catGroceries),
         IconRule(keywords: ["coffee", "tea", "chai"],
-                 symbol: "cup.and.saucer.fill", color: DesignTokens.catDining),
+                 symbol: "cup.and.saucer.fill", color: DesignTokens.catPantryBrew),
         IconRule(keywords: ["oil", "ghee", "butter"],
                  symbol: "drop.circle.fill", color: DesignTokens.catRent),
         IconRule(keywords: ["soap", "detergent", "dishwash", "cleaner", "phenyl"],
@@ -154,10 +154,16 @@ enum KitchenLogic {
                  symbol: "leaf.fill", color: DesignTokens.catSubscriptions),
         IconRule(keywords: ["fruit", "apple", "banana", "orange", "mango"],
                  symbol: "basket.fill", color: DesignTokens.catFuel),
+        // Dry staples share ONE warm amber jar tile, matching the reference mockup where rice,
+        // atta, dal and sugar are visually the same kind of thing on the shelf.
+        // NOTE: "takeoutbag.fill.and.rectangle.portrait" is NOT a real SF Symbol — it rendered an
+        // empty tile (caught by screenshot, not by tests: SwiftUI silently draws nothing for an
+        // unknown symbol name). Both dry-staple rules use shippingbox.fill, which is verified to
+        // render. Any new symbol name here must be eyeballed on the simulator before it ships.
         IconRule(keywords: ["salt", "sugar", "jaggery", "masala", "spice", "powder"],
-                 symbol: "takeoutbag.fill.and.rectangle.portrait", color: DesignTokens.catShopping),
+                 symbol: "shippingbox.fill", color: DesignTokens.catPantryGrain),
         IconRule(keywords: ["rice", "atta", "flour", "dal", "wheat", "rava", "poha", "grain", "pulse"],
-                 symbol: "shippingbox.fill", color: DesignTokens.catHealth),
+                 symbol: "shippingbox.fill", color: DesignTokens.catPantryGrain),
         IconRule(keywords: ["bread", "bun", "biscuit", "cookie", "snack"],
                  symbol: "birthday.cake.fill", color: DesignTokens.catEntertainment),
         IconRule(keywords: ["water", "juice", "drink", "soda"],
