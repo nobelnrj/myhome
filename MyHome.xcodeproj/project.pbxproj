@@ -96,9 +96,11 @@
 		A2003KL /* KitchenLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KL /* KitchenLogic.swift */; };
 		A2201PC /* PantryCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2201PC /* PantryCategory.swift */; };
 		A2202IC /* PantryIconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2202IC /* PantryIconCache.swift */; };
+		A2202ICL /* PantryIconClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2202ICL /* PantryIconClassifier.swift */; };
 		A2003KLT /* KitchenLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KLT /* KitchenLogicTests.swift */; };
 		A2201PCT /* PantryCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2201PCT /* PantryCategoryTests.swift */; };
 		A2202ICT /* PantryIconCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2202ICT /* PantryIconCacheTests.swift */; };
+		A2202ICLT /* PantryIconClassifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2202ICLT /* PantryIconClassifierTests.swift */; };
 		A2004SLT /* ShoppingListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SLT /* ShoppingListTests.swift */; };
 		A2003KV /* KitchenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KV /* KitchenView.swift */; };
 		A2003PIR /* PantryItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003PIR /* PantryItemRow.swift */; };
@@ -376,9 +378,11 @@
 		F2003KL /* KitchenLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenLogic.swift; sourceTree = "<group>"; };
 		F2201PC /* PantryCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryCategory.swift; sourceTree = "<group>"; };
 		F2202IC /* PantryIconCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconCache.swift; sourceTree = "<group>"; };
+		F2202ICL /* PantryIconClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconClassifier.swift; sourceTree = "<group>"; };
 		F2003KLT /* KitchenLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenLogicTests.swift; sourceTree = "<group>"; };
 		F2201PCT /* PantryCategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryCategoryTests.swift; sourceTree = "<group>"; };
 		F2202ICT /* PantryIconCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconCacheTests.swift; sourceTree = "<group>"; };
+		F2202ICLT /* PantryIconClassifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconClassifierTests.swift; sourceTree = "<group>"; };
 		F2004SLT /* ShoppingListTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListTests.swift; sourceTree = "<group>"; };
 		F2003KV /* KitchenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenView.swift; sourceTree = "<group>"; };
 		F2003PIR /* PantryItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryItemRow.swift; sourceTree = "<group>"; };
@@ -602,6 +606,7 @@
 				F2003KL /* KitchenLogic.swift */,
 				F2201PC /* PantryCategory.swift */,
 				F2202IC /* PantryIconCache.swift */,
+				F2202ICL /* PantryIconClassifier.swift */,
 				F2003EPI /* EditPantryItemView.swift */,
 				F2003PIR /* PantryItemRow.swift */,
 				F2004SR /* ShoppingRow.swift */,
@@ -981,6 +986,7 @@
 				F2003KLT /* KitchenLogicTests.swift */,
 				F2201PCT /* PantryCategoryTests.swift */,
 				F2202ICT /* PantryIconCacheTests.swift */,
+				F2202ICLT /* PantryIconClassifierTests.swift */,
 				F2004SLT /* ShoppingListTests.swift */,
 				F1803SNIT /* SnapshotImporterTests.swift */,
 				F1804DTT /* DeletionTrackingTests.swift */,
@@ -1271,6 +1277,7 @@
 				A2003KL /* KitchenLogic.swift in Sources */,
 				A2201PC /* PantryCategory.swift in Sources */,
 				A2202IC /* PantryIconCache.swift in Sources */,
+				A2202ICL /* PantryIconClassifier.swift in Sources */,
 				A2003KV /* KitchenView.swift in Sources */,
 				A2003PIR /* PantryItemRow.swift in Sources */,
 				A2004SR /* ShoppingRow.swift in Sources */,
@@ -1400,6 +1407,7 @@
 				A2003KLT /* KitchenLogicTests.swift in Sources */,
 				A2201PCT /* PantryCategoryTests.swift in Sources */,
 				A2202ICT /* PantryIconCacheTests.swift in Sources */,
+				A2202ICLT /* PantryIconClassifierTests.swift in Sources */,
 				A2004SLT /* ShoppingListTests.swift in Sources */,
 				A2002KST /* KitchenSyncTests.swift in Sources */,
 				A1803SNIT /* SnapshotImporterTests.swift in Sources */,
