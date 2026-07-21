@@ -34,6 +34,17 @@
 - [x] **KTCH-03**: A shopping list auto-populates from low/out-of-stock items; the user can check an item off while shopping, which restocks it (updates the pantry quantity); manually-added shopping items are also supported.
 - [x] **KTCH-04**: Kitchen is a first-class neumorphic surface in the app (styled to the v1.2 design system, light + dark) and all kitchen models are registered as syncable so they flow through the SYNC engine.
 
+### Pantry Icon Intelligence (ICON)
+
+<!-- Added 2026-07-21 after Phase 20 UAT: the keyword table returns the neutral bag fallback for
+     anything it has not seen ("kitchen tissue", "fabric softener"). Uses the SAME on-device
+     FoundationModels stack as the AI insight card (Phase 16) — no network, no cost, no new
+     synced state. -->
+
+- [ ] **ICON-01**: A pantry item's icon and tile colour are chosen by the on-device model from its name, so unseen names ("kitchen tissue", "fabric softener", "dish scrubber") get a meaningful icon instead of the neutral fallback.
+- [ ] **ICON-02**: The model cannot produce an invalid SF Symbol — it selects a category from a closed set, and Swift maps each category to a symbol verified to render.
+- [ ] **ICON-03**: Classification is device-local and never persisted on PantryItem or synced; when the on-device model is unavailable the keyword table + neutral fallback still render immediately, and icon resolution never blocks the pantry list from drawing.
+
 ### Overview Filtering (OVF)
 
 <!-- Extends the existing Overview (OVR-01..06). Reuses expense queries + confirmed-transfer exclusion. -->
@@ -75,6 +86,9 @@
 | KTCH-02 | Phase 20 | Complete |
 | KTCH-03 | Phase 20 | Complete |
 | KTCH-04 | Phase 20 | Complete |
+| ICON-01 | Phase 22 | Pending |
+| ICON-02 | Phase 22 | Pending |
+| ICON-03 | Phase 22 | Pending |
 | OVF-01 | Phase 21 | Pending |
 | OVF-02 | Phase 21 | Pending |
 | OVF-03 | Phase 21 | Pending |

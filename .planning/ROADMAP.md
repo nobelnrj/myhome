@@ -57,6 +57,18 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 
 ---
 
+### Phase 22: Pantry Icon Intelligence
+**Goal**: Every pantry item shows a sensible icon and tile colour — including names the keyword table has never seen — decided by the on-device model, with no network, no cost, and no new synced state.
+**Depends on**: Phase 20 (kitchen surface + `KitchenLogic.icon`) and Phase 16 (established FoundationModels patterns: availability gating, `@Generable` guided generation, fallback builder, verifier)
+**Requirements**: ICON-01, ICON-02, ICON-03
+**Success Criteria** (what must be TRUE):
+  1. Names the keyword table misses — "kitchen tissue", "fabric softener", "dish scrubber" — resolve to a meaningful icon and colour rather than the neutral bag fallback.
+  2. An invalid SF Symbol is structurally impossible: the model returns a case from a closed `@Generable` category enum, and Swift maps each case to a symbol verified to render. (A fake symbol name draws NOTHING in SwiftUI and raises no error — this bug already shipped once, in 20-03.)
+  3. Classification is device-local and never written to `PantryItem` or synced, preserving the 20-01 decision that icons are derived; with Apple Intelligence unavailable the keyword table still renders instantly.
+  4. Icon resolution never blocks the pantry list from drawing — rows render the fallback immediately and upgrade in place when classification lands.
+**Plans**: TBD (to be planned)
+**UI hint**: yes — the model is invisible; the only visible change is better tiles.
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -85,6 +97,7 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 - [x] **Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap** - Automatic foreground P2P sync over WiFi with a first-run bootstrap and a trustworthy sync surface. (completed 2026-07-20)
 - [x] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface. (completed 2026-07-21)
 - [ ] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range.
+- [ ] **Phase 22: Pantry Icon Intelligence** - On-device model picks each pantry item's icon from a closed category set, with the keyword table as the offline fallback. (executing BEFORE 21 — they are independent)
 
 ## Phase Details â v1.3
 
@@ -171,3 +184,4 @@ Plans:
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 4/5 | In Progress|  |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
+| 22. Pantry Icon Intelligence | v1.3 | 0/? | Planning | - |
