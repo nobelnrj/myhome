@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
 status: executing
-last_updated: "2026-07-21T14:17:40.571Z"
+last_updated: "2026-07-21T14:31:02.616Z"
 last_activity: 2026-07-21
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 18
-  completed_plans: 14
+  completed_plans: 15
   percent: 50
 ---
 
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 20 (kitchen-inventory-shopping-list) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-07-21
 
@@ -100,6 +100,7 @@ Last activity: 2026-07-21
 | Phase 19 P04 | 35 min | 2 tasks | 7 files |
 | Phase 20 P02 | ~1h | 3 tasks | 8 files |
 | Phase 20 P03 | 55m | 3 tasks | 8 files |
+| Phase 20 P04 | 50m | 2 tasks | 7 files |
 
 ## Quick Tasks Completed
 
@@ -159,6 +160,8 @@ Recent decisions affecting current work:
 - [Phase ?]: 20-02: SyncScope.production widened to notes+kitchen — DTOs alone would have left KTCH-04 false on device; financial exclusions unchanged and still asserted
 - [Phase ?]: 20-03: Kitchen is a pushed Overview surface, not a 6th tab (5-tab bar and -startTab 0-4 untouched)
 - [Phase ?]: 20-03: Pantry item icons are DERIVED from the item name (KitchenLogic.icon) — no schema field, no picker
+- [Phase ?]: Shopping extras delete via context menu + Clear checked instead of swipe (mockup card is a neu VStack, not a List)
+- [Phase 20]: Shopping empty state keeps an Add item field the mockup omits — manual extras would otherwise be unreachable when the list is empty
 
 ### Pending Todos
 
@@ -220,7 +223,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ## Session Continuity
 
-Last session: 2026-07-21T14:17:35.519Z
+Last session: 2026-07-21T14:30:54.205Z
 Stopped at: Completed 19-03-PLAN.md
 Resume file: None
 
