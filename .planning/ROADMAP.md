@@ -83,7 +83,7 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 
 - [ ] **Phase 18: Sync Foundation â Schema, Merge Engine & AirDrop** - Syncable schema (syncID/updatedAt + tombstones), a pure tested merge engine, and device-to-device AirDrop snapshot exchange.
 - [ ] **Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap** - Automatic foreground P2P sync over WiFi with a first-run bootstrap and a trustworthy sync surface.
-- [ ] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface.
+- [x] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface. (completed 2026-07-21)
 - [ ] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range.
 
 ## Phase Details â v1.3
@@ -144,7 +144,7 @@ Plans:
 - [x] 20-02-PLAN.md — Sync wiring: kitchen DTOs, SyncEntityKind cases, snapshot version 10→11, exporter/importer + adoption + round-trip tests
 - [x] 20-03-PLAN.md — Pantry UI: neumorphic list, add/edit, used/restocked steppers, low/out-of-stock flags + Overview navigation entry
 - [x] 20-04-PLAN.md — Shopping list: auto-populated from low/out pantry, check-off restocks pantry, manual extras + segmented Kitchen host
-- [ ] 20-05-PLAN.md — Phase gate: full-suite + invariants + both-theme review set + end-of-phase human verification
+- [x] 20-05-PLAN.md — Phase gate: full-suite + invariants + both-theme review set + end-of-phase human verification
 **UI hint**: yes
 
 ### Phase 21: Overview Filtering
@@ -169,5 +169,5 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 2/5 | In Progress|  |
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 4/5 | In Progress|  |
-| 20. Kitchen Inventory & Shopping List | v1.3 | 4/5 | In Progress|  |
+| 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
