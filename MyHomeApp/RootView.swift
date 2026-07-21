@@ -76,6 +76,23 @@ struct RootView: View {
     @State private var showBootstrapSheet = false
 
     var body: some View {
+        // Phase 22 (ICON-02): `-iconGallery` swaps the whole root for the tile gallery, so
+        // `simctl io booted screenshot` can capture all 17 pantry symbols deterministically —
+        // simctl cannot navigate to Kitchen → Pantry. Mirrors the `-startTab` hook's style and,
+        // like it, exists only in DEBUG (T-22-10).
+        #if DEBUG
+        if PantryIconGalleryView.isRequested {
+            PantryIconGalleryView()
+        } else {
+            mainContent
+        }
+        #else
+        mainContent
+        #endif
+    }
+
+    @ViewBuilder
+    private var mainContent: some View {
         TabView(selection: $selectedTab) {
             OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID, activityCategoryFilter: $activityCategoryFilter)
                 .tabItem {
