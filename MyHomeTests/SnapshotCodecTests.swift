@@ -111,6 +111,17 @@ struct SnapshotCodecTests {
                 RoutineCompletionDTO(id: UUID(), syncID: UUID(), updatedAt: d0, noteID: UUID(),
                                      dayKey: d0, completedAt: d0, createdAt: d0)
             ],
+            pantryItems: [
+                PantryItemDTO(id: UUID(), syncID: UUID(), updatedAt: d0, name: "Rice",
+                              quantity: 2.0, unit: "kg", lowStockThreshold: 1.0,
+                              restockQuantity: 5.0, category: "Grains",
+                              notes: "basmati", createdAt: d0)
+            ],
+            shoppingListItems: [
+                ShoppingListItemDTO(id: UUID(), syncID: UUID(), updatedAt: d0, name: "Sponges",
+                                    quantity: 1.0, unit: "pcs", isChecked: false,
+                                    checkedAt: nil, createdAt: d0)
+            ],
             deletions: [
                 DeletionDTO(entitySyncID: UUID(), entityKindRaw: SyncEntityKind.expense.rawValue,
                             deletedAt: d1)
@@ -162,15 +173,17 @@ struct SnapshotCodecTests {
 
     // MARK: - Version refusal
 
-    @Test("decode refuses a schemaVersion-9 snapshot before decoding entities")
+    /// Models the REAL cross-version case after the Phase 20 bump: a phone still on schema v10
+    /// sends its snapshot to a phone on v11. It must be refused before any entity is decoded.
+    @Test("decode refuses a schemaVersion-10 snapshot before decoding entities")
     func versionMismatchRefused() throws {
         let snap = Self.makeFixture()
         let data = try SnapshotCodec.encode(snap)
         var json = String(decoding: data, as: UTF8.self)
-        json = json.replacingOccurrences(of: "\"schemaVersion\":10", with: "\"schemaVersion\":9")
+        json = json.replacingOccurrences(of: "\"schemaVersion\":11", with: "\"schemaVersion\":10")
         let tampered = Data(json.utf8)
 
-        #expect(throws: SyncError.schemaVersionMismatch(found: 9, expected: 10)) {
+        #expect(throws: SyncError.schemaVersionMismatch(found: 10, expected: 11)) {
             _ = try SnapshotCodec.decode(tampered)
         }
     }

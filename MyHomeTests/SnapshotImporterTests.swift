@@ -160,17 +160,17 @@ struct SnapshotImporterTests {
 
     // MARK: - Version refusal (T-18-06)
 
-    @Test("Version refusal: a schema-9 payload throws and leaves local counts untouched")
+    @Test("Version refusal: a schema-10 payload throws and leaves local counts untouched")
     func versionRefusal() throws {
         let b = try SyncTestSupport.makeStore()
         try SyncTestSupport.seedFullStore(b.mainContext)
         let expensesBefore = try b.mainContext.fetch(FetchDescriptor<Expense>()).count
         let catsBefore = try b.mainContext.fetch(FetchDescriptor<Cat>()).count
 
-        let stale = SyncSnapshot(schemaVersion: 9, exportedAt: Date(), deviceName: "Old")
+        let stale = SyncSnapshot(schemaVersion: 10, exportedAt: Date(), deviceName: "Old")
         let data = try SnapshotCodec.encode(stale)
 
-        #expect(throws: SyncError.schemaVersionMismatch(found: 9, expected: 10)) {
+        #expect(throws: SyncError.schemaVersionMismatch(found: 10, expected: 11)) {
             _ = try SnapshotImporter.mergeData(data, into: b.mainContext, scope: .all)
         }
 

@@ -17,8 +17,9 @@ struct MergeStats: Equatable, Sendable {
 ///   1. Tombstone union — remote DeletionLog rows merge into the local log (max deletedAt wins).
 ///   2. Apply tombstones — local rows whose deletion `tombstoneWins` are deleted BEFORE any upsert
 ///      (no-resurrection, SYNC criterion 2).
-///   3. Identity adoption — a remote row created independently on both phones (Category by name,
-///      Expense by (sourceAccount, gmailMessageID)) is paired to its local twin and both converge
+///   3. Identity adoption — a remote row created independently on both phones (Category and the
+///      kitchen entities by normalized name, Expense by (sourceAccount, gmailMessageID)) is
+///      paired to its local twin and both converge
 ///      to `min(uuidString)` syncID (vantage-independent, no day-one duplicates).
 ///   4. Upsert pass 1 (scalars) — fetch-all-then-index-by-syncID, then insert-or-LWW-overwrite.
 ///   5. Wiring pass 2 (create-then-link) — resolve Expense↔Category and NoteBlock→Note by syncID
@@ -129,6 +130,14 @@ enum SnapshotImporter {
             kind: .routineCompletion, tombstone: tombstone, context: context,
             rows: try context.fetch(FetchDescriptor<RoutineCompletion>())
         ) { $0.syncID } updatedAt: { $0.updatedAt }
+        stats.deleted += applyTombstones(
+            kind: .pantryItem, tombstone: tombstone, context: context,
+            rows: try context.fetch(FetchDescriptor<PantryItem>())
+        ) { $0.syncID } updatedAt: { $0.updatedAt }
+        stats.deleted += applyTombstones(
+            kind: .shoppingListItem, tombstone: tombstone, context: context,
+            rows: try context.fetch(FetchDescriptor<ShoppingListItem>())
+        ) { $0.syncID } updatedAt: { $0.updatedAt }
 
         // ── 3. Identity adoption (Category by name, Expense by (sourceAccount, gmailMessageID)) ──
         // Adopt BEFORE the upsert: pair a remote row to its independently-created local twin,
@@ -136,7 +145,23 @@ enum SnapshotImporter {
         // winner so the upsert matches the twin (LWW) instead of inserting a duplicate.
         let (adoptedCategories, catAdopts) = adoptCategories(snapshot.categories, context: context)
         let (adoptedExpenses, expAdopts) = adoptExpenses(snapshot.expenses, context: context)
-        stats.adopted += catAdopts + expAdopts
+        // Kitchen adoption (Phase 20): both phones independently add "Rice"/"Milk" before their
+        // first sync — same normalized-name + min(uuidString) rule as Category.
+        let (adoptedPantry, pantryAdopts) = adoptByName(
+            snapshot.pantryItems, context: context,
+            localName: { (p: PantryItem) in p.name },
+            dtoName: { $0.name },
+            localSyncID: { $0.syncID }, setLocalSyncID: { $0.syncID = $1 },
+            dtoSyncID: { $0.syncID }, setDTOSyncID: { $0.syncID = $1 }
+        )
+        let (adoptedShopping, shoppingAdopts) = adoptByName(
+            snapshot.shoppingListItems, context: context,
+            localName: { (s: ShoppingListItem) in s.name },
+            dtoName: { $0.name },
+            localSyncID: { $0.syncID }, setLocalSyncID: { $0.syncID = $1 },
+            dtoSyncID: { $0.syncID }, setDTOSyncID: { $0.syncID = $1 }
+        )
+        stats.adopted += catAdopts + expAdopts + pantryAdopts + shoppingAdopts
 
         // ── 4. Upsert pass 1 (scalars only) ─────────────────────────────────────────────────────
         // Track which rows pass 2 must wire (only inserted/updated Expenses and NoteBlocks).
@@ -268,7 +293,29 @@ enum SnapshotImporter {
             apply: { row, dto in applyRoutineCompletion(dto, to: row) }
         )
 
+        // PantryItem (adoption-rewritten syncIDs)
+        upsert(
+            adoptedPantry, kind: .pantryItem, tombstone: tombstone, context: context,
+            local: try context.fetch(FetchDescriptor<PantryItem>()), syncID: { $0.syncID },
+            updatedAt: { $0.updatedAt }, localDTO: SnapshotExporter.dto, dtoUpdatedAt: { $0.updatedAt },
+            stats: &stats,
+            make: { _ in PantryItem(name: "") },
+            apply: { row, dto in applyPantryItem(dto, to: row) }
+        )
+
+        // ShoppingListItem (adoption-rewritten syncIDs)
+        upsert(
+            adoptedShopping, kind: .shoppingListItem, tombstone: tombstone, context: context,
+            local: try context.fetch(FetchDescriptor<ShoppingListItem>()), syncID: { $0.syncID },
+            updatedAt: { $0.updatedAt }, localDTO: SnapshotExporter.dto, dtoUpdatedAt: { $0.updatedAt },
+            stats: &stats,
+            make: { _ in ShoppingListItem(name: "") },
+            apply: { row, dto in applyShoppingListItem(dto, to: row) }
+        )
+
         // ── 5. Wiring pass 2 (create-then-link) — only rows touched in pass 1 ────────────────────
+        // Kitchen is deliberately ABSENT from this pass: PantryItem/ShoppingListItem declare zero
+        // @Relationship (20-01 design), so pass 1 fully materialises them — nothing to link.
         for (expense, dto) in expensesToWire {
             expense.categories = dto.categorySyncIDs.compactMap { categoryBySyncID[$0] }
         }
@@ -449,6 +496,48 @@ enum SnapshotImporter {
             localBySync[winner] = twin
             localByIdentity[key] = nil          // one remote row per twin
             rewritten[i].syncID = winner        // upsert now matches the twin, not inserts
+            adopted += 1
+        }
+        return (rewritten, adopted)
+    }
+
+    /// Generic normalized-name adoption — the Category rule, reused verbatim for the kitchen
+    /// entities (Phase 20). A remote row with no local syncID match but an equal trimmed,
+    /// case-insensitive name is the SAME item both phones added independently ("Rice" / " rice ").
+    /// Converge BOTH sides to `min(uuidString)` — vantage-independent, so A→B and B→A pick the
+    /// same winner and the pair can never flip-flop — then rewrite the remote DTO's syncID so the
+    /// upsert matches the twin (LWW) instead of inserting a duplicate.
+    /// Rows with a nil/blank name never adopt. One remote row per twin.
+    private static func adoptByName<Row: PersistentModel, DTO>(
+        _ dtos: [DTO],
+        context: ModelContext,
+        localName: (Row) -> String?,
+        dtoName: (DTO) -> String?,
+        localSyncID: (Row) -> UUID,
+        setLocalSyncID: (Row, UUID) -> Void,
+        dtoSyncID: (DTO) -> UUID,
+        setDTOSyncID: (inout DTO, UUID) -> Void
+    ) -> ([DTO], Int) {
+        guard let locals = try? context.fetch(FetchDescriptor<Row>()) else { return (dtos, 0) }
+        var localBySync: [UUID: Row] = [:]
+        var localByName: [String: Row] = [:]
+        for row in locals {
+            localBySync[localSyncID(row)] = row
+            if let n = normalized(localName(row)) { localByName[n] = row }
+        }
+        var rewritten = dtos
+        var adopted = 0
+        for i in rewritten.indices {
+            let dto = rewritten[i]
+            guard localBySync[dtoSyncID(dto)] == nil,
+                  let n = normalized(dtoName(dto)),
+                  let twin = localByName[n] else { continue }
+            let winner = minSyncID(localSyncID(twin), dtoSyncID(dto))
+            localBySync[localSyncID(twin)] = nil
+            setLocalSyncID(twin, winner)
+            localBySync[winner] = twin
+            localByName[n] = nil                        // one remote row per twin
+            setDTOSyncID(&rewritten[i], winner)         // upsert matches the twin, not inserts
             adopted += 1
         }
         return (rewritten, adopted)
@@ -642,6 +731,34 @@ enum SnapshotImporter {
         r.dayKey = dto.dayKey
         r.completedAt = dto.completedAt
         r.createdAt = dto.createdAt
+    }
+
+    /// Kitchen quantities are assigned straight across as `Double` — measurements, not money, so
+    /// no `SyncDecimal` conversion applies (see `PantryItemDTO`).
+    private static func applyPantryItem(_ dto: PantryItemDTO, to p: PantryItem) {
+        p.id = dto.id
+        p.syncID = dto.syncID
+        p.updatedAt = dto.updatedAt
+        p.name = dto.name
+        p.quantity = dto.quantity
+        p.unit = dto.unit
+        p.lowStockThreshold = dto.lowStockThreshold
+        p.restockQuantity = dto.restockQuantity
+        p.category = dto.category
+        p.notes = dto.notes
+        p.createdAt = dto.createdAt
+    }
+
+    private static func applyShoppingListItem(_ dto: ShoppingListItemDTO, to s: ShoppingListItem) {
+        s.id = dto.id
+        s.syncID = dto.syncID
+        s.updatedAt = dto.updatedAt
+        s.name = dto.name
+        s.quantity = dto.quantity
+        s.unit = dto.unit
+        s.isChecked = dto.isChecked
+        s.checkedAt = dto.checkedAt
+        s.createdAt = dto.createdAt
     }
 
     /// Money fields that are non-optional in the model: a malformed string aborts the merge
