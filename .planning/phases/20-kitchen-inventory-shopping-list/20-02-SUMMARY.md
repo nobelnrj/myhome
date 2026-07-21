@@ -114,3 +114,7 @@ None.
 ## Threat Flags
 
 None — no new network endpoint, auth path, or file-access surface. The one new trust-boundary change (version stamp 10→11) is the mitigation for T-20-03 and is asserted by test.
+
+## Self-Check: PASSED
+
+All created/modified files exist on disk; all four task commits (`e9d2227`, `bb06419`, `14ebf2a`, `d636719`) are present in git history.
