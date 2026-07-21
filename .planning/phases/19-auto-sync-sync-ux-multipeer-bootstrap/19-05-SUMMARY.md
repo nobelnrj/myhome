@@ -137,9 +137,9 @@ The only part of SYNC-04/05 that genuinely needs hardware (real MultipeerConnect
 
 Both phones on the same home Wi-Fi; app installed on A with real data; B available for a fresh-install pass:
 
-1. **AUTO-SYNC (criterion 1):** Open MyHome on both phones, foregrounded. Sync screen on each shows "Connected to <other phone's name>". Add an expense on A → within ~10s it appears on B with correct amount/category, no taps. Edit a note on B → text updates on A.
+1. **AUTO-SYNC (criterion 1):** Open MyHome on both phones, foregrounded. Sync screen on each shows "Connected to <other phone's name>". Add a note on A → within ~10s it appears on B, no taps. Edit that note on B → text updates on A. Then add an expense on A and confirm it does **not** reach B (notes-only scope, 19-06).
 2. **SYNC NOW (criterion 2):** Background the app on B, reopen it, Settings → Sync → tap "Sync Now" → status cycles connecting/syncing and last-synced updates to "Just now" on both.
-3. **BOOTSTRAP (criterion 3):** Delete the app on B, reinstall, launch → the "Set up from your other phone" sheet appears; with A open it connects, copies, and shows "Done — N added…". B now shows A's expenses, notes, accounts, and assets; spot-check one Decimal amount digit-for-digit.
+3. **BOOTSTRAP (criterion 3):** Delete the app on B, reinstall, launch → the "Set up from your other phone" sheet appears; with A open it connects, copies, and shows "Done — N added…". B now shows A's **notes and reminders** — and NOTHING else. Scope is notes-only as of 19-06: if any of A's expenses, accounts, assets or investments appear on B, that is a **FAILURE**, not a pass.
 4. **SURFACE (criterion 4):** Sync screen on both shows a truthful last-synced relative time, current status, connected peer name, and last merge summary; the Settings row shows the glanceable last-synced text.
 5. **NO SILENT LOSS (criterion 5):** With B temporarily offline (Wi-Fi off), edit the SAME note on both phones (B edited LAST); rejoin Wi-Fi, let it sync → B's newer text wins on both; nothing else disappeared.
 6. **LIFECYCLE:** Background the app on A → B's Sync screen drops to "Looking for your other phone…" shortly after; foreground A → reconnects by itself.

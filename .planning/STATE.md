@@ -4,7 +4,7 @@ milestone: v1.3
 milestone_name: Private Sync & Kitchen
 status: executing
 last_updated: "2026-07-20T20:02:19.661Z"
-last_activity: 2026-07-20
+last_activity: 2026-07-21
 progress:
   total_phases: 4
   completed_phases: 1
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 19 (Auto-Sync — Sync UX, Multipeer & Bootstrap) — EXECUTING
-Plan: 4 of 5 complete — next: 19-05 (final Phase 19 plan)
-Status: Ready to execute
+Plan: 5 of 5 complete, plus unplanned 19-06 (SyncScope — notes-only sync)
+Status: Code-complete & suite-green (703 tests). Deployed to both phones from feat/19-auto-sync-multipeer. BLOCKING on two-phone UAT (see 19-05-SUMMARY.md, steps corrected for notes-only scope).
 Last activity: 2026-07-21
 
 ## Performance Metrics
