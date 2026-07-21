@@ -180,8 +180,8 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 2/5 | In Progress|  |
-| 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 4/5 | In Progress|  |
+| 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 5/5 | Complete   | 2026-07-17 |
+| 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 6/5 | Complete   | 2026-07-20 |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
 | 22. Pantry Icon Intelligence | v1.3 | 0/? | Planning | - |
