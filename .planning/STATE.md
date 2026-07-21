@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
 status: executing
-last_updated: "2026-07-21T14:02:21.043Z"
+last_updated: "2026-07-21T14:17:40.571Z"
 last_activity: 2026-07-21
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 18
-  completed_plans: 13
+  completed_plans: 14
   percent: 50
 ---
 
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 20 (kitchen-inventory-shopping-list) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-07-21
 
@@ -99,6 +99,7 @@ Last activity: 2026-07-21
 | Phase 19 P03 | ~18 min | 2 tasks | 5 files |
 | Phase 19 P04 | 35 min | 2 tasks | 7 files |
 | Phase 20 P02 | ~1h | 3 tasks | 8 files |
+| Phase 20 P03 | 55m | 3 tasks | 8 files |
 
 ## Quick Tasks Completed
 
@@ -156,6 +157,8 @@ Recent decisions affecting current work:
 - [Phase 14 SKIN DECISION, 2026-06-21]: Design handoff ships 6 interchangeable skins (Liquid Glass / Glassmorphism / Neomorphism / Minimalism / Bento / Spatial). User's reference screenshots = the DEFAULT 'liquid' (Liquid Glass) skin; Phase 13 DesignTokens.swift translated the 'neuro' (Neomorphism) branch — hence the mismatch. After a side-by-side comparison (design/skin-comparison.html), user CHOSE **Neomorphism** (keep what Phase 13 built) over matching the glass reference. So: NO rework of DesignTokens/NeuSurface; Phase 14 applies the existing neuro tokens + canary-yellow accent + colored category palette + "Where it's going" donut + net-cash-flow card across all 67 feature view files. Do NOT pursue Liquid Glass / translucent material.
 - [Phase 14 verified state, 2026-06-21]: Phase 13 components (DesignTokens/NeuSurface/RollingMoneyText/NeuTabBar) exist + pushed to main + compile, but are applied to 0 real screens (only CardStyle.swift deprecation shim references them). All 67 feature views still use system colors (secondarySystemBackground, .accentColor blue). Phase 14 is the wiring/restyle pass. CardStyle is marked "removed in Phase 14".
 - [Phase ?]: 20-02: SyncScope.production widened to notes+kitchen — DTOs alone would have left KTCH-04 false on device; financial exclusions unchanged and still asserted
+- [Phase ?]: 20-03: Kitchen is a pushed Overview surface, not a 6th tab (5-tab bar and -startTab 0-4 untouched)
+- [Phase ?]: 20-03: Pantry item icons are DERIVED from the item name (KitchenLogic.icon) — no schema field, no picker
 
 ### Pending Todos
 
@@ -217,7 +220,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ## Session Continuity
 
-Last session: 2026-07-21T14:02:16.803Z
+Last session: 2026-07-21T14:17:35.519Z
 Stopped at: Completed 19-03-PLAN.md
 Resume file: None
 
