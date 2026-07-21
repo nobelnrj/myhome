@@ -31,13 +31,15 @@ public enum SyncEntityKind: String, Codable, CaseIterable, Sendable {
     case sipAmountChange
     case contribution
     case routineCompletion
+    case pantryItem
+    case shoppingListItem
 }
 
 // MARK: - SyncScope
 
 /// The single source of truth for WHICH entity kinds are allowed to cross the wire.
 ///
-/// v1.3 ships a deliberately narrow scope: **notes only**. Financial data — expenses,
+/// v1.3 ships a deliberately narrow scope: **notes + kitchen**. Financial data — expenses,
 /// categories, accounts, assets, net-worth history, SIPs and contributions — is private to
 /// the device that entered it and is never exported, never transmitted, and never accepted
 /// on import. A combined household asset view is a separate, later feature with its own
@@ -62,9 +64,17 @@ public struct SyncScope: Equatable, Sendable {
 
     public init(synced: Set<SyncEntityKind>) { self.synced = synced }
 
-    /// PRODUCTION SCOPE (v1.3) — notes and their blocks plus routine completions. All money
-    /// data is deliberately absent. Every production call path defaults to this.
-    public static let production = SyncScope(synced: [.note, .noteBlock, .routineCompletion])
+    /// PRODUCTION SCOPE (v1.3) — notes and their blocks, routine completions, and the Phase 20
+    /// kitchen entities (pantry + shopping list). All money data is deliberately absent. Every
+    /// production call path defaults to this.
+    ///
+    /// Kitchen joined the scope in Phase 20 (KTCH-04): a shared pantry/shopping list is useless
+    /// if it stays on one phone. Widening is strictly additive — the financial exclusions
+    /// (expense, category, account, asset, netWorthSnapshot, sip, sipAmountChange, contribution)
+    /// are unchanged and still asserted by the export/import scope tests.
+    public static let production = SyncScope(
+        synced: [.note, .noteBlock, .routineCompletion, .pantryItem, .shoppingListItem]
+    )
 
     /// Every kind. TEST-ONLY: it is what keeps the merge engine's out-of-scope paths covered.
     /// Never pass this from app code — doing so would ship expenses to the other phone.
@@ -101,6 +111,8 @@ extension SyncSnapshot {
             sipAmountChanges: scope.isSynced(.sipAmountChange) ? sipAmountChanges : [],
             contributions: scope.isSynced(.contribution) ? contributions : [],
             routineCompletions: scope.isSynced(.routineCompletion) ? routineCompletions : [],
+            pantryItems: scope.isSynced(.pantryItem) ? pantryItems : [],
+            shoppingListItems: scope.isSynced(.shoppingListItem) ? shoppingListItems : [],
             deletions: deletions.filter {
                 guard let kind = SyncEntityKind(rawValue: $0.entityKindRaw) else { return false }
                 return scope.isSynced(kind)
@@ -332,6 +344,42 @@ public struct RoutineCompletionDTO: Codable, Equatable, Sendable {
     public var createdAt: Date
 }
 
+/// Kitchen inventory row (Phase 20, KTCH-01/KTCH-04).
+///
+/// QUANTITIES ARE `Double`, NOT `Decimal`-as-String — and that is deliberate, not an oversight
+/// of the money rule. Pantry amounts ("2 kg of rice") are measurements, not currency; no
+/// rupee-and-paise value ever lands in these fields, so `SyncDecimal` must NOT be applied here.
+/// The "money never crosses as a JSON number" invariant is unchanged: it governs `Decimal`
+/// fields, and PantryItem has none.
+public struct PantryItemDTO: Codable, Equatable, Sendable {
+    public var id: UUID
+    public var syncID: UUID
+    public var updatedAt: Date
+    public var name: String?
+    public var quantity: Double            // stock level in `unit` — NOT money
+    public var unit: String?
+    public var lowStockThreshold: Double   // NOT money
+    public var restockQuantity: Double     // NOT money
+    public var category: String?
+    public var notes: String?
+    public var createdAt: Date
+}
+
+/// Manual shopping-list row (Phase 20, KTCH-03). Derived low/out-of-stock entries are computed
+/// at render time and never materialised, so only user-added rows cross the wire.
+/// `quantity` is a count/measure, not money — see `PantryItemDTO` for the rationale.
+public struct ShoppingListItemDTO: Codable, Equatable, Sendable {
+    public var id: UUID
+    public var syncID: UUID
+    public var updatedAt: Date
+    public var name: String?
+    public var quantity: Double            // how many/much to buy — NOT money
+    public var unit: String?
+    public var isChecked: Bool
+    public var checkedAt: Date?
+    public var createdAt: Date
+}
+
 /// Tombstone carried on the wire — mirrors DeletionLog's cross-device fields.
 /// `entityKindRaw` holds a `SyncEntityKind` rawValue.
 public struct DeletionDTO: Codable, Equatable, Sendable {
@@ -346,9 +394,12 @@ public struct DeletionDTO: Codable, Equatable, Sendable {
 /// Version-stamped so a peer refuses a snapshot from an incompatible schema before decoding
 /// any entity data.
 public struct SyncSnapshot: Codable, Equatable, Sendable {
-    /// Tracks the SchemaV10 major version. Bump this in lockstep with every future schema bump
-    /// so the version probe refuses cross-schema snapshots.
-    public static let currentSchemaVersion = 10
+    /// Tracks the SchemaV11 major version. Bumped 10 → 11 in Phase 20 when the kitchen models
+    /// (PantryItem / ShoppingListItem) joined the snapshot. Bump this in lockstep with every
+    /// future schema bump so the version probe refuses cross-schema snapshots: a phone still on
+    /// v10 has its payload refused cleanly (`schemaVersionMismatch(found: 10, expected: 11)`)
+    /// with the store untouched, until both phones update.
+    public static let currentSchemaVersion = 11
 
     public var schemaVersion: Int
     public var exportedAt: Date
@@ -365,6 +416,8 @@ public struct SyncSnapshot: Codable, Equatable, Sendable {
     public var sipAmountChanges: [SIPAmountChangeDTO]
     public var contributions: [ContributionDTO]
     public var routineCompletions: [RoutineCompletionDTO]
+    public var pantryItems: [PantryItemDTO]
+    public var shoppingListItems: [ShoppingListItemDTO]
 
     public var deletions: [DeletionDTO]
 
@@ -383,6 +436,8 @@ public struct SyncSnapshot: Codable, Equatable, Sendable {
         sipAmountChanges: [SIPAmountChangeDTO] = [],
         contributions: [ContributionDTO] = [],
         routineCompletions: [RoutineCompletionDTO] = [],
+        pantryItems: [PantryItemDTO] = [],
+        shoppingListItems: [ShoppingListItemDTO] = [],
         deletions: [DeletionDTO] = []
     ) {
         self.schemaVersion = schemaVersion
@@ -399,6 +454,8 @@ public struct SyncSnapshot: Codable, Equatable, Sendable {
         self.sipAmountChanges = sipAmountChanges
         self.contributions = contributions
         self.routineCompletions = routineCompletions
+        self.pantryItems = pantryItems
+        self.shoppingListItems = shoppingListItems
         self.deletions = deletions
     }
 }
