@@ -89,10 +89,45 @@ enum PantryIconPromptBuilder {
     static let maxNameLength = 80
 
     /// System instructions injected into every `LanguageModelSession`.
+    /// System instructions injected into every `LanguageModelSession`.
+    ///
+    /// The category legend below is NOT decoration. The `@Generable` enum constrains the model to
+    /// the 17 case names, but a bare identifier like `grainStaple` or `oilFat` carries almost no
+    /// meaning on its own, so the model was left guessing: the first eval run scored 37.5% overall
+    /// and 60% on names the keyword table already handled, with misses that were close to arbitrary
+    /// (`milk` → other, `filter coffee` → cleaning). Glossing each case and anchoring the Indian
+    /// staples by example is what turns the closed enum into a usable classification.
+    ///
+    /// This household is Indian — atta, dal, rava, jaggery and ghee are everyday items, not exotica,
+    /// and a model reaching for a generic Western grocery prior gets them wrong.
     static let systemInstructions: String = """
-        You classify a single household pantry item name into one of the given categories. \
-        Pick the single best fit for the item as a household would shop for it. \
-        If the name is empty, meaningless, or does not fit any other category, answer other.
+        You classify a single household pantry item name into exactly one category. \
+        Pick the single best fit for the item as a household would shop for it.
+
+        The categories, and what belongs in each:
+        - dairy: milk, curd, yoghurt, paneer, cheese, butter, cream
+        - eggs: eggs of any kind
+        - grainStaple: dry staples bought by weight — rice, atta, flour, wheat, dal, pulses, \
+        rava, poha, sooji, besan, sugar, salt, jaggery
+        - spice: spices, masalas and seasoning powders — turmeric, chilli powder, garam masala
+        - produce: fresh vegetables — onions, tomatoes, potatoes, spinach, chillies, ginger
+        - fruit: fresh fruit — apples, bananas, mangoes, oranges
+        - brew: things brewed into a hot drink — tea, coffee, chai, green tea
+        - oilFat: cooking oil, ghee, vanaspati, coconut oil
+        - snackBakery: bread, buns, biscuits, cookies, chips, namkeen, cakes
+        - beverage: drinks that are not brewed — water, juice, soft drinks, health drink powders
+        - cleaning: household cleaning — detergent, dishwash liquid, floor cleaner, toilet cleaner, \
+        fabric softener, phenyl, scrubbers and sponges
+        - paperDisposable: paper and single-use goods — kitchen tissue, paper napkins, toilet paper, \
+        aluminium foil, cling film, garbage bags, paper plates
+        - personalCare: soap, shampoo, toothpaste, deodorant, razors, wipes, sanitary products
+        - condiment: sauces, pickles, jams, ketchup, mayonnaise, vinegar, honey
+        - frozen: frozen foods — frozen peas, ice cream, frozen parathas
+        - petSupplies: pet food and pet supplies
+        - other: only when the name is empty, meaningless, or genuinely fits nothing above
+
+        Answer with the one category that fits best. Use other only as a last resort — \
+        a name that clearly belongs somewhere above must not be answered other.
         """
 
     /// Wraps the trimmed, truncated name in a minimal instruction.
