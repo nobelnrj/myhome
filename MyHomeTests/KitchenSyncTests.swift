@@ -108,6 +108,35 @@ struct KitchenSyncTests {
         #expect(try Self.shopping(b.mainContext).count == shoppingBefore)
     }
 
+    /// 20-05 gate: the BYTES-level self-merge — the exact loop the Settings UI performs when a
+    /// user exports a snapshot and imports that same file back into the phone that made it
+    /// ("Export Sync Snapshot" → Save to Files → "Import Snapshot…" → Merge). It must be a
+    /// visible no-op: 0 inserted / 0 adopted / 0 deleted, with the kitchen untouched. The
+    /// share-sheet and Files-picker taps around it are not automatable — this proves everything
+    /// between them.
+    @Test("Self-merging a phone's own exported BYTES is a no-op with kitchen data aboard")
+    func selfMergeOfOwnExportIsNoOp() throws {
+        let a = try Self.makeStore()
+        try Self.seedKitchen(a.mainContext)
+
+        // Default (production) scope — the same call the Settings export row makes.
+        let data = try SnapshotExporter.exportData(context: a.mainContext, deviceName: "A")
+
+        let snapshot = try SnapshotCodec.decode(data)
+        #expect(snapshot.schemaVersion == 11)
+        #expect(snapshot.pantryItems.count == 2)
+        #expect(snapshot.shoppingListItems.count == 1)
+
+        let stats = try SnapshotImporter.mergeData(data, into: a.mainContext)
+
+        #expect(stats.inserted == 0)
+        #expect(stats.adopted == 0)
+        #expect(stats.deleted == 0)
+        #expect(try Self.pantry(a.mainContext).count == 2)
+        #expect(try Self.shopping(a.mainContext).count == 1)
+        #expect(try Self.pantry(a.mainContext).first(where: { $0.name == "Rice" })?.quantity == 2.0)
+    }
+
     // MARK: - Identity adoption (both phones added the same staple before their first sync)
 
     @Test("Two phones independently adding the same pantry item converge to ONE row")
