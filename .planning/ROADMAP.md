@@ -69,7 +69,7 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 **Plans**: 4 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — Closed 17-case PantryCategory enum + total category→(symbol, colour) table; keyword rules refactored onto it with zero visual regression
+- [x] 22-01-PLAN.md — Closed 17-case PantryCategory enum + total category→(symbol, colour) table; keyword rules refactored onto it with zero visual regression
 - [ ] 22-02-PLAN.md — PantryIconCache (device-local, LRU-capped) + PantryIconClassifying seam, @Generable twin, FoundationModels classifier
 - [ ] 22-03-PLAN.md — PantryIconResolver (synchronous answer now, model upgrade in place) wired into PantryItemRow + ShoppingRow
 - [ ] 22-04-PLAN.md — Reference fixture, always-on structural gates, opt-in accuracy suite, 17-tile simulator screenshot verification
@@ -190,4 +190,4 @@ Plans:
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 6/5 | Complete   | 2026-07-20 |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
-| 22. Pantry Icon Intelligence | v1.3 | 0/4 | Planned | - |
+| 22. Pantry Icon Intelligence | v1.3 | 1/4 | In Progress|  |
