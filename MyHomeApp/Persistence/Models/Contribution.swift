@@ -20,4 +20,10 @@ import SwiftData
 /// syncID + updatedAt (SYNC-01); no other changes.
 ///
 /// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
-typealias Contribution = SchemaV10.Contribution      // was SchemaV9.Contribution
+/// Flipped from SchemaV10.Contribution → SchemaV11.Contribution in Phase 20 (plan 20-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV11.self)`. SchemaV11.Contribution is
+/// copied verbatim from SchemaV10.Contribution — V11 adds only the two new kitchen @Models
+/// (PantryItem, ShoppingListItem).
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias Contribution = SchemaV11.Contribution      // was SchemaV10.Contribution

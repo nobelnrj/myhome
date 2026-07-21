@@ -18,4 +18,10 @@ import SwiftData
 /// Usage:
 ///   let tombstone = DeletionLog(entitySyncID: expense.syncID, entityKindRaw: "expense")
 ///   @Query var tombstones: [DeletionLog]
-typealias DeletionLog = SchemaV10.DeletionLog
+/// Flipped from SchemaV10.DeletionLog → SchemaV11.DeletionLog in Phase 20 (plan 20-01): the production
+/// container is built with `Schema(versionedSchema: SchemaV11.self)`. SchemaV11.DeletionLog is
+/// copied verbatim from SchemaV10.DeletionLog — V11 adds only the two new kitchen @Models
+/// (PantryItem, ShoppingListItem).
+///
+/// STAB-08 lesson: flipped atomically with all other model typealiases in one commit.
+typealias DeletionLog = SchemaV11.DeletionLog
