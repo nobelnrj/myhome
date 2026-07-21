@@ -72,6 +72,10 @@
 		A1801SS /* SyncStamped.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801SS /* SyncStamped.swift */; };
 		A1801DL /* DeletionLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801DL /* DeletionLog.swift */; };
 		A1801SV10MT /* SchemaV10MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1801SV10MT /* SchemaV10MigrationTests.swift */; };
+		A2001SV11 /* SchemaV11.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2001SV11 /* SchemaV11.swift */; };
+		A2001PI /* PantryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2001PI /* PantryItem.swift */; };
+		A2001SLI /* ShoppingListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2001SLI /* ShoppingListItem.swift */; };
+		A2001SV11MT /* SchemaV11MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2001SV11MT /* SchemaV11MigrationTests.swift */; };
 		A1802SNAP /* SyncSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1802SNAP /* SyncSnapshot.swift */; };
 		A1802SMP /* SyncMergePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1802SMP /* SyncMergePolicy.swift */; };
 		A1802SNCT /* SnapshotCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1802SNCT /* SnapshotCodecTests.swift */; };
@@ -334,6 +338,10 @@
 		F1801SS /* SyncStamped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStamped.swift; sourceTree = "<group>"; };
 		F1801DL /* DeletionLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionLog.swift; sourceTree = "<group>"; };
 		F1801SV10MT /* SchemaV10MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV10MigrationTests.swift; sourceTree = "<group>"; };
+		F2001SV11 /* SchemaV11.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV11.swift; sourceTree = "<group>"; };
+		F2001PI /* PantryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryItem.swift; sourceTree = "<group>"; };
+		F2001SLI /* ShoppingListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListItem.swift; sourceTree = "<group>"; };
+		F2001SV11MT /* SchemaV11MigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaV11MigrationTests.swift; sourceTree = "<group>"; };
 		F1802SNAP /* SyncSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSnapshot.swift; sourceTree = "<group>"; };
 		F1802SMP /* SyncMergePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMergePolicy.swift; sourceTree = "<group>"; };
 		F1802SNCT /* SnapshotCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCodecTests.swift; sourceTree = "<group>"; };
@@ -768,6 +776,7 @@
 				F1101SV8 /* SchemaV8.swift */,
 				F1201SV9 /* SchemaV9.swift */,
 				F1801SV10 /* SchemaV10.swift */,
+				F2001SV11 /* SchemaV11.swift */,
 			);
 			path = Schema;
 			sourceTree = "<group>";
@@ -789,6 +798,8 @@
 				F1201RC /* RoutineCompletion.swift */,
 				F1801SS /* SyncStamped.swift */,
 				F1801DL /* DeletionLog.swift */,
+				F2001PI /* PantryItem.swift */,
+				F2001SLI /* ShoppingListItem.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -907,6 +918,7 @@
 				F1101SV8MT /* SchemaV8MigrationTests.swift */,
 				F1201SV9MT /* SchemaV9MigrationTests.swift */,
 				F1801SV10MT /* SchemaV10MigrationTests.swift */,
+				F2001SV11MT /* SchemaV11MigrationTests.swift */,
 				F1201SCT /* StreakCalculatorTests.swift */,
 				F1201RNST /* RoutineNotificationServiceTests.swift */,
 				F1201NRT /* NoteReorderTests.swift */,
@@ -1204,8 +1216,11 @@
 				A1101SV8 /* SchemaV8.swift in Sources */,
 				A1201SV9 /* SchemaV9.swift in Sources */,
 				A1801SV10 /* SchemaV10.swift in Sources */,
+				A2001SV11 /* SchemaV11.swift in Sources */,
 				A1801SS /* SyncStamped.swift in Sources */,
 				A1801DL /* DeletionLog.swift in Sources */,
+				A2001PI /* PantryItem.swift in Sources */,
+				A2001SLI /* ShoppingListItem.swift in Sources */,
 				A1802SNAP /* SyncSnapshot.swift in Sources */,
 				A1802SMP /* SyncMergePolicy.swift in Sources */,
 				A1803SNEX /* SnapshotExporter.swift in Sources */,
@@ -1323,6 +1338,7 @@
 				A1101SV8MT /* SchemaV8MigrationTests.swift in Sources */,
 				A1201SV9MT /* SchemaV9MigrationTests.swift in Sources */,
 				A1801SV10MT /* SchemaV10MigrationTests.swift in Sources */,
+				A2001SV11MT /* SchemaV11MigrationTests.swift in Sources */,
 				A1802SNCT /* SnapshotCodecTests.swift in Sources */,
 				A1802SMPT /* SyncMergePolicyTests.swift in Sources */,
 				A1803SRTT /* SnapshotRoundTripTests.swift in Sources */,
