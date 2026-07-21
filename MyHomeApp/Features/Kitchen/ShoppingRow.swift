@@ -41,13 +41,28 @@ struct ShoppingRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
+        // P22-D4/P22-D6: same shared resolver as PantryItemRow, so a name present in both the
+        // pantry list and this list is classified exactly once. `nil` for manual extras, which
+        // carry no icon tile — the resolver no-ops on a nil name.
+        .task(id: derivedItemName) {
+            await PantryIconResolver.shared.classifyIfNeeded(name: derivedItemName)
+        }
+    }
+
+    /// The pantry name whose icon this row draws, or `nil` for a manual extra.
+    private var derivedItemName: String? {
+        switch kind {
+        case .derived(let item): return item.name
+        case .manual: return nil
+        }
     }
 
     // MARK: - Bodies
 
     @ViewBuilder
     private func derivedBody(_ item: PantryItem) -> some View {
-        let icon = KitchenLogic.icon(for: item)
+        // Synchronous tile (AI-SPEC §4.4) — see PantryItemRow. Upgrades in place via the `.task`.
+        let icon = PantryIconResolver.shared.presentation(for: item)
         IconTile(symbol: icon.symbol, color: icon.color, size: 38, cornerRadius: 11)
 
         VStack(alignment: .leading, spacing: 2) {

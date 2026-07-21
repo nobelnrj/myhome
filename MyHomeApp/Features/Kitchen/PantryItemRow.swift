@@ -25,7 +25,10 @@ struct PantryItemRow: View {
             // Row body (tap → edit)
             Button(action: onEdit) {
                 HStack(spacing: 12) {
-                    let icon = KitchenLogic.icon(for: item)
+                    // Synchronous by construction (AI-SPEC §4.4): the tile is never empty and the
+                    // draw never waits on inference. The `.task` below upgrades it in place if the
+                    // on-device model has an opinion. No spinner, no placeholder, no layout shift.
+                    let icon = PantryIconResolver.shared.presentation(for: item)
                     IconTile(symbol: icon.symbol, color: icon.color, size: 38, cornerRadius: 11)
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -61,6 +64,12 @@ struct PantryItemRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
+        // P22-D4: classification is triggered lazily, on first render. Keyed on the name so a
+        // rename reclassifies and SwiftUI cancels the superseded task for free; the resolver
+        // no-ops on a cache hit, so a scroll that recycles rows costs nothing.
+        .task(id: item.name) {
+            await PantryIconResolver.shared.classifyIfNeeded(name: item.name)
+        }
     }
 
     // MARK: - Helpers
