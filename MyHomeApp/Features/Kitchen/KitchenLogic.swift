@@ -114,14 +114,13 @@ enum KitchenLogic {
     ///
     /// Colours are existing semantic/category tokens only (adaptive light/dark pairs) — no new
     /// tokens, no edits to DesignTokens.swift.
+    ///
+    /// As of 22-01 no symbol string is written here: the keyword table yields a `PantryCategory`
+    /// and `PantryCategory.presentation` owns every symbol and colour in the Kitchen feature
+    /// (ICON-02). The keyword table is RETAINED and demoted to the offline fallback beneath the
+    /// 22-03 on-device model path — it must keep working with Apple Intelligence switched off.
     static func icon(forName rawName: String?) -> (symbol: String, color: Color) {
-        let name = (rawName ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !name.isEmpty else { return fallbackIcon }
-
-        for rule in iconRules where rule.keywords.contains(where: { name.contains($0) }) {
-            return (rule.symbol, rule.color)
-        }
-        return fallbackIcon
+        keywordCategory(forName: rawName)?.presentation ?? PantryCategory.other.presentation
     }
 
     /// Convenience overload for a live pantry row.
@@ -129,44 +128,54 @@ enum KitchenLogic {
         icon(forName: item.name)
     }
 
-    private static let fallbackIcon: (symbol: String, color: Color) =
-        ("bag.fill", DesignTokens.catOther)
+    /// The keyword table's opinion about an item name, or `nil` when it has none.
+    ///
+    /// `nil` means "no opinion" and is deliberately distinct from a confident `.other`: the CALLER
+    /// decides the fallback, so 22-03's resolver can tell "the table doesn't know" from "this really
+    /// is miscellaneous". `internal` (not private) so that resolver and its tests can call it.
+    static func keywordCategory(forName rawName: String?) -> PantryCategory? {
+        guard let name = normalizedIconKey(forName: rawName) else { return nil }
+        for rule in iconRules where rule.keywords.contains(where: { name.contains($0) }) {
+            return rule.category
+        }
+        return nil
+    }
+
+    /// The trimmed, lowercased name — `nil` when blank.
+    ///
+    /// The ONE normalisation rule in the codebase: keyword matching uses it, and 22-02's device-local
+    /// icon cache keys on it, so a cache hit and a keyword match can never disagree about what
+    /// "  Sona Masoori RICE " normalises to.
+    static func normalizedIconKey(forName rawName: String?) -> String? {
+        let key = (rawName ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return key.isEmpty ? nil : key
+    }
 
     private struct IconRule {
         let keywords: [String]
-        let symbol: String
-        let color: Color
+        let category: PantryCategory
     }
 
-    /// First match wins, so put the specific rules above the generic ones.
+    /// First match wins, so put the specific rules above the generic ones. Keyword arrays and their
+    /// ORDER are unchanged from 20-03 — 22-01 only swapped each rule's symbol/colour pair for the
+    /// category that maps to it, so no shipped tile changed appearance.
     private static let iconRules: [IconRule] = [
-        IconRule(keywords: ["milk", "curd", "yoghurt", "yogurt", "cream"],
-                 symbol: "drop.fill", color: DesignTokens.catGroceries),
-        IconRule(keywords: ["egg"],
-                 symbol: "oval.fill", color: DesignTokens.catGroceries),
-        IconRule(keywords: ["coffee", "tea", "chai"],
-                 symbol: "cup.and.saucer.fill", color: DesignTokens.catPantryBrew),
-        IconRule(keywords: ["oil", "ghee", "butter"],
-                 symbol: "drop.circle.fill", color: DesignTokens.catRent),
-        IconRule(keywords: ["soap", "detergent", "dishwash", "cleaner", "phenyl"],
-                 symbol: "bubbles.and.sparkles.fill", color: DesignTokens.catUtilities),
+        IconRule(keywords: ["milk", "curd", "yoghurt", "yogurt", "cream"], category: .dairy),
+        IconRule(keywords: ["egg"], category: .eggs),
+        IconRule(keywords: ["coffee", "tea", "chai"], category: .brew),
+        IconRule(keywords: ["oil", "ghee", "butter"], category: .oilFat),
+        IconRule(keywords: ["soap", "detergent", "dishwash", "cleaner", "phenyl"], category: .cleaning),
         IconRule(keywords: ["onion", "tomato", "potato", "vegetable", "veg", "spinach", "chilli", "chili"],
-                 symbol: "leaf.fill", color: DesignTokens.catSubscriptions),
-        IconRule(keywords: ["fruit", "apple", "banana", "orange", "mango"],
-                 symbol: "basket.fill", color: DesignTokens.catFuel),
+                 category: .produce),
+        IconRule(keywords: ["fruit", "apple", "banana", "orange", "mango"], category: .fruit),
         // Dry staples share ONE warm amber jar tile, matching the reference mockup where rice,
-        // atta, dal and sugar are visually the same kind of thing on the shelf.
-        // NOTE: "takeoutbag.fill.and.rectangle.portrait" is NOT a real SF Symbol — it rendered an
-        // empty tile (caught by screenshot, not by tests: SwiftUI silently draws nothing for an
-        // unknown symbol name). Both dry-staple rules use shippingbox.fill, which is verified to
-        // render. Any new symbol name here must be eyeballed on the simulator before it ships.
-        IconRule(keywords: ["salt", "sugar", "jaggery", "masala", "spice", "powder"],
-                 symbol: "shippingbox.fill", color: DesignTokens.catPantryGrain),
+        // atta, dal and sugar are visually the same kind of thing on the shelf. `.spice` and
+        // `.grainStaple` therefore render identically today — the split exists so the model path
+        // can tell a spice from a staple without changing what the shelf looks like.
+        IconRule(keywords: ["salt", "sugar", "jaggery", "masala", "spice", "powder"], category: .spice),
         IconRule(keywords: ["rice", "atta", "flour", "dal", "wheat", "rava", "poha", "grain", "pulse"],
-                 symbol: "shippingbox.fill", color: DesignTokens.catPantryGrain),
-        IconRule(keywords: ["bread", "bun", "biscuit", "cookie", "snack"],
-                 symbol: "birthday.cake.fill", color: DesignTokens.catEntertainment),
-        IconRule(keywords: ["water", "juice", "drink", "soda"],
-                 symbol: "waterbottle.fill", color: DesignTokens.catAuto)
+                 category: .grainStaple),
+        IconRule(keywords: ["bread", "bun", "biscuit", "cookie", "snack"], category: .snackBakery),
+        IconRule(keywords: ["water", "juice", "drink", "soda"], category: .beverage)
     ]
 }
