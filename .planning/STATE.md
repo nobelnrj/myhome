@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-07-22T18:22:15.791Z"
 last_activity: 2026-07-22
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,21 +20,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 22 — pantry icon intelligence
+**Current focus:** Phase 23 â Overview Declutter & Tap-to-Edit Everywhere (v1.3.1 UX Polish)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-07-22 — Milestone v1.3.1 started
+Phase: 23 of 24 (Overview Declutter & Tap-to-Edit Everywhere)
+Plan: â (roadmap set; ready to plan)
+Status: Ready to plan
+Last activity: 2026-07-22 â v1.3.1 roadmap created (Phases 23-24, 3/3 reqs mapped)
 
 ## Performance Metrics
 
 **Velocity:**
 
 - Total plans completed: 51
-- Average duration: — min
+- Average duration: â min
 - Total execution time: 0 hours
 
 **By Phase:**
@@ -55,8 +55,8 @@ Last activity: 2026-07-22 — Milestone v1.3.1 started
 
 **Recent Trend:**
 
-- Last 5 plans: —
-- Trend: —
+- Last 5 plans: â
+- Trend: â
 
 *Updated after each plan completion*
 | Phase 01 P02 | 20 | 2 tasks | 9 files |
@@ -79,8 +79,8 @@ Last activity: 2026-07-22 — Milestone v1.3.1 started
 | Phase 07 P05 | 95 | 2 tasks | 12 files |
 | Phase 08-stabilization P01 | 15 | 3 tasks | 3 files |
 | Phase 09 P01 | 21 | 3 tasks | 9 files |
-| Phase 09 P02 | — | 4 tasks | 12 files |
-| Phase 09 P03 | — | 3 tasks + 1 verify | 6 files |
+| Phase 09 P02 | â | 4 tasks | 12 files |
+| Phase 09 P03 | â | 3 tasks + 1 verify | 6 files |
 | Phase 10-self-transfer-detection P02 | 25 | 2 tasks | 4 files |
 | Phase 10 P04 | 25 | 2 tasks | 3 files |
 | Phase 11.1-sip-automation-and-nps-nav-auto-refresh P02 | 45 | 3 tasks | 3 files |
@@ -114,14 +114,15 @@ Last activity: 2026-07-22 — Milestone v1.3.1 started
 
 | Slug | Date | Status | Summary |
 |------|------|--------|---------|
-| 260603-lvt-support-syncing-from-multiple-gmail-acco | 2026-06-05 | complete ✓ | Multi-Gmail account support: SchemaV5 (Expense.sourceAccount), GmailAccountStore (per-account state + legacy forward-migration), multi-account signIn/sync/signOut, per-account Settings UI. 4 tasks, full suite green. |
+| 260603-lvt-support-syncing-from-multiple-gmail-acco | 2026-06-05 | complete â | Multi-Gmail account support: SchemaV5 (Expense.sourceAccount), GmailAccountStore (per-account state + legacy forward-migration), multi-account signIn/sync/signOut, per-account Settings UI. 4 tasks, full suite green. |
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 
+- v1.3.1 roadmap created 2026-07-22: Phases 23-24 (Overview Declutter & Tap-to-Edit Everywhere → Custom Floating Nav Bar); 3/3 reqs mapped (OVF-04+EDIT-01 → P23, NAV-01 → P24); no orphans. Contained screen-level items (OVF-04, EDIT-01) clubbed into P23; the riskier app-shell floating nav bar (NAV-01) isolated into P24 last so main stays deployable throughout.
 - Phase 3 edited: expanded scope to Notes + Reminders hub: reminders, recurrence, notifications, calendar (goal + 5 success criteria)
-- v1.1 roadmap created 2026-06-08: Phases 8-12 (Stabilization → SchemaV6+Accounts → Self-Transfer → Asset Tracker → Notes Enhancement); 32 requirements mapped; no orphans
+- v1.1 roadmap created 2026-06-08: Phases 8-12 (Stabilization â SchemaV6+Accounts â Self-Transfer â Asset Tracker â Notes Enhancement); 32 requirements mapped; no orphans
 - Phase 11.1 inserted after Phase 11: SIP Automation and NPS NAV auto-refresh (URGENT)
 
 ### Decisions
@@ -129,82 +130,82 @@ Last activity: 2026-07-22 — Milestone v1.3.1 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Roadmap]: Manual expense entry ships before Gmail ingestion (load-bearing sequencing — validates schema/UI/budget loop before staking the project on the riskiest sub-system)
+- [Roadmap]: Manual expense entry ships before Gmail ingestion (load-bearing sequencing â validates schema/UI/budget loop before staking the project on the riskiest sub-system)
 - [Roadmap]: Foundation lock-ins (bundle/CloudKit/App-Group IDs, privacy manifest, CloudKit-ready schema) folded into Phase 1 because they are one-way doors
-- [Roadmap]: Gmail ingestion split — OAuth/client proven in isolation (Phase 6) before parsers + pipeline + background tasks (Phase 7)
-- [Roadmap v1.1]: Stabilization gates all schema work — crash vectors must be fixed before any schema migration begins
-- [Roadmap v1.1]: SchemaV6 (Account + Asset models + transfer + routine fields) bundled into Phase 9 with Accounts Management — one migration stage, not two
+- [Roadmap]: Gmail ingestion split â OAuth/client proven in isolation (Phase 6) before parsers + pipeline + background tasks (Phase 7)
+- [Roadmap v1.1]: Stabilization gates all schema work â crash vectors must be fixed before any schema migration begins
+- [Roadmap v1.1]: SchemaV6 (Account + Asset models + transfer + routine fields) bundled into Phase 9 with Accounts Management â one migration stage, not two
 - [Roadmap v1.1]: STAB-04 (daily routine reset) assigned to Phase 9 because its observable behavior requires the NoteBlock.lastCheckedDate schema field; Phase 8 ships the RoutineResetService skeleton only
 - [Roadmap v1.1]: NOTE-02 (lastCheckedDate field) placed in Phase 9 (schema phase) to avoid an intermediate migration stage; observable per-day reset behavior is a Phase 9 success criterion
-- [Roadmap v1.1]: ACCT-05 assigned to Phase 9 (baseline ± transactions); transfer balance-move semantics completed in Phase 10 (self-transfer confirm wires the balance-move)
+- [Roadmap v1.1]: ACCT-05 assigned to Phase 9 (baseline Â± transactions); transfer balance-move semantics completed in Phase 10 (self-transfer confirm wires the balance-move)
 - [Roadmap v1.1]: Phase 11 (Asset Tracker) and Phase 12 (Notes Enhancement) are independent after Phase 9; serial order chosen (11 before 12) so spend accuracy is confirmed before net-worth figures are presented
-- [Phase 9 research flag]: V5→V6 didMigrate closure is first non-nil didMigrate in this codebase — verify error-handling (throwing closure: rollback vs. partial state) against FB13812722 workaround in MigrationPlan.swift before writing the migration stage
+- [Phase 9 research flag]: V5âV6 didMigrate closure is first non-nil didMigrate in this codebase â verify error-handling (throwing closure: rollback vs. partial state) against FB13812722 workaround in MigrationPlan.swift before writing the migration stage
 - [Phase ?]: Expense @Model nested in SchemaV1 enum; typealias Expense = SchemaV1.Expense for clean view imports
-- [Phase ?]: FormatStyle .currency(code:INR).locale(en_IN) for lakh grouping — not NumberFormatter, not hand-rolled
+- [Phase ?]: FormatStyle .currency(code:INR).locale(en_IN) for lakh grouping â not NumberFormatter, not hand-rolled
 - [Phase ?]: App Group store URL with Application Support fallback for free-account provisioning
 - [Phase ?]: EditExpenseView uses local @State mirror of expense fields for isDirty detection; Cancel dismisses without mutating model
 - [Phase ?]: RootView reduced to single-line pass-through to ExpenseListView; ExpenseListView owns its own NavigationStack
-- [Phase ?]: Seed store generated via macOS SwiftData script (xcrun -sdk macosx swift) — deterministic, reproducible, no simulator required
+- [Phase ?]: Seed store generated via macOS SwiftData script (xcrun -sdk macosx swift) â deterministic, reproducible, no simulator required
 - [Phase ?]: Required companion to container flip
 - [Phase ?]: AppMigrationPlan chains to V3 now
-- [Phase ?]: 03-06: categoryIdentifier must be stamped in NotificationScheduler.makeRequest — iOS drops actions if absent
-- [Phase ?]: 03-06: Deep-link via kOpenNoteNotification + RootView @State tab-selection Binding — no environment key needed
-- [Phase ?]: 03-06: Calendar day-agenda binds live to Note/NoteBlock @Model via AgendaReminderItem — never snapshot for completion-state UI
+- [Phase ?]: 03-06: categoryIdentifier must be stamped in NotificationScheduler.makeRequest â iOS drops actions if absent
+- [Phase ?]: 03-06: Deep-link via kOpenNoteNotification + RootView @State tab-selection Binding â no environment key needed
+- [Phase ?]: 03-06: Calendar day-agenda binds live to Note/NoteBlock @Model via AgendaReminderItem â never snapshot for completion-state UI
 - [Phase ?]: BiometricAuthPort protocol-port seam (mirrors NotificationCenterPort) makes every LAError path unit-testable without a device
 - [Phase ?]: LockController @MainActor for Swift 6 strict concurrency when scenePhase onChange mutates @Observable state
-- [Phase ?]: canEvaluate called before evaluate in authenticate() — passcodeNotSet only detectable from canEvaluatePolicy path (D5-05)
+- [Phase ?]: canEvaluate called before evaluate in authenticate() â passcodeNotSet only detectable from canEvaluatePolicy path (D5-05)
 - [Phase ?]: shouldRefresh in sync() uses (accessToken==nil || (expiry!=nil && needsProactiveRefresh))
 - [Phase ?]: STAB-01 tombstone guard: modelContext != nil applied to all Note/NoteBlock iteration sites in CalendarView and CalendarAggregator
 - [Phase ?]: applyTransferMark extracted as static func on EditExpenseView for testability without SwiftUI
 - [Phase ?]: nil chosen over false on unmark so scorer can re-evaluate (D-14)
 - [Phase ?]: Avoids init-time predicate complexity with asset.id capture
 - [Phase ?]: Enables direct unit testing without a view instance
-- [Phase ?]: OQ-1 RESOLVED: UUID direct equality in #Predicate compiles and works — no .uuidString fallback needed
+- [Phase ?]: OQ-1 RESOLVED: UUID direct equality in #Predicate compiles and works â no .uuidString fallback needed
 - [Phase ?]: All 11 model typealiases flipped atomically to SchemaV9 (STAB-08)
-- [Phase ?]: v8ToV9 uses nil-closure .custom stage — purely additive (RoutineCompletion new empty table)
-- [Phase 13→14, 2026-06-21]: DS-03 floating capsule tab bar REVERTED to native iOS tab bar per user (commit 92e3e61). NeuTabBar.swift now orphaned/unused (delete during Phase 14). Phase 14 restyles the NATIVE bar's colors only — do NOT rebuild a custom tab bar. Reference design's yellow-active-pill bar is explicitly out of scope.
-- [Phase 14 SKIN DECISION, 2026-06-21]: Design handoff ships 6 interchangeable skins (Liquid Glass / Glassmorphism / Neomorphism / Minimalism / Bento / Spatial). User's reference screenshots = the DEFAULT 'liquid' (Liquid Glass) skin; Phase 13 DesignTokens.swift translated the 'neuro' (Neomorphism) branch — hence the mismatch. After a side-by-side comparison (design/skin-comparison.html), user CHOSE **Neomorphism** (keep what Phase 13 built) over matching the glass reference. So: NO rework of DesignTokens/NeuSurface; Phase 14 applies the existing neuro tokens + canary-yellow accent + colored category palette + "Where it's going" donut + net-cash-flow card across all 67 feature view files. Do NOT pursue Liquid Glass / translucent material.
+- [Phase ?]: v8ToV9 uses nil-closure .custom stage â purely additive (RoutineCompletion new empty table)
+- [Phase 13â14, 2026-06-21]: DS-03 floating capsule tab bar REVERTED to native iOS tab bar per user (commit 92e3e61). NeuTabBar.swift now orphaned/unused (delete during Phase 14). Phase 14 restyles the NATIVE bar's colors only â do NOT rebuild a custom tab bar. Reference design's yellow-active-pill bar is explicitly out of scope.
+- [Phase 14 SKIN DECISION, 2026-06-21]: Design handoff ships 6 interchangeable skins (Liquid Glass / Glassmorphism / Neomorphism / Minimalism / Bento / Spatial). User's reference screenshots = the DEFAULT 'liquid' (Liquid Glass) skin; Phase 13 DesignTokens.swift translated the 'neuro' (Neomorphism) branch â hence the mismatch. After a side-by-side comparison (design/skin-comparison.html), user CHOSE **Neomorphism** (keep what Phase 13 built) over matching the glass reference. So: NO rework of DesignTokens/NeuSurface; Phase 14 applies the existing neuro tokens + canary-yellow accent + colored category palette + "Where it's going" donut + net-cash-flow card across all 67 feature view files. Do NOT pursue Liquid Glass / translucent material.
 - [Phase 14 verified state, 2026-06-21]: Phase 13 components (DesignTokens/NeuSurface/RollingMoneyText/NeuTabBar) exist + pushed to main + compile, but are applied to 0 real screens (only CardStyle.swift deprecation shim references them). All 67 feature views still use system colors (secondarySystemBackground, .accentColor blue). Phase 14 is the wiring/restyle pass. CardStyle is marked "removed in Phase 14".
-- [Phase ?]: 20-02: SyncScope.production widened to notes+kitchen — DTOs alone would have left KTCH-04 false on device; financial exclusions unchanged and still asserted
+- [Phase ?]: 20-02: SyncScope.production widened to notes+kitchen â DTOs alone would have left KTCH-04 false on device; financial exclusions unchanged and still asserted
 - [Phase ?]: 20-03: Kitchen is a pushed Overview surface, not a 6th tab (5-tab bar and -startTab 0-4 untouched)
-- [Phase ?]: 20-03: Pantry item icons are DERIVED from the item name (KitchenLogic.icon) — no schema field, no picker
+- [Phase ?]: 20-03: Pantry item icons are DERIVED from the item name (KitchenLogic.icon) â no schema field, no picker
 - [Phase ?]: Shopping extras delete via context menu + Clear checked instead of swipe (mockup card is a neu VStack, not a List)
-- [Phase 20]: Shopping empty state keeps an Add item field the mockup omits — manual extras would otherwise be unreachable when the list is empty
-- [Phase ?]: 20-05: BootstrapAdvisor emptiness now counts kitchen rows — scope-relative emptiness must follow SyncScope widening
+- [Phase 20]: Shopping empty state keeps an Add item field the mockup omits â manual extras would otherwise be unreachable when the list is empty
+- [Phase ?]: 20-05: BootstrapAdvisor emptiness now counts kitchen rows â scope-relative emptiness must follow SyncScope widening
 - [Phase ?]: 20-05: share-sheet/Files UI loop is not simctl-automatable; automated the export-decode-self-merge bytes instead and left the taps to the human check
-- [Phase ?]: 22-01: PantryCategory owns every pantry SF Symbol via an exhaustive no-default switch — the model names a category, never a symbol (ICON-02)
+- [Phase ?]: 22-01: PantryCategory owns every pantry SF Symbol via an exhaustive no-default switch â the model names a category, never a symbol (ICON-02)
 - [Phase ?]: 22-01: keyword table retained as the offline fallback; keywordCategory returns nil for 'no opinion', distinct from a confident .other
 - [Phase ?]: P22-D3 honoured: pantry icon cache in App-Group UserDefaults with a 300-entry LRU cap, not SwiftData (ICON-03)
-- [Phase 22]: PantryIconCache is @unchecked Sendable — UserDefaults is not Sendable and injectable defaults are needed for test isolation
+- [Phase 22]: PantryIconCache is @unchecked Sendable â UserDefaults is not Sendable and injectable defaults are needed for test isolation
 - [Phase ?]: 21-01: OverviewFilterEngine.apply owns account dimension only; date scoping stays in the view @Query predicate fed by rangeBoundaries
-- [Phase ?]: 21-01: transfer exclusion never re-implemented in the filter engine — callers compose apply() with BudgetCalculator.grossSpend/grossIncome (T-21-02)
+- [Phase ?]: 21-01: transfer exclusion never re-implemented in the filter engine â callers compose apply() with BudgetCalculator.grossSpend/grossIncome (T-21-02)
 - [Phase ?]: 21-02: visibleExpenses (account-filtered) is the ONLY input to every Overview cash-flow figure; no aggregation reads the raw @Query array (T-21-03)
 - [Phase ?]: 21-02: active filter suppresses Net Worth + Budgets and hides Over Time under a custom range (OVF-03 data half); reviewItems stays unfiltered as triage queue
 - [Phase ?]: Overview filter UI = single always-present header pill (entry + active display + one-tap clear) + OverviewFilterSheet (account multi-select, This Month/custom range); sheet is Overview-scoped
 
 ### Pending Todos
 
-- [Phase 13]: Blocking human-verify checkpoint (13-03 Task 3) outstanding — interactive 5-tab tap + NavigationStack regression check, kOpenNoteNotification deep-link to Notes (index 3), Reduce Motion pill-jump, Accessibility Inspector zero-contrast pass on NeuSurface/NeuTabBar/RollingMoneyText previews, NeuSurface(.recessed) look check. Resume via `/gsd-verify-work 13`. (Capsule render/float/accent already confirmed in simulator.)
+- [Phase 13]: Blocking human-verify checkpoint (13-03 Task 3) outstanding â interactive 5-tab tap + NavigationStack regression check, kOpenNoteNotification deep-link to Notes (index 3), Reduce Motion pill-jump, Accessibility Inspector zero-contrast pass on NeuSurface/NeuTabBar/RollingMoneyText previews, NeuSurface(.recessed) look check. Resume via `/gsd-verify-work 13`. (Capsule render/float/accent already confirmed in simulator.)
 
 ### Blockers/Concerns
 
 Carried from v1.1 research/SUMMARY.md, to resolve at the relevant phase:
 
-- [Phase 9]: SchemaV6 didMigrate closure error handling — first non-nil didMigrate in this codebase; verify behavior of a throwing closure (rollback vs. partial store) against FB13812722 workaround in MigrationPlan.swift before writing the stage
-- [Phase 10]: Self-transfer 3-day window — well-reasoned for Indian settlement (NEFT/IMPS/UPI) but not yet validated against household's actual transaction history; spot-check historical expenses during Phase 10 planning
-- [Phase 11]: Yahoo Finance rate-limit and ToS risk — 2-person household is well within community-reported ~360 req/hr cap; implementation must fall back to manual immediately on any non-200 or decode error; do not retry or chase alternative endpoints
-- [Phase 11]: npsnav.in availability — single-maintainer hobby project; app must degrade gracefully to last-known NAV on any failure; manual override is the primary NPS entry path
+- [Phase 9]: SchemaV6 didMigrate closure error handling â first non-nil didMigrate in this codebase; verify behavior of a throwing closure (rollback vs. partial store) against FB13812722 workaround in MigrationPlan.swift before writing the stage
+- [Phase 10]: Self-transfer 3-day window â well-reasoned for Indian settlement (NEFT/IMPS/UPI) but not yet validated against household's actual transaction history; spot-check historical expenses during Phase 10 planning
+- [Phase 11]: Yahoo Finance rate-limit and ToS risk â 2-person household is well within community-reported ~360 req/hr cap; implementation must fall back to manual immediately on any non-200 or decode error; do not retry or chase alternative endpoints
+- [Phase 11]: npsnav.in availability â single-maintainer hobby project; app must degrade gracefully to last-known NAV on any failure; manual override is the primary NPS entry path
 
 Carried from v1.0 (pre-existing, still outstanding):
 
-- [Phase 6]: Gmail OAuth library choice (raw ASWebAuthenticationSession vs GoogleSignIn SDK) — RESOLVED (shipped Phase 6); retained for reference
+- [Phase 6]: Gmail OAuth library choice (raw ASWebAuthenticationSession vs GoogleSignIn SDK) â RESOLVED (shipped Phase 6); retained for reference
 - [Phase 7]: Collect 50+ real anonymized bank emails per target bank BEFORE building parsers; confirm final 2 banks (likely HDFC + ICICI); confidence threshold (0.85) needs real-data calibration after first week
 - [Phase 7]: BGAppRefreshTask must be verified on-device unplugged-overnight; simulator triggering is not representative
 - 18-05 SYNC-03 code complete + suite green; BLOCKING human-verify UAT pending before phase 18 complete
 
 ## Deferred Items
 
-Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer upgrade or real v1 usage):
+Items acknowledged and carried forward (v2 â gated on $99/yr Apple Developer upgrade or real v1 usage):
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
@@ -212,14 +213,14 @@ Items acknowledged and carried forward (v2 — gated on $99/yr Apple Developer u
 | Apple surfaces | Widgets, App Intents/Siri, watchOS app | Deferred to v2 | Roadmap |
 | Expense v1.x | Per-merchant category memory, more bank parsers, today's tile, vs-prior-month | Deferred to v2 | Roadmap |
 | Notes/Notifications | Share-sheet receive, Spotlight, budget/inbox notifications, haptics | Deferred to v2 | Roadmap |
-| Asset Tracker v1.x | Stock quote auto-fetch (Yahoo Finance) — deferred until manual flow proven | Deferred to v1.2+ | REQUIREMENTS.md |
-| Asset Tracker v1.x | NPS NAV auto-fetch (npsnav.in) — single-maintainer source risk; manual entry suffices for v1.1 | Deferred to v1.2+ | REQUIREMENTS.md |
+| Asset Tracker v1.x | Stock quote auto-fetch (Yahoo Finance) â deferred until manual flow proven | Deferred to v1.2+ | REQUIREMENTS.md |
+| Asset Tracker v1.x | NPS NAV auto-fetch (npsnav.in) â single-maintainer source risk; manual entry suffices for v1.1 | Deferred to v1.2+ | REQUIREMENTS.md |
 | Asset Tracker v1.x | CAS / broker import, XIRR | Deferred to v2 | REQUIREMENTS.md |
 | Notes v1.x | RoutineCompletion-driven analytics beyond simple streaks (heatmaps, insights) | Deferred to v1.2+ | REQUIREMENTS.md |
 
 ### Acknowledged at v1.0 Milestone Close (2026-06-03)
 
-Open human-verification artifacts deferred at milestone close — code is implemented; these are manual on-device verification/UAT passes that remain outstanding:
+Open human-verification artifacts deferred at milestone close â code is implemented; these are manual on-device verification/UAT passes that remain outstanding:
 
 | Category | Item | Status |
 |----------|------|--------|
@@ -230,7 +231,7 @@ Open human-verification artifacts deferred at milestone close — code is implem
 
 ### Acknowledged at v1.1 Milestone Close (2026-06-20)
 
-Open artifacts deferred at v1.1 close — code is implemented; the verification items are outstanding manual on-device passes carried into v1.2 as tracked debt:
+Open artifacts deferred at v1.1 close â code is implemented; the verification items are outstanding manual on-device passes carried into v1.2 as tracked debt:
 
 | Category | Item | Status |
 |----------|------|--------|
@@ -242,7 +243,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ### Acknowledged at v1.3 Milestone Close (2026-07-22)
 
-All v1.3 requirements (SYNC/KTCH/ICON/OVF, 15/15) are Complete. Deferred artifacts below are pre-existing debt carried from v1.0–v1.2 plus one v1.3 manual-verification item; all mirrored in the GitHub tracker (nobelnrj/myhome issues #24 test-infra, #25 doc/nyquist debt, #26 v1.0 deferred verification):
+All v1.3 requirements (SYNC/KTCH/ICON/OVF, 15/15) are Complete. Deferred artifacts below are pre-existing debt carried from v1.0âv1.2 plus one v1.3 manual-verification item; all mirrored in the GitHub tracker (nobelnrj/myhome issues #24 test-infra, #25 doc/nyquist debt, #26 v1.0 deferred verification):
 
 | Category | Item | Status | Tracker |
 |----------|------|--------|---------|
@@ -250,8 +251,8 @@ All v1.3 requirements (SYNC/KTCH/ICON/OVF, 15/15) are Complete. Deferred artifac
 | uat_gap | 13-HUMAN-UAT.md | testing (5 pending, v1.2) | #25 |
 | verification_gap | 08-VERIFICATION.md | human_needed (v1.1) | #26 |
 | verification_gap | 09-VERIFICATION.md | human_needed (v1.1) | #26 |
-| verification_gap | 20-VERIFICATION.md | human_needed (v1.3 kitchen; de-facto verified — shipped to both phones, in daily use) | — |
-| quick_task | 260603-lvt-support-syncing-from-multiple-gmail-acco | missing/stale (v1.0) | — |
+| verification_gap | 20-VERIFICATION.md | human_needed (v1.3 kitchen; de-facto verified â shipped to both phones, in daily use) | â |
+| quick_task | 260603-lvt-support-syncing-from-multiple-gmail-acco | missing/stale (v1.0) | â |
 | todo | test-isolation-swiftdata-multicontainer.md | pending (test-infra debt) | #24 |
 
 ## Session Continuity

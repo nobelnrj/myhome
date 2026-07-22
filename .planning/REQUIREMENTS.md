@@ -38,11 +38,13 @@ Deferred to v1.4 Finance & AI Depth (tracked in GitHub, nobelnrj/myhome):
 
 <!-- Filled by roadmap: REQ-ID → Phase. -->
 
-| REQ-ID | Phase |
-|--------|-------|
-| NAV-01 | — |
-| OVF-04 | — |
-| EDIT-01 | — |
+| REQ-ID | Phase | Status |
+|--------|-------|--------|
+| OVF-04 | Phase 23 | Pending |
+| EDIT-01 | Phase 23 | Pending |
+| NAV-01 | Phase 24 | Pending |
+
+Coverage: 3/3 requirements mapped ✓ — no orphans, no duplicates.
 
 ---
 *Created: 2026-07-22 — v1.3.1 UX Polish milestone.*
