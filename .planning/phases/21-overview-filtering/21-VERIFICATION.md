@@ -1,8 +1,9 @@
 ---
 phase: 21-overview-filtering
 verified: 2026-07-22T05:44:21Z
-status: human_needed
-score: 3/3 must-haves verified (code + automated tests); 1 item requires on-device human confirmation
+status: passed
+human_uat_result: passed 2026-07-22 on device (Nobel-iPhone17ProMax). On-device UAT surfaced a layout jump (date range grew the pill and reflowed the header) — fixed by splitting the dimensions (889bd99): account → pill, date range → resettable left eyebrow. User approved after retest. Separately, a seeded-simulator sync incident polluted Kitchen (auto-sync LWW-push); guarded so seeded builds never join sync (75f7d00) and tracked as #43.
+score: 3/3 must-haves verified (code + automated tests); on-device UAT passed
 overrides_applied: 0
 human_verification:
   - test: "On the seeded simulator (SAMPLE HDFC / SAMPLE ICICI Credit accounts): open the filter sheet from the header pill, select a single account, add a custom date range, confirm the hero/donut/by-category/Recent figures all change together and Net Worth + Budgets + Over Time are suppressed/adjusted correctly. Then tap the pill's xmark to clear in one tap and confirm every figure returns exactly to the unfiltered (all-accounts, current-month) values with no leftover pill state."
