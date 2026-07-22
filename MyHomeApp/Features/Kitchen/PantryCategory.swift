@@ -40,6 +40,13 @@ enum PantryCategory: String, CaseIterable, Sendable {
     case condiment = "condiment"
     case frozen = "frozen"
     case petSupplies = "petSupplies"
+    // Added 2026-07-22 — user asked why the set was so small. Appended (never reordered) so the
+    // 22-02 device-local cache, which stores the raw value, keeps resolving old entries.
+    case meatSeafood = "meatSeafood"
+    case healthMedicine = "healthMedicine"
+    case babyCare = "babyCare"
+    case household = "household"
+    case nutsDryFruit = "nutsDryFruit"
     case other = "other"
 
     /// The tile appearance for a category. TOTAL by construction — exhaustive `switch`, no
@@ -82,6 +89,15 @@ enum PantryCategory: String, CaseIterable, Sendable {
         case .condiment:       return ("fork.knife", DesignTokens.catDining)
         case .frozen:          return ("snowflake", DesignTokens.catUtilities)
         case .petSupplies:     return ("pawprint.fill", DesignTokens.catOther)
+
+        // --- Added 2026-07-22 (user request: "why is it this limited"). Symbols are CANDIDATES
+        // until the gallery screenshot pass confirms each renders — a non-existent SF Symbol draws
+        // nothing and raises no error (the 20-03 bug), so an unverified name here is a blank tile.
+        case .meatSeafood:     return ("fish.fill", DesignTokens.catFuel)
+        case .healthMedicine:  return ("pills.fill", DesignTokens.catGroceries)
+        case .babyCare:        return ("teddybear.fill", DesignTokens.catSubscriptions)
+        case .household:       return ("wrench.and.screwdriver.fill", DesignTokens.catRent)
+        case .nutsDryFruit:    return ("laurel.leading", DesignTokens.catEntertainment)
 
         // --- Terminal fallback: the neutral bag tile an unmatched name has always produced.
         case .other:           return ("bag.fill", DesignTokens.catOther)

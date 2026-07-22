@@ -17,14 +17,21 @@ struct PantryCategoryTests {
 
     // MARK: - Closed set
 
-    @Test("The category set is exactly the 17 cases the AI-SPEC names")
+    // The AI-SPEC opened with 17 cases; five more (meatSeafood, healthMedicine, babyCare,
+    // household, nutsDryFruit) were added 2026-07-22 at the user's request — the pantry was too
+    // coarse. The count stays PINNED (not `>= 17`) so any future case add/remove is a deliberate,
+    // reviewed edit here rather than a silent drift, and so it stays in lockstep with the
+    // @Generable twin's parity test.
+    @Test("The category set is exactly the 22 named cases")
     func categorySetIsClosedAndComplete() {
-        #expect(PantryCategory.allCases.count == 17)
+        #expect(PantryCategory.allCases.count == 22)
 
         let expected: Set<String> = [
             "dairy", "eggs", "grainStaple", "spice", "produce", "fruit", "brew", "oilFat",
             "snackBakery", "beverage", "cleaning", "paperDisposable", "personalCare",
-            "condiment", "frozen", "petSupplies", "other"
+            "condiment", "frozen", "petSupplies",
+            "meatSeafood", "healthMedicine", "babyCare", "household", "nutsDryFruit",
+            "other"
         ]
         #expect(Set(PantryCategory.allCases.map(\.rawValue)) == expected)
     }

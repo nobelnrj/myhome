@@ -72,7 +72,7 @@ struct PantryIconClassifierTests {
         let plain = Set(PantryCategory.allCases.map(\.rawValue))
 
         #expect(generated == plain)
-        #expect(generated.count == 17)
+        #expect(generated.count == 22)
     }
 
     @available(iOS 26, *)

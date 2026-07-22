@@ -61,6 +61,11 @@ enum GeneratedPantryCategory: String, CaseIterable {
     case condiment = "condiment"
     case frozen = "frozen"
     case petSupplies = "petSupplies"
+    case meatSeafood = "meatSeafood"
+    case healthMedicine = "healthMedicine"
+    case babyCare = "babyCare"
+    case household = "household"
+    case nutsDryFruit = "nutsDryFruit"
     case other = "other"
 
     /// The plain-enum equivalent. Non-nil for every case while the parity test passes.
@@ -124,6 +129,12 @@ enum PantryIconPromptBuilder {
         - condiment: sauces, pickles, jams, ketchup, mayonnaise, vinegar, honey
         - frozen: frozen foods — frozen peas, ice cream, frozen parathas
         - petSupplies: pet food and pet supplies
+        - meatSeafood: chicken, mutton, fish, prawns, eggs excepted (eggs is its own category)
+        - healthMedicine: medicines, tablets, supplements, vitamins, first-aid, ORS
+        - babyCare: diapers, baby food, baby formula, baby wipes, baby lotion
+        - household: non-food household goods — batteries, bulbs, matches, candles, tools, \
+        garbage bags, mosquito repellent
+        - nutsDryFruit: nuts and dried fruit — almonds, cashews, raisins, dates, walnuts, pistachios
         - other: only when the name is empty, meaningless, or genuinely fits nothing above
 
         Answer with the one category that fits best. Use other only as a last resort — \
