@@ -66,7 +66,19 @@ struct MyHomeApp: App {
                     // App launches foregrounded; the scenePhase .active branch does not reliably
                     // fire for the initial transition on all iOS versions, so start here.
                     syncCoordinator.setContext(container.mainContext)
-                    syncCoordinator.start()
+                    // A -seedSampleData build must NEVER join auto-sync: kitchen (pantry +
+                    // shopping) is in the sync scope, and auto-sync silently LWW-pushes on peer
+                    // connect to any same-service peer on the LAN. A seeded simulator would
+                    // therefore merge its SAMPLE pantry into the real phones' Kitchen. Skip
+                    // discovery when seeding so a dev build can't pollute the household stores.
+                    #if DEBUG
+                    let skipSyncForSeeding = ProcessInfo.processInfo.arguments.contains("-seedSampleData")
+                    #else
+                    let skipSyncForSeeding = false
+                    #endif
+                    if !skipSyncForSeeding {
+                        syncCoordinator.start()
+                    }
                     #if DEBUG
                     seedSampleDataIfRequested()
                     #endif
@@ -174,16 +186,37 @@ struct MyHomeApp: App {
         // (rounded caps must not overlap — the NeuDonutRing min-span fix).
         // (category index, amount, days ago). The tiny spends stay within the last few
         // days so they land in the CURRENT month — the donut is month-scoped.
+        // Phase 21 (OVF-01): two sample accounts so the Overview account filter is visually
+        // verifiable in the simulator. Seeded expenses are attributed alternately to these two;
+        // the income row is left unassigned so the "Unassigned" filter row also has something to
+        // show. Guarded by the same -seedSampleData flag + SAMPLE idempotence check above.
+        let hdfc = Account(name: "SAMPLE HDFC", typeRaw: "credit_card")
+        hdfc.colorHex = "#2563EB"
+        hdfc.symbolName = "creditcard"
+        hdfc.last4 = "42"
+        hdfc.sortOrder = 0
+        ctx.insert(hdfc)
+        let icici = Account(name: "SAMPLE ICICI Credit", typeRaw: "credit_card")
+        icici.colorHex = "#C2410C"
+        icici.symbolName = "creditcard"
+        icici.last4 = "18"
+        icici.sortOrder = 1
+        ctx.insert(icici)
+        let sampleAccountIDs = [hdfc.id, icici.id]
+
         let spends: [(Int, Decimal, Int)] = [(0, 14200, 1), (1, 9300, 4), (2, 5100, 7), (3, 3800, 10),
                                              (0, 2600, 13), (1, 1900, 16), (4, 430, 2), (5, 210, 3)]
-        for (catIndex, amount, daysAgo) in spends {
+        for (i, (catIndex, amount, daysAgo)) in spends.enumerated() {
             guard catIndex < cats.count else { continue }
             let day = cal.date(byAdding: .day, value: -daysAgo, to: now) ?? now
             let e = Expense(amount: amount, date: day, note: "SAMPLE")
             e.categories = [cats[catIndex]]
+            // Attribute alternately so filtering to one account halves the visible spend (OVF-01).
+            e.accountID = sampleAccountIDs[i % sampleAccountIDs.count]
             ctx.insert(e)
         }
         // Income (negative amount, uncategorised) so the two-tone orb shows green + red.
+        // Left UNASSIGNED (accountID == nil) so the "Unassigned" filter row has a figure.
         let income = Expense(amount: Decimal(-14000), date: cal.date(byAdding: .day, value: -2, to: now) ?? now, note: "SAMPLE")
         ctx.insert(income)
 

@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
-status: executing
-last_updated: "2026-07-22T00:45:00.000Z"
+status: ready_to_plan
+last_updated: 2026-07-22T15:52:05.168Z
 last_activity: 2026-07-22
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 5
   total_plans: 22
-  completed_plans: 20
-  percent: 63
+  completed_plans: 109
+  percent: 100
+stopped_at: Phase 21 complete (3/3) — ready to discuss Phase 22
 ---
 
 # Project State
@@ -20,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 22 — pantry-icon-intelligence
+**Current focus:** Phase 22 — pantry icon intelligence
 
 ## Current Position
 
-Phase: 22 (pantry-icon-intelligence) — CLOSED (merged, deployed, on-device UAT passed 2026-07-22)
-Plan: 4 of 4 (all executed + user-directed polish: prompt gloss, 17→22 categories, spice tile)
-Status: DONE. Shipped via PR #41, live on both phones, user confirmed the on-device model works ("everything looks good"). Opt-in accuracy eval 75%/90% recorded honestly as below aspirational thresholds; tune against real device data if desired. Board issue #42 Done.
+Phase: 22
+Plan: Not started
+Status: Ready to plan
 Next: Phase 21 (Overview Filtering) — 3 plans already written, 0 executed. Last phase of v1.3.
 Last activity: 2026-07-22
 
@@ -34,7 +35,7 @@ Last activity: 2026-07-22
 
 **Velocity:**
 
-- Total plans completed: 48
+- Total plans completed: 51
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -52,6 +53,7 @@ Last activity: 2026-07-22
 | 15 | 3 | - | - |
 | 16 | 5 | - | - |
 | 17 | 9 | - | - |
+| 21 | 3 | - | - |
 
 **Recent Trend:**
 
@@ -106,6 +108,9 @@ Last activity: 2026-07-22
 | Phase 22 P01 | 35m | 2 tasks | 5 files |
 | Phase 22 P02 | 30 min | 2 tasks | 5 files |
 | Phase 22 P03 | 30min | 2 tasks | 5 files |
+| Phase 21 P01 | 6 | 2 tasks | 3 files |
+| Phase 21 P02 | 15 | 2 tasks | 1 files |
+| Phase 21 P03 | 20 | 2 tasks | 5 files |
 
 ## Quick Tasks Completed
 
@@ -173,6 +178,11 @@ Recent decisions affecting current work:
 - [Phase ?]: 22-01: keyword table retained as the offline fallback; keywordCategory returns nil for 'no opinion', distinct from a confident .other
 - [Phase ?]: P22-D3 honoured: pantry icon cache in App-Group UserDefaults with a 300-entry LRU cap, not SwiftData (ICON-03)
 - [Phase 22]: PantryIconCache is @unchecked Sendable — UserDefaults is not Sendable and injectable defaults are needed for test isolation
+- [Phase ?]: 21-01: OverviewFilterEngine.apply owns account dimension only; date scoping stays in the view @Query predicate fed by rangeBoundaries
+- [Phase ?]: 21-01: transfer exclusion never re-implemented in the filter engine — callers compose apply() with BudgetCalculator.grossSpend/grossIncome (T-21-02)
+- [Phase ?]: 21-02: visibleExpenses (account-filtered) is the ONLY input to every Overview cash-flow figure; no aggregation reads the raw @Query array (T-21-03)
+- [Phase ?]: 21-02: active filter suppresses Net Worth + Budgets and hides Over Time under a custom range (OVF-03 data half); reviewItems stays unfiltered as triage queue
+- [Phase ?]: Overview filter UI = single always-present header pill (entry + active display + one-tap clear) + OverviewFilterSheet (account multi-select, This Month/custom range); sheet is Overview-scoped
 
 ### Pending Todos
 
@@ -234,7 +244,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ## Session Continuity
 
-Last session: 2026-07-21T19:02:01.102Z
+Last session: 2026-07-22T05:34:30.526Z
 Stopped at: Completed 19-03-PLAN.md
 Resume file: None
 
