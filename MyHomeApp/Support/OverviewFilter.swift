@@ -35,10 +35,29 @@ struct OverviewFilter: Equatable {
         !accountIDs.isEmpty || includeUnassigned
     }
 
-    /// True when ANY dimension of the filter is active — drives the OVF-03 header pill
-    /// (accent dot + summary label + one-tap clear) in Plan 03.
+    /// True when ANY dimension of the filter is active — drives content suppression
+    /// (Net Worth / Budgets / Over Time) in Plan 03.
     var isActive: Bool {
         accountFilterActive || dateRange != nil
+    }
+
+    /// Returns a copy with the ACCOUNT dimension cleared (keeps any custom date range).
+    /// The header scope pill now owns the account dimension only; its one-tap clear resets
+    /// accounts without discarding a date range the user set from the left eyebrow.
+    func clearingAccounts() -> OverviewFilter {
+        var copy = self
+        copy.accountIDs = []
+        copy.includeUnassigned = false
+        return copy
+    }
+
+    /// Returns a copy with the custom DATE RANGE cleared (keeps any account subset).
+    /// Backs the left eyebrow's tap-to-reset when a custom range is showing, so the two
+    /// dimensions are independently resettable.
+    func clearingDateRange() -> OverviewFilter {
+        var copy = self
+        copy.dateRange = nil
+        return copy
     }
 }
 

@@ -235,7 +235,27 @@ private struct OverviewMonthContent: View {
                 // can never read as all-account totals (threat T-21-05).
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 5) {
-                        Text(monthLabel).eyebrow()
+                        // The eyebrow doubles as the DATE dimension: when a custom range is set it
+                        // shows that range (never the stale month name — OVF-03) and becomes a
+                        // one-tap reset for the range only, keeping any account scope. Otherwise it
+                        // is the plain current-month label. Keeping the date here (not in the pill)
+                        // stops the header from growing/reflowing when a range is applied.
+                        if filter.dateRange != nil {
+                            Button {
+                                filter = filter.clearingDateRange()
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Text(monthLabel).eyebrow()
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(DesignTokens.label3)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Clear date range")
+                        } else {
+                            Text(monthLabel).eyebrow()
+                        }
                         Text("Overview")
                             .font(.system(size: 34, weight: .bold))
                             .foregroundStyle(DesignTokens.label)
@@ -245,7 +265,7 @@ private struct OverviewMonthContent: View {
                         filter: filter,
                         accountNames: selectedAccountNames,
                         onTap: { showFilterSheet = true },
-                        onClear: { filter = OverviewFilter() }
+                        onClear: { filter = filter.clearingAccounts() }
                     )
                 }
                 .padding(.bottom, -6)

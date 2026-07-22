@@ -1,25 +1,29 @@
 import SwiftUI
 
-/// The Overview header scope pill (OVF-03) — a single always-present control that is BOTH the
-/// filter entry point AND the active-state display (UI-REFERENCE Decision 3, which replaces the
-/// planned separate chip bar).
+/// The Overview header scope pill (OVF-03) — the always-present entry point AND active-state
+/// display for the ACCOUNT dimension of the filter (UI-REFERENCE Decision 3).
 ///
-/// - Inactive: a neutral dot + "All accounts" + a chevron; the whole capsule opens the filter sheet.
-/// - Active: an accent dot + a summary label naming the selection (accounts and/or custom range),
-///   so filtered figures can never masquerade as all-account totals (threat T-21-05). A trailing
-///   `xmark.circle.fill` replaces the chevron; ONE tap on it clears the filter without opening the
-///   sheet (`onClear` → `OverviewFilter()`), while tapping the label still opens the sheet.
+/// The pill deliberately shows ONLY the account scope; the custom date range lives in the left
+/// eyebrow (which recolours to the selected range and is tappable to reset it). Keeping the date
+/// range OUT of the pill means the pill can never grow to a long "account · date" string and
+/// reflow the header against the title — the layout stays stable when a range is applied.
+///
+/// - No account subset: a neutral dot + "All accounts" + a chevron; the capsule opens the sheet.
+/// - Account subset active: an accent dot + the account name(s), so filtered figures can never
+///   masquerade as all-account totals (threat T-21-05). A trailing `xmark.circle.fill` replaces
+///   the chevron; ONE tap clears the ACCOUNT dimension only (`onClear`, keeping any date range),
+///   while tapping the label still opens the sheet.
 ///
 /// Pure presentation — no @Query, no fetching. The caller resolves `accountNames` and gates the
 /// clear action. Styled with existing neumorphic tokens only (no DesignSystem edits).
 struct OverviewScopePill: View {
     let filter: OverviewFilter
-    /// Resolved names of the selected accounts (plus "Unassigned" when included). Empty when only
-    /// a custom date range is active — the label then shows just the range.
+    /// Resolved names of the selected accounts (plus "Unassigned" when included).
     let accountNames: [String]
     /// Opens the filter sheet.
     let onTap: () -> Void
-    /// Resets to `OverviewFilter()` — a single tap, no confirmation (OVF-03).
+    /// Clears the ACCOUNT dimension only (`filter.clearingAccounts()`) — a single tap, no
+    /// confirmation (OVF-03). A date range set from the eyebrow is preserved.
     let onClear: () -> Void
 
     var body: some View {
@@ -31,14 +35,14 @@ struct OverviewScopePill: View {
             Button(action: onTap) {
                 HStack(spacing: 7) {
                     Circle()
-                        .fill(filter.isActive ? DesignTokens.accent : DesignTokens.label3)
+                        .fill(filter.accountFilterActive ? DesignTokens.accent : DesignTokens.label3)
                         .frame(width: 8, height: 8)
                     Text(summaryLabel)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(DesignTokens.label)
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
-                    if !filter.isActive {
+                    if !filter.accountFilterActive {
                         Image(systemName: "chevron.down")
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(DesignTokens.label3)
@@ -48,7 +52,7 @@ struct OverviewScopePill: View {
             }
             .buttonStyle(.plain)
 
-            if filter.isActive {
+            if filter.accountFilterActive {
                 Button(action: onClear) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 18, weight: .semibold))
@@ -57,11 +61,11 @@ struct OverviewScopePill: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Clear filters")
+                .accessibilityLabel("Clear account filter")
             }
         }
         .padding(.leading, 14)
-        .padding(.trailing, filter.isActive ? 6 : 14)
+        .padding(.trailing, filter.accountFilterActive ? 6 : 14)
         .padding(.vertical, 9)
         .background(
             Capsule().fill(LinearGradient(
@@ -82,20 +86,8 @@ struct OverviewScopePill: View {
     // MARK: - Summary label
 
     private var summaryLabel: String {
-        guard filter.isActive else { return "All accounts" }
-        var parts: [String] = []
-        if let first = accountNames.first {
-            parts.append(accountNames.count > 1 ? "\(first) +\(accountNames.count - 1)" : first)
-        }
-        if let range = filter.dateRange {
-            // WR-01 / WR-02: one shared formatter for header + pill; discloses the from-side year
-            // on cross-year ranges so the scope label is never ambiguous.
-            // WR-04: same explicit IST calendar the header uses, so the pill label matches the
-            // @Query day-edges regardless of device timezone.
-            parts.append(OverviewFilterEngine.rangeLabel(
-                from: range.lowerBound, to: range.upperBound,
-                calendar: OverviewFilterEngine.financialCalendar))
-        }
-        return parts.isEmpty ? "Filtered" : parts.joined(separator: " · ")
+        guard filter.accountFilterActive else { return "All accounts" }
+        guard let first = accountNames.first else { return "Filtered" }
+        return accountNames.count > 1 ? "\(first) +\(accountNames.count - 1)" : first
     }
 }
