@@ -4,13 +4,21 @@
 
 **Shipped:** v1.3 Private Sync & Kitchen (2026-07-22) — see [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md). Both phones now share household data privately for free — a transport-agnostic merge engine (syncID + last-writer-wins + tombstones) over AirDrop snapshots and automatic MultipeerConnectivity sync on home WiFi, with a first-run bootstrap and a trustworthy sync surface; no cloud, no $99 account, schema stays CloudKit-ready. Adds a first-class Kitchen (pantry stock, low-stock thresholds, auto-restocking shopping list) with on-device model-chosen pantry icons, and an account × date-range filter on the Overview — on top of the v1.2 neumorphic redesign, v1.1 finance hub, and v1.0 MVP.
 
-## Next Milestone: v1.4 Finance & AI Depth (planning)
+## Current Milestone: v1.3.1 UX Polish (planning)
+
+**Goal:** A fast interim polish pass — make the app feel more premium (floating nav bar), de-crowd the Overview (remove duplicated spend charts), and make every expense editable wherever it appears. Local-only, no schema change, no new dependencies.
+
+**Target features:**
+- **Floating nav bar (#33)** — replace the native tab bar with a custom floating nav bar for a premium feel. Re-attempts v1.2's reverted DS-03 as a true custom bar.
+- **Overview declutter (#34)** — "Where it's going" donut and "By category" show the same data, and the budget section overlaps too; consolidate to a single spend-by-category view and de-crowd the dashboard.
+- **Tap-to-edit expenses everywhere (#35)** — every expense row shown anywhere (Budget filtered list, Analytics drill-downs, category views) is tappable → opens the existing edit sheet.
+
+## Following Milestone: v1.4 Finance & AI Depth (queued)
 
 **Direction:** Deepen finance and AI, and pay down two shipping-feature security gaps first. Scope lives in the GitHub tracker (nobelnrj/myhome) until formalized via `/gsd-new-milestone`:
 - **Security debt (first):** land the 4 un-merged Phase-05 Face ID review fixes (#31) and add a paired-device allowlist so auto-sync no longer trusts any LAN peer (#43).
 - **Finance depth:** bill/subscription reminders (#27), recurring-transaction detection (#28), data exports (#29), and surfacing the account scope pill in Expenses too (#44).
 - **Smarter AI:** better-grounded Overview insight / follow-ups / trend narratives (#30) — including fixing insight advice that miscounts investments as spend.
-- **v1.3.1 UX polish (may ship first):** floating nav bar (#33), Overview section de-duplication (#34), tap-to-edit expenses everywhere (#35).
 
 <details>
 <summary>Previous milestone: v1.3 Private Sync & Kitchen (shipped 2026-07-22)</summary>
@@ -95,13 +103,17 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 
 ### Active
 
-<!-- Next milestone (v1.4 Finance & AI Depth) — scoped in GitHub tracker, to be formalized via /gsd-new-milestone. -->
+<!-- Current milestone: v1.3.1 UX Polish (Phase 23). REQ-IDs in .planning/REQUIREMENTS.md. -->
 
-v1.4 direction — tracked as GitHub issues, to be assigned REQ-IDs in a fresh REQUIREMENTS.md:
+v1.3.1 UX Polish — interim polish milestone (see REQUIREMENTS.md):
+- [ ] **NAV-01**: Custom floating nav bar replacing the native tab bar (#33)
+- [ ] **OVF-04**: Overview declutter — one spend-by-category view, remove duplicated donut/budget overlap (#34)
+- [ ] **EDIT-01**: Tap-to-edit any expense row shown anywhere in the app (#35)
+
+v1.4 Finance & AI Depth — queued next, tracked as GitHub issues, REQ-IDs assigned when formalized:
 - Security debt first: merge the 4 un-landed Phase-05 Face ID review fixes (#31); paired-device allowlist for auto-sync so it no longer trusts any LAN peer (#43)
 - Finance depth: bill/subscription reminders (#27), recurring-transaction detection (#28), data exports (#29), account scope pill in Expenses (#44)
 - Smarter AI: better-grounded Overview insight / follow-ups / trend narratives, incl. not counting investments as spend (#30)
-- v1.3.1 UX polish (may ship as a fast interim milestone): floating nav bar (#33), Overview de-duplication (#34), tap-to-edit expenses everywhere (#35)
 
 ### Out of Scope
 
@@ -198,4 +210,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-22 — v1.3 Private Sync & Kitchen milestone complete (Phases 18–22); next up v1.4 Finance & AI Depth.*
+*Last updated: 2026-07-22 — v1.3.1 UX Polish milestone started (Phase 23); v1.4 Finance & AI Depth queued next.*
