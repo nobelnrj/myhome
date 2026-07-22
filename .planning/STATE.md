@@ -2,16 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
-status: ready_to_plan
-last_updated: 2026-07-22T15:52:05.168Z
-last_activity: 2026-07-22
+status: Awaiting next milestone
+last_updated: "2026-07-22T16:14:05.686Z"
+last_activity: 2026-07-22 — Milestone v1.3 completed and archived
 progress:
   total_phases: 5
   completed_phases: 5
   total_plans: 22
-  completed_plans: 109
+  completed_plans: 23
   percent: 100
-stopped_at: Phase 21 complete (3/3) — ready to discuss Phase 22
 ---
 
 # Project State
@@ -25,11 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 
 ## Current Position
 
-Phase: 22
-Plan: Not started
-Status: Ready to plan
-Next: Phase 21 (Overview Filtering) — 3 plans already written, 0 executed. Last phase of v1.3.
-Last activity: 2026-07-22
+Phase: Milestone v1.3 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-22 — Milestone v1.3 completed and archived
 
 ## Performance Metrics
 
@@ -242,6 +240,20 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 | quick_task | 260603-lvt-support-syncing-from-multiple-gmail-acco | missing/stale |
 | todo | test-isolation-swiftdata-multicontainer.md | pending (test-infra debt) |
 
+### Acknowledged at v1.3 Milestone Close (2026-07-22)
+
+All v1.3 requirements (SYNC/KTCH/ICON/OVF, 15/15) are Complete. Deferred artifacts below are pre-existing debt carried from v1.0–v1.2 plus one v1.3 manual-verification item; all mirrored in the GitHub tracker (nobelnrj/myhome issues #24 test-infra, #25 doc/nyquist debt, #26 v1.0 deferred verification):
+
+| Category | Item | Status | Tracker |
+|----------|------|--------|---------|
+| uat_gap | 09-HUMAN-UAT.md | partial (1 pending, v1.1) | #26 |
+| uat_gap | 13-HUMAN-UAT.md | testing (5 pending, v1.2) | #25 |
+| verification_gap | 08-VERIFICATION.md | human_needed (v1.1) | #26 |
+| verification_gap | 09-VERIFICATION.md | human_needed (v1.1) | #26 |
+| verification_gap | 20-VERIFICATION.md | human_needed (v1.3 kitchen; de-facto verified — shipped to both phones, in daily use) | — |
+| quick_task | 260603-lvt-support-syncing-from-multiple-gmail-acco | missing/stale (v1.0) | — |
+| todo | test-isolation-swiftdata-multicontainer.md | pending (test-infra debt) | #24 |
+
 ## Session Continuity
 
 Last session: 2026-07-22T05:34:30.526Z
@@ -250,5 +262,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Phase 14 RESUME POINT (2026-06-21): 14-CONTEXT.md committed (skin=Neomorphism, native tab bar, donut). 14-UI-SPEC.md drafted by ui-researcher. UI-checker returned BLOCKED but ONLY on a Dimension-4 typography technicality (named scale has 5 sizes / 5 weights vs the checker's max 4/2) — these are the LOCKED Phase-13 DesignTokens type roles, not sprawl. FIX = doc reframe only (split the type table into ≤4 primary roles + the rest as "contextual overrides" e.g. heroMoney 46/ultraLight, statNumber 21/light; no DesignTokens change). UI-SPEC typography section is at 14-UI-SPEC.md lines ~61-79. After reframe, re-run ui-checker, then /gsd-plan-phase 14.
-- Note: NeuTabBar.swift is orphaned (delete in Phase 14, needs pbxproj edits). CardStyle.swift deprecated, 14 call-sites migrate to .neuSurface in Phase 14.
+- Start the next milestone with /gsd-new-milestone

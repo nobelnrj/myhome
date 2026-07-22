@@ -9,7 +9,7 @@ My Home is a single-user (v1) iOS app for a two-person Indian household, built a
 - Ã¢ÂÂ **v1.0 MVP** Ã¢ÂÂ Phases 1-7 (shipped 2026-06-03) Ã¢ÂÂ see [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - Ã¢ÂÂ **v1.1 Accounts, Assets & Household Polish** Ã¢ÂÂ Phases 8-12 (shipped 2026-06-20) Ã¢ÂÂ see [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md)
 - Ã¢ÂÂ **v1.2 Neumorphic Redesign** Ã¢ Phases 13-17 (shipped 2026-07-13) Ã¢ see [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
-- ⭐ **v1.3 Private Sync & Kitchen** — Phases 18-21 (in progress) — details below
+- ✅ **v1.3 Private Sync & Kitchen** — Phases 18-22 (shipped 2026-07-22) — see [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 
 ## Phases
 
@@ -55,25 +55,18 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 
 </details>
 
----
+<details>
+<summary>✅ v1.3 Private Sync & Kitchen (Phases 18-22) — SHIPPED 2026-07-22</summary>
 
-### Phase 22: Pantry Icon Intelligence
-**Goal**: Every pantry item shows a sensible icon and tile colour — including names the keyword table has never seen — decided by the on-device model, with no network, no cost, and no new synced state.
-**Depends on**: Phase 20 (kitchen surface + `KitchenLogic.icon`) and Phase 16 (established FoundationModels patterns: availability gating, `@Generable` guided generation, fallback builder, verifier)
-**Requirements**: ICON-01, ICON-02, ICON-03
-**Success Criteria** (what must be TRUE):
-  1. Names the keyword table misses — "kitchen tissue", "fabric softener", "dish scrubber" — resolve to a meaningful icon and colour rather than the neutral bag fallback.
-  2. An invalid SF Symbol is structurally impossible: the model returns a case from a closed `@Generable` category enum, and Swift maps each case to a symbol verified to render. (A fake symbol name draws NOTHING in SwiftUI and raises no error — this bug already shipped once, in 20-03.)
-  3. Classification is device-local and never written to `PantryItem` or synced, preserving the 20-01 decision that icons are derived; with Apple Intelligence unavailable the keyword table still renders instantly.
-  4. Icon resolution never blocks the pantry list from drawing — rows render the fallback immediately and upgrade in place when classification lands.
-**Plans**: 4 plans
+- [x] Phase 18: Sync Foundation — Schema, Merge Engine & AirDrop (5/5 plans) — completed 2026-07-17
+- [x] Phase 19: Auto-Sync & Sync UX — Multipeer + Bootstrap (5/5 plans) — completed 2026-07-20
+- [x] Phase 20: Kitchen Inventory & Shopping List (5/5 plans) — completed 2026-07-21
+- [x] Phase 21: Overview Filtering (3/3 plans) — completed 2026-07-22
+- [x] Phase 22: Pantry Icon Intelligence (4/4 plans) — completed 2026-07-22
 
-Plans:
-- [x] 22-01-PLAN.md — Closed 17-case PantryCategory enum + total category→(symbol, colour) table; keyword rules refactored onto it with zero visual regression
-- [x] 22-02-PLAN.md — PantryIconCache (device-local, LRU-capped) + PantryIconClassifying seam, @Generable twin, FoundationModels classifier
-- [x] 22-03-PLAN.md — PantryIconResolver (synchronous answer now, model upgrade in place) wired into PantryItemRow + ShoppingRow
-- [ ] 22-04-PLAN.md — Reference fixture, always-on structural gates, opt-in accuracy suite, 17-tile simulator screenshot verification
-**UI hint**: yes — the model is invisible; the only visible change is better tiles.
+Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md).
+
+</details>
 
 ## Progress
 
@@ -91,103 +84,16 @@ Plans:
 | 15. Analytics Screen | v1.2 | 3/3 | Complete    | 2026-06-25 |
 | 16. AI Insight Card | v1.2 | 5/5 | Complete    | 2026-06-27 |
 | 17. Light Mode Support | v1.2 | 9/9 | Complete    | 2026-07-12 |
+| 18. Sync Foundation — Schema, Merge Engine & AirDrop | v1.3 | 5/5 | Complete | 2026-07-17 |
+| 19. Auto-Sync & Sync UX — Multipeer + Bootstrap | v1.3 | 5/5 | Complete | 2026-07-20 |
+| 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete | 2026-07-21 |
+| 21. Overview Filtering | v1.3 | 3/3 | Complete | 2026-07-22 |
+| 22. Pantry Icon Intelligence | v1.3 | 4/4 | Complete | 2026-07-22 |
 
----
+## Backlog
 
-## Phases â v1.3 Private Sync & Kitchen (Active)
+Post-v1.3 items live in the GitHub tracker (nobelnrj/myhome, Project "My Home"):
 
-**Milestone:** v1.3 Private Sync & Kitchen â Phases 18-21 (started 2026-07-16)
-**Granularity:** standard Â· **Coverage:** 12/12 requirements mapped
-
-- [x] **Phase 18: Sync Foundation â Schema, Merge Engine & AirDrop** - Syncable schema (syncID/updatedAt + tombstones), a pure tested merge engine, and device-to-device AirDrop snapshot exchange. (completed 2026-07-17)
-- [x] **Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap** - Automatic foreground P2P sync over WiFi with a first-run bootstrap and a trustworthy sync surface. (completed 2026-07-20)
-- [x] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface. (completed 2026-07-21)
-- [x] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range. (completed 2026-07-22)
-- [x] **Phase 22: Pantry Icon Intelligence** - On-device model picks each pantry item's icon from a closed category set, with the keyword table as the offline fallback. (executing BEFORE 21 — they are independent) (completed 2026-07-22)
-
-## Phase Details â v1.3
-
-### Phase 18: Sync Foundation â Schema, Merge Engine & AirDrop
-**Goal**: Two phones can exchange a full data snapshot device-to-device and merge it losslessly through a tested, transport-agnostic engine.
-**Depends on**: Nothing new (extends the existing SwiftData schema; first v1.3 phase)
-**Requirements**: SYNC-01, SYNC-02, SYNC-03
-**Success Criteria** (what must be TRUE):
-  1. Every syncable record carries a stable `syncID` and an `updatedAt` that survive an exportâimport round-trip, and re-importing the same snapshot creates no duplicates.
-  2. A record deleted on one phone stays deleted when the other phone's older snapshot arrives (tombstones/`DeletionLog` honored, no resurrection).
-  3. A snapshot exported on phone A and sent via the share sheet / AirDrop opens on phone B and merges its data in â fully device-to-device, no cloud or third party.
-  4. Exportâimportâexport is idempotent (golden round-trip test passes) and all `Decimal` values survive as strings (never JSON-Double).
-  5. A snapshot stamped with a mismatched schema version is refused rather than corrupting the store.
-**Plans**: 5 plans
-
-Plans:
-- [x] 18-01-PLAN.md — SchemaV10 (syncID/updatedAt on all 11 models) + DeletionLog + V9→V10 backfill migration + atomic typealias flip
-- [x] 18-02-PLAN.md — SyncSnapshot Codable document layer (Decimal-as-string, version-stamped codec) + pure LWW SyncMergePolicy
-- [x] 18-03-PLAN.md — SnapshotExporter/SnapshotImporter merge engine + golden round-trip test
-- [x] 18-04-PLAN.md — Tombstone-on-delete (deleteSynced) at all delete sites + updatedAt touch() stamping
-- [x] 18-05-PLAN.md — .myhomesnap UTType + share-sheet/AirDrop export + onOpenURL import + confirm-merge UI (human AirDrop UAT approved)
-**UI hint**: yes
-
-### Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap
-**Goal**: The two phones keep each other up to date automatically over home WiFi, with a first-run bootstrap and a clear sync surface that never loses local edits.
-**Depends on**: Phase 18 (reuses the SYNC-02 merge engine as the transport-agnostic core)
-**Requirements**: SYNC-04, SYNC-05
-**Success Criteria** (what must be TRUE):
-  1. With both apps foregrounded on the same network, a change made on one phone appears on the other automatically over MultipeerConnectivity (encrypted `MCSession`).
-  2. A manual "Sync now" action always works as a fallback when auto-sync is unavailable.
-  3. A first-time "bootstrap this phone" flow seeds a fresh install with a full copy of the other phone's data.
-  4. The sync surface shows last-synced time and current status with a clear affordance.
-  5. Local edits are never silently lost during a sync or merge.
-**Plans**: 5 plans
-
-Plans:
-- [x] 19-01-PLAN.md — SyncTransport seam + SyncEnvelope wire format + MultipeerSyncTransport (encrypted MCSession, invite tie-break, Info.plist local-network keys)
-- [x] 19-02-PLAN.md — SyncCoordinator + SyncStatusStore: connect/change-triggered exchange over the seam, echo suppression, retry, Sync now, scenePhase foreground-only wiring
-- [x] 19-03-PLAN.md — Neumorphic Sync surface in Settings: status, peer name, last-synced, merge results, Sync Now (SyncStatusPresentation tested)
-- [x] 19-04-PLAN.md — Bootstrap flow: first-run "set up from your other phone" sheet + BootstrapAdvisor (merge-never-clobber proven)
-- [ ] 19-05-PLAN.md — Phase gate: full-suite + regression sweep, UI review set, two-device end-of-phase human verification
-**UI hint**: yes
-
-### Phase 20: Kitchen Inventory & Shopping List
-**Goal**: The household can track pantry stock and shop from an auto-populated list, on a first-class neumorphic surface whose data syncs between phones.
-**Depends on**: Phase 18 (kitchen models must adopt `syncID`/`updatedAt` from birth so they flow through the sync engine â KTCH-04)
-**Requirements**: KTCH-01, KTCH-02, KTCH-03, KTCH-04
-**Success Criteria** (what must be TRUE):
-  1. User can add/edit pantry items with a quantity and unit and mark an item used (decrement) or restocked (increment).
-  2. Items at or below their per-item low-stock threshold are visually flagged as low/out of stock.
-  3. Low/out-of-stock items auto-populate a shopping list; checking an item off while shopping restocks the pantry quantity, and manually-added shopping items are supported.
-  4. Kitchen matches the v1.2 neumorphic design system in light + dark, and its data syncs to the other phone through the SYNC engine.
-**Plans**: 5 plans
-
-Plans:
-- [x] 20-01-PLAN.md — SchemaV11 (PantryItem + ShoppingListItem, SyncStamped from birth) + V10→V11 migration + atomic typealias flip
-- [x] 20-02-PLAN.md — Sync wiring: kitchen DTOs, SyncEntityKind cases, snapshot version 10→11, exporter/importer + adoption + round-trip tests
-- [x] 20-03-PLAN.md — Pantry UI: neumorphic list, add/edit, used/restocked steppers, low/out-of-stock flags + Overview navigation entry
-- [x] 20-04-PLAN.md — Shopping list: auto-populated from low/out pantry, check-off restocks pantry, manual extras + segmented Kitchen host
-- [x] 20-05-PLAN.md — Phase gate: full-suite + invariants + both-theme review set + end-of-phase human verification
-**UI hint**: yes
-
-### Phase 21: Overview Filtering
-**Goal**: The Overview can be narrowed to any account subset combined with a custom date range, with every figure recomputing consistently.
-**Depends on**: Nothing sync-related â extends the existing Overview/donut/expense-query plumbing (can be sequenced independently)
-**Requirements**: OVF-01, OVF-02, OVF-03
-**Success Criteria** (what must be TRUE):
-  1. User can filter the Overview (net cash flow hero, spend donut, totals) to a single account or a chosen subset; all-accounts remains the default.
-  2. The account filter combines with a custom date range, and every Overview figure recomputes correctly for the account Ã date-range selection (reusing the confirmed-self-transfer exclusion).
-  3. The active filter is clearly shown and clears in one tap, with no stale/unfiltered figure left behind.
-**Plans**: 3 plans
-
-Plans:
-- [x] 21-01-PLAN.md — Filter model + pure filtering engine + tests (OverviewFilter, OverviewFilterEngine)
-- [x] 21-02-PLAN.md — Thread the filter through Overview aggregation (recompute + stale-figure suppression)
-- [x] 21-03-PLAN.md — Filter UI: sheet, active-filter chip bar, one-tap clear
-**UI hint**: yes
-
-## Progress â v1.3
-
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 5/5 | Complete   | 2026-07-17 |
-| 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 6/5 | Complete   | 2026-07-20 |
-| 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
-| 21. Overview Filtering | v1.3 | 3/3 | Complete    | 2026-07-22 |
-| 22. Pantry Icon Intelligence | v1.3 | 4/4 | Complete   | 2026-07-22 |
+- **v1.3.1 UX Polish** — floating nav bar (#33), Overview de-duplication (#34), tap-to-edit expenses everywhere (#35)
+- **v1.4 Finance & AI Depth** — security debt first (#31 Face ID review fixes, #43 paired-device sync allowlist), then bill reminders (#27), recurring detection (#28), exports (#29), smarter AI (#30), Expenses scope pill (#44)
+- **Untriaged debt** — test-infra crash (#24), doc/Nyquist gaps (#25), v1.0 deferred verification (#26)

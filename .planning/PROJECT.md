@@ -2,24 +2,32 @@
 
 ## Current State
 
-**Shipped:** v1.2 Neumorphic Redesign (2026-07-13) — see [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md). The app is now a polished, cohesive neumorphic (Soft UI) product with light + dark theming: a single-source design system, every screen restyled, a "where it's going" spend donut on Overview, a dedicated Analytics screen (trend chart, category bars, delta chips), and an on-device AI Insight card (Apple FoundationModels, iOS 26) — on top of the v1.1 finance hub and v1.0 MVP.
+**Shipped:** v1.3 Private Sync & Kitchen (2026-07-22) — see [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md). Both phones now share household data privately for free — a transport-agnostic merge engine (syncID + last-writer-wins + tombstones) over AirDrop snapshots and automatic MultipeerConnectivity sync on home WiFi, with a first-run bootstrap and a trustworthy sync surface; no cloud, no $99 account, schema stays CloudKit-ready. Adds a first-class Kitchen (pantry stock, low-stock thresholds, auto-restocking shopping list) with on-device model-chosen pantry icons, and an account × date-range filter on the Overview — on top of the v1.2 neumorphic redesign, v1.1 finance hub, and v1.0 MVP.
 
-## Current Milestone: v1.3 Private Sync & Kitchen
+## Next Milestone: v1.4 Finance & AI Depth (planning)
 
-**Goal:** Let both phones share household data privately for free (no cloud, no $99 Apple Developer account), add a kitchen inventory + shopping list, and make the Overview filterable by account and date — turning My Home into a genuinely shared two-person hub.
-
-**Target features:**
-- **Private P2P sync** — a transport-agnostic merge engine (syncID + last-writer-wins + tombstones) with two free, on-device transports: AirDrop snapshot exchange and automatic MultipeerConnectivity sync over home WiFi. No cloud, no third party, schema stays CloudKit-ready.
-- **Kitchen inventory** — pantry stock tracking, per-item low-stock thresholds, and an auto-populated shopping list that restocks on check-off; a first-class neumorphic surface that syncs.
-- **Overview filtering** — filter the Overview (cash flow, spend donut, totals) by account or a subset of accounts, combinable with a custom date range.
-
-**Key context:**
-- Free-tier constraints confirmed by research (2026): CloudKit/iCloud/Push are paid-only; MultipeerConnectivity + Network.framework need no entitlement and work on a free Personal Team. Sync is foreground-only P2P (no background sync without paid Push) — fine for a two-person household on shared WiFi.
-- The 7-day free-provisioning app expiry is handled OUT of the app by `scripts/auto-deploy.sh` (launchd-scheduled xcodebuild + devicectl reinstall), not by a milestone requirement.
-- **Deferred to v1.4:** deepen finance (bill reminders, recurring detection, exports) and smarter AI (Overview insight, follow-ups, trend narratives) — scoped when they become active.
+**Direction:** Deepen finance and AI, and pay down two shipping-feature security gaps first. Scope lives in the GitHub tracker (nobelnrj/myhome) until formalized via `/gsd-new-milestone`:
+- **Security debt (first):** land the 4 un-merged Phase-05 Face ID review fixes (#31) and add a paired-device allowlist so auto-sync no longer trusts any LAN peer (#43).
+- **Finance depth:** bill/subscription reminders (#27), recurring-transaction detection (#28), data exports (#29), and surfacing the account scope pill in Expenses too (#44).
+- **Smarter AI:** better-grounded Overview insight / follow-ups / trend narratives (#30) — including fixing insight advice that miscounts investments as spend.
+- **v1.3.1 UX polish (may ship first):** floating nav bar (#33), Overview section de-duplication (#34), tap-to-edit expenses everywhere (#35).
 
 <details>
-<summary>Previous milestone: v1.2 Neumorphic Redesign (shipped 2026-07-13)</summary>
+<summary>Previous milestone: v1.3 Private Sync & Kitchen (shipped 2026-07-22)</summary>
+
+**Goal:** Let both phones share household data privately for free (no cloud, no $99 Apple Developer account), add a kitchen inventory + shopping list, and make the Overview filterable by account and date.
+
+- Private P2P sync — transport-agnostic merge engine (syncID + LWW + tombstones); AirDrop snapshot exchange + automatic MultipeerConnectivity sync over home WiFi; first-run bootstrap; no cloud, schema stays CloudKit-ready (SchemaV9→V11).
+- Kitchen inventory — pantry stock, per-item low-stock thresholds, auto-populated shopping list that restocks on check-off; a synced neumorphic surface.
+- Pantry icon intelligence — on-device model (Apple FoundationModels) picks each item's icon from a closed category set, keyword table as offline fallback; never persisted or synced.
+- Overview filtering — filter cash flow, spend donut, and totals by account subset combined with a custom date range.
+
+Foreground-only P2P (no paid Push/CloudKit), free on-device transports only, zero new paid dependencies. 7-day provisioning expiry handled outside the app by `scripts/auto-deploy.sh`.
+
+</details>
+
+<details>
+<summary>Earlier milestone: v1.2 Neumorphic Redesign (shipped 2026-07-13)</summary>
 
 **Goal:** A full neumorphic (Soft UI) visual redesign of the entire app, plus the design handoff's net-new surfaces — making My Home look and feel like a polished, cohesive personal-finance product rather than a stock SwiftUI app.
 
@@ -79,17 +87,21 @@ If everything else fails, the email-driven expense ingestion + manual fallback m
 - ✓ Gmail read-only OAuth (ASWebAuthenticationSession + PKCE, no SDK), Keychain token, 30-day backfill, Sync now, last-synced, reconnect CTA — v1.0 (Phase 6)
 - ✓ Automated bank-email ingestion — HDFC + ICICI parsers, 0.85-confidence triage, Review Inbox, dedup, reversal/refund handling, merchant normalization, parser provenance, best-effort BGAppRefreshTask — v1.0 (Phase 7)
 - ✓ On-device AI Insight card on Analytics — FoundationModels (Apple Intelligence) natural-language spending insight, silent absence on unavailable devices, streaming typewriter + Reduce-Motion degradation, numeric-integrity verifier (no model-invented figures), templated fallback — v1.2 (Phase 16; on-device sign-off 2026-06-27) [AI-01..AI-05]
+- ✓ Accounts management + self-transfer detection + net-worth asset tracker (MF/stocks/NPS via free AMFI NAV, manual override, SIP automation, NPS NAV refresh) + daily-routine notes enhancement; stabilization pass — v1.1 (Phases 8–12, SchemaV5→V9)
+- ✓ Full neumorphic (Soft UI) redesign — single-source design system + `NeuSurface`, every screen restyled, Overview spend donut, dedicated Analytics screen, and full light-mode support with byte-identical dark rendering — v1.2 (Phases 13–17)
+- ✓ Private P2P household sync — transport-agnostic merge engine (syncID + LWW + tombstones), AirDrop snapshot exchange + automatic MultipeerConnectivity sync over home WiFi, first-run bootstrap, trustworthy sync surface; no cloud, CloudKit-ready SchemaV9→V11 — v1.3 (Phases 18–19) [SYNC-01..05]
+- ✓ Kitchen inventory — pantry stock, per-item low-stock thresholds, auto-restocking shopping list; a synced neumorphic surface with on-device model-chosen pantry icons — v1.3 (Phases 20, 22) [KTCH-01..04, ICON-01..03]
+- ✓ Overview filtering — account subset × custom date range, reusing confirmed-self-transfer exclusion, one-tap clear — v1.3 (Phase 21) [OVF-01..03]
 
 ### Active
 
-<!-- Next milestone (v1.1) scope — to be defined via /gsd-new-milestone. -->
+<!-- Next milestone (v1.4 Finance & AI Depth) — scoped in GitHub tracker, to be formalized via /gsd-new-milestone. -->
 
-v1.1 scope — to be assigned REQ-IDs in REQUIREMENTS.md:
-- Accounts management (bank accounts, balances, per-account spend)
-- Self-transfer auto-detection + confirm (exclude from spend)
-- Asset tracker (MF / stocks / NPS / account balances → net worth) with free public NAV/quote APIs
-- Notes enhancement (daily routine → calendar daily reminder; day-to-day features)
-- Stabilization fixes (add-category ordering, sync/notes crash, daily-routine end-of-day reset)
+v1.4 direction — tracked as GitHub issues, to be assigned REQ-IDs in a fresh REQUIREMENTS.md:
+- Security debt first: merge the 4 un-landed Phase-05 Face ID review fixes (#31); paired-device allowlist for auto-sync so it no longer trusts any LAN peer (#43)
+- Finance depth: bill/subscription reminders (#27), recurring-transaction detection (#28), data exports (#29), account scope pill in Expenses (#44)
+- Smarter AI: better-grounded Overview insight / follow-ups / trend narratives, incl. not counting investments as spend (#30)
+- v1.3.1 UX polish (may ship as a fast interim milestone): floating nav bar (#33), Overview de-duplication (#34), tap-to-edit expenses everywhere (#35)
 
 ### Out of Scope
 
@@ -97,7 +109,7 @@ v1.1 scope — to be assigned REQ-IDs in REQUIREMENTS.md:
 
 - **Android / cross-platform** — Both users are on iPhone; cross-platform doubles work for zero benefit.
 - **SMS reading on iOS** — iOS does not expose SMS to third-party apps; pursuing this is wasted effort. Email-based ingestion replaces it.
-- **Real cross-Apple-ID sharing in v1** — Requires the $99/yr Apple Developer Program for reliable CloudKit sharing. v1 is single-user on Reo's phone; sharing is a deliberate later phase after the upgrade decision.
+- **Cloud / cross-Apple-ID sharing when phones are apart** — Reliable CloudKit sharing needs the $99/yr Apple Developer Program. v1.3 shipped free P2P sync for the two phones **on the same network** (AirDrop + MultipeerConnectivity); sync-when-apart via a cloud relay stays deferred as the future paid-upgrade trigger.
 - **Open-Banking / Plaid / TrueLayer integrations** — Cost, complexity, and weaker India coverage versus free Gmail-based ingestion.
 - **Multi-currency display / FX conversion in v1** — Schema will accommodate it; UI will not. Adds complexity for no current need.
 - **watchOS app, widgets, complications** — Explicitly a post-v1 goal once the core app is loved and used daily.
@@ -109,7 +121,7 @@ v1.1 scope — to be assigned REQ-IDs in REQUIREMENTS.md:
 
 ## Context
 
-**Current state (v1.0, 2026-06-03):** ~16,000 LOC Swift across 106 files, 209 commits over ~6 days. Stack: Swift 6.2 / SwiftUI / SwiftData, iOS 17+, schema at SchemaV4, local-only on one device. All 56 v1 requirements complete. 4 open human-verification artifacts deferred (manual on-device UAT/verification passes — see STATE.md). Confidence threshold (0.85) and BGAppRefreshTask behavior want real-week validation.
+**Current state (v1.3, 2026-07-22):** Swift 6.2 / SwiftUI / SwiftData, iOS 17+, schema at SchemaV11. No longer single-device — data syncs P2P between two phones (foreground-only, over AirDrop + MultipeerConnectivity), still local-only with no cloud. Neumorphic light+dark UI; on-device Apple FoundationModels used for the AI Insight card and pantry icons. v1.3 requirements 15/15 complete. Deferred debt carried at close (all mirrored in the GitHub tracker): test-infra multi-container crash (#24), doc/Nyquist gaps (#25), v1.0-era human-verification passes (#26), and one v1.3 kitchen verification that is de-facto validated (shipped to both phones, in daily use). Two known security gaps queued first for v1.4: un-landed Face ID review fixes (#31) and auto-sync trusting any LAN peer (#43).
 
 **Users:** Reo (primary, developer) and his wife. Two iPhones, two Apple Watches. iCloud users. Based in India. Daily-use household tool — not a side project to ship publicly.
 
@@ -153,7 +165,10 @@ v1.1 scope — to be assigned REQ-IDs in REQUIREMENTS.md:
 |----------|-----------|---------|
 | iOS-only, no cross-platform | Both users on iPhone; goals include watchOS widgets which RN can't deliver | ✓ Good — v1.0 shipped iOS-only |
 | Swift + SwiftUI (not React Native) | iOS-only removes RN's main benefit; doubles as Swift learning vehicle | ✓ Good — full v1.0 built in Swift 6.2 / SwiftUI / SwiftData |
-| CloudKit for sync (when sync arrives) | Free, native, fits 2-user shared-data model, no backend to host | — Pending (deferred to v2; schema kept CloudKit-ready throughout) |
+| CloudKit for sync (when sync arrives) | Free, native, fits 2-user shared-data model, no backend to host | — Deferred — v1.3 shipped free P2P sync (MultipeerConnectivity + AirDrop) instead; CloudKit stays the future paid-upgrade trigger for sync-when-apart. Schema kept CloudKit-ready throughout. |
+| Free P2P sync over MultipeerConnectivity + AirDrop (not CloudKit) | CloudKit/iCloud/Push are paid-only; MC needs no entitlement on a free Personal Team; a two-person household shares home WiFi | ✓ Good — v1.3 shipped foreground-only encrypted P2P with a tested transport-agnostic merge engine (LWW + tombstones), reused verbatim across AirDrop + Multipeer |
+| App-level identity + LWW + tombstones for merge (no `.unique`) | Schema has no unique constraints (CloudKit-ready); identity must be app-level `syncID: UUID`, conflicts resolve last-writer-wins on `updatedAt`, deletes need tombstones or they resurrect | ✓ Good — v1.3 golden round-trip idempotence proven; no-resurrection pinned by test |
+| On-device model for pantry icons (closed category set) | Reuse the Phase-16 FoundationModels stack; a fake SF Symbol draws nothing silently, so the model must pick from a closed enum Swift maps to a verified symbol | ✓ Good — v1.3 Phase 22; device-local, never persisted or synced, keyword-table fallback |
 | Gmail-based email ingestion (not SMS) | iOS blocks SMS access; email is the only legitimate zero-touch path on iOS | ✓ Good — Phase 7 ingested real HDFC/ICICI emails zero-touch |
 | Single-user v1 on Reo's phone | Free Apple Developer account can't do reliable CloudKit sharing across Apple IDs | ✓ Good — v1.0 runs local-only on one device |
 | Defer $99/yr Apple Developer cost | "Prove before paying" — validate the app is used daily before committing the only recurring spend | — Pending (v2 trigger; awaiting real v1 usage) |
@@ -183,4 +198,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-27 — Phase 16 (AI Insight Card) complete; v1.2 Neumorphic Redesign phases 13–16 all shipped.*
+*Last updated: 2026-07-22 — v1.3 Private Sync & Kitchen milestone complete (Phases 18–22); next up v1.4 Finance & AI Depth.*
