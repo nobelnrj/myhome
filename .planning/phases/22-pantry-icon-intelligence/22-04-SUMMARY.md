@@ -125,7 +125,34 @@ None.
 
 ## Checkpoint Status
 
-**Task 3 (human-verify, blocking) is PENDING.** Not self-approved. The two screenshots and the eval figures above are what the user is being asked to rule on, in particular whether the 37.5% simulator accuracy warrants a device rerun or a prompt change before the phase closes.
+**Task 3 (human-verify, blocking) — APPROVED by the user 2026-07-22.**
+
+The gallery screenshots were reviewed and accepted. Two follow-on changes were made
+during the checkpoint at the user's direction (both post-checkpoint commits on the
+branch, all with the full suite green at 715):
+
+- **Prompt glossed → accuracy 37.5% → 75%.** The initial 37.5% was a prompt defect,
+  not a weak simulator model: the `@Generable` enum handed the model bare identifiers
+  (`grainStaple`, `oilFat`) with no meaning. Adding a category legend anchored on this
+  household's vocabulary (atta/dal/rava/jaggery/ghee) moved overall accuracy to 75%,
+  non-regression to 90%, and the motivating names to 6/6. Commit `f644105`.
+- **Category set expanded 17 → 22.** User asked why the set was so limited. Added
+  meatSeafood, healthMedicine, babyCare, household, nutsDryFruit — all verified
+  rendering. Commit `f1e5f8c`.
+- **spice given its own tile** (`flame.fill` on catDining) — it previously shared
+  grainStaple's exact amber box. Commit `548a706`.
+
+**Honest state of the opt-in accuracy eval at close:** 75% overall / 90% non-regression,
+both still below the AI-SPEC's aspirational 90% / 100% thresholds. This is NOT claimed as
+a pass. Per AI-SPEC §5.2 the accuracy suite is deliberately opt-in and non-blocking
+because it is non-deterministic; the BLOCKING gates (structural symbol validity, fallback,
+no-leak, non-blocking render, human screenshot review) are all green. The residual misses
+are mostly fixture-label disagreements where the model is arguably right (`sugar`/`jaggery`
+→ grainStaple, `coconut`/`tamarind` → fruit) rather than model errors; only `ghee` →
+grainStaple is a clear miss. Left for tuning against real device data post-ship rather than
+graded by relabelling our own fixture to pass. Known gap carried forward:
+`nutsDryFruit` uses `laurel.leading`, which renders but reads as a botanical branch — SF
+Symbols has no clean nut/dry-fruit glyph.
 
 ## Self-Check: PASSED
 

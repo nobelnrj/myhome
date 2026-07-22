@@ -103,7 +103,7 @@ Plans:
 - [x] **Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap** - Automatic foreground P2P sync over WiFi with a first-run bootstrap and a trustworthy sync surface. (completed 2026-07-20)
 - [x] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface. (completed 2026-07-21)
 - [ ] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range.
-- [ ] **Phase 22: Pantry Icon Intelligence** - On-device model picks each pantry item's icon from a closed category set, with the keyword table as the offline fallback. (executing BEFORE 21 — they are independent)
+- [x] **Phase 22: Pantry Icon Intelligence** - On-device model picks each pantry item's icon from a closed category set, with the keyword table as the offline fallback. (executing BEFORE 21 — they are independent) (completed 2026-07-22)
 
 ## Phase Details â v1.3
 
@@ -190,4 +190,4 @@ Plans:
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 6/5 | Complete   | 2026-07-20 |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
-| 22. Pantry Icon Intelligence | v1.3 | 4/4 | Awaiting Verify |  |
+| 22. Pantry Icon Intelligence | v1.3 | 4/4 | Complete   | 2026-07-22 |
