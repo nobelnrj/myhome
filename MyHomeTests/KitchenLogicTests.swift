@@ -159,4 +159,56 @@ struct KitchenLogicTests {
         #expect(KitchenLogic.icon(forName: nil).symbol == "bag.fill")
         #expect(KitchenLogic.icon(forName: "   ").symbol == "bag.fill")
     }
+
+    // MARK: - Keyword → category seam (22-01, ICON-02)
+    //
+    // The three tests above are the NON-REGRESSION proof that routing the keyword table through
+    // PantryCategory changed no shipped tile — they must keep passing unedited. The tests below
+    // pin the new seam that 22-02's cache and 22-03's model resolver build on.
+
+    @Test("Keyword matching yields the category behind each mockup item")
+    func keywordCategoryResolvesMockupItems() {
+        #expect(KitchenLogic.keywordCategory(forName: "Milk") == .dairy)
+        #expect(KitchenLogic.keywordCategory(forName: "Eggs") == .eggs)
+        #expect(KitchenLogic.keywordCategory(forName: "Sona Masoori rice") == .grainStaple)
+        #expect(KitchenLogic.keywordCategory(forName: "Filter coffee") == .brew)
+        #expect(KitchenLogic.keywordCategory(forName: "Cooking oil") == .oilFat)
+        #expect(KitchenLogic.keywordCategory(forName: "Onions") == .produce)
+        #expect(KitchenLogic.keywordCategory(forName: "Dishwash liquid") == .cleaning)
+    }
+
+    @Test("Spices render a different tile from staples (spice separated 2026-07-22)")
+    func keywordCategorySeparatesSpiceFromStaple() {
+        #expect(KitchenLogic.keywordCategory(forName: "Garam masala") == .spice)
+        #expect(KitchenLogic.keywordCategory(forName: "Toor dal") == .grainStaple)
+        // spice was given its own glyph at the user's request — the two tiles now differ, which is
+        // the whole point of the change (they used to be the identical amber box).
+        #expect(KitchenLogic.icon(forName: "Garam masala").symbol == "flame.fill")
+        #expect(KitchenLogic.icon(forName: "Toor dal").symbol == "shippingbox.fill")
+        #expect(KitchenLogic.icon(forName: "Garam masala").symbol
+                != KitchenLogic.icon(forName: "Toor dal").symbol)
+    }
+
+    @Test("No keyword match means nil — 'no opinion', distinct from a confident .other")
+    func keywordCategoryReturnsNilWhenItHasNoOpinion() {
+        #expect(KitchenLogic.keywordCategory(forName: "Zqx widget") == nil)
+        #expect(KitchenLogic.keywordCategory(forName: "") == nil)
+        #expect(KitchenLogic.keywordCategory(forName: "   ") == nil)
+        #expect(KitchenLogic.keywordCategory(forName: nil) == nil)
+    }
+
+    @Test("Keyword categorisation is case-insensitive and whitespace-trimmed")
+    func keywordCategoryIsCaseInsensitive() {
+        #expect(KitchenLogic.keywordCategory(forName: "  ATTA  ") == .grainStaple)
+        #expect(KitchenLogic.keywordCategory(forName: "toor DAL") == .grainStaple)
+    }
+
+    @Test("normalizedIconKey is the one normalisation rule (22-02 caches on it)")
+    func normalizedIconKeyTrimsAndLowercases() {
+        #expect(KitchenLogic.normalizedIconKey(forName: "  Sona Masoori RICE ") == "sona masoori rice")
+        #expect(KitchenLogic.normalizedIconKey(forName: "Milk") == "milk")
+        #expect(KitchenLogic.normalizedIconKey(forName: "") == nil)
+        #expect(KitchenLogic.normalizedIconKey(forName: "   ") == nil)
+        #expect(KitchenLogic.normalizedIconKey(forName: nil) == nil)
+    }
 }

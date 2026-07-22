@@ -94,7 +94,19 @@
 		A1904BAT /* BootstrapAdvisorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1904BAT /* BootstrapAdvisorTests.swift */; };
 		A1803SRTT /* SnapshotRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1803SRTT /* SnapshotRoundTripTests.swift */; };
 		A2003KL /* KitchenLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KL /* KitchenLogic.swift */; };
+		A2201PC /* PantryCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2201PC /* PantryCategory.swift */; };
+		A2202IC /* PantryIconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2202IC /* PantryIconCache.swift */; };
+		A2202ICL /* PantryIconClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2202ICL /* PantryIconClassifier.swift */; };
+		A2203IR /* PantryIconResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2203IR /* PantryIconResolver.swift */; };
+		A2204IG /* PantryIconGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2204IG /* PantryIconGalleryView.swift */; };
 		A2003KLT /* KitchenLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KLT /* KitchenLogicTests.swift */; };
+		A2201PCT /* PantryCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2201PCT /* PantryCategoryTests.swift */; };
+		A2202ICT /* PantryIconCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2202ICT /* PantryIconCacheTests.swift */; };
+		A2202ICLT /* PantryIconClassifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2202ICLT /* PantryIconClassifierTests.swift */; };
+		A2203IRT /* PantryIconResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2203IRT /* PantryIconResolverTests.swift */; };
+		A2204FIX /* PantryIconFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2204FIX /* PantryIconFixture.swift */; };
+		A2204SGT /* PantryIconStructuralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2204SGT /* PantryIconStructuralTests.swift */; };
+		A2204EVT /* PantryIconEvalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2204EVT /* PantryIconEvalTests.swift */; };
 		A2004SLT /* ShoppingListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2004SLT /* ShoppingListTests.swift */; };
 		A2003KV /* KitchenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003KV /* KitchenView.swift */; };
 		A2003PIR /* PantryItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2003PIR /* PantryItemRow.swift */; };
@@ -370,7 +382,19 @@
 		F1904BAT /* BootstrapAdvisorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BootstrapAdvisorTests.swift; sourceTree = "<group>"; };
 		F1803SRTT /* SnapshotRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotRoundTripTests.swift; sourceTree = "<group>"; };
 		F2003KL /* KitchenLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenLogic.swift; sourceTree = "<group>"; };
+		F2201PC /* PantryCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryCategory.swift; sourceTree = "<group>"; };
+		F2202IC /* PantryIconCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconCache.swift; sourceTree = "<group>"; };
+		F2202ICL /* PantryIconClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconClassifier.swift; sourceTree = "<group>"; };
+		F2203IR /* PantryIconResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconResolver.swift; sourceTree = "<group>"; };
+		F2204IG /* PantryIconGalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconGalleryView.swift; sourceTree = "<group>"; };
 		F2003KLT /* KitchenLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenLogicTests.swift; sourceTree = "<group>"; };
+		F2201PCT /* PantryCategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryCategoryTests.swift; sourceTree = "<group>"; };
+		F2202ICT /* PantryIconCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconCacheTests.swift; sourceTree = "<group>"; };
+		F2202ICLT /* PantryIconClassifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconClassifierTests.swift; sourceTree = "<group>"; };
+		F2203IRT /* PantryIconResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconResolverTests.swift; sourceTree = "<group>"; };
+		F2204FIX /* PantryIconFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconFixture.swift; sourceTree = "<group>"; };
+		F2204SGT /* PantryIconStructuralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconStructuralTests.swift; sourceTree = "<group>"; };
+		F2204EVT /* PantryIconEvalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryIconEvalTests.swift; sourceTree = "<group>"; };
 		F2004SLT /* ShoppingListTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListTests.swift; sourceTree = "<group>"; };
 		F2003KV /* KitchenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitchenView.swift; sourceTree = "<group>"; };
 		F2003PIR /* PantryItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PantryItemRow.swift; sourceTree = "<group>"; };
@@ -592,6 +616,11 @@
 			isa = PBXGroup;
 			children = (
 				F2003KL /* KitchenLogic.swift */,
+				F2201PC /* PantryCategory.swift */,
+				F2202IC /* PantryIconCache.swift */,
+				F2202ICL /* PantryIconClassifier.swift */,
+				F2203IR /* PantryIconResolver.swift */,
+				F2204IG /* PantryIconGalleryView.swift */,
 				F2003EPI /* EditPantryItemView.swift */,
 				F2003PIR /* PantryItemRow.swift */,
 				F2004SR /* ShoppingRow.swift */,
@@ -969,6 +998,13 @@
 				F1803SRTT /* SnapshotRoundTripTests.swift */,
 				F2002KST /* KitchenSyncTests.swift */,
 				F2003KLT /* KitchenLogicTests.swift */,
+				F2201PCT /* PantryCategoryTests.swift */,
+				F2202ICT /* PantryIconCacheTests.swift */,
+				F2202ICLT /* PantryIconClassifierTests.swift */,
+				F2203IRT /* PantryIconResolverTests.swift */,
+				F2204FIX /* PantryIconFixture.swift */,
+				F2204SGT /* PantryIconStructuralTests.swift */,
+				F2204EVT /* PantryIconEvalTests.swift */,
 				F2004SLT /* ShoppingListTests.swift */,
 				F1803SNIT /* SnapshotImporterTests.swift */,
 				F1804DTT /* DeletionTrackingTests.swift */,
@@ -1257,6 +1293,11 @@
 				A2001PI /* PantryItem.swift in Sources */,
 				A2001SLI /* ShoppingListItem.swift in Sources */,
 				A2003KL /* KitchenLogic.swift in Sources */,
+				A2201PC /* PantryCategory.swift in Sources */,
+				A2202IC /* PantryIconCache.swift in Sources */,
+				A2202ICL /* PantryIconClassifier.swift in Sources */,
+				A2203IR /* PantryIconResolver.swift in Sources */,
+				A2204IG /* PantryIconGalleryView.swift in Sources */,
 				A2003KV /* KitchenView.swift in Sources */,
 				A2003PIR /* PantryItemRow.swift in Sources */,
 				A2004SR /* ShoppingRow.swift in Sources */,
@@ -1384,6 +1425,13 @@
 				A1802SMPT /* SyncMergePolicyTests.swift in Sources */,
 				A1803SRTT /* SnapshotRoundTripTests.swift in Sources */,
 				A2003KLT /* KitchenLogicTests.swift in Sources */,
+				A2201PCT /* PantryCategoryTests.swift in Sources */,
+				A2202ICT /* PantryIconCacheTests.swift in Sources */,
+				A2202ICLT /* PantryIconClassifierTests.swift in Sources */,
+				A2203IRT /* PantryIconResolverTests.swift in Sources */,
+				A2204FIX /* PantryIconFixture.swift in Sources */,
+				A2204SGT /* PantryIconStructuralTests.swift in Sources */,
+				A2204EVT /* PantryIconEvalTests.swift in Sources */,
 				A2004SLT /* ShoppingListTests.swift in Sources */,
 				A2002KST /* KitchenSyncTests.swift in Sources */,
 				A1803SNIT /* SnapshotImporterTests.swift in Sources */,

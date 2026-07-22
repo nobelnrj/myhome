@@ -41,9 +41,9 @@
      FoundationModels stack as the AI insight card (Phase 16) — no network, no cost, no new
      synced state. -->
 
-- [ ] **ICON-01**: A pantry item's icon and tile colour are chosen by the on-device model from its name, so unseen names ("kitchen tissue", "fabric softener", "dish scrubber") get a meaningful icon instead of the neutral fallback.
-- [ ] **ICON-02**: The model cannot produce an invalid SF Symbol — it selects a category from a closed set, and Swift maps each category to a symbol verified to render.
-- [ ] **ICON-03**: Classification is device-local and never persisted on PantryItem or synced; when the on-device model is unavailable the keyword table + neutral fallback still render immediately, and icon resolution never blocks the pantry list from drawing.
+- [x] **ICON-01**: A pantry item's icon and tile colour are chosen by the on-device model from its name, so unseen names ("kitchen tissue", "fabric softener", "dish scrubber") get a meaningful icon instead of the neutral fallback.
+- [x] **ICON-02**: The model cannot produce an invalid SF Symbol — it selects a category from a closed set, and Swift maps each category to a symbol verified to render.
+- [x] **ICON-03**: Classification is device-local and never persisted on PantryItem or synced; when the on-device model is unavailable the keyword table + neutral fallback still render immediately, and icon resolution never blocks the pantry list from drawing.
 
 ### Overview Filtering (OVF)
 
@@ -86,9 +86,9 @@
 | KTCH-02 | Phase 20 | Complete |
 | KTCH-03 | Phase 20 | Complete |
 | KTCH-04 | Phase 20 | Complete |
-| ICON-01 | Phase 22 | Pending |
-| ICON-02 | Phase 22 | Pending |
-| ICON-03 | Phase 22 | Pending |
+| ICON-01 | Phase 22 | Complete |
+| ICON-02 | Phase 22 | Complete |
+| ICON-03 | Phase 22 | Complete |
 | OVF-01 | Phase 21 | Pending |
 | OVF-02 | Phase 21 | Pending |
 | OVF-03 | Phase 21 | Pending |

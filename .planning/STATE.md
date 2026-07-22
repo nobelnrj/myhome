@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
 status: executing
-last_updated: "2026-07-21T17:02:50.062Z"
-last_activity: 2026-07-21 -- Phase 20 marked complete
+last_updated: "2026-07-22T00:45:00.000Z"
+last_activity: 2026-07-22
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 3
-  total_plans: 18
-  completed_plans: 16
-  percent: 75
+  total_plans: 22
+  completed_plans: 20
+  percent: 63
 ---
 
 # Project State
@@ -20,21 +20,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-08)
 
 **Core value:** Everything our household needs in one place, with the expense tracker so automated that I never have to think about logging a transaction.
-**Current focus:** Phase 21 — Overview Filtering (last phase of v1.3)
+**Current focus:** Phase 22 — pantry-icon-intelligence
 
 ## Current Position
 
-Phase: 20 — COMPLETE (merged to main via PR #39, 2026-07-21)
-Plan: 5 of 5
-Status: Phase 20 shipped. Kitchen is live on main. Two-phone AirDrop UAT (20-VERIFICATION.md, 9 steps) was NOT run before merge — user merged deliberately; treat it as outstanding.
+Phase: 22 (pantry-icon-intelligence) — COMPLETE (checkpoint approved 2026-07-22)
+Plan: 4 of 4 (all executed + user-directed polish: prompt gloss, 17→22 categories, spice tile)
+Status: On-device pantry icon classifier shipped behind keyword fallback. 22 categories, all tiles verified. Opt-in accuracy eval 75%/90% (below aspirational 90%/100%, honestly recorded — structural gates green, misses are mostly fixture disagreements). Merging + deploying so the model can be seen working on-device.
 Next: Phase 21 (Overview Filtering) — 3 plans already written, 0 executed. Last phase of v1.3.
-Last activity: 2026-07-21 -- Phase 20 marked complete
+Last activity: 2026-07-22
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 47
+- Total plans completed: 48
 - Average duration: — min
 - Total execution time: 0 hours
 
@@ -103,6 +103,9 @@ Last activity: 2026-07-21 -- Phase 20 marked complete
 | Phase 20 P03 | 55m | 3 tasks | 8 files |
 | Phase 20 P04 | 50m | 2 tasks | 7 files |
 | Phase 20 P05 | 40m | 2 tasks | 9 files |
+| Phase 22 P01 | 35m | 2 tasks | 5 files |
+| Phase 22 P02 | 30 min | 2 tasks | 5 files |
+| Phase 22 P03 | 30min | 2 tasks | 5 files |
 
 ## Quick Tasks Completed
 
@@ -166,6 +169,10 @@ Recent decisions affecting current work:
 - [Phase 20]: Shopping empty state keeps an Add item field the mockup omits — manual extras would otherwise be unreachable when the list is empty
 - [Phase ?]: 20-05: BootstrapAdvisor emptiness now counts kitchen rows — scope-relative emptiness must follow SyncScope widening
 - [Phase ?]: 20-05: share-sheet/Files UI loop is not simctl-automatable; automated the export-decode-self-merge bytes instead and left the taps to the human check
+- [Phase ?]: 22-01: PantryCategory owns every pantry SF Symbol via an exhaustive no-default switch — the model names a category, never a symbol (ICON-02)
+- [Phase ?]: 22-01: keyword table retained as the offline fallback; keywordCategory returns nil for 'no opinion', distinct from a confident .other
+- [Phase ?]: P22-D3 honoured: pantry icon cache in App-Group UserDefaults with a 300-entry LRU cap, not SwiftData (ICON-03)
+- [Phase 22]: PantryIconCache is @unchecked Sendable — UserDefaults is not Sendable and injectable defaults are needed for test isolation
 
 ### Pending Todos
 
@@ -227,7 +234,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ## Session Continuity
 
-Last session: 2026-07-21T14:40:05.447Z
+Last session: 2026-07-21T19:02:01.102Z
 Stopped at: Completed 19-03-PLAN.md
 Resume file: None
 

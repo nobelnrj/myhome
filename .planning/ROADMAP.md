@@ -69,9 +69,9 @@ Full phase details archived in [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROAD
 **Plans**: 4 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — Closed 17-case PantryCategory enum + total category→(symbol, colour) table; keyword rules refactored onto it with zero visual regression
-- [ ] 22-02-PLAN.md — PantryIconCache (device-local, LRU-capped) + PantryIconClassifying seam, @Generable twin, FoundationModels classifier
-- [ ] 22-03-PLAN.md — PantryIconResolver (synchronous answer now, model upgrade in place) wired into PantryItemRow + ShoppingRow
+- [x] 22-01-PLAN.md — Closed 17-case PantryCategory enum + total category→(symbol, colour) table; keyword rules refactored onto it with zero visual regression
+- [x] 22-02-PLAN.md — PantryIconCache (device-local, LRU-capped) + PantryIconClassifying seam, @Generable twin, FoundationModels classifier
+- [x] 22-03-PLAN.md — PantryIconResolver (synchronous answer now, model upgrade in place) wired into PantryItemRow + ShoppingRow
 - [ ] 22-04-PLAN.md — Reference fixture, always-on structural gates, opt-in accuracy suite, 17-tile simulator screenshot verification
 **UI hint**: yes — the model is invisible; the only visible change is better tiles.
 
@@ -103,7 +103,7 @@ Plans:
 - [x] **Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap** - Automatic foreground P2P sync over WiFi with a first-run bootstrap and a trustworthy sync surface. (completed 2026-07-20)
 - [x] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface. (completed 2026-07-21)
 - [ ] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range.
-- [ ] **Phase 22: Pantry Icon Intelligence** - On-device model picks each pantry item's icon from a closed category set, with the keyword table as the offline fallback. (executing BEFORE 21 — they are independent)
+- [x] **Phase 22: Pantry Icon Intelligence** - On-device model picks each pantry item's icon from a closed category set, with the keyword table as the offline fallback. (executing BEFORE 21 — they are independent) (completed 2026-07-22)
 
 ## Phase Details â v1.3
 
@@ -190,4 +190,4 @@ Plans:
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 6/5 | Complete   | 2026-07-20 |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
 | 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
-| 22. Pantry Icon Intelligence | v1.3 | 0/4 | Planned | - |
+| 22. Pantry Icon Intelligence | v1.3 | 4/4 | Complete   | 2026-07-22 |
