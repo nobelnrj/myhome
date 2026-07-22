@@ -190,6 +190,7 @@
 		A404 /* SpendOverTimeAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F404 /* SpendOverTimeAggregator.swift */; };
 		A405 /* OverviewAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F405 /* OverviewAggregation.swift */; };
 		A21F0 /* OverviewFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21F0 /* OverviewFilter.swift */; };
+		A2103FS /* OverviewFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2103FS /* OverviewFilterSheet.swift */; };
 		A21FT /* OverviewFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21FT /* OverviewFilterTests.swift */; };
 		A406 /* SpendBudgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F406 /* SpendBudgetCard.swift */; };
 		A407 /* TopCategoriesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F407 /* TopCategoriesCard.swift */; };
@@ -480,6 +481,7 @@
 		F404 /* SpendOverTimeAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendOverTimeAggregator.swift; sourceTree = "<group>"; };
 		F405 /* OverviewAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewAggregation.swift; sourceTree = "<group>"; };
 		F21F0 /* OverviewFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewFilter.swift; sourceTree = "<group>"; };
+		F2103FS /* OverviewFilterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewFilterSheet.swift; sourceTree = "<group>"; };
 		F21FT /* OverviewFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewFilterTests.swift; sourceTree = "<group>"; };
 		F406 /* SpendBudgetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendBudgetCard.swift; sourceTree = "<group>"; };
 		F407 /* TopCategoriesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopCategoriesCard.swift; sourceTree = "<group>"; };
@@ -750,6 +752,7 @@
 			isa = PBXGroup;
 			children = (
 				F411 /* OverviewView.swift */,
+				F2103FS /* OverviewFilterSheet.swift */,
 				F1402SDC /* SpendDonutCard.swift */,
 				F406 /* SpendBudgetCard.swift */,
 				F407 /* TopCategoriesCard.swift */,
@@ -1241,6 +1244,7 @@
 				A21F0 /* OverviewFilter.swift in Sources */,
 				A1401SDA /* SpendDonutAggregation.swift in Sources */,
 				A411 /* OverviewView.swift in Sources */,
+				A2103FS /* OverviewFilterSheet.swift in Sources */,
 				A1402SDC /* SpendDonutCard.swift in Sources */,
 				A801SH /* CategoryStyle.swift in Sources */,
 				A802SH /* IconTile.swift in Sources */,
