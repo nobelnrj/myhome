@@ -23,56 +23,59 @@ struct OverviewScopePill: View {
     let onClear: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 7) {
-                Circle()
-                    .fill(filter.isActive ? DesignTokens.accent : DesignTokens.label3)
-                    .frame(width: 8, height: 8)
-                Text(summaryLabel)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(DesignTokens.label)
-                    .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
-                if filter.isActive {
-                    // Reserve space for the overlaid clear button so the label doesn't sit under it.
-                    Color.clear.frame(width: 20, height: 20)
-                } else {
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(DesignTokens.label3)
+        // WR-03: the label and the clear button are SIBLING buttons in the HStack, each sized to
+        // its own bounds, rather than a 44×44 clear overlay pinned over the capsule. This confines
+        // the clear tap target to the xmark so a tap on the trailing edge of the label can never
+        // silently wipe the filter (clear has no confirmation — OVF-03).
+        HStack(spacing: 7) {
+            Button(action: onTap) {
+                HStack(spacing: 7) {
+                    Circle()
+                        .fill(filter.isActive ? DesignTokens.accent : DesignTokens.label3)
+                        .frame(width: 8, height: 8)
+                    Text(summaryLabel)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(DesignTokens.label)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                    if !filter.isActive {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(DesignTokens.label3)
+                    }
                 }
+                .contentShape(Rectangle())
             }
-            .padding(.leading, 14)
-            .padding(.trailing, filter.isActive ? 6 : 14)
-            .padding(.vertical, 9)
-            .background(
-                Capsule().fill(LinearGradient(
-                    colors: [DesignTokens.surfaceRaisedStrongTop, DesignTokens.surfaceRaisedStrongBottom],
-                    startPoint: .topLeading, endPoint: .bottomTrailing))
-            )
-            .overlay(
-                Capsule().strokeBorder(
-                    LinearGradient(colors: [DesignTokens.neuRimTop, DesignTokens.neuRimBottom],
-                                   startPoint: .topLeading, endPoint: .bottomTrailing),
-                    lineWidth: 1)
-            )
-            .shadow(color: DesignTokens.neuOuterHighlight, radius: 6, x: -4, y: -4)
-            .shadow(color: DesignTokens.neuOuterShade, radius: 7, x: 5, y: 5)
-        }
-        .buttonStyle(.plain)
-        .overlay(alignment: .trailing) {
+            .buttonStyle(.plain)
+
             if filter.isActive {
                 Button(action: onClear) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(DesignTokens.label3)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 28, height: 28)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Clear filters")
             }
         }
+        .padding(.leading, 14)
+        .padding(.trailing, filter.isActive ? 6 : 14)
+        .padding(.vertical, 9)
+        .background(
+            Capsule().fill(LinearGradient(
+                colors: [DesignTokens.surfaceRaisedStrongTop, DesignTokens.surfaceRaisedStrongBottom],
+                startPoint: .topLeading, endPoint: .bottomTrailing))
+        )
+        .overlay(
+            Capsule().strokeBorder(
+                LinearGradient(colors: [DesignTokens.neuRimTop, DesignTokens.neuRimBottom],
+                               startPoint: .topLeading, endPoint: .bottomTrailing),
+                lineWidth: 1)
+        )
+        .shadow(color: DesignTokens.neuOuterHighlight, radius: 6, x: -4, y: -4)
+        .shadow(color: DesignTokens.neuOuterShade, radius: 7, x: 5, y: 5)
         .accessibilityElement(children: .contain)
     }
 
