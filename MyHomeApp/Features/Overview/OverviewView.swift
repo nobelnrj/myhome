@@ -228,6 +228,10 @@ private struct OverviewMonthContent: View {
             )
         }
 
+        // OVF-03: Over Time series scoped to the account subset (date range is handled by hiding
+        // the section, not by this array). `OverviewFilter()` default = passthrough.
+        let overTimeExpenses = OverviewFilterEngine.apply(filter, to: allGlobalExpenses)
+
         // Net-worth suppression test: compute cashValue outside ScrollView (Pitfall A guard)
         let netWorthBreakdown = NetWorthCalculator.breakdown(
             assets: allAssets, accounts: allAccounts, expenses: allGlobalExpenses
@@ -248,11 +252,14 @@ private struct OverviewMonthContent: View {
                 .entrance(0)
 
                 // Hero
+                // OVF-03: budgets are whole-month, all-account concepts. While a filter is active
+                // the hero budget strip would read a subset spend against a whole-month budget — a
+                // stale figure — so we feed 0/0 and let SpendBudgetCard render its no-budget state.
                 SpendBudgetCard(
                     income: totalIncome,
                     spent: totalSpend,
-                    budgetedSpent: budgetedSpent,
-                    totalBudget: totalBudget,
+                    budgetedSpent: filter.isActive ? 0 : budgetedSpent,
+                    totalBudget: filter.isActive ? 0 : totalBudget,
                     selectedTab: $selectedTab,
                     onAddExpense: { showAddExpense = true },
                     onDetails: { navigateToAnalytics = true }
@@ -265,8 +272,10 @@ private struct OverviewMonthContent: View {
                         .entrance(2)
                 }
 
-                // Net Worth card — suppressed when no assets and cash is 0 (D-04 / ASSET-05)
-                if showNetWorth {
+                // Net Worth card — suppressed when no assets and cash is 0 (D-04 / ASSET-05).
+                // OVF-03: also suppressed while a filter is active — net worth is a balance-sheet
+                // total across ALL accounts + assets, so it can't reconcile with subset cash flow.
+                if showNetWorth && !filter.isActive {
                     sectionHeader("Net Worth", action: ("See holdings", { navigateToAssets = true }))
                         .id("networth")
                     NetWorthCard(
@@ -304,16 +313,21 @@ private struct OverviewMonthContent: View {
                         .entrance(5)
                 }
 
-                // Spend over time chart (D-05 — restyled, retained on Overview)
-                if !allGlobalExpenses.isEmpty {
+                // Spend over time chart (D-05 — restyled, retained on Overview).
+                // OVF-03: when only the ACCOUNT filter is active the multi-month series recomputes
+                // for the subset (overTimeExpenses). When a CUSTOM DATE RANGE is active the chart's
+                // multi-month window contradicts the selected range, so the section is hidden.
+                if filter.dateRange == nil && !overTimeExpenses.isEmpty {
                     sectionHeader("Over Time", action: ("See analytics", { navigateToAnalytics = true }))
-                    SpendOverTimeChart(expenses: allGlobalExpenses)
+                    SpendOverTimeChart(expenses: overTimeExpenses)
                         .entrance(6)
                 }
 
                 // Budgets glance — pill-well gauges, same chart language as "By category"
-                // (fill = share of that category's budget, red when over)
-                if !budgeted.isEmpty {
+                // (fill = share of that category's budget, red when over).
+                // OVF-03: budgets are whole-month, all-account concepts; hidden while any filter is
+                // active so no whole-month budget figure survives beside subset cash flow.
+                if !budgeted.isEmpty && !filter.isActive {
                     sectionHeader("Budgets", action: ("See all", { selectedTab = 2 }))
                         .id("budgets")
                     BudgetGlancePills(items: Array(budgeted.prefix(5)))
