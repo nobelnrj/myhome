@@ -177,7 +177,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Filter model + pure filtering engine + tests (OverviewFilter, OverviewFilterEngine)
+- [x] 21-01-PLAN.md — Filter model + pure filtering engine + tests (OverviewFilter, OverviewFilterEngine)
 - [ ] 21-02-PLAN.md — Thread the filter through Overview aggregation (recompute + stale-figure suppression)
 - [ ] 21-03-PLAN.md — Filter UI: sheet, active-filter chip bar, one-tap clear
 **UI hint**: yes
@@ -189,5 +189,5 @@ Plans:
 | 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 5/5 | Complete   | 2026-07-17 |
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 6/5 | Complete   | 2026-07-20 |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
-| 21. Overview Filtering | v1.3 | 0/3 | Not started | - |
+| 21. Overview Filtering | v1.3 | 1/3 | In Progress|  |
 | 22. Pantry Icon Intelligence | v1.3 | 4/4 | Complete   | 2026-07-22 |
