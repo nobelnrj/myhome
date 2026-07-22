@@ -22,6 +22,11 @@ struct OverviewView: View {
 
     @State private var showAddExpense = false
 
+    /// Phase 21 (OVF-01/02/03): the active Overview scope. `OverviewFilter()` is the neutral
+    /// all-accounts / current-month default, so every figure below is byte-for-byte unchanged
+    /// until a filter is applied. The visible pill/sheet that mutates this lands in Plan 03.
+    @State private var filter = OverviewFilter()
+
     /// The "now" the month boundaries are derived from. Backed by @State so a day/month
     /// rollover while the app is left open refreshes the boundaries (WR-06).
     @State private var referenceDate = Date()
@@ -30,13 +35,49 @@ struct OverviewView: View {
         Calendar.current.dateComponents([.year, .month], from: referenceDate)
     }
 
+    /// Effective date window + header label for the current scope (OVF-02).
+    ///
+    /// When `filter.dateRange` is set, the window becomes the inclusive day boundaries of that
+    /// custom range and the label reflects it (never the stale month name — OVF-03). Otherwise
+    /// the existing current-month boundaries + "MONTH YEAR" label apply, exactly as before.
+    private var effectiveBounds: (start: Date, end: Date, label: String)? {
+        if let range = filter.dateRange {
+            let bounds = OverviewFilterEngine.rangeBoundaries(from: range.lowerBound, to: range.upperBound)
+            return (bounds.start, bounds.end, Self.rangeLabel(from: bounds.start, to: bounds.end))
+        }
+        guard let (start, end) = BudgetCalculator.monthBoundaries(for: currentMonth) else { return nil }
+        return (start, end, start.formattedAsMonthYear())
+    }
+
+    /// Compact "5 Jun – 12 Jul 2026" label for a custom range (OVF-02 header, OVF-03 anti-stale).
+    /// Locale/timezone-adaptive via `DateFormatter` templates, reusing the Date+Display conventions
+    /// (D-02: store UTC, display local). The trailing year is shown once; the from-side year is
+    /// dropped when both endpoints fall in the same calendar year to keep the pill compact.
+    private static func rangeLabel(from: Date, to: Date) -> String {
+        let cal = Calendar.current
+        let sameYear = cal.component(.year, from: from) == cal.component(.year, from: to)
+
+        let toFmt = DateFormatter()
+        toFmt.locale = .current
+        toFmt.timeZone = .current
+        toFmt.setLocalizedDateFormatFromTemplate("dMMMyyyy")
+
+        let fromFmt = DateFormatter()
+        fromFmt.locale = .current
+        fromFmt.timeZone = .current
+        fromFmt.setLocalizedDateFormatFromTemplate(sameYear ? "dMMM" : "dMMMyyyy")
+
+        return "\(fromFmt.string(from: from)) – \(toFmt.string(from: to))"
+    }
+
     var body: some View {
         NavigationStack {
-            if let (start, end) = BudgetCalculator.monthBoundaries(for: currentMonth) {
+            if let bounds = effectiveBounds {
                 OverviewMonthContent(
-                    start: start,
-                    end: end,
-                    monthLabel: start.formattedAsMonthYear(),
+                    start: bounds.start,
+                    end: bounds.end,
+                    monthLabel: bounds.label,
+                    filter: filter,
                     selectedTab: $selectedTab,
                     deepLinkNoteID: $deepLinkNoteID,
                     activityCategoryFilter: $activityCategoryFilter,
@@ -72,6 +113,10 @@ private struct OverviewMonthContent: View {
     let start: Date
     let end: Date
     let monthLabel: String
+    /// Phase 21: the active account × date scope. The @Query window is already date-scoped by
+    /// `start`/`end`; this filter narrows the fetched rows by ACCOUNT before every cash-flow
+    /// aggregation (OVF-01). `OverviewFilter()` default = passthrough, so default state is unchanged.
+    let filter: OverviewFilter
     @Binding var selectedTab: Int
     @Binding var deepLinkNoteID: UUID?
     @Binding var activityCategoryFilter: UUID?
@@ -81,6 +126,8 @@ private struct OverviewMonthContent: View {
     @Query private var monthExpenses: [Expense]
     /// Review-inbox items needing triage — drives the Gmail review banner (D7-04). Reads existing
     /// data only; the banner just routes to the Expenses tab.
+    /// Phase 21: intentionally UNFILTERED — this is a triage queue, not a financial figure, so the
+    /// account/date scope must NOT hide expenses still awaiting confirmation (OVF-03 exempts it).
     @Query(
         filter: #Predicate<Expense> { $0.ingestionStateRaw != nil && $0.ingestionStateRaw != "autoSaved" },
         sort: \Expense.createdAt,
@@ -104,6 +151,7 @@ private struct OverviewMonthContent: View {
     @State private var navigateToKitchen = false
 
     init(start: Date, end: Date, monthLabel: String,
+         filter: OverviewFilter,
          selectedTab: Binding<Int>,
          deepLinkNoteID: Binding<UUID?>,
          activityCategoryFilter: Binding<UUID?>,
@@ -111,6 +159,7 @@ private struct OverviewMonthContent: View {
         self.start = start
         self.end = end
         self.monthLabel = monthLabel
+        self.filter = filter
         self._selectedTab = selectedTab
         self._deepLinkNoteID = deepLinkNoteID
         self._activityCategoryFilter = activityCategoryFilter
@@ -127,16 +176,23 @@ private struct OverviewMonthContent: View {
     }
 
     var body: some View {
+        // Phase 21 (OVF-01): the single account-filtered source of truth. EVERY cash-flow figure
+        // below derives from `visibleExpenses` so no figure can silently read the unfiltered array
+        // (threat T-21-03). The date window is already applied by the @Query predicate; this applies
+        // the ACCOUNT dimension. With `OverviewFilter()` default this returns `monthExpenses`
+        // untouched, keeping default-state figures byte-for-byte identical.
+        let visibleExpenses = OverviewFilterEngine.apply(filter, to: monthExpenses)
+
         // Pre-aggregate outside any Chart DSL (Pitfall A guard)
-        let spendByCategory = BudgetCalculator.monthlySpend(for: monthExpenses, categories: categories)
+        let spendByCategory = BudgetCalculator.monthlySpend(for: visibleExpenses, categories: categories)
         let totalBudget: Decimal = categories.compactMap(\.monthlyBudget).reduce(.zero, +)
 
         // Hero cash-flow totals: gross positive-only spend and gross credit-only income, both with
         // internal transfers excluded. Using positive-only spend (not the category net, which sums
         // in credits) prevents a negative spend total from clamping the orb to 0% (see
         // BudgetCalculator.grossSpend / .isTransferForCashFlow).
-        let totalSpend = BudgetCalculator.grossSpend(for: monthExpenses)
-        let totalIncome = BudgetCalculator.grossIncome(for: monthExpenses)
+        let totalSpend = BudgetCalculator.grossSpend(for: visibleExpenses)
+        let totalIncome = BudgetCalculator.grossIncome(for: visibleExpenses)
 
         // Category spend, sorted descending — feeds the stacked bar + donut + legend.
         let rankedSpend: [(category: Category, spent: Decimal)] = categories
@@ -159,7 +215,7 @@ private struct OverviewMonthContent: View {
         // against the budgeted-only total). Gross cash-flow spend still drives the orb/tiles/net.
         let budgetedSpent: Decimal = budgeted.reduce(Decimal.zero) { $0 + $1.spent }
 
-        let recent = Array(monthExpenses.prefix(5))
+        let recent = Array(visibleExpenses.prefix(5))
 
         // CategorySpendItem for SpendByCategoryChart (D-05: keep chart on Overview, restyled)
         let categoryItems: [CategorySpendItem] = rankedSpend.map { item in
