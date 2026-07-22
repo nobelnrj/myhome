@@ -150,3 +150,13 @@ No code-level gaps found. This phase's implementation is unusually rigorous: the
 
 _Verified: 2026-07-21_
 _Verifier: Claude (gsd-verifier)_
+
+---
+
+## On-device UAT — PASSED (2026-07-22)
+
+The two-phone AirDrop kitchen sync was run on real devices (both on a Phase 20+ build,
+deployed alongside Phase 22 off `main`) and confirmed working by the user. This covers
+what the 2026-07-21 notes-only test could not: SchemaV11 migration on real hardware,
+pantry/shopping rows crossing between phones, and tombstone propagation. Tracked and
+closed as issue #40. All Phase 20 human-verification items are now satisfied.
