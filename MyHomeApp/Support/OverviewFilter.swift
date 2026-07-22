@@ -107,4 +107,32 @@ enum OverviewFilterEngine {
             ?? hi
         return (start: start, end: end)
     }
+
+    /// Compact "5 Jun – 12 Jul 2026" range label shared by the Overview header eyebrow and the
+    /// scope pill (WR-01 / WR-02: defined once so the header and the pill can never disagree).
+    ///
+    /// The trailing (to-side) year is always shown. The leading (from-side) year is shown ONLY
+    /// when the two endpoints fall in different calendar years, so a cross-year range is never
+    /// ambiguous (e.g. "5 Dec 2025 – 12 Jan 2026" rather than the lossy "5 Dec – 12 Jan 2026").
+    /// Same-year ranges omit the redundant from-side year to stay compact.
+    ///
+    /// `calendar` supplies both the year comparison and the formatter time zone, so the label
+    /// matches the same day-edges `rangeBoundaries` uses instead of ambient device state (WR-04).
+    static func rangeLabel(from: Date, to: Date, calendar: Calendar = .current) -> String {
+        let sameYear = calendar.component(.year, from: from) == calendar.component(.year, from: to)
+
+        let fromFmt = DateFormatter()
+        fromFmt.locale = .current
+        fromFmt.calendar = calendar
+        fromFmt.timeZone = calendar.timeZone
+        fromFmt.setLocalizedDateFormatFromTemplate(sameYear ? "dMMM" : "dMMMyyyy")
+
+        let toFmt = DateFormatter()
+        toFmt.locale = .current
+        toFmt.calendar = calendar
+        toFmt.timeZone = calendar.timeZone
+        toFmt.setLocalizedDateFormatFromTemplate("dMMMyyyy")
+
+        return "\(fromFmt.string(from: from)) – \(toFmt.string(from: to))"
+    }
 }

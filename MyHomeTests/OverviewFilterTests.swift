@@ -284,4 +284,30 @@ struct OverviewFilterTests {
         let midpoint = istDate(cal, year: 2026, month: 7, day: 11, hour: 12)
         #expect(midpoint >= start && midpoint <= end)
     }
+
+    // MARK: - WR-01 / WR-02: shared range label discloses the from-side year across years
+
+    @Test("rangeLabelCrossYearShowsBothYears: a range spanning a year boundary discloses BOTH years")
+    func rangeLabelCrossYearShowsBothYears() throws {
+        let cal = istCalendar()
+        let from = istDate(cal, year: 2025, month: 12, day: 5)
+        let to = istDate(cal, year: 2026, month: 1, day: 12)
+
+        let label = OverviewFilterEngine.rangeLabel(from: from, to: to, calendar: cal)
+
+        #expect(label.contains("2025"), "cross-year label must disclose the from-side (2025) year")
+        #expect(label.contains("2026"), "cross-year label must disclose the to-side (2026) year")
+    }
+
+    @Test("rangeLabelSameYearOmitsFromYear: a same-year range shows the year once (to-side only)")
+    func rangeLabelSameYearOmitsFromYear() throws {
+        let cal = istCalendar()
+        let from = istDate(cal, year: 2026, month: 6, day: 5)
+        let to = istDate(cal, year: 2026, month: 7, day: 12)
+
+        let label = OverviewFilterEngine.rangeLabel(from: from, to: to, calendar: cal)
+
+        let yearOccurrences = label.components(separatedBy: "2026").count - 1
+        #expect(yearOccurrences == 1, "same-year label must show the year exactly once (redundant from-year dropped)")
+    }
 }

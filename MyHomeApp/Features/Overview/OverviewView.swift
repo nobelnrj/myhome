@@ -43,31 +43,11 @@ struct OverviewView: View {
     private var effectiveBounds: (start: Date, end: Date, label: String)? {
         if let range = filter.dateRange {
             let bounds = OverviewFilterEngine.rangeBoundaries(from: range.lowerBound, to: range.upperBound)
-            return (bounds.start, bounds.end, Self.rangeLabel(from: bounds.start, to: bounds.end))
+            return (bounds.start, bounds.end,
+                    OverviewFilterEngine.rangeLabel(from: bounds.start, to: bounds.end))
         }
         guard let (start, end) = BudgetCalculator.monthBoundaries(for: currentMonth) else { return nil }
         return (start, end, start.formattedAsMonthYear())
-    }
-
-    /// Compact "5 Jun – 12 Jul 2026" label for a custom range (OVF-02 header, OVF-03 anti-stale).
-    /// Locale/timezone-adaptive via `DateFormatter` templates, reusing the Date+Display conventions
-    /// (D-02: store UTC, display local). The trailing year is shown once; the from-side year is
-    /// dropped when both endpoints fall in the same calendar year to keep the pill compact.
-    private static func rangeLabel(from: Date, to: Date) -> String {
-        let cal = Calendar.current
-        let sameYear = cal.component(.year, from: from) == cal.component(.year, from: to)
-
-        let toFmt = DateFormatter()
-        toFmt.locale = .current
-        toFmt.timeZone = .current
-        toFmt.setLocalizedDateFormatFromTemplate("dMMMyyyy")
-
-        let fromFmt = DateFormatter()
-        fromFmt.locale = .current
-        fromFmt.timeZone = .current
-        fromFmt.setLocalizedDateFormatFromTemplate(sameYear ? "dMMM" : "dMMMyyyy")
-
-        return "\(fromFmt.string(from: from)) – \(toFmt.string(from: to))"
     }
 
     var body: some View {

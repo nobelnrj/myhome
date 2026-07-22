@@ -85,27 +85,10 @@ struct OverviewScopePill: View {
             parts.append(accountNames.count > 1 ? "\(first) +\(accountNames.count - 1)" : first)
         }
         if let range = filter.dateRange {
-            parts.append(Self.rangeLabel(from: range.lowerBound, to: range.upperBound))
+            // WR-01 / WR-02: one shared formatter for header + pill; discloses the from-side year
+            // on cross-year ranges so the scope label is never ambiguous.
+            parts.append(OverviewFilterEngine.rangeLabel(from: range.lowerBound, to: range.upperBound))
         }
         return parts.isEmpty ? "Filtered" : parts.joined(separator: " · ")
-    }
-
-    /// Compact "5 Jun – 12 Jul" range label; the trailing year is dropped when both endpoints fall
-    /// in the same calendar year to keep the pill short.
-    private static func rangeLabel(from: Date, to: Date) -> String {
-        let cal = Calendar.current
-        let sameYear = cal.component(.year, from: from) == cal.component(.year, from: to)
-
-        let fromFmt = DateFormatter()
-        fromFmt.locale = .current
-        fromFmt.timeZone = .current
-        fromFmt.setLocalizedDateFormatFromTemplate("dMMM")
-
-        let toFmt = DateFormatter()
-        toFmt.locale = .current
-        toFmt.timeZone = .current
-        toFmt.setLocalizedDateFormatFromTemplate(sameYear ? "dMMM" : "dMMMyyyy")
-
-        return "\(fromFmt.string(from: from)) – \(toFmt.string(from: to))"
     }
 }
