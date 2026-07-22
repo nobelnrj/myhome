@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
-status: executing
-last_updated: "2026-07-22T05:19:54.987Z"
+status: verifying
+last_updated: "2026-07-22T05:34:48.334Z"
 last_activity: 2026-07-22
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 22
-  completed_plans: 22
-  percent: 80
+  completed_plans: 23
+  percent: 100
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 
 Phase: 21 (overview-filtering) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Next: Phase 21 (Overview Filtering) — 3 plans already written, 0 executed. Last phase of v1.3.
 Last activity: 2026-07-22
 
@@ -108,6 +108,7 @@ Last activity: 2026-07-22
 | Phase 22 P03 | 30min | 2 tasks | 5 files |
 | Phase 21 P01 | 6 | 2 tasks | 3 files |
 | Phase 21 P02 | 15 | 2 tasks | 1 files |
+| Phase 21 P03 | 20 | 2 tasks | 5 files |
 
 ## Quick Tasks Completed
 
@@ -179,6 +180,7 @@ Recent decisions affecting current work:
 - [Phase ?]: 21-01: transfer exclusion never re-implemented in the filter engine — callers compose apply() with BudgetCalculator.grossSpend/grossIncome (T-21-02)
 - [Phase ?]: 21-02: visibleExpenses (account-filtered) is the ONLY input to every Overview cash-flow figure; no aggregation reads the raw @Query array (T-21-03)
 - [Phase ?]: 21-02: active filter suppresses Net Worth + Budgets and hides Over Time under a custom range (OVF-03 data half); reviewItems stays unfiltered as triage queue
+- [Phase ?]: Overview filter UI = single always-present header pill (entry + active display + one-tap clear) + OverviewFilterSheet (account multi-select, This Month/custom range); sheet is Overview-scoped
 
 ### Pending Todos
 
@@ -240,7 +242,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ## Session Continuity
 
-Last session: 2026-07-22T05:19:49.184Z
+Last session: 2026-07-22T05:34:30.526Z
 Stopped at: Completed 19-03-PLAN.md
 Resume file: None
 

@@ -51,7 +51,7 @@
 
 - [x] **OVF-01**: User can filter the Overview (net cash flow hero, spend donut, and totals) to a single account or a chosen subset of accounts; unfiltered (all accounts) remains the default.
 - [x] **OVF-02**: The account filter is combinable with a custom date range, and all Overview figures recompute correctly for the account × date-range selection (reusing the existing confirmed-self-transfer exclusion).
-- [ ] **OVF-03**: The active filter is clearly shown and can be cleared in one tap; every Overview figure respects the filter consistently (no stale/unfiltered value left behind).
+- [x] **OVF-03**: The active filter is clearly shown and can be cleared in one tap; every Overview figure respects the filter consistently (no stale/unfiltered value left behind).
 
 ---
 
@@ -91,4 +91,4 @@
 | ICON-03 | Phase 22 | Complete |
 | OVF-01 | Phase 21 | Complete |
 | OVF-02 | Phase 21 | Complete |
-| OVF-03 | Phase 21 | Pending |
+| OVF-03 | Phase 21 | Complete |

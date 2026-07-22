@@ -102,7 +102,7 @@ Plans:
 - [x] **Phase 18: Sync Foundation â Schema, Merge Engine & AirDrop** - Syncable schema (syncID/updatedAt + tombstones), a pure tested merge engine, and device-to-device AirDrop snapshot exchange. (completed 2026-07-17)
 - [x] **Phase 19: Auto-Sync & Sync UX â Multipeer + Bootstrap** - Automatic foreground P2P sync over WiFi with a first-run bootstrap and a trustworthy sync surface. (completed 2026-07-20)
 - [x] **Phase 20: Kitchen Inventory & Shopping List** - Pantry stock, low-stock thresholds, and an auto-restocking shopping list â a synced neumorphic surface. (completed 2026-07-21)
-- [ ] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range.
+- [x] **Phase 21: Overview Filtering** - Filter the Overview by account subset combinable with a custom date range. (completed 2026-07-22)
 - [x] **Phase 22: Pantry Icon Intelligence** - On-device model picks each pantry item's icon from a closed category set, with the keyword table as the offline fallback. (executing BEFORE 21 — they are independent) (completed 2026-07-22)
 
 ## Phase Details â v1.3
@@ -179,7 +179,7 @@ Plans:
 Plans:
 - [x] 21-01-PLAN.md — Filter model + pure filtering engine + tests (OverviewFilter, OverviewFilterEngine)
 - [x] 21-02-PLAN.md — Thread the filter through Overview aggregation (recompute + stale-figure suppression)
-- [ ] 21-03-PLAN.md — Filter UI: sheet, active-filter chip bar, one-tap clear
+- [x] 21-03-PLAN.md — Filter UI: sheet, active-filter chip bar, one-tap clear
 **UI hint**: yes
 
 ## Progress â v1.3
@@ -189,5 +189,5 @@ Plans:
 | 18. Sync Foundation â Schema, Merge Engine & AirDrop | v1.3 | 5/5 | Complete   | 2026-07-17 |
 | 19. Auto-Sync & Sync UX â Multipeer + Bootstrap | v1.3 | 6/5 | Complete   | 2026-07-20 |
 | 20. Kitchen Inventory & Shopping List | v1.3 | 5/5 | Complete   | 2026-07-21 |
-| 21. Overview Filtering | v1.3 | 2/3 | In Progress|  |
+| 21. Overview Filtering | v1.3 | 3/3 | Complete   | 2026-07-22 |
 | 22. Pantry Icon Intelligence | v1.3 | 4/4 | Complete   | 2026-07-22 |
