@@ -154,6 +154,14 @@ graded by relabelling our own fixture to pass. Known gap carried forward:
 `nutsDryFruit` uses `laurel.leading`, which renders but reads as a botanical branch — SF
 Symbols has no clean nut/dry-fruit glyph.
 
+## On-Device UAT — PASSED (2026-07-22)
+
+Phase 22 was deployed to both phones (FORCE auto-deploy off `origin/main`, no schema
+change so no migration). User confirmed on-device: "Everything looks good." This is the
+real-device ICON-01 proof the simulator eval could only approximate — the on-device
+FoundationModels classifier is running and upgrading tiles in place, not just the
+keyword fallback. Nothing on Phase 22 remains open.
+
 ## Self-Check: PASSED
 
 - FOUND: MyHomeTests/PantryIconFixture.swift

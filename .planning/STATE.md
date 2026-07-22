@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 
 ## Current Position
 
-Phase: 22 (pantry-icon-intelligence) — COMPLETE (checkpoint approved 2026-07-22)
+Phase: 22 (pantry-icon-intelligence) — CLOSED (merged, deployed, on-device UAT passed 2026-07-22)
 Plan: 4 of 4 (all executed + user-directed polish: prompt gloss, 17→22 categories, spice tile)
-Status: On-device pantry icon classifier shipped behind keyword fallback. 22 categories, all tiles verified. Opt-in accuracy eval 75%/90% (below aspirational 90%/100%, honestly recorded — structural gates green, misses are mostly fixture disagreements). Merging + deploying so the model can be seen working on-device.
+Status: DONE. Shipped via PR #41, live on both phones, user confirmed the on-device model works ("everything looks good"). Opt-in accuracy eval 75%/90% recorded honestly as below aspirational thresholds; tune against real device data if desired. Board issue #42 Done.
 Next: Phase 21 (Overview Filtering) — 3 plans already written, 0 executed. Last phase of v1.3.
 Last activity: 2026-07-22
 
