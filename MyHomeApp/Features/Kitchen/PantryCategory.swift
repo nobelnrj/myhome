@@ -66,14 +66,12 @@ enum PantryCategory: String, CaseIterable, Sendable {
         case .dairy:           return ("drop.fill", DesignTokens.catGroceries)
         case .eggs:            return ("oval.fill", DesignTokens.catGroceries)
         case .grainStaple:     return ("shippingbox.fill", DesignTokens.catPantryGrain)
-        // NOTE (22-04 gallery observation): spice and grainStaple render an IDENTICAL tile — same
-        // symbol AND same colour — so the model's distinction between them is invisible on screen.
-        // Elsewhere in this table categories that share a colour are separated by their symbol
-        // (frozen/cleaning, petSupplies/other); this pair is the one place that rule is broken.
-        // Left as-is deliberately: `spice` is a LEGACY keyword category, so today's Sugar/Salt/
-        // Masala rows already draw this tile, and changing it is a visible change to shipped rows
-        // rather than a bug fix. Raised for the user at the 22-04 checkpoint.
-        case .spice:           return ("shippingbox.fill", DesignTokens.catPantryGrain)
+        // spice USED to share grainStaple's exact tile (shippingbox.fill on catPantryGrain), so the
+        // two were indistinguishable on screen. Given its own glyph + colour 2026-07-22 at the
+        // user's request. This is a DELIBERATE visible change to shipped Sugar/Salt/Masala rows
+        // (they resolve to .spice via the keyword table), so the legacy symbol/colour lock tests
+        // were updated in lockstep — a drift there is still a failure, this was an intended move.
+        case .spice:           return ("flame.fill", DesignTokens.catDining)
         case .produce:         return ("leaf.fill", DesignTokens.catSubscriptions)
         case .fruit:           return ("basket.fill", DesignTokens.catFuel)
         case .brew:            return ("cup.and.saucer.fill", DesignTokens.catPantryBrew)

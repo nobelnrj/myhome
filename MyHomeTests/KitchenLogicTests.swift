@@ -177,13 +177,16 @@ struct KitchenLogicTests {
         #expect(KitchenLogic.keywordCategory(forName: "Dishwash liquid") == .cleaning)
     }
 
-    @Test("Spices are now distinguishable from staples even though the tile is identical")
+    @Test("Spices render a different tile from staples (spice separated 2026-07-22)")
     func keywordCategorySeparatesSpiceFromStaple() {
         #expect(KitchenLogic.keywordCategory(forName: "Garam masala") == .spice)
         #expect(KitchenLogic.keywordCategory(forName: "Toor dal") == .grainStaple)
-        // ...but the rendered tile is unchanged, which is the point of the refactor.
+        // spice was given its own glyph at the user's request — the two tiles now differ, which is
+        // the whole point of the change (they used to be the identical amber box).
+        #expect(KitchenLogic.icon(forName: "Garam masala").symbol == "flame.fill")
+        #expect(KitchenLogic.icon(forName: "Toor dal").symbol == "shippingbox.fill")
         #expect(KitchenLogic.icon(forName: "Garam masala").symbol
-                == KitchenLogic.icon(forName: "Toor dal").symbol)
+                != KitchenLogic.icon(forName: "Toor dal").symbol)
     }
 
     @Test("No keyword match means nil — 'no opinion', distinct from a confident .other")

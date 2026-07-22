@@ -86,7 +86,7 @@ struct PantryCategoryTests {
             (.dairy, "drop.fill"),
             (.eggs, "oval.fill"),
             (.grainStaple, "shippingbox.fill"),
-            (.spice, "shippingbox.fill"),
+            (.spice, "flame.fill"),   // separated from grainStaple 2026-07-22 (user request)
             (.produce, "leaf.fill"),
             (.fruit, "basket.fill"),
             (.brew, "cup.and.saucer.fill"),
@@ -106,7 +106,7 @@ struct PantryCategoryTests {
             (.dairy, DesignTokens.catGroceries),
             (.eggs, DesignTokens.catGroceries),
             (.grainStaple, DesignTokens.catPantryGrain),
-            (.spice, DesignTokens.catPantryGrain),
+            (.spice, DesignTokens.catDining),   // separated from grainStaple 2026-07-22 (user request)
             (.produce, DesignTokens.catSubscriptions),
             (.fruit, DesignTokens.catFuel),
             (.brew, DesignTokens.catPantryBrew),
