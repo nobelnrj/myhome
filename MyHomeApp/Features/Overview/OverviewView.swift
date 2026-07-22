@@ -42,9 +42,14 @@ struct OverviewView: View {
     /// the existing current-month boundaries + "MONTH YEAR" label apply, exactly as before.
     private var effectiveBounds: (start: Date, end: Date, label: String)? {
         if let range = filter.dateRange {
-            let bounds = OverviewFilterEngine.rangeBoundaries(from: range.lowerBound, to: range.upperBound)
+            // WR-04: use ONE explicit IST-anchored calendar for both the @Query window boundaries
+            // and the label, so custom-range day-edges don't shift by the device UTC offset on a
+            // non-IST phone (bank-mail expense timestamps are IST-anchored).
+            let cal = OverviewFilterEngine.financialCalendar
+            let bounds = OverviewFilterEngine.rangeBoundaries(
+                from: range.lowerBound, to: range.upperBound, calendar: cal)
             return (bounds.start, bounds.end,
-                    OverviewFilterEngine.rangeLabel(from: bounds.start, to: bounds.end))
+                    OverviewFilterEngine.rangeLabel(from: bounds.start, to: bounds.end, calendar: cal))
         }
         guard let (start, end) = BudgetCalculator.monthBoundaries(for: currentMonth) else { return nil }
         return (start, end, start.formattedAsMonthYear())

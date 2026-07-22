@@ -60,6 +60,25 @@ struct OverviewFilter: Equatable {
 /// doing so would let filtered totals diverge from the hero cash-flow readout (T-21-02).
 enum OverviewFilterEngine {
 
+    /// The canonical calendar for Overview financial day-edges (WR-04).
+    ///
+    /// Bank-mail expense timestamps are IST-anchored, so a custom range's `[start, end]`
+    /// boundaries — and the label that discloses them — must be computed against IST day-edges
+    /// regardless of the *device* timezone. Without this, a second household phone set to another
+    /// region (this is a two-phone-sync app) would build the `@Query` window from its own UTC
+    /// offset and include/drop a boundary day's expenses relative to what the label claims.
+    ///
+    /// Production call sites pass this explicitly instead of relying on ambient `Calendar.current`,
+    /// so the UI exercises the same calendar the boundary tests pin. Falls back to `.current` only
+    /// if the IST identifier is somehow unavailable.
+    static let financialCalendar: Calendar = {
+        var cal = Calendar(identifier: .gregorian)
+        if let ist = TimeZone(identifier: "Asia/Kolkata") {
+            cal.timeZone = ist
+        }
+        return cal
+    }()
+
     /// True when a single expense passes the filter's ACCOUNT dimension.
     ///
     /// - When the account filter is inactive (`!filter.accountFilterActive`), every

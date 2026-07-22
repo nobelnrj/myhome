@@ -41,6 +41,26 @@ struct OverviewFilterTests {
         return cal
     }
 
+    /// US Pacific (PST/PDT) calendar — a deliberately non-IST timezone so WR-04 can prove that
+    /// boundary math tracks the injected calendar, not the ambient device timezone.
+    private func pacificCalendar() -> Calendar {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+        return cal
+    }
+
+    /// Build a specific instant from Y/M/D + optional time-of-day in the given calendar's zone.
+    private func date(
+        _ cal: Calendar,
+        year: Int, month: Int, day: Int,
+        hour: Int = 0, minute: Int = 0, second: Int = 0
+    ) -> Date {
+        var comps = DateComponents()
+        comps.year = year; comps.month = month; comps.day = day
+        comps.hour = hour; comps.minute = minute; comps.second = second
+        return cal.date(from: comps)!
+    }
+
     /// Build a specific instant in IST from Y/M/D + optional time-of-day.
     private func istDate(
         _ cal: Calendar,
@@ -309,5 +329,56 @@ struct OverviewFilterTests {
 
         let yearOccurrences = label.components(separatedBy: "2026").count - 1
         #expect(yearOccurrences == 1, "same-year label must show the year exactly once (redundant from-year dropped)")
+    }
+
+    // MARK: - WR-04: boundaries track the injected calendar, and production pins IST
+
+    @Test("rangeBoundariesTrackCalendar: start-of-day edges follow the injected (non-IST) calendar, not IST")
+    func rangeBoundariesTrackCalendar() throws {
+        let pacific = pacificCalendar()
+
+        let (start, end) = OverviewFilterEngine.rangeBoundaries(
+            from: date(pacific, year: 2026, month: 7, day: 10),
+            to: date(pacific, year: 2026, month: 7, day: 12),
+            calendar: pacific
+        )
+
+        // Start must be Pacific midnight of Jul 10, NOT IST midnight (which is 11.5h earlier
+        // in absolute time and would produce a different Date).
+        #expect(start == date(pacific, year: 2026, month: 7, day: 10, hour: 0, minute: 0, second: 0),
+                "start clamps to Pacific start-of-day when a Pacific calendar is injected")
+
+        let istCal = istCalendar()
+        let istMidnight = istDate(istCal, year: 2026, month: 7, day: 10, hour: 0, minute: 0, second: 0)
+        #expect(start != istMidnight, "Pacific and IST start-of-day are distinct instants — boundaries follow the injected calendar")
+
+        // Sanity: the window is a valid ascending inclusive range with the expected end edge.
+        #expect(start < end)
+        #expect(end == pacific.date(byAdding: DateComponents(day: 1, second: -1),
+                                    to: date(pacific, year: 2026, month: 7, day: 12))!,
+                "end is 23:59:59 Pacific on the to-day")
+    }
+
+    @Test("financialCalendarPinsIST: the production financial calendar is IST regardless of device")
+    func financialCalendarPinsIST() throws {
+        #expect(OverviewFilterEngine.financialCalendar.timeZone.identifier == "Asia/Kolkata",
+                "production call sites must compute financial day-edges in IST, not the device timezone")
+
+        // The production calendar yields the SAME boundaries as the IST test calendar for a range,
+        // proving the UI path and the IST-pinned tests agree.
+        let prod = OverviewFilterEngine.financialCalendar
+        let istCal = istCalendar()
+        let (prodStart, prodEnd) = OverviewFilterEngine.rangeBoundaries(
+            from: date(prod, year: 2026, month: 7, day: 1),
+            to: date(prod, year: 2026, month: 7, day: 15),
+            calendar: prod
+        )
+        let (istStart, istEnd) = OverviewFilterEngine.rangeBoundaries(
+            from: istDate(istCal, year: 2026, month: 7, day: 1),
+            to: istDate(istCal, year: 2026, month: 7, day: 15),
+            calendar: istCal
+        )
+        #expect(prodStart == istStart && prodEnd == istEnd,
+                "production (financialCalendar) boundaries match the IST-pinned test boundaries")
     }
 }

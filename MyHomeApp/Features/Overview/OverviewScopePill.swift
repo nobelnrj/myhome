@@ -90,7 +90,11 @@ struct OverviewScopePill: View {
         if let range = filter.dateRange {
             // WR-01 / WR-02: one shared formatter for header + pill; discloses the from-side year
             // on cross-year ranges so the scope label is never ambiguous.
-            parts.append(OverviewFilterEngine.rangeLabel(from: range.lowerBound, to: range.upperBound))
+            // WR-04: same explicit IST calendar the header uses, so the pill label matches the
+            // @Query day-edges regardless of device timezone.
+            parts.append(OverviewFilterEngine.rangeLabel(
+                from: range.lowerBound, to: range.upperBound,
+                calendar: OverviewFilterEngine.financialCalendar))
         }
         return parts.isEmpty ? "Filtered" : parts.joined(separator: " · ")
     }
