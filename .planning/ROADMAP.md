@@ -113,8 +113,8 @@ Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROAD
 | 8-12 | v1.1 | 26/26 | Complete | 2026-06-20 |
 | 13-17 | v1.2 | 28/28 | Complete | 2026-07-13 |
 | 18-22 | v1.3 | 22/22 | Complete | 2026-07-22 |
-| 23. Overview Declutter & Tap-to-Edit Everywhere | v1.3.1 | 0/TBD | Not started | - |
-| 24. Custom Floating Nav Bar | v1.3.1 | 0/TBD | Not started | - |
+| 23. Overview Declutter & Tap-to-Edit Everywhere | v1.3.1 | 1/1 | PR #46 open — awaiting merge | - |
+| 24. Custom Floating Nav Bar | v1.3.1 | 1/1 | PR #47 open — awaiting merge | - |
 
 ## Backlog
 
