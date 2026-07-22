@@ -15,7 +15,9 @@ findings:
   warning: 4
   info: 4
   total: 8
-status: issues_found
+  warnings_resolved: 4
+status: resolved
+resolution: "All 4 warnings fixed 2026-07-22 (commits e6b2882 WR-01/02, c5f60ad WR-03, 3884d98 WR-04). Build clean, full MyHomeTests green. INFO items left as-is."
 ---
 
 # Phase 21: Code Review Report
