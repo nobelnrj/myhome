@@ -77,7 +77,7 @@ struct OverviewView: View {
                     start: bounds.start,
                     end: bounds.end,
                     monthLabel: bounds.label,
-                    filter: filter,
+                    filter: $filter,
                     selectedTab: $selectedTab,
                     deepLinkNoteID: $deepLinkNoteID,
                     activityCategoryFilter: $activityCategoryFilter,
@@ -116,7 +116,8 @@ private struct OverviewMonthContent: View {
     /// Phase 21: the active account × date scope. The @Query window is already date-scoped by
     /// `start`/`end`; this filter narrows the fetched rows by ACCOUNT before every cash-flow
     /// aggregation (OVF-01). `OverviewFilter()` default = passthrough, so default state is unchanged.
-    let filter: OverviewFilter
+    /// A `@Binding` (Plan 03) so the header pill + filter sheet mutate the parent's `@State`.
+    @Binding var filter: OverviewFilter
     @Binding var selectedTab: Int
     @Binding var deepLinkNoteID: UUID?
     @Binding var activityCategoryFilter: UUID?
@@ -144,6 +145,8 @@ private struct OverviewMonthContent: View {
     @Query(sort: \PantryItem.name) private var pantry: [PantryItem]
 
     @State private var editingExpense: Expense?
+    /// Phase 21 (OVF-01/03): presents the OverviewFilterSheet from the header scope pill.
+    @State private var showFilterSheet = false
     @State private var navigateToAssets = false
     @State private var navigateToAnalytics = false
     /// Phase 20: Kitchen is a PUSHED surface from Overview (Assets/Analytics precedent) — the
@@ -151,7 +154,7 @@ private struct OverviewMonthContent: View {
     @State private var navigateToKitchen = false
 
     init(start: Date, end: Date, monthLabel: String,
-         filter: OverviewFilter,
+         filter: Binding<OverviewFilter>,
          selectedTab: Binding<Int>,
          deepLinkNoteID: Binding<UUID?>,
          activityCategoryFilter: Binding<UUID?>,
@@ -159,7 +162,7 @@ private struct OverviewMonthContent: View {
         self.start = start
         self.end = end
         self.monthLabel = monthLabel
-        self.filter = filter
+        self._filter = filter
         self._selectedTab = selectedTab
         self._deepLinkNoteID = deepLinkNoteID
         self._activityCategoryFilter = activityCategoryFilter
@@ -241,12 +244,24 @@ private struct OverviewMonthContent: View {
         ScrollViewReader { scrollProxy in
         ScrollView(.vertical) {
             LazyVStack(alignment: .leading, spacing: DesignTokens.spacing22) {
-                // Screen header: eyebrow month + 34pt title (v2 handoff)
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(monthLabel).eyebrow()
-                    Text("Overview")
-                        .font(.system(size: 34, weight: .bold))
-                        .foregroundStyle(DesignTokens.label)
+                // Screen header: eyebrow month + 34pt title (v2 handoff), with the OVF-03 scope
+                // pill trailing the title — the always-present filter entry point AND active-state
+                // display (UI-REFERENCE Decision 3). It names the current scope so filtered figures
+                // can never read as all-account totals (threat T-21-05).
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(monthLabel).eyebrow()
+                        Text("Overview")
+                            .font(.system(size: 34, weight: .bold))
+                            .foregroundStyle(DesignTokens.label)
+                    }
+                    Spacer(minLength: 8)
+                    OverviewScopePill(
+                        filter: filter,
+                        accountNames: selectedAccountNames,
+                        onTap: { showFilterSheet = true },
+                        onClear: { filter = OverviewFilter() }
+                    )
                 }
                 .padding(.bottom, -6)
                 .entrance(0)
@@ -369,6 +384,12 @@ private struct OverviewMonthContent: View {
         .sheet(item: $editingExpense) { expense in
             EditExpenseView(expense: expense)
         }
+        // Phase 21 (OVF-01/02): the filter sheet edits `filter` live. `monthExpenses` (date-scoped,
+        // account-UNfiltered) feeds the per-account glance numbers via the same transfer-excluding
+        // BudgetCalculator path the hero uses, so the sheet's figures reconcile with the readout.
+        .sheet(isPresented: $showFilterSheet) {
+            OverviewFilterSheet(filter: $filter, periodExpenses: monthExpenses)
+        }
         .navigationDestination(isPresented: $navigateToAssets) {
             AssetsListView()
         }
@@ -389,6 +410,21 @@ private struct OverviewMonthContent: View {
             }
             if args.contains("-openKitchen") {
                 navigateToKitchen = true
+            }
+            // Phase 21 screenshot hooks (Plan 03): pre-apply a filter scope so the filtered /
+            // range-filtered Overview can be captured without manual taps. DEBUG-only, same as
+            // -openAnalytics / -scrollTo above.
+            if args.contains("-filterFirstAccount"),
+               let first = allAccounts.filter({ !$0.isArchived }).sorted(by: { $0.sortOrder < $1.sortOrder }).first {
+                filter.accountIDs = [first.id]
+            }
+            if let i = args.firstIndex(of: "-filterRangeDays"), i + 1 < args.count, let days = Int(args[i + 1]) {
+                let to = Date()
+                let from = Calendar.current.date(byAdding: .day, value: -days, to: to) ?? to
+                filter.dateRange = from...to
+            }
+            if args.contains("-openFilterSheet") {
+                showFilterSheet = true
             }
             if let i = args.firstIndex(of: "-scrollTo"), i + 1 < args.count {
                 let target = args[i + 1]
@@ -418,6 +454,18 @@ private struct OverviewMonthContent: View {
             }
         }
         .padding(.bottom, -8)
+    }
+
+    // MARK: - Scope-pill support
+
+    /// Resolves the selected account names (plus "Unassigned" when included) for the header pill's
+    /// summary label, reusing the existing `allAccounts` @Query — no second fetch mechanism.
+    private var selectedAccountNames: [String] {
+        var names = allAccounts
+            .filter { filter.accountIDs.contains($0.id) }
+            .map { $0.name ?? "Account" }
+        if filter.includeUnassigned { names.append("Unassigned") }
+        return names
     }
 
     // MARK: - Decimal helpers
