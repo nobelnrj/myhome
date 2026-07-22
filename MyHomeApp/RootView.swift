@@ -26,6 +26,16 @@ import SwiftData
 /// notification deep-link (kOpenNoteNotification → switch to Notes tab, open note).
 ///
 /// No shared NavigationPath — each tab owns its navigation independently.
+///
+/// Phase 24 (NAV-01) — Custom Floating Nav Bar:
+/// - `TabView(selection:)` still drives content switching, but its native chrome is hidden
+///   (`.toolbar(.hidden, for: .tabBar)`) — a native bar can't be restyled/glow (Phase 14 revert).
+/// - `FloatingNavBar` (DesignSystem/FloatingNavBar.swift) is overlaid in a `ZStack(alignment: .bottom)`
+///   and is the ONLY visible tab bar. It reads/writes the same `selectedTab` binding, so
+///   `-startTab N` and the note deep-link (`selectedTab = 3`) work unchanged.
+/// - `.padding(.bottom: DesignTokens.navContentClearance)` + `.clipped()` on the TabView reserve
+///   clearance so tab content doesn't visually run under (or, for a List with more rows than fit,
+///   overflow past) the floating bar.
 struct RootView: View {
 
     @Environment(\.scenePhase) private var scenePhase
@@ -93,37 +103,49 @@ struct RootView: View {
 
     @ViewBuilder
     private var mainContent: some View {
-        TabView(selection: $selectedTab) {
-            OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID, activityCategoryFilter: $activityCategoryFilter)
-                .tabItem {
-                    Label("Home", systemImage: "house")
-                }
-                .tag(0)
-            ExpenseListView(reviewBadgeCount: $reviewBadgeCount, deepLinkCategoryFilter: $activityCategoryFilter)
-                .tabItem {
-                    Label("Expenses", systemImage: "list.bullet")
-                }
-                .badge(reviewBadgeCount)
-                .tag(1)
-            BudgetsView()
-                .tabItem {
-                    Label("Budgets", systemImage: "chart.bar")
-                }
-                .tag(2)
-            NotesHomeView(deepLinkNoteID: $deepLinkNoteID, deepLinkBlockID: $deepLinkBlockID)
-                .tabItem {
-                    Label("Notes", systemImage: "note.text")
-                }
-                .tag(3)
-            SettingsView(selectedTab: $selectedTab, lockController: lockController, gmailSyncController: gmailSyncController, transferScanService: transferScanService)
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape")
-                }
-                .tag(4)        }
-        // D-07/D-08: selected-tab icon/label is accent ICONOGRAPHY on the (light) bar — a
-        // text/icon role, so it uses accentText (dark amber in light for contrast). accentText's
-        // dark branch == #FFD60A, so dark rendering is byte-identical (D-06).
-        .tint(DesignTokens.accentText)
+        ZStack(alignment: .bottom) {
+            TabView(selection: $selectedTab) {
+                OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID, activityCategoryFilter: $activityCategoryFilter)
+                    .tag(0)
+                ExpenseListView(reviewBadgeCount: $reviewBadgeCount, deepLinkCategoryFilter: $activityCategoryFilter)
+                    .tag(1)
+                BudgetsView()
+                    .tag(2)
+                NotesHomeView(deepLinkNoteID: $deepLinkNoteID, deepLinkBlockID: $deepLinkBlockID)
+                    .tag(3)
+                SettingsView(selectedTab: $selectedTab, lockController: lockController, gmailSyncController: gmailSyncController, transferScanService: transferScanService)
+                    .tag(4)
+            }
+            // D-07/D-08: selected-tab icon/label is accent ICONOGRAPHY on the (light) bar — a
+            // text/icon role, so it uses accentText (dark amber in light for contrast). accentText's
+            // dark branch == #FFD60A, so dark rendering is byte-identical (D-06).
+            .tint(DesignTokens.accentText)
+            // Phase 24 (NAV-01): the native tab bar is hidden — FloatingNavBar (below) is the
+            // ONLY visible bar. Each tab's own tabItem/badge no longer render anywhere, so the
+            // review-badge count is threaded into FloatingNavBar directly instead.
+            .toolbar(.hidden, for: .tabBar)
+            // Defensive: on iOS 26 a hidden tab bar can otherwise leave behind the Liquid Glass
+            // auto-minimize/reveal-handle behavior. `.never` guarantees FloatingNavBar is the
+            // only bottom-bar chrome the system ever draws. Gated to 26+ (API unavailable on the
+            // iOS 17 deployment target; pre-26 TabViews have no such handle to suppress).
+            .modifier(TabBarNeverMinimizeModifier())
+            // Reserve clearance under every tab's content so it doesn't run under the floating
+            // bar. `.padding(.bottom:)` genuinely shrinks the size TabView offers its pages —
+            // this propagates through the view tree (unlike `.safeAreaInset`, which some
+            // intermediate containers don't forward, e.g. BudgetsView's List sitting inside a
+            // plain VStack below its own header) — and `.clipped()` hard-clips anything that
+            // still overflows the reduced frame. Without hiding the native tab bar (pre-Phase-24)
+            // that overflow — a List with more rows than fit above the OLD opaque bar — was
+            // simply covered by it; now it must be reserved explicitly. `navContentClearance` is
+            // deliberately smaller than the bar's own visual footprint (`tabBarClearance`): the
+            // bar floats as an OVERLAY, not a layout participant, so content only needs enough
+            // headroom to avoid visually competing with it, not to physically clear its full
+            // height + offset.
+            .padding(.bottom, DesignTokens.navContentClearance)
+            .clipped()
+
+            FloatingNavBar(selectedTab: $selectedTab, reviewBadgeCount: reviewBadgeCount)
+        }
         .onChange(of: selectedTab) { _, _ in Haptics.selection() }
         .onAppear {
             // Inject the SwiftData context into the sync controller so sync() can persist
@@ -248,5 +270,20 @@ struct RootView: View {
         var descriptor = FetchDescriptor<Asset>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         return try? modelContext.fetch(descriptor).first
+    }
+}
+
+// MARK: - iOS 26 tab-bar-minimize suppression (Phase 24, NAV-01)
+
+/// `.tabBarMinimizeBehavior(_:)` is iOS 26+ only — the app's deployment target is iOS 17, so it
+/// must be applied conditionally. Pre-26 TabViews have no auto-minimize/reveal-handle behavior
+/// to suppress, so the modifier is simply a no-op there.
+private struct TabBarNeverMinimizeModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.tabBarMinimizeBehavior(.never)
+        } else {
+            content
+        }
     }
 }

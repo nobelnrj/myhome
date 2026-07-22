@@ -169,6 +169,12 @@ enum DesignTokens {
     static let tabBarBottomOffset: CGFloat = 24
     static let tabBarClearance:    CGFloat = 100   // safeAreaInset height for content (TABBAR_H)
     static let tabItemWidth:       CGFloat = 58
+    /// Phase 24 (NAV-01): reserved bottom clearance under each TabView page so its content
+    /// doesn't visually collide with the floating FloatingNavBar overlay. Deliberately smaller
+    /// than `tabBarClearance` — the bar FLOATS above content (an overlay, not a layout
+    /// participant), so content only needs enough headroom to clear the bar visually, not to
+    /// physically vacate its full height + bottom offset. Tuned on-device (RootView.mainContent).
+    static let navContentClearance: CGFloat = 40
 
     // MARK: - Neumorphic shadow colors (adaptive)
     // D-05/D-06: every promoted inline surface/button/puck shadow, rim, and hairline color is a
