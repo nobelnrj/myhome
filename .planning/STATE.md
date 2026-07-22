@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Private Sync & Kitchen
 status: executing
-last_updated: "2026-07-22T05:10:06.202Z"
+last_updated: "2026-07-22T05:19:54.987Z"
 last_activity: 2026-07-22
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
   percent: 80
 ---
 
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 21 (overview-filtering) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Next: Phase 21 (Overview Filtering) — 3 plans already written, 0 executed. Last phase of v1.3.
 Last activity: 2026-07-22
@@ -107,6 +107,7 @@ Last activity: 2026-07-22
 | Phase 22 P02 | 30 min | 2 tasks | 5 files |
 | Phase 22 P03 | 30min | 2 tasks | 5 files |
 | Phase 21 P01 | 6 | 2 tasks | 3 files |
+| Phase 21 P02 | 15 | 2 tasks | 1 files |
 
 ## Quick Tasks Completed
 
@@ -176,6 +177,8 @@ Recent decisions affecting current work:
 - [Phase 22]: PantryIconCache is @unchecked Sendable — UserDefaults is not Sendable and injectable defaults are needed for test isolation
 - [Phase ?]: 21-01: OverviewFilterEngine.apply owns account dimension only; date scoping stays in the view @Query predicate fed by rangeBoundaries
 - [Phase ?]: 21-01: transfer exclusion never re-implemented in the filter engine — callers compose apply() with BudgetCalculator.grossSpend/grossIncome (T-21-02)
+- [Phase ?]: 21-02: visibleExpenses (account-filtered) is the ONLY input to every Overview cash-flow figure; no aggregation reads the raw @Query array (T-21-03)
+- [Phase ?]: 21-02: active filter suppresses Net Worth + Budgets and hides Over Time under a custom range (OVF-03 data half); reviewItems stays unfiltered as triage queue
 
 ### Pending Todos
 
@@ -237,7 +240,7 @@ Open artifacts deferred at v1.1 close — code is implemented; the verification 
 
 ## Session Continuity
 
-Last session: 2026-07-22T05:09:54.837Z
+Last session: 2026-07-22T05:19:49.184Z
 Stopped at: Completed 19-03-PLAN.md
 Resume file: None
 
