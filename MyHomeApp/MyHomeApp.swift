@@ -66,7 +66,19 @@ struct MyHomeApp: App {
                     // App launches foregrounded; the scenePhase .active branch does not reliably
                     // fire for the initial transition on all iOS versions, so start here.
                     syncCoordinator.setContext(container.mainContext)
-                    syncCoordinator.start()
+                    // A -seedSampleData build must NEVER join auto-sync: kitchen (pantry +
+                    // shopping) is in the sync scope, and auto-sync silently LWW-pushes on peer
+                    // connect to any same-service peer on the LAN. A seeded simulator would
+                    // therefore merge its SAMPLE pantry into the real phones' Kitchen. Skip
+                    // discovery when seeding so a dev build can't pollute the household stores.
+                    #if DEBUG
+                    let skipSyncForSeeding = ProcessInfo.processInfo.arguments.contains("-seedSampleData")
+                    #else
+                    let skipSyncForSeeding = false
+                    #endif
+                    if !skipSyncForSeeding {
+                        syncCoordinator.start()
+                    }
                     #if DEBUG
                     seedSampleDataIfRequested()
                     #endif
