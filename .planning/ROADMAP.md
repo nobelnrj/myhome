@@ -10,7 +10,7 @@ My Home is a single-user (v1) iOS app for a two-person Indian household, built a
 - ✅ **v1.1 Accounts, Assets & Household Polish** — Phases 8-12 (shipped 2026-06-20) — see [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Neumorphic Redesign** — Phases 13-17 (shipped 2026-07-13) — see [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 Private Sync & Kitchen** — Phases 18-22 (shipped 2026-07-22) — see [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
-- 🚧 **v1.3.1 UX Polish** — Phases 23-24 (planning)
+- ✅ **v1.3.1 UX Polish** — Phases 23-24 (shipped 2026-07-23)
 
 ## Phases
 
@@ -69,12 +69,12 @@ Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROAD
 
 </details>
 
-### 🚧 v1.3.1 UX Polish (Planning)
+### ✅ v1.3.1 UX Polish (Shipped 2026-07-23)
 
-**Milestone Goal:** A fast interim polish pass — de-crowd the Overview (remove duplicated spend charts), make every expense editable wherever it appears, and give the app a more premium feel with a custom floating nav bar. Local-only, no schema change, no new dependencies (SchemaV11 unchanged).
+**Milestone Goal:** A fast interim polish pass — de-crowd the Overview (remove duplicated spend charts), make every expense editable wherever it appears, and give the app a more premium feel with a floating nav bar. Local-only, no schema change, no new dependencies (SchemaV11 unchanged).
 
-- [ ] **Phase 23: Overview Declutter & Tap-to-Edit Everywhere** — collapse the duplicated Overview spend charts into one view and make every expense row open the existing edit sheet
-- [ ] **Phase 24: Custom Floating Nav Bar** — replace the native tab bar with a custom floating neumorphic nav bar, keeping main deployable
+- [x] **Phase 23: Overview Declutter & Tap-to-Edit Everywhere** — consolidated Overview spend into one donut; every expense row (incl. budget drill-downs) opens the edit sheet (PR #46; contentShape tap-fix PR #46)
+- [x] **Phase 24: Floating Nav Bar** — shipped as the **native iOS 26 floating TabView** (`.tabBarMinimizeBehavior(.never)`); custom-container approach abandoned. Scroll-edge band hidden so the bar floats transparently (PR #47 + polish PR #48)
 
 ## Phase Details
 
@@ -91,8 +91,10 @@ Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROAD
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 24: Custom Floating Nav Bar
-**Goal**: The five tab destinations are presented in a custom floating, neumorphic nav bar detached from the screen edge instead of the native tab bar — a genuine custom bar over a plain TabView selection — without breaking navigation or leaving main undeployable.
+### Phase 24: Floating Nav Bar
+**Shipped note (2026-07-23):** After a custom-container attempt regressed on-device (bad positioning, no bottom clearance, full-screen filter sheet), pivoted to the **native iOS 26 floating TabView** (`.tabBarMinimizeBehavior(.never)`); `FloatingNavBar.swift` deleted. Follow-up PR #48 hid the bottom scroll-edge "Liquid Glass" band so the bar floats transparently over content (no background band).
+
+**Original goal**: The five tab destinations are presented in a custom floating, neumorphic nav bar detached from the screen edge instead of the native tab bar — a genuine custom bar over a plain TabView selection — without breaking navigation or leaving main undeployable.
 **Depends on**: Phase 23
 **Requirements**: NAV-01
 **Success Criteria** (what must be TRUE):
@@ -113,8 +115,8 @@ Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROAD
 | 8-12 | v1.1 | 26/26 | Complete | 2026-06-20 |
 | 13-17 | v1.2 | 28/28 | Complete | 2026-07-13 |
 | 18-22 | v1.3 | 22/22 | Complete | 2026-07-22 |
-| 23. Overview Declutter & Tap-to-Edit Everywhere | v1.3.1 | 1/1 | PR #46 open — awaiting merge | - |
-| 24. Custom Floating Nav Bar | v1.3.1 | 1/1 | PR #47 open — awaiting merge | - |
+| 23. Overview Declutter & Tap-to-Edit Everywhere | v1.3.1 | 1/1 | Complete (PR #46) | 2026-07-23 |
+| 24. Floating Nav Bar (native iOS 26) | v1.3.1 | 1/1 | Complete (PR #47, #48) | 2026-07-23 |
 
 ## Backlog
 

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3.1
 milestone_name: UX Polish
-status: planning
-last_updated: "2026-07-22T18:22:15.791Z"
-last_activity: 2026-07-22
+status: shipped
+last_updated: "2026-07-23T17:40:00.000Z"
+last_activity: 2026-07-23
 progress:
   total_phases: 2
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 
 ## Current Position
 
-Phase: 23 of 24 (Overview Declutter & Tap-to-Edit Everywhere)
+Phase: 24 of 24 (v1.3.1 complete)
 Plan: â (roadmap set; ready to plan)
-Status: Ready to plan
+Status: Shipped 2026-07-23 — Phases 23 (PR #46) & 24 (PR #47, #48) merged to main and deployed to both phones
 Last activity: 2026-07-22 â v1.3.1 roadmap created (Phases 23-24, 3/3 reqs mapped)
 
 ## Performance Metrics
