@@ -189,7 +189,6 @@ struct ExpenseListView: View {
                         .padding(.bottom, 24)
                     }
                     .background(DesignTokens.bgCanvas)
-                    .floatingBarClearance()
                 }
             }
             .navigationTitle("Activity")

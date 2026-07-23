@@ -319,7 +319,6 @@ struct SettingsView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(DesignTokens.bgCanvas)
-            .floatingBarClearance()
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $navigateToSync) {

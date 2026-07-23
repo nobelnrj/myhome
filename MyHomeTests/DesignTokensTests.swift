@@ -101,10 +101,6 @@ struct DesignTokensTests {
         #expect(DesignTokens.radiusCard == 26)
     }
 
-    @Test("DesignTokens.tabBarClearance equals 100")
-    func tabBarClearance() throws {
-        #expect(DesignTokens.tabBarClearance == 100)
-    }
 }
 
 // MARK: - D-06 Dark bit-identity gate (Phase 17)

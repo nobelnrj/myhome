@@ -164,26 +164,6 @@ enum DesignTokens {
     static let spacing12: CGFloat = 12   // active pill vertical inset formula (ui.jsx pilH = tabBarHeight − 12)
     static let spacing22: CGFloat = 22   // inter-card vertical gap (ui.jsx card list gap: 22)
 
-    // MARK: - Tab Bar Geometry
-    static let tabBarHeight:       CGFloat = 62
-    /// Phase 24.1 (UX polish): the bar floats inside RootView's `mainContent` ZStack, which
-    /// itself already respects the safe area (only its `bgCanvas` background ignores it) — so
-    /// this offset is the FULL visible gap above the home-indicator safe area, not an addition
-    /// on top of it. Was 24 (read as "extra safety margin above the safe area", producing a
-    /// large empty band below the bar); dropped to 10 so the bar hovers just above the home
-    /// indicator with a small detached gap, matching the design intent of "floating," not "high."
-    static let tabBarBottomOffset: CGFloat = 10
-    static let tabBarClearance:    CGFloat = 100   // safeAreaInset height for content (TABBAR_H)
-    static let tabItemWidth:       CGFloat = 58
-    /// Phase 24 (NAV-01, fixed post-launch): reserved bottom clearance under each screen's
-    /// scrollable content so it doesn't visually collide with the floating FloatingNavBar
-    /// overlay. Derived from the bar's own geometry (height + its floating offset off the
-    /// screen edge) plus a comfortable breathing gap, rather than a hand-tuned guess — if the
-    /// bar's height or offset ever changes, this stays correct automatically. Applied via
-    /// `.floatingBarClearance()` directly on each screen's List/ScrollView (see that modifier's
-    /// doc comment for why it's applied there and not higher up the view tree).
-    static let navContentClearance: CGFloat = tabBarHeight + tabBarBottomOffset + spacing16
-
     /// Global minimum breathing room below presented sheet/popover content, above the home
     /// indicator / bottom safe area. Applied via `.sheetBottomClearance()`.
     static let sheetBottomClearance: CGFloat = spacing24
@@ -516,27 +496,9 @@ extension View {
     func entrance(_ index: Int) -> some View { modifier(EntranceModifier(index: index)) }
 }
 
-// MARK: - Floating nav bar clearance (Phase 24 NAV-01, fixed post-launch)
+// MARK: - Sheet bottom clearance
 
 extension View {
-    /// Reserves `DesignTokens.navContentClearance` below this view's content via
-    /// `safeAreaInset`, so a List/ScrollView's last row/section gets a comfortable gap above
-    /// the floating nav bar instead of sitting flush behind it.
-    ///
-    /// Apply this DIRECTLY to the screen's List/ScrollView — not to some ancestor container
-    /// (e.g. RootView's TabView, or an intermediate VStack/NavigationStack a few levels up).
-    /// The original Phase 24 attempt applied `.padding(.bottom:)` at the TabView level, and
-    /// its own dev-comment noted `.safeAreaInset` didn't reliably reach a List sitting inside a
-    /// plain VStack several levels down (e.g. BudgetsView). A NavigationStack in particular
-    /// manages/resets safe areas for its pushed content, so an inset applied above it doesn't
-    /// reliably propagate to a List/ScrollView underneath. Applying the inset at the scroll
-    /// view itself sidesteps that entirely — it always works, everywhere.
-    func floatingBarClearance() -> some View {
-        safeAreaInset(edge: .bottom) {
-            Color.clear.frame(height: DesignTokens.navContentClearance)
-        }
-    }
-
     /// Reserves `DesignTokens.sheetBottomClearance` below this view's content via
     /// `safeAreaInset`, so presented sheet/popover content (e.g. a trailing button or footer
     /// link) never sits flush against the screen's bottom edge / home indicator. Apply to the

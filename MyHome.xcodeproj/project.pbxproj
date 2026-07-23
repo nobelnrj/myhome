@@ -142,7 +142,6 @@
 		A13DS1 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DS1 /* DesignTokens.swift */; };
 		A13DST /* DesignTokensTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13DST /* DesignTokensTests.swift */; };
 		A13NS /* NeuSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13NS /* NeuSurface.swift */; };
-		A24FNB /* FloatingNavBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F24FNB /* FloatingNavBar.swift */; };
 		A13RMT /* RollingMoneyText.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMT /* RollingMoneyText.swift */; };
 		A13RMTT /* RollingMoneyTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13RMTT /* RollingMoneyTextTests.swift */; };
 		A1401SDA /* SpendDonutAggregation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1401SDA /* SpendDonutAggregation.swift */; };
@@ -435,7 +434,6 @@
 		F13DS1 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		F13DST /* DesignTokensTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokensTests.swift; sourceTree = "<group>"; };
 		F13NS /* NeuSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuSurface.swift; sourceTree = "<group>"; };
-		F24FNB /* FloatingNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingNavBar.swift; sourceTree = "<group>"; };
 		F13RMT /* RollingMoneyText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyText.swift; sourceTree = "<group>"; };
 		F13RMTT /* RollingMoneyTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingMoneyTextTests.swift; sourceTree = "<group>"; };
 		F1401SDA /* SpendDonutAggregation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendDonutAggregation.swift; sourceTree = "<group>"; };
@@ -1081,7 +1079,6 @@
 			children = (
 				F13DS1 /* DesignTokens.swift */,
 				F13NS /* NeuSurface.swift */,
-				F24FNB /* FloatingNavBar.swift */,
 				F13RMT /* RollingMoneyText.swift */,
 			);
 			path = DesignSystem;
@@ -1357,7 +1354,6 @@
 				A703CUB /* CUBParser.swift in Sources */,
 				A13DS1 /* DesignTokens.swift in Sources */,
 				A13NS /* NeuSurface.swift in Sources */,
-				A24FNB /* FloatingNavBar.swift in Sources */,
 				A13RMT /* RollingMoneyText.swift in Sources */,
 				AANL01 /* AnalyticsAggregator.swift in Sources */,
 				AANL02 /* AnalyticsView.swift in Sources */,

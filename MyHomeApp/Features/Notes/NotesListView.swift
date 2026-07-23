@@ -207,7 +207,6 @@ struct NotesListView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(DesignTokens.bgCanvas)
-        .floatingBarClearance()
     }
 
     // MARK: - Actions
