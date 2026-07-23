@@ -84,6 +84,7 @@ struct EditExpenseView: View {
                 .padding(.horizontal, 16)
             }
             .background(DesignTokens.bgCanvas)
+            .sheetBottomClearance()
             .navigationTitle("Edit Expense")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

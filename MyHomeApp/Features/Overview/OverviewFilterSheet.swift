@@ -70,6 +70,7 @@ struct OverviewFilterSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(DesignTokens.bgCanvas)
+            .sheetBottomClearance()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Reset") {

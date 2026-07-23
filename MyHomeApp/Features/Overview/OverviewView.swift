@@ -386,6 +386,7 @@ private struct OverviewMonthContent: View {
         }
         .scrollContentBackground(.hidden)
         .background(DesignTokens.bgCanvas)
+        .floatingBarClearance()
         .sheet(item: $editingExpense) { expense in
             EditExpenseView(expense: expense)
         }

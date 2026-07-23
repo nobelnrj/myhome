@@ -204,6 +204,7 @@ private struct BudgetsMonthView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(DesignTokens.bgCanvas)
+        .floatingBarClearance()
     }
 
     @ViewBuilder

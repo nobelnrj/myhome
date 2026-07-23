@@ -69,6 +69,7 @@ struct AddExpenseView: View {
                 .padding(.horizontal, 16)
             }
             .background(DesignTokens.bgCanvas)
+            .sheetBottomClearance()
             .navigationTitle("New Expense")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {

@@ -33,9 +33,14 @@ import SwiftData
 /// - `FloatingNavBar` (DesignSystem/FloatingNavBar.swift) is overlaid in a `ZStack(alignment: .bottom)`
 ///   and is the ONLY visible tab bar. It reads/writes the same `selectedTab` binding, so
 ///   `-startTab N` and the note deep-link (`selectedTab = 3`) work unchanged.
-/// - `.padding(.bottom: DesignTokens.navContentClearance)` + `.clipped()` on the TabView reserve
-///   clearance so tab content doesn't visually run under (or, for a List with more rows than fit,
-///   overflow past) the floating bar.
+/// - Content clearance under the floating bar is reserved per-screen via `.floatingBarClearance()`
+///   (DesignSystem/DesignTokens.swift) applied directly to each screen's own List/ScrollView — see
+///   that modifier's doc comment for why the TabView level doesn't work reliably. The ZStack itself
+///   carries an explicit `bgCanvas.ignoresSafeArea()` background (below) so the screen background
+///   always fills edge-to-edge regardless of how any individual tab insets its content — a
+///   `.padding(.bottom:)` + `.clipped()` on the TabView was tried first (shrinking the TabView's own
+///   frame to reserve clearance) but that left the ZStack's default (white) background exposed
+///   below the shrunk frame — the reported "white band" bug. Fixed post-launch (see PR #47).
 struct RootView: View {
 
     @Environment(\.scenePhase) private var scenePhase
@@ -104,6 +109,12 @@ struct RootView: View {
     @ViewBuilder
     private var mainContent: some View {
         ZStack(alignment: .bottom) {
+            // Phase 24 fix (NAV-01): explicit full-bleed background BEHIND the TabView. Without
+            // this the ZStack has no background of its own, so anywhere a tab's content is
+            // inset off the bottom edge (deliberately, via floatingBarClearance) the system's
+            // default (white) window background showed through as a band at the screen bottom.
+            DesignTokens.bgCanvas.ignoresSafeArea()
+
             TabView(selection: $selectedTab) {
                 OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID, activityCategoryFilter: $activityCategoryFilter)
                     .tag(0)
@@ -129,20 +140,8 @@ struct RootView: View {
             // only bottom-bar chrome the system ever draws. Gated to 26+ (API unavailable on the
             // iOS 17 deployment target; pre-26 TabViews have no such handle to suppress).
             .modifier(TabBarNeverMinimizeModifier())
-            // Reserve clearance under every tab's content so it doesn't run under the floating
-            // bar. `.padding(.bottom:)` genuinely shrinks the size TabView offers its pages —
-            // this propagates through the view tree (unlike `.safeAreaInset`, which some
-            // intermediate containers don't forward, e.g. BudgetsView's List sitting inside a
-            // plain VStack below its own header) — and `.clipped()` hard-clips anything that
-            // still overflows the reduced frame. Without hiding the native tab bar (pre-Phase-24)
-            // that overflow — a List with more rows than fit above the OLD opaque bar — was
-            // simply covered by it; now it must be reserved explicitly. `navContentClearance` is
-            // deliberately smaller than the bar's own visual footprint (`tabBarClearance`): the
-            // bar floats as an OVERLAY, not a layout participant, so content only needs enough
-            // headroom to avoid visually competing with it, not to physically clear its full
-            // height + offset.
-            .padding(.bottom, DesignTokens.navContentClearance)
-            .clipped()
+            // Content clearance is reserved per-screen (`.floatingBarClearance()` on each
+            // screen's own List/ScrollView) rather than here — see the doc comment above.
 
             FloatingNavBar(selectedTab: $selectedTab, reviewBadgeCount: reviewBadgeCount)
         }
