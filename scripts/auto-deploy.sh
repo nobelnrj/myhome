@@ -18,14 +18,16 @@
 #   stable ref but can be pointed at a phase branch while testing a PR.
 #
 # CADENCE:
-#   launchd fires this DAILY at 21:00, but it only actually reinstalls when the
-#   content changed or the last success is >= MIN_AGE_DAYS (3) old. Everything else
-#   is a fast no-op. The point is retries: a night where the phones aren't home on
-#   Wi-Fi costs nothing because tomorrow tries again — seven chances a week instead
-#   of two. A full install is only recorded as success when EVERY phone got it.
+#   launchd fires this every 30 min (pipeline L3 — see scripts/PIPELINE.md), but it
+#   only actually reinstalls when the content changed (i.e. you merged a PR to main)
+#   or the last success is >= MIN_AGE_DAYS (3) old. Everything else is a fast no-op.
+#   So a merge reaches both phones within ~30 min, and the 3-day re-sign still beats
+#   the free-provisioning 7-day expiry. Idle polls cost a git fetch. A full install is
+#   only recorded as success when EVERY phone got it; a miss just retries next poll.
+#   (Was DAILY at 21:00; the plist template lives at scripts/launchd/.)
 #
-# REQUIRES: this Mac powered on and awake at some 21:00. It's a Mac mini with
-#   sleep=0, so that's free — but it IS a hard dependency: the build runs here.
+# REQUIRES: this Mac powered on and awake. It's a Mac mini with sleep=0, so that's
+#   free — but it IS a hard dependency: the build runs here.
 #   Off for 7 straight days = profiles expire = apps won't launch.
 #
 # USAGE:
