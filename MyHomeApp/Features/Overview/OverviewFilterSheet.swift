@@ -31,6 +31,17 @@ struct OverviewFilterSheet: View {
     @State private var customFrom: Date
     @State private var customTo: Date
 
+    /// Phase 24.1 (UX polish): the sheet's account list + PERIOD controls + "Manage accounts"
+    /// footer don't fit `.medium`'s fixed frame height — a plain `.presentationDetents([.medium,
+    /// .large])` with no selection binding opens at the FIRST (smallest) detent, `.medium`, so
+    /// the ScrollView renders unscrolled and gets clipped by that frame regardless of how much
+    /// bottom padding trailing content carries (padding pushes content further below the fold,
+    /// it doesn't change what's visible at scroll-offset 0) — the This Month/Custom range chips
+    /// (and, worse, the custom-range date pickers) land exactly on that clip line, reading as
+    /// jammed flush with zero space below. Defaulting to `.large` gives the content its natural
+    /// height with room to spare in both states; `.medium` stays reachable by dragging down.
+    @State private var detent: PresentationDetent = .large
+
     init(filter: Binding<OverviewFilter>, periodExpenses: [Expense]) {
         self._filter = filter
         self.periodExpenses = periodExpenses
@@ -86,7 +97,7 @@ struct OverviewFilterSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.medium, .large], selection: $detent)
         .presentationDragIndicator(.visible)
     }
 
@@ -254,6 +265,16 @@ struct OverviewFilterSheet: View {
                 .neuSurface(.recessed, radius: DesignTokens.radiusInner, padding: nil)
             }
         }
+        // Phase 24.1 (UX polish): this is frequently the last thing visible in the sheet's
+        // .medium detent — the ScrollView renders top-down and the detent's fixed frame height
+        // simply clips wherever the content reaches, so the trailing `manageAccountsFooter` +
+        // `.sheetBottomClearance()` below it can end up entirely off-screen with the This
+        // Month/Custom range chips (or, in custom-range state, the date pickers) landing exactly
+        // on that clip boundary — reading as jammed flush against the sheet edge with zero
+        // space, in BOTH states. A hard bottom padding directly on this section (not just
+        // downstream spacing that may never get rendered) guarantees whatever the detent clips
+        // to, it clips into blank space right after the controls, not the controls themselves.
+        .padding(.bottom, DesignTokens.spacing24)
     }
 
     private func periodChip(title: String, active: Bool, action: @escaping () -> Void) -> some View {
