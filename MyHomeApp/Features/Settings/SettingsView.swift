@@ -27,6 +27,8 @@ struct SettingsView: View {
     @Environment(SyncCoordinator.self) private var syncCoordinator
 
     @State private var showManageCategories = false
+    /// True while an enable/disable auth task is in flight — prevents toggle flicker (WR-01).
+    @State private var isTogglingLock = false
     /// DEBUG screenshot-verify hook: `-openSync` pushes the Sync screen on launch (a navigation
     /// push, unreachable via -startTab) — mirrors OverviewView's `-openAnalytics` convention.
     @State private var navigateToSync = false
@@ -81,18 +83,22 @@ struct SettingsView: View {
                     Toggle(isOn: Binding(
                         get: { lockController.lockEnabled },
                         set: { newValue in
+                            guard !isTogglingLock else { return }
+                            isTogglingLock = true
                             Task {
                                 if newValue {
                                     await lockController.enableLock()
                                 } else {
                                     await lockController.disableLock()
                                 }
+                                isTogglingLock = false
                             }
                         }
                     )) {
                         rowLabel("Face ID Lock", symbol: "faceid", color: DesignTokens.positive)
                     }
                     .tint(DesignTokens.accent)
+                    .disabled(isTogglingLock)
                 }
                 .listRowBackground(DesignTokens.surfaceRaised)
 

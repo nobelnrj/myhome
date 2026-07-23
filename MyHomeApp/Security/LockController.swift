@@ -63,10 +63,8 @@ final class LockController {
     private let auth: any BiometricAuthPort
     /// Provides the current time; injectable for deterministic grace-period tests.
     private let now: () -> Date
-
-    private var defaults: UserDefaults {
-        UserDefaults(suiteName: "group.com.reojacob.myhome") ?? .standard
-    }
+    /// Resolved once at init — consistent store for all reads and writes (CR-02).
+    private let defaults: UserDefaults
 
     // MARK: - Init
 
@@ -77,8 +75,10 @@ final class LockController {
     init(auth: any BiometricAuthPort = SystemBiometricAuth(), now: @escaping () -> Date = Date.init) {
         self.auth = auth
         self.now = now
+        // Resolve the App Group suite once — consistent store across all reads/writes (CR-02).
+        self.defaults = UserDefaults(suiteName: "group.com.reojacob.myhome") ?? .standard
         // Cold launch: if lock is enabled, start locked (D5-01, Pitfall 4)
-        if lockEnabled { isLocked = true }
+        if defaults.bool(forKey: "lockEnabled") { isLocked = true }
     }
 
     // MARK: - Scene phase hook (called from RootView .onChange)
@@ -109,11 +109,14 @@ final class LockController {
 
     // MARK: - Test seam for grace period
 
+    #if DEBUG
     /// Sets the backgroundedAt timestamp to a specific date.
     /// Used in unit tests to drive grace-period math without real elapsed time.
+    /// Compiled only in DEBUG builds — compiles away in release (WR-02).
     func markBackgrounded(at date: Date) {
         backgroundedAt = date
     }
+    #endif
 
     // MARK: - Authentication
 
@@ -131,6 +134,8 @@ final class LockController {
         if !canEval {
             if let laErr = canErr as? LAError, laErr.code == .passcodeNotSet {
                 authError = .noPasscode   // D5-05: hard-block with guidance
+            } else {
+                authError = .unknown      // CR-03: all other canEvaluate failures show guidance (D5-06)
             }
             return
         }
@@ -151,8 +156,19 @@ final class LockController {
     // MARK: - Enable / Disable lock (D5-07a / D5-07b)
 
     /// Enables the Face ID lock gate after authenticating the user (D5-07a).
+    /// Applies the same canEvaluate preflight as authenticate() to enforce D5-05.
     /// Only sets lockEnabled=true if authentication succeeds.
     func enableLock() async {
+        // Preflight: enforce D5-05 (no-passcode escape path) — mirrors authenticate() (CR-01)
+        let (canEval, canErr) = auth.canEvaluate(.deviceOwnerAuthentication)
+        guard canEval else {
+            if let laErr = canErr as? LAError, laErr.code == .passcodeNotSet {
+                authError = .noPasscode
+            } else {
+                authError = .unknown
+            }
+            return
+        }
         let (success, _) = await auth.evaluate(
             .deviceOwnerAuthentication,
             reason: "Verify your identity to enable the lock."
@@ -161,8 +177,19 @@ final class LockController {
     }
 
     /// Disables the Face ID lock gate after authenticating the user (D5-07b).
+    /// Applies the same canEvaluate preflight as authenticate() to enforce D5-05.
     /// Only sets lockEnabled=false if authentication succeeds.
     func disableLock() async {
+        // Preflight: enforce D5-05 (no-passcode escape path) — mirrors authenticate() (CR-01)
+        let (canEval, canErr) = auth.canEvaluate(.deviceOwnerAuthentication)
+        guard canEval else {
+            if let laErr = canErr as? LAError, laErr.code == .passcodeNotSet {
+                authError = .noPasscode
+            } else {
+                authError = .unknown
+            }
+            return
+        }
         let (success, _) = await auth.evaluate(
             .deviceOwnerAuthentication,
             reason: "Verify your identity to disable the lock."
