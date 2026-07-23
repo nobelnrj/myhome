@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.reojacob.myhome.autodeploy</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>/Users/reo/My Projects/my-home/scripts/auto-deploy.sh</string>
+    </array>
+
+    <!-- MERGE-RESPONSIVE POLL (pipeline L3). Fires every 30 min. auto-deploy.sh
+         self-gates, so this is cheap: it only builds+installs when origin/main
+         actually changed (i.e. you merged a PR) OR the last success is >= MIN_AGE_DAYS
+         (3) old (the free-provisioning 7-day-expiry beat). Net effect:
+           • merge a PR  -> lands on both phones within ~30 min (no waiting for 21:00)
+           • quiet week  -> silent no-ops, plus a re-sign every 3 days
+         launchd never overlaps a single job, so no concurrency guard is needed. -->
+    <key>StartInterval</key>
+    <integer>1800</integer>
+
+    <!-- Run once at load/boot too, so a reboot doesn't wait 30 min for the first check. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/reo/My Projects/my-home/scripts/logs/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/reo/My Projects/my-home/scripts/logs/launchd.err.log</string>
+</dict>
+</plist>
