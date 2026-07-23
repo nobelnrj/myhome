@@ -6,9 +6,11 @@ import SwiftData
 
 /// Pre-aggregated value type for by-category spend charts (EXP-10).
 ///
-/// Consumed by `AnalyticsCategoryBars` (the vertical pill-well chart used on BOTH the
-/// Overview "By category" section and the Analytics screen — the horizontal bar variant
-/// was retired when the user picked the pill chart for Overview too).
+/// Consumed by `AnalyticsCategoryBars` (the vertical pill-well chart used on the Analytics
+/// screen). Phase 23 (OVF-04): the Overview screen's own "By category" section — which showed
+/// this same chart with the identical per-category totals as the "Where it's going" donut
+/// directly above it — was removed to consolidate Overview onto a single spend-by-category
+/// presentation (the donut, which already had tap-to-filter-into-Activity).
 ///
 /// `spent` is `Double` (not `Decimal`) because Swift Charts requires `Plottable` conformance.
 /// The Decimal→Double conversion happens at the aggregation boundary (caller's body),

@@ -9,10 +9,16 @@ import UIKit
 /// previous Pinned-Note card and Spend-over-time chart are intentionally not shown here (the
 /// user chose to match the design exactly).
 ///
+/// Phase 23 (OVF-04): the donut card ("Where it's going") is now the SINGLE spend-by-category
+/// presentation on this screen — the redundant "By category" pill-bar section (which showed
+/// the exact same per-category totals with no tap-through) was removed to de-clutter the
+/// screen. The donut already had tap-to-filter-into-Activity wired (OVR-06), so nothing about
+/// that interaction changed; only the duplicate list-of-the-same-data was cut.
+///
 /// Owns the @Query sources, pre-aggregates with OverviewAggregation + BudgetCalculator, and
 /// passes value-type data down to dumb subviews. No raw @Query array enters any Chart DSL.
 ///
-/// Satisfies: OVR-01, OVR-02, OVR-04, EXP-10, EXP-11, D4-01, D4-03, D4-06.
+/// Satisfies: OVR-01, OVR-02, OVR-04, EXP-10, EXP-11, D4-01, D4-03, D4-06, OVF-04.
 struct OverviewView: View {
 
     @Binding var selectedTab: Int
@@ -205,17 +211,6 @@ private struct OverviewMonthContent: View {
 
         let recent = Array(visibleExpenses.prefix(5))
 
-        // CategorySpendItem for SpendByCategoryChart (D-05: keep chart on Overview, restyled)
-        let categoryItems: [CategorySpendItem] = rankedSpend.map { item in
-            CategorySpendItem(
-                id: item.category.persistentModelID,
-                name: item.category.name ?? "—",
-                spent: NSDecimalNumber(decimal: item.spent).doubleValue,
-                spentDecimal: item.spent,
-                color: CategoryStyle.color(for: item.category)
-            )
-        }
-
         // OVF-03: Over Time series scoped to the account subset (date range is handled by hiding
         // the section, not by this array). `OverviewFilter()` default = passthrough.
         let overTimeExpenses = OverviewFilterEngine.apply(filter, to: allGlobalExpenses)
@@ -322,15 +317,6 @@ private struct OverviewMonthContent: View {
                         }
                     )
                     .entrance(4)
-                }
-
-                // Spend by category — same vertical pill-well chart as Analytics (user pick)
-                if !categoryItems.isEmpty {
-                    sectionHeader("By category")
-                        .id("bycat")
-                    AnalyticsCategoryBars(items: categoryItems)
-                        .neuSurface(.raised)
-                        .entrance(5)
                 }
 
                 // Spend over time chart (D-05 — restyled, retained on Overview).
