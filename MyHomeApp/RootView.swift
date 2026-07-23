@@ -131,6 +131,11 @@ struct RootView: View {
         // Guarded because the deployment target is iOS 17; on <26 the modifier is a no-op and the
         // classic native bar shows (still correct, just not the floating capsule).
         .stableFloatingTabBar()
+        // Phase 24 polish: hide the default soft "Liquid Glass" scroll-edge band (the frosted strip
+        // the system paints where content scrolls under the floating bar) so the bar floats
+        // transparently over the content. Applied once here; it propagates through the environment
+        // to every tab's scroll view. No-op < iOS 26.
+        .hideBottomScrollEdge()
         .onChange(of: selectedTab) { _, _ in Haptics.selection() }
         .onAppear {
             // Inject the SwiftData context into the sync controller so sync() can persist
@@ -266,6 +271,21 @@ private extension View {
     func stableFloatingTabBar() -> some View {
         if #available(iOS 26.0, *) {
             self.tabBarMinimizeBehavior(.never)
+        } else {
+            self
+        }
+    }
+}
+
+extension View {
+    /// Hides the iOS 26 bottom scroll-edge effect — the soft frosted "Liquid Glass" band the
+    /// system paints where scroll content passes under the floating tab bar. Removing it lets the
+    /// bar float transparently over the content (no background band). No-op < iOS 26, where there
+    /// is no floating bar and no such effect.
+    @ViewBuilder
+    func hideBottomScrollEdge() -> some View {
+        if #available(iOS 26.0, *) {
+            self.scrollEdgeEffectHidden(true, for: .bottom)
         } else {
             self
         }
