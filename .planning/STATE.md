@@ -1,8 +1,8 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3.1
-milestone_name: UX Polish
-status: shipped
+milestone: v1.4
+milestone_name: Finance & AI Depth
+status: planning
 last_updated: "2026-07-23T17:40:00.000Z"
 last_activity: 2026-07-23
 progress:
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 
 ## Current Position
 
-Phase: 24 of 24 (v1.3.1 complete)
+Phase: 25 (Paired-Device Sync Allowlist) — planning
 Plan: â (roadmap set; ready to plan)
 Status: Shipped 2026-07-23 — Phases 23 (PR #46) & 24 (PR #47, #48) merged to main and deployed to both phones
 Last activity: 2026-07-22 â v1.3.1 roadmap created (Phases 23-24, 3/3 reqs mapped)

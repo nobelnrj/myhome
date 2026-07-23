@@ -11,6 +11,7 @@ My Home is a single-user (v1) iOS app for a two-person Indian household, built a
 - ✅ **v1.2 Neumorphic Redesign** — Phases 13-17 (shipped 2026-07-13) — see [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 Private Sync & Kitchen** — Phases 18-22 (shipped 2026-07-22) — see [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 - ✅ **v1.3.1 UX Polish** — Phases 23-24 (shipped 2026-07-23)
+- 🚧 **v1.4 Finance & AI Depth** — security debt first; Phase 25 (paired-device sync allowlist, #43) planning
 
 ## Phases
 
@@ -102,6 +103,26 @@ Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROAD
   2. Selecting any of the five destinations from the floating bar switches to it with correct active-selection state.
   3. Existing `-startTab N` debug indices still launch the app on the correct destination.
   4. The floating bar renders correctly in both light and dark themes and does not regress existing navigation or deep-links (e.g. the note deep-link into Notes).
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 25: Paired-Device Sync Allowlist (v1.4 — security debt)
+**Goal**: Auto-sync only ever connects to and merges with the two paired household phones; any other peer advertising `myhome-sync` on the LAN is ignored. Fixes #43 (a seeded simulator polluted the real phones' Kitchen because `MultipeerSyncTransport` accepts/invites every peer).
+**Depends on**: Phase 22 (v1.3 sync stack)
+**Requirements**: SYNC-06
+**LOCKED product decisions** (user sign-off 2026-07-23 — do not re-litigate):
+  - **Identity** = the persistent per-install `installID` (UUID), exchanged via MC `discoveryInfo["iid"]` (browse-side gate) and invitation `context` (accept-side gate). NOT the display name (mutable via device rename).
+  - **Allowlist** = a local, **never-synced** `PairedDevicesStore` (Codable in UserDefaults): `{installID, friendlyName, pairedAt}`. Sync settings are per-device and must never leave the device.
+  - **Pairing ceremony = code-confirmed**: both phones enter a pairing window and display the SAME 6-digit code derived deterministically from both installIDs; each user taps "Codes match" before trust is recorded. A rogue peer yields a different code → declined. (Chosen over windowed trust-on-first-use.)
+  - **Migration = guided one-time re-pair**: on upgrade, sync is paused with a "Pair your devices to resume sync" prompt; the user runs pairing once. No auto-adopt (no trust hole at the migration moment).
+  - Threat scope: fully stops the *accidental* rogue (seeded sim / other install). A determined attacker sniffing+spoofing the installID off the home LAN is out of scope for a two-phone household (would need a shared secret) — note it, don't build it, unless the plan surfaces a cheap win.
+**Success Criteria** (what must be TRUE):
+  1. With no paired device, the transport neither invites discovered peers nor accepts invitations — an unpaired peer (e.g. a seeded simulator on the LAN) can never form a session or merge.
+  2. A code-confirmed pairing flow in Settings › Sync adds a peer to the allowlist on both phones; only mutually-confirmed peers become trusted.
+  3. After pairing, auto-sync connects to and merges with the paired phone exactly as before (no regression to the Phase 18 merge engine / LWW).
+  4. On upgrade from an unpaired build, sync is paused with a clear re-pair prompt; it resumes only after the one-time pairing.
+  5. The allowlist is local-only and never appears in any exported/synced snapshot.
+  6. Unpairing a device removes it from the allowlist and stops future connections to it.
 **Plans**: TBD
 **UI hint**: yes
 
