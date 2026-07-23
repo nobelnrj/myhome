@@ -27,32 +27,47 @@ import SwiftData
 ///
 /// No shared NavigationPath — each tab owns its navigation independently.
 ///
-/// Phase 24 (NAV-01) — Custom Floating Nav Bar:
-/// - `TabView(selection:)` still drives content switching, but its native chrome is hidden
-///   (`.toolbar(.hidden, for: .tabBar)`) — a native bar can't be restyled/glow (Phase 14 revert).
-/// - `FloatingNavBar` (DesignSystem/FloatingNavBar.swift) is overlaid in a `ZStack(alignment: .bottom)`
-///   and is the ONLY visible tab bar. It reads/writes the same `selectedTab` binding, so
-///   `-startTab N` and the note deep-link (`selectedTab = 3`) work unchanged.
+/// Phase 24 (NAV-01) — Custom Floating Nav Bar (rebuilt, no native bar):
+/// - There is NO `TabView`. The five tab roots live in a plain `ZStack` and are switched by
+///   the `selectedTab` state; `FloatingNavBar` (DesignSystem/FloatingNavBar.swift) is the ONLY
+///   bar. Rebuilt this way because the previous approach kept a native `TabView` and tried to
+///   HIDE its bar (`.toolbar(.hidden, for: .tabBar)` + frame-shrink hacks); the hidden native
+///   bar kept leaking — a white band, then an empty native pill under the floating bar. A bar
+///   that doesn't exist can't leak.
+/// - Per-tab state preservation (matching native TabView semantics): each tab keeps its own
+///   `NavigationStack`. A tab is instantiated LAZILY the first time it is selected and then kept
+///   alive in the hierarchy forever (tracked in `activatedTabs`), toggled only by `.opacity` /
+///   `.allowsHitTesting` / `.zIndex`. Because a tab is only added to the hierarchy on first
+///   selection — never at launch for the other four — each tab's `.onAppear` / `.task`
+///   side-effects (LockController, TransferScanService, Gmail/NAV refresh, routine reset, etc.)
+///   fire exactly once, when that tab first becomes visible, exactly as a native `TabView` does.
+/// - `-startTab N` seeds both `selectedTab` and `activatedTabs` (only that tab is pre-activated).
+///   The note deep-link (`selectedTab = 3`) selects — and thereby activates — the Notes tab.
 /// - Content clearance under the floating bar is reserved per-screen via `.floatingBarClearance()`
-///   (DesignSystem/DesignTokens.swift) applied directly to each screen's own List/ScrollView — see
-///   that modifier's doc comment for why the TabView level doesn't work reliably. The ZStack itself
-///   carries an explicit `bgCanvas.ignoresSafeArea()` background (below) so the screen background
-///   always fills edge-to-edge regardless of how any individual tab insets its content — a
-///   `.padding(.bottom:)` + `.clipped()` on the TabView was tried first (shrinking the TabView's own
-///   frame to reserve clearance) but that left the ZStack's default (white) background exposed
-///   below the shrunk frame — the reported "white band" bug. Fixed post-launch (see PR #47).
+///   applied directly to each screen's own List/ScrollView. The container carries an explicit
+///   `bgCanvas.ignoresSafeArea()` background so the screen background fills edge-to-edge and there
+///   is never a white band regardless of how any individual tab insets its content.
 struct RootView: View {
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.modelContext) private var modelContext
 
-    @State private var selectedTab: Int = {
+    /// Resolves the launch tab from the `-startTab N` debug flag (default 0). Used to seed both
+    /// `selectedTab` and the initially-activated tab so exactly one tab appears at launch.
+    private static func initialTab() -> Int {
         #if DEBUG
         let args = ProcessInfo.processInfo.arguments
-        if let i = args.firstIndex(of: "-startTab"), i + 1 < args.count, let t = Int(args[i + 1]) { return t }
+        if let i = args.firstIndex(of: "-startTab"), i + 1 < args.count, let t = Int(args[i + 1]), (0...4).contains(t) { return t }
         #endif
         return 0
-    }()
+    }
+
+    @State private var selectedTab: Int = RootView.initialTab()
+
+    /// Tabs that have been selected at least once and are therefore kept alive in the hierarchy.
+    /// Seeded with only the launch tab so the other four never `.onAppear` (and never fire their
+    /// services) until the user actually navigates to them — matching native TabView semantics.
+    @State private var activatedTabs: Set<Int> = [RootView.initialTab()]
     @State private var deepLinkNoteID: UUID? = nil
     /// OVR-06: Category filter deep-link from Overview donut tap → pre-filters Activity tab.
     /// Set by SpendDonutCard's onCategoryTap closure; cleared by ExpenseListView on appear.
@@ -109,43 +124,32 @@ struct RootView: View {
     @ViewBuilder
     private var mainContent: some View {
         ZStack(alignment: .bottom) {
-            // Phase 24 fix (NAV-01): explicit full-bleed background BEHIND the TabView. Without
-            // this the ZStack has no background of its own, so anywhere a tab's content is
-            // inset off the bottom edge (deliberately, via floatingBarClearance) the system's
-            // default (white) window background showed through as a band at the screen bottom.
+            // Phase 24 fix (NAV-01): explicit full-bleed background BEHIND the tab content. Every
+            // tab insets its content off the bottom edge (via floatingBarClearance); without this
+            // the container's default (white) window background would show through as a band.
             DesignTokens.bgCanvas.ignoresSafeArea()
 
-            TabView(selection: $selectedTab) {
-                OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID, activityCategoryFilter: $activityCategoryFilter)
-                    .tag(0)
-                ExpenseListView(reviewBadgeCount: $reviewBadgeCount, deepLinkCategoryFilter: $activityCategoryFilter)
-                    .tag(1)
-                BudgetsView()
-                    .tag(2)
-                NotesHomeView(deepLinkNoteID: $deepLinkNoteID, deepLinkBlockID: $deepLinkBlockID)
-                    .tag(3)
-                SettingsView(selectedTab: $selectedTab, lockController: lockController, gmailSyncController: gmailSyncController, transferScanService: transferScanService)
-                    .tag(4)
+            // Custom tab container — no native TabView, so there is no native bar to leak. Each
+            // tab is instantiated lazily on first selection (activatedTabs) and then kept alive,
+            // switched only by opacity/hit-testing/zIndex so its NavigationStack state survives.
+            ForEach(0..<5, id: \.self) { index in
+                if activatedTabs.contains(index) {
+                    tabRoot(for: index)
+                        .opacity(selectedTab == index ? 1 : 0)
+                        .allowsHitTesting(selectedTab == index)
+                        .zIndex(selectedTab == index ? 1 : 0)
+                }
             }
-            // D-07/D-08: selected-tab icon/label is accent ICONOGRAPHY on the (light) bar — a
-            // text/icon role, so it uses accentText (dark amber in light for contrast). accentText's
-            // dark branch == #FFD60A, so dark rendering is byte-identical (D-06).
-            .tint(DesignTokens.accentText)
-            // Phase 24 (NAV-01): the native tab bar is hidden — FloatingNavBar (below) is the
-            // ONLY visible bar. Each tab's own tabItem/badge no longer render anywhere, so the
-            // review-badge count is threaded into FloatingNavBar directly instead.
-            .toolbar(.hidden, for: .tabBar)
-            // Defensive: on iOS 26 a hidden tab bar can otherwise leave behind the Liquid Glass
-            // auto-minimize/reveal-handle behavior. `.never` guarantees FloatingNavBar is the
-            // only bottom-bar chrome the system ever draws. Gated to 26+ (API unavailable on the
-            // iOS 17 deployment target; pre-26 TabViews have no such handle to suppress).
-            .modifier(TabBarNeverMinimizeModifier())
-            // Content clearance is reserved per-screen (`.floatingBarClearance()` on each
-            // screen's own List/ScrollView) rather than here — see the doc comment above.
 
             FloatingNavBar(selectedTab: $selectedTab, reviewBadgeCount: reviewBadgeCount)
+                // Above every tab's content so the bar is always tappable and on top.
+                .zIndex(100)
         }
-        .onChange(of: selectedTab) { _, _ in Haptics.selection() }
+        .onChange(of: selectedTab) { _, newTab in
+            // Activate (and thereby first-appear) the tab lazily on selection, then keep it alive.
+            activatedTabs.insert(newTab)
+            Haptics.selection()
+        }
         .onAppear {
             // Inject the SwiftData context into the sync controller so sync() can persist
             // ingested expenses. Called here (not in init) so the @Environment is populated.
@@ -238,6 +242,28 @@ struct RootView: View {
         .environment(npsNavService)
     }
 
+    // MARK: - Tab roots (custom container — NAV-01)
+
+    /// Returns the root view for a tab index. Order/destinations unchanged from the old TabView
+    /// tags: 0 Home · 1 Expenses · 2 Budgets · 3 Notes · 4 Settings. Each root owns its own
+    /// NavigationStack. Only ever built for an activated tab, so a tab's onAppear/.task fires the
+    /// first time it is selected — never at launch for the unselected four.
+    @ViewBuilder
+    private func tabRoot(for index: Int) -> some View {
+        switch index {
+        case 0:
+            OverviewView(selectedTab: $selectedTab, deepLinkNoteID: $deepLinkNoteID, activityCategoryFilter: $activityCategoryFilter)
+        case 1:
+            ExpenseListView(reviewBadgeCount: $reviewBadgeCount, deepLinkCategoryFilter: $activityCategoryFilter)
+        case 2:
+            BudgetsView()
+        case 3:
+            NotesHomeView(deepLinkNoteID: $deepLinkNoteID, deepLinkBlockID: $deepLinkBlockID)
+        default:
+            SettingsView(selectedTab: $selectedTab, lockController: lockController, gmailSyncController: gmailSyncController, transferScanService: transferScanService)
+        }
+    }
+
     // MARK: - Reconcile deep-link sheet (D-06)
 
     /// Resolves a sipID UUID to its owning Asset and returns a ReconcileView sheet.
@@ -269,20 +295,5 @@ struct RootView: View {
         var descriptor = FetchDescriptor<Asset>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         return try? modelContext.fetch(descriptor).first
-    }
-}
-
-// MARK: - iOS 26 tab-bar-minimize suppression (Phase 24, NAV-01)
-
-/// `.tabBarMinimizeBehavior(_:)` is iOS 26+ only — the app's deployment target is iOS 17, so it
-/// must be applied conditionally. Pre-26 TabViews have no auto-minimize/reveal-handle behavior
-/// to suppress, so the modifier is simply a no-op there.
-private struct TabBarNeverMinimizeModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content.tabBarMinimizeBehavior(.never)
-        } else {
-            content
-        }
     }
 }
