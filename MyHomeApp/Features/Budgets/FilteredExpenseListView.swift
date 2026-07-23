@@ -68,6 +68,7 @@ struct FilteredExpenseListView: View {
                             editingExpense = expense
                         } label: {
                             ExpenseRow(expense: expense)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .listRowBackground(DesignTokens.surfaceRaised)
@@ -137,6 +138,7 @@ struct UncategorizedExpenseListView: View {
                             editingExpense = expense
                         } label: {
                             ExpenseRow(expense: expense)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .listRowBackground(DesignTokens.surfaceRaised)
