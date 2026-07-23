@@ -166,7 +166,13 @@ enum DesignTokens {
 
     // MARK: - Tab Bar Geometry
     static let tabBarHeight:       CGFloat = 62
-    static let tabBarBottomOffset: CGFloat = 24
+    /// Phase 24.1 (UX polish): the bar floats inside RootView's `mainContent` ZStack, which
+    /// itself already respects the safe area (only its `bgCanvas` background ignores it) — so
+    /// this offset is the FULL visible gap above the home-indicator safe area, not an addition
+    /// on top of it. Was 24 (read as "extra safety margin above the safe area", producing a
+    /// large empty band below the bar); dropped to 10 so the bar hovers just above the home
+    /// indicator with a small detached gap, matching the design intent of "floating," not "high."
+    static let tabBarBottomOffset: CGFloat = 10
     static let tabBarClearance:    CGFloat = 100   // safeAreaInset height for content (TABBAR_H)
     static let tabItemWidth:       CGFloat = 58
     /// Phase 24 (NAV-01, fixed post-launch): reserved bottom clearance under each screen's
