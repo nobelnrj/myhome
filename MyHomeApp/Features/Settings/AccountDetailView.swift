@@ -69,6 +69,9 @@ struct AccountDetailView: View {
 
     @State private var showEditSheet = false
     @State private var showMergeSheet = false
+    /// Phase 23 (EDIT-01): drives the shared EditExpenseView sheet — parity with every other
+    /// expense list (Activity, Budget category drill-downs) so a tap here opens the same editor.
+    @State private var editingExpense: Expense?
     @Environment(\.dismiss) private var dismiss
 
     // MARK: - Body
@@ -102,7 +105,12 @@ struct AccountDetailView: View {
                     ForEach(daySections, id: \.id) { section in
                         Section {
                             ForEach(section.expenses) { expense in
-                                ExpenseRow(expense: expense)
+                                Button {
+                                    editingExpense = expense
+                                } label: {
+                                    ExpenseRow(expense: expense)
+                                }
+                                .buttonStyle(.plain)
                             }
                         } header: {
                             HStack {
@@ -144,6 +152,9 @@ struct AccountDetailView: View {
         .sheet(isPresented: $showMergeSheet) {
             // On merge the absorbed account (this one) is deleted — pop back to the list.
             MergeAccountView(absorbed: account) { dismiss() }
+        }
+        .sheet(item: $editingExpense) { expense in
+            EditExpenseView(expense: expense)
         }
         // NOTE: No pull-to-refresh — balance is reactive via @Query (D-10 contract)
     }
