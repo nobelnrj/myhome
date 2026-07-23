@@ -422,7 +422,7 @@ box.value(ok, ok ? self.session : nil)   // reject → (false, nil), no session 
 
 **No `[ASSUMED]` package or compliance claims** — all dependencies are system frameworks verified present in the codebase.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Friendly name source for the paired list.**
    - What we know: `UIDevice.current.name` on iOS 16+ returns a generic "iPhone" without the (unavailable on free-provisioning) device-name entitlement; the existing `PeerInvitePolicy.displayName` already sanitizes whatever it returns.

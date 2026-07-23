@@ -56,9 +56,10 @@ created: 2026-07-24
 
 ## Wave 0 Requirements
 
-- [ ] `MyHomeTests/PairingCodeTests.swift` — stubs for the deterministic code derivation
-- [ ] `MyHomeTests/PeerAllowlistTests.swift` — stubs for allowlist gating + store
-- [ ] New `.swift` files (incl. `PairedDevicesStore.swift`) need the 4 manual `project.pbxproj` edits — see 25-RESEARCH.md Pitfalls (no synchronized groups in this project).
+- [ ] Allowlist / code / gating tests EXTEND the existing `MyHomeTests/SyncTransportTests.swift` (the plans chose this over new stub files — same proven pattern as `PeerInvitePolicy` tests). No separate `PairingCodeTests`/`PeerAllowlistTests` files are created.
+- [ ] Every new `.swift` file (`PairedDevicesStore.swift`, the pairing view) needs the 4 manual `project.pbxproj` edits — an explicit sub-step with a `grep -c … == 4` acceptance check lives in 25-01 Task 2 and 25-03 Task 2 (no synchronized groups in this project).
+
+> Note: this doc's frontmatter (`nyquist_compliant`, `wave_0_complete`, sign-off) is finalized during/after 25-01 execution, once the tests referenced by each plan's `<automated>` command exist and pass.
 
 ---
 
