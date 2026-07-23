@@ -164,11 +164,9 @@ enum DesignTokens {
     static let spacing12: CGFloat = 12   // active pill vertical inset formula (ui.jsx pilH = tabBarHeight − 12)
     static let spacing22: CGFloat = 22   // inter-card vertical gap (ui.jsx card list gap: 22)
 
-    // MARK: - Tab Bar Geometry
-    static let tabBarHeight:       CGFloat = 62
-    static let tabBarBottomOffset: CGFloat = 24
-    static let tabBarClearance:    CGFloat = 100   // safeAreaInset height for content (TABBAR_H)
-    static let tabItemWidth:       CGFloat = 58
+    /// Global minimum breathing room below presented sheet/popover content, above the home
+    /// indicator / bottom safe area. Applied via `.sheetBottomClearance()`.
+    static let sheetBottomClearance: CGFloat = spacing24
 
     // MARK: - Neumorphic shadow colors (adaptive)
     // D-05/D-06: every promoted inline surface/button/puck shadow, rim, and hairline color is a
@@ -496,6 +494,20 @@ private struct EntranceModifier: ViewModifier {
 extension View {
     /// Staggered fade+rise entrance; pass the item's position in its stack.
     func entrance(_ index: Int) -> some View { modifier(EntranceModifier(index: index)) }
+}
+
+// MARK: - Sheet bottom clearance
+
+extension View {
+    /// Reserves `DesignTokens.sheetBottomClearance` below this view's content via
+    /// `safeAreaInset`, so presented sheet/popover content (e.g. a trailing button or footer
+    /// link) never sits flush against the screen's bottom edge / home indicator. Apply to the
+    /// outermost scrollable content of any `.sheet`/`.popover`.
+    func sheetBottomClearance() -> some View {
+        safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: DesignTokens.sheetBottomClearance)
+        }
+    }
 }
 
 // MARK: - Haptics

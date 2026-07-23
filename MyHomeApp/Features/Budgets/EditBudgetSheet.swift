@@ -71,6 +71,7 @@ struct EditBudgetSheet: View {
                 .padding(.horizontal, 16)
             }
             .background(DesignTokens.bgCanvas)
+            .sheetBottomClearance()
             .navigationTitle("Set Budget")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

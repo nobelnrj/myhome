@@ -70,6 +70,7 @@ struct AddTransferView: View {
                 .padding(.horizontal, 16)
             }
             .background(DesignTokens.bgCanvas)
+            .sheetBottomClearance()
             .navigationTitle("New Transfer")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

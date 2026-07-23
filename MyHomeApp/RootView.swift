@@ -124,6 +124,13 @@ struct RootView: View {
         // text/icon role, so it uses accentText (dark amber in light for contrast). accentText's
         // dark branch == #FFD60A, so dark rendering is byte-identical (D-06).
         .tint(DesignTokens.accentText)
+        // Phase 24 (NAV pivot): use the native iOS 26 floating "Liquid Glass" tab bar rather than
+        // a custom bar. `.never` keeps the floating capsule fixed instead of minimizing it on
+        // scroll-down — chosen for stability (a fixed bar can't produce the jump/re-layout the
+        // custom bar kept regressing into). The system handles bottom safe-area insets for content.
+        // Guarded because the deployment target is iOS 17; on <26 the modifier is a no-op and the
+        // classic native bar shows (still correct, just not the floating capsule).
+        .stableFloatingTabBar()
         .onChange(of: selectedTab) { _, _ in Haptics.selection() }
         .onAppear {
             // Inject the SwiftData context into the sync controller so sync() can persist
@@ -248,5 +255,19 @@ struct RootView: View {
         var descriptor = FetchDescriptor<Asset>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
         return try? modelContext.fetch(descriptor).first
+    }
+}
+
+private extension View {
+    /// Applies `.tabBarMinimizeBehavior(.never)` on iOS 26+ (keeps the native floating
+    /// Liquid-Glass tab bar fixed instead of minimizing on scroll); a no-op on earlier OSes,
+    /// where the deployment target (iOS 17) still shows the classic native bar.
+    @ViewBuilder
+    func stableFloatingTabBar() -> some View {
+        if #available(iOS 26.0, *) {
+            self.tabBarMinimizeBehavior(.never)
+        } else {
+            self
+        }
     }
 }
