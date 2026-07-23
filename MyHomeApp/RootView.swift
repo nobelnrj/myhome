@@ -131,11 +131,11 @@ struct RootView: View {
         // Guarded because the deployment target is iOS 17; on <26 the modifier is a no-op and the
         // classic native bar shows (still correct, just not the floating capsule).
         .stableFloatingTabBar()
-        // Phase 24 polish: replace the default soft "Liquid Glass" scroll-edge band (the frosted
-        // strip the system paints where content scrolls under the floating bar) with the `.hard`
-        // style — a clean canvas-coloured cutoff. Applied once here; the style propagates through
-        // the environment to every tab's scroll view. No-op < iOS 26.
-        .hardBottomScrollEdge()
+        // Phase 24 polish: hide the default soft "Liquid Glass" scroll-edge band (the frosted strip
+        // the system paints where content scrolls under the floating bar) so the bar floats
+        // transparently over the content. Applied once here; it propagates through the environment
+        // to every tab's scroll view. No-op < iOS 26.
+        .hideBottomScrollEdge()
         .onChange(of: selectedTab) { _, _ in Haptics.selection() }
         .onAppear {
             // Inject the SwiftData context into the sync controller so sync() can persist
@@ -278,14 +278,14 @@ private extension View {
 }
 
 extension View {
-    /// Applies the `.hard` iOS 26 bottom scroll-edge style to a scroll container. Replaces the
-    /// default soft frosted "Liquid Glass" band the system paints where content passes under the
-    /// floating tab bar with a clean canvas-coloured cutoff (no frost, no crisp bleed-through).
-    /// No-op < iOS 26, where there is no floating bar and no such effect.
+    /// Hides the iOS 26 bottom scroll-edge effect — the soft frosted "Liquid Glass" band the
+    /// system paints where scroll content passes under the floating tab bar. Removing it lets the
+    /// bar float transparently over the content (no background band). No-op < iOS 26, where there
+    /// is no floating bar and no such effect.
     @ViewBuilder
-    func hardBottomScrollEdge() -> some View {
+    func hideBottomScrollEdge() -> some View {
         if #available(iOS 26.0, *) {
-            self.scrollEdgeEffectStyle(.hard, for: .bottom)
+            self.scrollEdgeEffectHidden(true, for: .bottom)
         } else {
             self
         }
