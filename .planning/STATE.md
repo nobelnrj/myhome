@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Finance & AI Depth
-status: planning
-last_updated: "2026-07-23T17:40:00.000Z"
-last_activity: 2026-07-23
+status: "Shipped 2026-07-23 — Phases 23 (PR #46) & 24 (PR #47, #48) merged to main and deployed to both phones"
+last_updated: "2026-07-24T20:06:03.427Z"
+last_activity: 2026-07-22 â v1.3.1 roadmap created (Phases 23-24, 3/3 reqs mapped)
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 2
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 4
   completed_plans: 2
-  percent: 100
+  percent: 0
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 
 ## Current Position
 
-Phase: 25 (Paired-Device Sync Allowlist) — planning
-Plan: â (roadmap set; ready to plan)
-Status: Shipped 2026-07-23 — Phases 23 (PR #46) & 24 (PR #47, #48) merged to main and deployed to both phones
-Last activity: 2026-07-22 â v1.3.1 roadmap created (Phases 23-24, 3/3 reqs mapped)
+Phase: 25 (Paired-Device Sync Allowlist) — executing
+Plan: 25-01 complete (trust primitives + allowlist store); 25-02 next
+Status: 25-01 executed on feat/25-sync-allowlist — all unit tests green
+Last activity: 2026-07-25 — 25-01 executed (2 tasks, 34 unit tests green)
 
 ## Performance Metrics
 
@@ -109,6 +109,7 @@ Last activity: 2026-07-22 â v1.3.1 roadmap created (Phases 23-24, 3/3 reqs 
 | Phase 21 P01 | 6 | 2 tasks | 3 files |
 | Phase 21 P02 | 15 | 2 tasks | 1 files |
 | Phase 21 P03 | 20 | 2 tasks | 5 files |
+| Phase 25 P01 | 25 | 2 tasks | 5 files |
 
 ## Quick Tasks Completed
 
@@ -257,8 +258,8 @@ All v1.3 requirements (SYNC/KTCH/ICON/OVF, 15/15) are Complete. Deferred artifac
 
 ## Session Continuity
 
-Last session: 2026-07-22T05:34:30.526Z
-Stopped at: Completed 19-03-PLAN.md
+Last session: 2026-07-25
+Stopped at: Completed 25-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
