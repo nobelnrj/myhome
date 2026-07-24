@@ -193,6 +193,40 @@ import Testing
         #expect(PeerAllowlistPolicy.shouldConnect(peerIID: nil, allowlist: [], pairingMode: true) == false)
     }
 
+    // MARK: - PeerAllowlistPolicy.decodeIID (SYNC-06 — untrusted invite-context decode, V5)
+
+    @Test func decodeIIDReturnsNilForNilData() {
+        // An old build sends no invite context ⇒ untrusted, never crash.
+        #expect(PeerAllowlistPolicy.decodeIID(nil) == nil)
+    }
+
+    @Test func decodeIIDReturnsTheStringForAValidUUIDPayload() {
+        let uuid = "11111111-2222-3333-4444-555555555555"
+        #expect(PeerAllowlistPolicy.decodeIID(Data(uuid.utf8)) == uuid)
+    }
+
+    @Test func decodeIIDTrimsWhitespaceAndRejectsEmpty() {
+        #expect(PeerAllowlistPolicy.decodeIID(Data("  padded-id  ".utf8)) == "padded-id")
+        #expect(PeerAllowlistPolicy.decodeIID(Data("   ".utf8)) == nil)   // whitespace-only ⇒ nil
+        #expect(PeerAllowlistPolicy.decodeIID(Data()) == nil)            // empty ⇒ nil
+    }
+
+    @Test func decodeIIDRejectsNonUTF8Garbage() {
+        // Hostile invalid-UTF8 bytes must decode to nil, never crash.
+        let garbage = Data([0xFF, 0xFE, 0xFD, 0xC0, 0x80])
+        #expect(PeerAllowlistPolicy.decodeIID(garbage) == nil)
+    }
+
+    @Test func decodeIIDRejectsOversizedInput() {
+        // > 64 bytes is not one of ours ⇒ untrusted (also mirrors tiny-discoveryInfo discipline).
+        let oversized = Data(String(repeating: "A", count: 65).utf8)
+        #expect(PeerAllowlistPolicy.decodeIID(oversized) == nil)
+        // A 36-char UUID (well under the cap) still passes.
+        let uuid = "abcdef01-2345-6789-abcd-ef0123456789"
+        #expect(uuid.utf8.count == 36)
+        #expect(PeerAllowlistPolicy.decodeIID(Data(uuid.utf8)) == uuid)
+    }
+
     // MARK: - InstallIdentity (SYNC-06)
 
     @Test func installIdentityReturnsExistingValue() {

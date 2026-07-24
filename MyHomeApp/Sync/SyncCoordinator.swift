@@ -227,6 +227,24 @@ final class SyncCoordinator {
         }
     }
 
+    // MARK: - SYNC-06 allowlist / pairing forwarding
+
+    /// Push the current trusted allowlist (from `PairedDevicesStore`) down to the transport
+    /// gate. Thin forwarder so Plan 03's UI drives trust without touching the transport directly.
+    func applyAllowlist(_ set: Set<String>) {
+        transport.allowlist = set
+    }
+
+    /// Enter the time-boxed pairing window on the transport (relaxes the gate for the handshake).
+    func beginPairing() {
+        transport.beginPairing()
+    }
+
+    /// Leave the pairing window on the transport (restores default-deny).
+    func endPairing() {
+        transport.endPairing()
+    }
+
     // MARK: - Manual fallback (SYNC-04)
 
     /// "Sync now": if connected, push ours AND request theirs (bidirectional). If not

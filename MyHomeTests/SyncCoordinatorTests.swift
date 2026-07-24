@@ -25,6 +25,10 @@ final class FakeSyncTransport: SyncTransport {
     var isConnected = false
     var connectedPeerName: String?
 
+    /// SYNC-06 — the allowlist/pairing surface the coordinator forwards onto (Plan 02).
+    var allowlist: Set<String> = []
+    var isPairingMode = false
+
     /// Every envelope handed to `send(_:)`, in order — the assertion surface for echo bounds.
     var sentEnvelopes: [SyncEnvelope] = []
     var startCount = 0
@@ -46,6 +50,9 @@ final class FakeSyncTransport: SyncTransport {
             peer.onEvent?(.received(envelope))
         }
     }
+
+    func beginPairing() { isPairingMode = true }
+    func endPairing() { isPairingMode = false }
 
     // MARK: Test drivers
 
@@ -72,6 +79,13 @@ final class FakeSyncTransport: SyncTransport {
 
     func simulateFailure(_ message: String) {
         onEvent?(.failed(message: message))
+    }
+
+    /// SYNC-06 — drive the coordinator's `.pairingCandidate` arm (un-allowlisted peer that
+    /// formed a session in pairing mode). Deliberately does NOT set `isConnected`: a candidate
+    /// is not a trusted connection.
+    func simulatePairingCandidate(peerName: String, peerIID: String) {
+        onEvent?(.pairingCandidate(peerName: peerName, peerIID: peerIID))
     }
 }
 
@@ -429,6 +443,87 @@ struct SyncCoordinatorTests {
             guard case .snapshot(let data) = envelope else { continue }
             #expect(!String(decoding: data, as: UTF8.self).contains("private-spend"))
             #expect(try SnapshotCodec.decode(data).expenses.isEmpty)
+        }
+    }
+
+    // MARK: SYNC-06 — pairing-window auto-push hole (T-25-03)
+
+    @Test("A pairing candidate in pairing mode pushes NO snapshot and is NOT marked syncing")
+    func pairingCandidateNeverPushesSnapshot() throws {
+        let (cb, bctx) = try makeStore()
+        _ = cb
+        let t = FakeSyncTransport()
+        // Even if a session physically exists, an un-allowlisted candidate must never be pushed to.
+        t.isConnected = true
+        let coord = makeCoordinator(transport: t, context: bctx)
+        coord.start()
+
+        var captured: (name: String, iid: String)?
+        coord.onPairingCandidate = { name, iid in captured = (name, iid) }
+
+        t.simulatePairingCandidate(peerName: "Candidate", peerIID: "rogue-iid-not-in-allowlist")
+
+        // No snapshot envelope was sent to the candidate (the hole is closed)…
+        let snapshots = t.sentEnvelopes.filter { if case .snapshot = $0 { return true } else { return false } }
+        #expect(snapshots.isEmpty)
+        // …status was never driven to .syncing…
+        #expect(coord.statusStore.status != .syncing)
+        // …and the candidate was forwarded to the pairing UI hook for the code ceremony.
+        #expect(captured?.name == "Candidate")
+        #expect(captured?.iid == "rogue-iid-not-in-allowlist")
+    }
+
+    @Test("A trusted .connected still pushes exactly as before (SC-3 no regression)")
+    func trustedConnectedStillPushes() throws {
+        let (cb, bctx) = try makeStore()
+        _ = cb
+        let t = FakeSyncTransport()   // peer nil → send records but does not recurse
+        let coord = makeCoordinator(transport: t, context: bctx)
+        coord.start()
+
+        t.simulateConnected(peerName: "TrustedPhone")   // sets isConnected = true, emits .connected
+
+        let snapshots = t.sentEnvelopes.filter { if case .snapshot = $0 { return true } else { return false } }
+        #expect(snapshots.count == 1)   // the connect-push fired for a trusted peer
+    }
+
+    // MARK: SYNC-06 — allowlist never crosses the wire (SC-5 / T-25-04)
+
+    @Test("A snapshot built while paired devices are persisted contains none of their installID/friendlyName bytes")
+    func allowlistNeverAppearsInSnapshot() throws {
+        // Persist a couple of paired devices in an isolated UserDefaults suite.
+        let suiteName = "test.pairedDevices.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = PairedDevicesStore(defaults: defaults)
+        let iidA = "AAAAAAAA-1111-2222-3333-444444444444"
+        let iidB = "BBBBBBBB-5555-6666-7777-888888888888"
+        store.add(PairedDevice(installID: iidA, friendlyName: "Reo-iPhone-Secret", pairedAt: .now))
+        store.add(PairedDevice(installID: iidB, friendlyName: "Spouse-iPhone-Secret", pairedAt: .now))
+        #expect(store.allowlist == [iidA, iidB])
+
+        // Export a snapshot from a POPULATED context (notes + an expense present).
+        let data = try snapshotBytes { ctx in
+            ctx.insert(Note(title: "shared-note"))
+            ctx.insert(Expense(amount: Decimal(string: "42")!))
+            try ctx.save()
+        }
+
+        // The allowlist is structurally not a SyncSnapshot field, so its bytes never appear.
+        let wire = String(decoding: data, as: UTF8.self)
+        #expect(!wire.contains(iidA))
+        #expect(!wire.contains(iidB))
+        #expect(!wire.contains("Reo-iPhone-Secret"))
+        #expect(!wire.contains("Spouse-iPhone-Secret"))
+
+        // And the decoded snapshot exposes no field bearing them (belt-and-suspenders).
+        let decoded = try SnapshotCodec.decode(data)
+        for child in Mirror(reflecting: decoded).children {
+            let dump = String(describing: child.value)
+            #expect(!dump.contains(iidA))
+            #expect(!dump.contains(iidB))
+            #expect(!dump.contains("Reo-iPhone-Secret"))
+            #expect(!dump.contains("Spouse-iPhone-Secret"))
         }
     }
 }
