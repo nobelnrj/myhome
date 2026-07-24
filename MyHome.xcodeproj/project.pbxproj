@@ -269,6 +269,7 @@
 		A908CHX /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F908CHX /* Color+Hex.swift */; };
 		A910ALV /* AccountsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F910ALV /* AccountsListView.swift */; };
 		A1903SSV /* SyncStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1903SSV /* SyncStatusView.swift */; };
+		A25PDV /* PairDeviceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F25PDV /* PairDeviceView.swift */; };
 		A1904BA /* BootstrapAdvisor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1904BA /* BootstrapAdvisor.swift */; };
 		A1904SBV /* SyncBootstrapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1904SBV /* SyncBootstrapView.swift */; };
 		A911EAV /* EditAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F911EAV /* EditAccountView.swift */; };
@@ -563,6 +564,7 @@
 		F908CHX /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		F910ALV /* AccountsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsListView.swift; sourceTree = "<group>"; };
 		F1903SSV /* SyncStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusView.swift; sourceTree = "<group>"; };
+		F25PDV /* PairDeviceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairDeviceView.swift; sourceTree = "<group>"; };
 		F1904SBV /* SyncBootstrapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBootstrapView.swift; sourceTree = "<group>"; };
 		F911EAV /* EditAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccountView.swift; sourceTree = "<group>"; };
 		F911MAV /* MergeAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeAccountView.swift; sourceTree = "<group>"; };
@@ -777,6 +779,7 @@
 				F601 /* UnlockView.swift */,
 				F602 /* SettingsView.swift */,
 				F1903SSV /* SyncStatusView.swift */,
+				F25PDV /* PairDeviceView.swift */,
 				F1904SBV /* SyncBootstrapView.swift */,
 				F1805SSV /* SyncSnapshotViews.swift */,
 				F910ALV /* AccountsListView.swift */,
@@ -1274,6 +1277,7 @@
 				A601 /* UnlockView.swift in Sources */,
 				A602 /* SettingsView.swift in Sources */,
 				A1903SSV /* SyncStatusView.swift in Sources */,
+				A25PDV /* PairDeviceView.swift in Sources */,
 				A1904BA /* BootstrapAdvisor.swift in Sources */,
 				A1904SBV /* SyncBootstrapView.swift in Sources */,
 				A910ALV /* AccountsListView.swift in Sources */,

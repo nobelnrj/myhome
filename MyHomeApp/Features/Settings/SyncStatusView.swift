@@ -98,6 +98,9 @@ struct SyncStatusView: View {
     /// Works on non-empty stores too — the underlying exchange merges (never clobbers).
     @State private var showBootstrap = false
 
+    /// SYNC-06: presents the code-confirmed pairing sheet (Pair New Device / paired-devices list).
+    @State private var showPairDevice = false
+
     private var store: SyncStatusStore { coordinator.statusStore }
 
     private var isSyncing: Bool { store.status == .syncing }
@@ -126,6 +129,9 @@ struct SyncStatusView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: DesignTokens.spacing22) {
+                if let banner = SyncStatusPresentation.pairingBanner(needsPairing: store.needsPairing) {
+                    repairBanner(banner)
+                }
                 statusCard
                 if let summary = SyncStatusPresentation.mergeSummary(store.lastMergeStats) {
                     Text(summary)
@@ -134,6 +140,7 @@ struct SyncStatusView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 syncNowButton
+                pairNewDeviceButton
                 setUpFromOtherPhoneButton
                 Text(footerText)
                     .font(.system(size: 12))
@@ -148,6 +155,50 @@ struct SyncStatusView: View {
         .sheet(isPresented: $showBootstrap) {
             SyncBootstrapView()
         }
+        .sheet(isPresented: $showPairDevice) {
+            PairDeviceView()
+        }
+    }
+
+    // MARK: - Re-pair migration banner (SYNC-06, SC-4)
+
+    /// One-time paused/re-pair prompt shown when `store.needsPairing` (empty allowlist AND a prior
+    /// sync happened). Tapping it opens the pairing sheet. Tinted with EXISTING tokens only.
+    private func repairBanner(_ text: String) -> some View {
+        Button {
+            Haptics.tap()
+            showPairDevice = true
+        } label: {
+            HStack(spacing: DesignTokens.spacing12) {
+                Image(systemName: "lock.shield")
+                    .font(.title3)
+                    .foregroundStyle(DesignTokens.accentText)
+                Text(text)
+                    .font(.system(size: 13))
+                    .foregroundStyle(DesignTokens.label)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(DesignTokens.label3)
+            }
+        }
+        .buttonStyle(.plain)
+        .neuSurface(.raised)
+    }
+
+    // MARK: - Pair New Device entry (SYNC-06)
+
+    private var pairNewDeviceButton: some View {
+        Button {
+            Haptics.tap()
+            showPairDevice = true
+        } label: {
+            Label("Pair New Device…", systemImage: "iphone.and.arrow.forward")
+                .font(.system(size: 14))
+                .foregroundStyle(DesignTokens.accentText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Manual bootstrap entry (SYNC-05)

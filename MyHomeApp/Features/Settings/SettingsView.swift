@@ -275,10 +275,17 @@ struct SettingsView: View {
                         HStack {
                             rowLabel("Sync", symbol: "arrow.triangle.2.circlepath", color: DesignTokens.catAuto)
                             Spacer()
-                            // Glanceable last-synced so the state is legible without drilling in.
-                            Text(SyncStatusPresentation.relativeLastSynced(syncCoordinator.statusStore.lastSyncedAt))
-                                .font(.subheadline)
-                                .foregroundStyle(DesignTokens.label3)
+                            if syncCoordinator.statusStore.needsPairing {
+                                // SYNC-06: nudge the user toward the one-time re-pair after upgrade.
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .font(.subheadline)
+                                    .foregroundStyle(DesignTokens.accentText)
+                            } else {
+                                // Glanceable last-synced so the state is legible without drilling in.
+                                Text(SyncStatusPresentation.relativeLastSynced(syncCoordinator.statusStore.lastSyncedAt))
+                                    .font(.subheadline)
+                                    .foregroundStyle(DesignTokens.label3)
+                            }
                         }
                     }
 
