@@ -94,4 +94,19 @@ struct SyncStatusPresentationTests {
         let stats = MergeStats(inserted: 0, updated: 0, deleted: 5, skipped: 0, adopted: 0)
         #expect(SyncStatusPresentation.mergeSummary(stats) == "5 removed")
     }
+
+    // MARK: - pairingBanner(needsPairing:) — SC-4 migration re-pair prompt
+
+    @Test("needsPairing true yields a non-nil re-pair banner string")
+    func pairingBannerWhenNeeded() {
+        let banner = SyncStatusPresentation.pairingBanner(needsPairing: true)
+        #expect(banner != nil)
+        // The prompt must direct the user to pair to resume sync (locked copy intent).
+        #expect(banner?.localizedCaseInsensitiveContains("pair") == true)
+    }
+
+    @Test("needsPairing false yields no banner (fresh install / already paired)")
+    func pairingBannerWhenNotNeeded() {
+        #expect(SyncStatusPresentation.pairingBanner(needsPairing: false) == nil)
+    }
 }

@@ -37,6 +37,13 @@ final class SyncStatusStore {
     /// The connected peer's display name, or nil when not connected (in-memory only).
     var connectedPeerName: String?
 
+    /// SYNC-06 — set true at launch ONLY on the upgrade-migration condition (empty allowlist
+    /// AND a prior sync happened, i.e. `lastSyncedAt != nil`). Drives the "Pair your devices to
+    /// resume sync" banner and the paused state. In-memory only — recomputed every launch from
+    /// the persisted allowlist + `lastSyncedAt`, never persisted itself. Once a device is paired
+    /// the allowlist is non-empty so this recomputes to `false` (the banner clears without a nag).
+    var needsPairing: Bool = false
+
     /// Stats from the most recent successful merge (in-memory only — for the UI to show
     /// "N inserted / M updated" after a sync).
     var lastMergeStats: MergeStats?

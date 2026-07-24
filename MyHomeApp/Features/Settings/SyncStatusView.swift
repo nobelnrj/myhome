@@ -71,6 +71,17 @@ enum SyncStatusPresentation {
         if parts.isEmpty { return "Nothing new — already in sync" }
         return parts.joined(separator: " · ")
     }
+
+    /// SYNC-06 (SC-4) — the one-time re-pair prompt for an upgraded phone. `needsPairing` is
+    /// computed at launch (empty allowlist AND a prior sync happened); when true, sync is paused
+    /// until the user pairs. Pure + deterministic: `true` → the prompt string, `false` → `nil`
+    /// (fresh install or already paired shows no banner). Defines NO color — the caller tints
+    /// with an EXISTING `DesignTokens` member (DarkBitIdentityTests tripwire).
+    static func pairingBanner(needsPairing: Bool) -> String? {
+        needsPairing
+            ? "Pair your devices to resume sync. For your security, syncing is paused until you confirm a matching code on both phones."
+            : nil
+    }
 }
 
 // MARK: - SyncStatusView

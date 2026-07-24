@@ -32,6 +32,11 @@ struct MyHomeApp: App {
         deviceName: UIDevice.current.name
     )
 
+    /// SYNC-06 — the local-only paired-devices allowlist (trust root for auto-sync). Seeded into
+    /// the transport gate at launch BEFORE discovery starts so an un-paired peer is denied from
+    /// the very first advertise. Also drives the pairing UI (Settings › Sync › Pair New Device).
+    @State private var pairedDevicesStore = PairedDevicesStore()
+
     /// scenePhase for scheduling background refresh on app-backgrounding.
     @Environment(\.scenePhase) private var scenePhase
 
@@ -56,6 +61,7 @@ struct MyHomeApp: App {
                 // former forced-dark DS-05 pin. Garbage/missing key → .system (D-02).
                 .preferredColorScheme((AppearanceTheme(rawValue: appearanceThemeRaw) ?? .system).colorScheme)
                 .environment(syncCoordinator)
+                .environment(pairedDevicesStore)
                 .onAppear {
                     setupNotifications()
                     // One-time repair for stores that accumulated duplicate ingested expenses
@@ -66,6 +72,23 @@ struct MyHomeApp: App {
                     // App launches foregrounded; the scenePhase .active branch does not reliably
                     // fire for the initial transition on all iOS versions, so start here.
                     syncCoordinator.setContext(container.mainContext)
+                    // SYNC-06: seed the transport allowlist from persisted trust BEFORE start()
+                    // so an un-paired peer is blocked from the very first advertise (research:
+                    // apply allowlist before discovery). Empty allowlist ⇒ default-deny ⇒ nothing
+                    // connects, which is exactly the paused state we want on an upgraded phone.
+                    syncCoordinator.applyAllowlist(pairedDevicesStore.allowlist)
+                    // Migration detection (SC-4): an upgraded phone that ALREADY synced under the
+                    // old unpaired build has lastSyncedAt != nil but no paired devices yet. Show
+                    // the one-time "re-pair to resume" banner and leave sync paused. NEVER
+                    // auto-adopt the last-connected peer — that would re-open the trust hole at the
+                    // migration moment (the seeded-sim incident). A fresh install (lastSyncedAt ==
+                    // nil) shows the ordinary bootstrap copy, not this banner.
+                    if pairedDevicesStore.allowlist.isEmpty,
+                       syncCoordinator.statusStore.lastSyncedAt != nil {
+                        syncCoordinator.statusStore.needsPairing = true
+                        // One-shot marker so the migration prompt is informative, not nagging.
+                        UserDefaults.standard.set(true, forKey: "sync.pairingMigrationShown")
+                    }
                     // A -seedSampleData build must NEVER join auto-sync: kitchen (pantry +
                     // shopping) is in the sync scope, and auto-sync silently LWW-pushes on peer
                     // connect to any same-service peer on the LAN. A seeded simulator would
