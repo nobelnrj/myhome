@@ -126,7 +126,7 @@ Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROAD
 **Plans**: 4 plans (4 waves)
 - [x] 25-01-PLAN.md — Pure trust primitives (InstallIdentity/PairingCode/PeerAllowlistPolicy) + local-only PairedDevicesStore + tests
 - [x] 25-02-PLAN.md — Transport allowlist gating (discoveryInfo/context, both MC callbacks) + .pairingCandidate no-push hole fix + SC-5 snapshot-exclusion test
-- [ ] 25-03-PLAN.md — Code-confirmed pairing UI, paired-list/unpair, guided re-pair migration banner + allowlist wiring
+- [x] 25-03-PLAN.md — Code-confirmed pairing UI, paired-list/unpair, guided re-pair migration banner + allowlist wiring
 - [ ] 25-04-PLAN.md — On-device three-party pairing + rogue-rejection verification (checkpoint)
 **UI hint**: yes
 

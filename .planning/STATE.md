@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Finance & AI Depth
-status: "Shipped 2026-07-23 — Phases 23 (PR #46) & 24 (PR #47, #48) merged to main and deployed to both phones"
-last_updated: "2026-07-24T20:06:03.427Z"
-last_activity: 2026-07-22 â v1.3.1 roadmap created (Phases 23-24, 3/3 reqs mapped)
+status: 25-02 executed on feat/25-sync-allowlist — both MC gates enforce the allowlist, pairing-window auto-push hole closed; SyncCoordinator/SyncTransport suites green (SC-3 no regression)
+last_updated: "2026-07-24T20:25:08.496Z"
+last_activity: 2026-07-25 — 25-02 executed (2 tasks, dual MC gate + .pairingCandidate + SC-5/decodeIID tests)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
   completed_plans: 3
-  percent: 0
+  percent: 75
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 25 (Paired-Device Sync Allowlist) — executing
-Plan: 25-01 + 25-02 complete (trust primitives, allowlist store, MC dual-gate enforcement + .pairingCandidate); 25-03 next (pairing UI + migration banner)
-Status: 25-02 executed on feat/25-sync-allowlist — both MC gates enforce the allowlist, pairing-window auto-push hole closed; SyncCoordinator/SyncTransport suites green (SC-3 no regression)
-Last activity: 2026-07-25 — 25-02 executed (2 tasks, dual MC gate + .pairingCandidate + SC-5/decodeIID tests)
+Plan: 25-01 + 25-02 + 25-03 complete (trust primitives, allowlist store, MC dual-gate enforcement + .pairingCandidate, pairing UI + migration banner); 25-04 next (on-device pairing/rogue-rejection UAT)
+Status: 25-03 executed on feat/25-sync-allowlist — code-confirmed PairDeviceView + paused/re-pair banner; PairedDevicesStore seeded into transport allowlist BEFORE start() at launch; no auto-adopt on migration; SyncStatusPresentation SC-4 + DarkBitIdentity green, app builds
+Last activity: 2026-07-25 — 25-03 executed (2 tasks, PairDeviceView + needsPairing/pairingBanner + launch allowlist wiring)
 
 ## Performance Metrics
 
@@ -111,6 +111,7 @@ Last activity: 2026-07-25 — 25-02 executed (2 tasks, dual MC gate + .pairingCa
 | Phase 21 P03 | 20 | 2 tasks | 5 files |
 | Phase 25 P01 | 25 | 2 tasks | 5 files |
 | Phase 25 P02 | 25 | 2 tasks | 5 files |
+| Phase 25 P03 | 30 | 2 tasks | 6 files |
 
 ## Quick Tasks Completed
 
@@ -260,7 +261,7 @@ All v1.3 requirements (SYNC/KTCH/ICON/OVF, 15/15) are Complete. Deferred artifac
 ## Session Continuity
 
 Last session: 2026-07-25
-Stopped at: Completed 25-02-PLAN.md
+Stopped at: Completed 25-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
