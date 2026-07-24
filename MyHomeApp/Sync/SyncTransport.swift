@@ -86,6 +86,13 @@ public enum SyncTransportEvent {
     /// A transport-level failure worth surfacing (discovery error, permission
     /// denial hint, dropped malformed frame).
     case failed(message: String)
+    /// SYNC-06 — an un-allowlisted peer formed a session *in pairing mode*. This is a
+    /// trust CANDIDATE, not a trusted peer: it is emitted INSTEAD of `.connected` so the
+    /// owner (SyncCoordinator) pushes NO snapshot to it (the pairing-window auto-push hole,
+    /// RESEARCH Pitfall 1 / T-25-03). The pairing UI derives the confirmation code from
+    /// `peerIID` and only after mutual "Codes match" is the device added to the allowlist;
+    /// the next genuine reconnect then surfaces as a trusted `.connected`.
+    case pairingCandidate(peerName: String, peerIID: String)
 }
 
 // MARK: - SyncTransport
@@ -107,12 +114,24 @@ public protocol SyncTransport: AnyObject {
     var isConnected: Bool { get }
     /// The connected peer's display name, or nil when not connected.
     var connectedPeerName: String? { get }
+    /// SYNC-06 — the set of trusted paired install IDs the two MC gate callbacks consult
+    /// (via `PeerAllowlistPolicy`) before any session forms. Set from `PairedDevicesStore`.
+    /// An empty allowlist in normal mode blocks every peer (default-deny).
+    var allowlist: Set<String> { get set }
+    /// SYNC-06 — while true, the gate is relaxed so the pairing handshake can proceed with
+    /// an as-yet-untrusted peer. Trust is persisted SEPARATELY, only after mutual code
+    /// confirmation. Driven by `beginPairing()`/`endPairing()`.
+    var isPairingMode: Bool { get set }
     /// Begin advertising + browsing for peers.
     func start()
     /// Disconnect and stop discovery. Idempotent — safe to call when never started.
     func stop()
     /// Send an envelope to the connected peer. Throws if no peer is connected.
     func send(_ envelope: SyncEnvelope) throws
+    /// SYNC-06 — enter the time-boxed pairing window (relaxes the allowlist gate). Auto-cancels.
+    func beginPairing()
+    /// SYNC-06 — leave the pairing window immediately (restores default-deny).
+    func endPairing()
 }
 
 // MARK: - PeerInvitePolicy
@@ -266,5 +285,24 @@ public enum PeerAllowlistPolicy {
                                      pairingMode: Bool) -> Bool {
         guard let peerIID, !peerIID.isEmpty else { return false } // missing iid = untrusted
         return pairingMode || allowlist.contains(peerIID)
+    }
+
+    /// Defensively decode a peer's claimed install ID from untrusted, unauthenticated,
+    /// pre-session LAN input — the invite `context` bytes (mirrors what the browser reads
+    /// from `discoveryInfo["iid"]`). Returns `nil` for anything that is not a plausible
+    /// install ID so the caller treats it as untrusted and forms no session:
+    ///   - `nil` data (an old build sent no context)
+    ///   - non-UTF8 bytes (garbage / hostile)
+    ///   - empty / whitespace-only after trimming
+    ///   - oversized (> 64 bytes — a UUID string is 36; anything larger is not one of ours,
+    ///     and keeping this tight also mirrors the tiny-`discoveryInfo` discipline, Pitfall 2)
+    ///
+    /// NEVER force-unwraps and NEVER crashes on hostile bytes (V5 input validation). Pure so
+    /// it is unit-tested directly with nil/garbage/oversized input.
+    public static func decodeIID(_ data: Data?) -> String? {
+        guard let data, data.count <= 64 else { return nil }        // nil / oversized ⇒ untrusted
+        guard let raw = String(data: data, encoding: .utf8) else { return nil } // non-UTF8 ⇒ untrusted
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }

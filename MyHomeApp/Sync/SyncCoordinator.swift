@@ -25,6 +25,11 @@ final class SyncCoordinator {
     /// Public status store — Plans 03/04 read sync state via the coordinator.
     let statusStore: SyncStatusStore
 
+    /// SYNC-06 — invoked when the transport reports an un-allowlisted peer that formed a
+    /// session in pairing mode (a trust CANDIDATE). The pairing UI (Plan 03) sets this to
+    /// derive/display the confirmation code. NO snapshot is pushed to a candidate.
+    var onPairingCandidate: ((_ peerName: String, _ peerIID: String) -> Void)?
+
     // MARK: - Injected dependencies
 
     private let transport: any SyncTransport
@@ -160,6 +165,13 @@ final class SyncCoordinator {
                 statusStore.status = .connecting
                 scheduleRetry()
             }
+
+        case .pairingCandidate(let peerName, let peerIID):
+            // SYNC-06 — a session formed with an un-allowlisted peer during pairing. This is a
+            // trust CANDIDATE, NOT a trusted peer: do NOT set `.syncing` and do NOT push a
+            // snapshot (closes the pairing-window auto-push hole, T-25-03). Only hand the
+            // candidate to the pairing UI so it can drive the code-confirmation ceremony.
+            onPairingCandidate?(peerName, peerIID)
 
         case .failed(let message):
             statusStore.status = .error(message: message)

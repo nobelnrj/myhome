@@ -66,6 +66,28 @@ final class MultipeerSyncTransport: NSObject, SyncTransport {
     private var advertiser: MCNearbyServiceAdvertiser?
     private var browser: MCNearbyServiceBrowser?
 
+    // MARK: - SYNC-06 allowlist gate state
+
+    /// The trusted paired install IDs both MC gate callbacks consult (via `PeerAllowlistPolicy`)
+    /// BEFORE any session forms. Set from `PairedDevicesStore`; empty ⇒ default-deny.
+    var allowlist: Set<String> = []
+
+    /// While true, the gate is relaxed so a pairing handshake can proceed with an
+    /// as-yet-untrusted peer. Toggled by `beginPairing()`/`endPairing()`; auto-cancels.
+    var isPairingMode = false
+
+    /// displayName → claimed install ID, learned pre-session from `discoveryInfo`/invite
+    /// `context` (both UNTRUSTED). Used at `.connected` to tell a trusted peer from a pairing
+    /// candidate. Cleared in `stop()`.
+    private var peerIIDByName: [String: String] = [:]
+
+    /// Time-boxed pairing auto-cancel (RESEARCH: 2-minute window). Mirrors the
+    /// `SyncCoordinator.scheduleRetry` Task.sleep idiom.
+    private var pairingTimeoutTask: Task<Void, Never>?
+
+    /// Pairing-window duration before the gate snaps back to default-deny.
+    private static let pairingWindow: TimeInterval = 120
+
     // MARK: - Sendable box for non-Sendable values that must cross the hop
 
     /// Carries a non-Sendable value (the advertiser's `invitationHandler`) across a
@@ -96,9 +118,12 @@ final class MultipeerSyncTransport: NSObject, SyncTransport {
         session.delegate = self
         self.session = session
 
+        // SYNC-06 — advertise THIS device's install ID so the browser can gate BEFORE
+        // inviting. Keep the dict TINY (iid only): an oversized discoveryInfo silently kills
+        // discovery with no error (RESEARCH Pitfall 2). A 36-char UUID is far under budget.
         let advertiser = MCNearbyServiceAdvertiser(
             peer: peerID,
-            discoveryInfo: nil,
+            discoveryInfo: ["iid": InstallIdentity.current()],
             serviceType: PeerInvitePolicy.serviceType
         )
         advertiser.delegate = self
@@ -122,6 +147,34 @@ final class MultipeerSyncTransport: NSObject, SyncTransport {
         advertiser = nil
         browser = nil
         session = nil
+        peerIIDByName.removeAll()   // learned iids are per-discovery; never outlive a session
+    }
+
+    // MARK: - SYNC-06 pairing window
+
+    /// Enter the time-boxed pairing window: relax the allowlist gate so an as-yet-untrusted
+    /// peer can form a candidate session. Auto-cancels after `pairingWindow` seconds (idiom
+    /// mirrors `SyncCoordinator.scheduleRetry`), snapping the gate back to default-deny and
+    /// tearing down any candidate session so no stale relaxed link survives the window.
+    func beginPairing() {
+        isPairingMode = true
+        pairingTimeoutTask?.cancel()
+        pairingTimeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(Self.pairingWindow))
+            guard !Task.isCancelled else { return }
+            guard let self else { return }
+            self.isPairingMode = false
+            // Tear down any candidate session formed under the relaxed gate; a genuine
+            // trusted peer (now in the allowlist) reconnects via the normal retry loop.
+            self.session?.disconnect()
+        }
+    }
+
+    /// Leave the pairing window immediately (e.g. right after "Codes match" + allowlist add).
+    func endPairing() {
+        pairingTimeoutTask?.cancel()
+        pairingTimeoutTask = nil
+        isPairingMode = false
     }
 
     func send(_ envelope: SyncEnvelope) throws {
@@ -155,7 +208,17 @@ extension MultipeerSyncTransport: MCSessionDelegate {
             case .connecting:
                 self.emit(.connecting(peerName: peerName))
             case .connected:
-                self.emit(.connected(peerName: peerName))
+                // SYNC-06 — a session that formed while pairing with an UN-allowlisted peer
+                // is a trust CANDIDATE, not a trusted peer. Surface it as `.pairingCandidate`
+                // (not `.connected`) so SyncCoordinator pushes NO snapshot to it — this closes
+                // the pairing-window auto-push hole (RESEARCH Pitfall 1 / T-25-03). A peer that
+                // IS in the allowlist (or any non-pairing session) surfaces as `.connected`.
+                if let iid = self.peerIIDByName[peerName],
+                   self.isPairingMode, !self.allowlist.contains(iid) {
+                    self.emit(.pairingCandidate(peerName: peerName, peerIID: iid))
+                } else {
+                    self.emit(.connected(peerName: peerName))
+                }
             case .notConnected:
                 self.emit(.disconnected)
             @unknown default:
@@ -212,6 +275,10 @@ extension MultipeerSyncTransport: MCSessionDelegate {
         certificateHandler: @escaping (Bool) -> Void
     ) {
         // Accept — the link is .required-encrypted; a 2-phone household trusts first contact.
+        // NOTE: this is deliberately NOT an identity gate. The presented cert is a per-session
+        // self-signed peer cert UNBOUND to the installID, so gating here adds zero installID
+        // assurance and cannot tell a trusted peer from a spoofer (RESEARCH Pitfall 5). The
+        // real identity gate is the allowlist check at foundPeer / didReceiveInvitation.
         certificateHandler(true)
     }
 }
@@ -226,12 +293,23 @@ extension MultipeerSyncTransport: MCNearbyServiceAdvertiserDelegate {
         withContext context: Data?,
         invitationHandler: @escaping (Bool, MCSession?) -> Void
     ) {
-        // `invitationHandler` is non-Sendable → box it across the hop.
+        // `invitationHandler` is non-Sendable → box it across the hop. `context`/`peerID`
+        // are Sendable-safe to read here; the trust decision happens on the MainActor hop.
         let box = UncheckedSendableBox(value: invitationHandler)
+        let remoteName = peerID.displayName
+        let context = context   // capture the Sendable Data? for the hop
         Task { @MainActor in
-            // Accept using our live session (a 2-phone household trusts first contact;
-            // encryption is .required so the link is private).
-            box.value(true, self.session)
+            // SYNC-06 accept-side gate (pre-session). Defensively decode the invite context —
+            // it is UNTRUSTED LAN input (nil / non-UTF8 / oversized ⇒ untrusted, never crash).
+            let peerIID = PeerAllowlistPolicy.decodeIID(context)
+            if let peerIID { self.peerIIDByName[remoteName] = peerIID }
+            let ok = PeerAllowlistPolicy.shouldConnect(
+                peerIID: peerIID,
+                allowlist: self.allowlist,
+                pairingMode: self.isPairingMode
+            )
+            // Reject ⇒ (false, nil): no session forms with an un-allowlisted peer.
+            box.value(ok, ok ? self.session : nil)
         }
     }
 
@@ -257,12 +335,25 @@ extension MultipeerSyncTransport: MCNearbyServiceBrowserDelegate {
         withDiscoveryInfo info: [String: String]?
     ) {
         let remoteName = peerID.displayName
+        // `info` is [String: String]? (Sendable) — safe to capture for the hop.
+        let discoveredIID = info?["iid"]
         // Box the non-Sendable peerID + browser so the invite happens on the hop
         // where we can read `myDisplayName` and `session`.
         let peerBox = UncheckedSendableBox(value: peerID)
         let browserBox = UncheckedSendableBox(value: browser)
         Task { @MainActor in
             guard let session = self.session else { return }
+            // SYNC-06 — record the peer's claimed iid (UNTRUSTED discoveryInfo) so `.connected`
+            // can later distinguish a trusted peer from a pairing candidate.
+            if let discoveredIID { self.peerIIDByName[remoteName] = discoveredIID }
+            // SYNC-06 browse-side gate (pre-invite, pre-session). ADDITIVE to the existing
+            // dual-connect tie-break — never a replacement (locked decision). Empty allowlist
+            // in normal mode ⇒ deny ⇒ no invite ⇒ no session with an unpaired peer.
+            guard PeerAllowlistPolicy.shouldConnect(
+                peerIID: discoveredIID,
+                allowlist: self.allowlist,
+                pairingMode: self.isPairingMode
+            ) else { return }
             // Deterministic tie-break: only the "lower" name invites. The other side
             // invites us — exactly one connection forms.
             if PeerInvitePolicy.shouldInvite(
@@ -272,7 +363,8 @@ extension MultipeerSyncTransport: MCNearbyServiceBrowserDelegate {
                 browserBox.value.invitePeer(
                     peerBox.value,
                     to: session,
-                    withContext: nil,
+                    // SYNC-06 — carry THIS device's iid so the advertiser can gate on accept.
+                    withContext: Data(InstallIdentity.current().utf8),
                     timeout: 15
                 )
             }
