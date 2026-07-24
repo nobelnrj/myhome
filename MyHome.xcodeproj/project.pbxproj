@@ -89,6 +89,8 @@
 		A1901MST /* MultipeerSyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1901MST /* MultipeerSyncTransport.swift */; };
 		A1901STT /* SyncTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1901STT /* SyncTransportTests.swift */; };
 		A1902SSS /* SyncStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SSS /* SyncStatusStore.swift */; };
+		A25PDS /* PairedDevicesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F25PDS /* PairedDevicesStore.swift */; };
+		A25PDST /* PairedDevicesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F25PDST /* PairedDevicesStoreTests.swift */; };
 		A1902SC /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SC /* SyncCoordinator.swift */; };
 		A1902SCT /* SyncCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1902SCT /* SyncCoordinatorTests.swift */; };
 		A1904BAT /* BootstrapAdvisorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1904BAT /* BootstrapAdvisorTests.swift */; };
@@ -380,6 +382,8 @@
 		F1901MST /* MultipeerSyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerSyncTransport.swift; sourceTree = "<group>"; };
 		F1901STT /* SyncTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTransportTests.swift; sourceTree = "<group>"; };
 		F1902SSS /* SyncStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusStore.swift; sourceTree = "<group>"; };
+		F25PDS /* PairedDevicesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairedDevicesStore.swift; sourceTree = "<group>"; };
+		F25PDST /* PairedDevicesStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairedDevicesStoreTests.swift; sourceTree = "<group>"; };
 		F1902SC /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
 		F1904BA /* BootstrapAdvisor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BootstrapAdvisor.swift; sourceTree = "<group>"; };
 		F1902SCT /* SyncCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinatorTests.swift; sourceTree = "<group>"; };
@@ -650,6 +654,7 @@
 				F1901ST /* SyncTransport.swift */,
 				F1901MST /* MultipeerSyncTransport.swift */,
 				F1902SSS /* SyncStatusStore.swift */,
+				F25PDS /* PairedDevicesStore.swift */,
 				F1902SC /* SyncCoordinator.swift */,
 				F1904BA /* BootstrapAdvisor.swift */,
 			);
@@ -1021,6 +1026,7 @@
 				F1803SNIT /* SnapshotImporterTests.swift */,
 				F1804DTT /* DeletionTrackingTests.swift */,
 				F1901STT /* SyncTransportTests.swift */,
+				F25PDST /* PairedDevicesStoreTests.swift */,
 				F1902SCT /* SyncCoordinatorTests.swift */,
 				F1903SPT /* SyncStatusPresentationTests.swift */,
 				F1904BAT /* BootstrapAdvisorTests.swift */,
@@ -1328,6 +1334,7 @@
 				A1901ST /* SyncTransport.swift in Sources */,
 				A1901MST /* MultipeerSyncTransport.swift in Sources */,
 				A1902SSS /* SyncStatusStore.swift in Sources */,
+				A25PDS /* PairedDevicesStore.swift in Sources */,
 				A1902SC /* SyncCoordinator.swift in Sources */,
 				A901ACC /* Account.swift in Sources */,
 				A902AST /* Asset.swift in Sources */,
@@ -1453,6 +1460,7 @@
 				A1803SNIT /* SnapshotImporterTests.swift in Sources */,
 				A1804DTT /* DeletionTrackingTests.swift in Sources */,
 				A1901STT /* SyncTransportTests.swift in Sources */,
+				A25PDST /* PairedDevicesStoreTests.swift in Sources */,
 				A1902SCT /* SyncCoordinatorTests.swift in Sources */,
 				A1903SPT /* SyncStatusPresentationTests.swift in Sources */,
 				A1904BAT /* BootstrapAdvisorTests.swift in Sources */,
