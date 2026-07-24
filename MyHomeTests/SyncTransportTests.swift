@@ -126,4 +126,89 @@ import Testing
             #expect(allowed.contains(scalar))
         }
     }
+
+    // MARK: - PairingCode (SYNC-06)
+
+    @Test func pairingCodeIsOrderIndependent() {
+        let a = "11111111-1111-1111-1111-111111111111"
+        let b = "22222222-2222-2222-2222-222222222222"
+        // Both phones must derive the identical code regardless of which ID is "theirs".
+        #expect(PairingCode.sixDigit(a, b) == PairingCode.sixDigit(b, a))
+    }
+
+    @Test func pairingCodeIsAlwaysSixDecimalDigits() {
+        let a = "11111111-1111-1111-1111-111111111111"
+        let b = "22222222-2222-2222-2222-222222222222"
+        let code = PairingCode.sixDigit(a, b)
+        #expect(code.count == 6)
+        let allDigits = code.allSatisfy { $0.isNumber }
+        #expect(allDigits)
+    }
+
+    @Test func pairingCodeMatchesGoldenVector() {
+        // Locked constant computed once from the SHA-256 derivation (proves cross-run,
+        // cross-device determinism — a per-process Hasher would NOT reproduce this).
+        let a = "11111111-1111-1111-1111-111111111111"
+        let b = "22222222-2222-2222-2222-222222222222"
+        #expect(PairingCode.sixDigit(a, b) == "773804")
+    }
+
+    @Test func pairingCodeZeroPadsShortValues() {
+        // Whatever the inputs, the display is always a fixed 6-glyph string.
+        let code = PairingCode.sixDigit("a", "b")
+        #expect(code.count == 6)
+        let allDigits = code.allSatisfy { $0.isNumber }
+        #expect(allDigits)
+    }
+
+    // MARK: - PeerAllowlistPolicy.shouldConnect (SYNC-06)
+
+    @Test func shouldConnectDeniesNilPeerIID() {
+        #expect(PeerAllowlistPolicy.shouldConnect(peerIID: nil, allowlist: ["x"], pairingMode: false) == false)
+    }
+
+    @Test func shouldConnectDeniesEmptyPeerIID() {
+        #expect(PeerAllowlistPolicy.shouldConnect(peerIID: "", allowlist: ["x"], pairingMode: false) == false)
+    }
+
+    @Test func shouldConnectDeniesEmptyAllowlistInNormalMode() {
+        #expect(PeerAllowlistPolicy.shouldConnect(peerIID: "x", allowlist: [], pairingMode: false) == false)
+    }
+
+    @Test func shouldConnectAllowsAllowlistedPeerInNormalMode() {
+        #expect(PeerAllowlistPolicy.shouldConnect(peerIID: "x", allowlist: ["x"], pairingMode: false) == true)
+    }
+
+    @Test func shouldConnectDeniesNonMemberInNormalMode() {
+        #expect(PeerAllowlistPolicy.shouldConnect(peerIID: "y", allowlist: ["x"], pairingMode: false) == false)
+    }
+
+    @Test func shouldConnectRelaxesGateInPairingMode() {
+        // Pairing relaxes the gate so the handshake can proceed with an untrusted peer.
+        #expect(PeerAllowlistPolicy.shouldConnect(peerIID: "x", allowlist: [], pairingMode: true) == true)
+    }
+
+    @Test func shouldConnectStillDeniesMissingIIDEvenInPairingMode() {
+        // A peer that advertises NO id is untrusted regardless of pairing mode.
+        #expect(PeerAllowlistPolicy.shouldConnect(peerIID: nil, allowlist: [], pairingMode: true) == false)
+    }
+
+    // MARK: - InstallIdentity (SYNC-06)
+
+    @Test func installIdentityReturnsExistingValue() {
+        let defaults = UserDefaults(suiteName: "InstallIdentityTests.existing")!
+        defaults.removePersistentDomain(forName: "InstallIdentityTests.existing")
+        defaults.set("preexisting-id", forKey: InstallIdentity.key)
+        #expect(InstallIdentity.current(defaults) == "preexisting-id")
+    }
+
+    @Test func installIdentityMintsAndPersistsWhenAbsent() {
+        let defaults = UserDefaults(suiteName: "InstallIdentityTests.mint")!
+        defaults.removePersistentDomain(forName: "InstallIdentityTests.mint")
+        let minted = InstallIdentity.current(defaults)
+        #expect(minted.isEmpty == false)
+        // Persisted: a second read returns the SAME value (does not re-mint).
+        #expect(InstallIdentity.current(defaults) == minted)
+        #expect(defaults.string(forKey: InstallIdentity.key) == minted)
+    }
 }

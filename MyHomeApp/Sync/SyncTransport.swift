@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 
 /// SYNC-04 — the transport seam for peer-to-peer sync.
@@ -180,5 +181,90 @@ public enum PeerInvitePolicy {
     /// equal names → false both ways (no self-invite / no dual-connect).
     public static func shouldInvite(localDisplayName: String, remoteDisplayName: String) -> Bool {
         localDisplayName < remoteDisplayName
+    }
+}
+
+// MARK: - InstallIdentity
+
+/// SYNC-06 — the single source of truth for THIS device's persistent install ID.
+///
+/// The install ID is the peer identity the paired-devices allowlist keys on (NOT the
+/// MCPeerID display name, which derives from the user-changeable device name). It is a
+/// non-secret random UUID that is broadcast on the LAN by design.
+///
+/// The UserDefaults key MUST stay `"sync.installID"` verbatim — the transport minted
+/// this value on first launch and the two already-in-practice-paired phones depend on
+/// it surviving the upgrade. Rotating the key would orphan them and break every future
+/// pairing (see RESEARCH Pitfall 4).
+public enum InstallIdentity {
+
+    /// UserDefaults key — UNCHANGED from `MultipeerSyncTransport`; never rotate on upgrade.
+    static let key = "sync.installID"
+
+    /// Returns the stored install ID, minting and persisting a fresh `UUID().uuidString`
+    /// only when none exists yet. `defaults` is injectable for tests.
+    public static func current(_ defaults: UserDefaults = .standard) -> String {
+        if let existing = defaults.string(forKey: key) { return existing }
+        let fresh = UUID().uuidString
+        defaults.set(fresh, forKey: key)
+        return fresh
+    }
+}
+
+// MARK: - PairingCode
+
+/// SYNC-06 — deterministic, order-independent 6-digit confirmation code from two
+/// installIDs. Both phones compute the identical value with NO extra exchange (each
+/// side already knows both IDs: one from `discoveryInfo`, one local). Pure + testable.
+///
+/// The code's security value is *mutual confirmation of intent*, not secrecy — both IDs
+/// are broadcast on the LAN. It defeats the accidental rogue (a seeded sim / other
+/// install shows a mismatched code), which is exactly this phase's threat model.
+public enum PairingCode {
+
+    /// Six decimal digits (zero-padded) derived from `SHA256(min|max)` of the two IDs.
+    ///
+    /// - Order-independent: `min`/`max` on the two ID strings ⇒ `sixDigit(a,b) == sixDigit(b,a)`.
+    /// - Cross-device / cross-launch stable: SHA-256 is deterministic. NEVER use the
+    ///   Swift standard-library string hasher — it is per-process randomly seeded and
+    ///   would show a different code on each phone and each relaunch (RESEARCH Pitfall 3).
+    public static func sixDigit(_ idA: String, _ idB: String) -> String {
+        let lo = min(idA, idB)                       // order-independence
+        let hi = max(idA, idB)
+        let input = Data("\(lo)|\(hi)".utf8)
+        let digest = SHA256.hash(data: input)        // stable across devices/relaunch
+        let b = Array(digest)                        // 32 bytes
+        let n = (UInt32(b[0]) << 24) | (UInt32(b[1]) << 16)
+              | (UInt32(b[2]) << 8)  |  UInt32(b[3])
+        return String(format: "%06u", n % 1_000_000) // always 6 digits, zero-padded
+    }
+}
+
+// MARK: - PeerAllowlistPolicy
+
+/// SYNC-06 — the pure allowlist gate. Antisymmetric sibling of `PeerInvitePolicy`:
+/// decides whether to form/accept a session with a peer of a given install ID.
+///
+/// This gate is ADDITIVE to `PeerInvitePolicy.shouldInvite` (the dual-connect
+/// tie-break), never a replacement (locked decision). It runs at both MC trust gates
+/// (browse-side `foundPeer` and accept-side `didReceiveInvitationFromPeer`), before any
+/// session forms.
+public enum PeerAllowlistPolicy {
+
+    /// - Parameters:
+    ///   - peerIID: the peer's claimed install ID (from `discoveryInfo`/invite `context`);
+    ///     untrusted LAN input, so `nil`/empty ⇒ deny (a peer that advertises no ID is
+    ///     treated as untrusted).
+    ///   - allowlist: the local set of paired install IDs. Empty ⇒ default-deny (this is
+    ///     what makes "no paired device ⇒ nothing connects" fall out for free).
+    ///   - pairingMode: when true, relaxes the gate so the pairing handshake can proceed
+    ///     with an as-yet-untrusted peer. Trust is persisted SEPARATELY, only after
+    ///     mutual code confirmation.
+    /// - Returns: whether a session may form/accept with this peer.
+    public static func shouldConnect(peerIID: String?,
+                                     allowlist: Set<String>,
+                                     pairingMode: Bool) -> Bool {
+        guard let peerIID, !peerIID.isEmpty else { return false } // missing iid = untrusted
+        return pairingMode || allowlist.contains(peerIID)
     }
 }
