@@ -9,7 +9,7 @@ progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 ## Current Position
 
 Phase: 25 (Paired-Device Sync Allowlist) — executing
-Plan: 25-01 complete (trust primitives + allowlist store); 25-02 next
-Status: 25-01 executed on feat/25-sync-allowlist — all unit tests green
-Last activity: 2026-07-25 — 25-01 executed (2 tasks, 34 unit tests green)
+Plan: 25-01 + 25-02 complete (trust primitives, allowlist store, MC dual-gate enforcement + .pairingCandidate); 25-03 next (pairing UI + migration banner)
+Status: 25-02 executed on feat/25-sync-allowlist — both MC gates enforce the allowlist, pairing-window auto-push hole closed; SyncCoordinator/SyncTransport suites green (SC-3 no regression)
+Last activity: 2026-07-25 — 25-02 executed (2 tasks, dual MC gate + .pairingCandidate + SC-5/decodeIID tests)
 
 ## Performance Metrics
 
@@ -110,6 +110,7 @@ Last activity: 2026-07-25 — 25-01 executed (2 tasks, 34 unit tests green)
 | Phase 21 P02 | 15 | 2 tasks | 1 files |
 | Phase 21 P03 | 20 | 2 tasks | 5 files |
 | Phase 25 P01 | 25 | 2 tasks | 5 files |
+| Phase 25 P02 | 25 | 2 tasks | 5 files |
 
 ## Quick Tasks Completed
 
@@ -259,7 +260,7 @@ All v1.3 requirements (SYNC/KTCH/ICON/OVF, 15/15) are Complete. Deferred artifac
 ## Session Continuity
 
 Last session: 2026-07-25
-Stopped at: Completed 25-01-PLAN.md
+Stopped at: Completed 25-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

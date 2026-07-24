@@ -125,7 +125,7 @@ Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROAD
   6. Unpairing a device removes it from the allowlist and stops future connections to it.
 **Plans**: 4 plans (4 waves)
 - [x] 25-01-PLAN.md — Pure trust primitives (InstallIdentity/PairingCode/PeerAllowlistPolicy) + local-only PairedDevicesStore + tests
-- [ ] 25-02-PLAN.md — Transport allowlist gating (discoveryInfo/context, both MC callbacks) + .pairingCandidate no-push hole fix + SC-5 snapshot-exclusion test
+- [x] 25-02-PLAN.md — Transport allowlist gating (discoveryInfo/context, both MC callbacks) + .pairingCandidate no-push hole fix + SC-5 snapshot-exclusion test
 - [ ] 25-03-PLAN.md — Code-confirmed pairing UI, paired-list/unpair, guided re-pair migration banner + allowlist wiring
 - [ ] 25-04-PLAN.md — On-device three-party pairing + rogue-rejection verification (checkpoint)
 **UI hint**: yes
@@ -142,7 +142,7 @@ Full phase details archived in [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROAD
 | 18-22 | v1.3 | 22/22 | Complete | 2026-07-22 |
 | 23. Overview Declutter & Tap-to-Edit Everywhere | v1.3.1 | 1/1 | Complete (PR #46) | 2026-07-23 |
 | 24. Floating Nav Bar (native iOS 26) | v1.3.1 | 1/1 | Complete (PR #47, #48) | 2026-07-23 |
-| 25. Paired-Device Sync Allowlist | v1.4 | 1/4 | In progress | — |
+| 25. Paired-Device Sync Allowlist | v1.4 | 2/4 | In progress | — |
 
 ## Backlog
 
