@@ -200,6 +200,21 @@ struct ICICIParserTests {
         #expect(result.rawSourceLabel == "ICICI Savings ••6843")
     }
 
+    @Test("parse: ICICI savings IMPS outflow → same template as NEFT, payee extracted — parser 1.1")
+    func parsesIMPSDebit() throws {
+        let raw = rawEmail(
+            sender: "customernotification@icici.bank.in",
+            date: "Thu, 1 Oct 2026 12:09:45 +0530",
+            body: "Dear Customer, You have made an online IMPS payment of Rs. 38,650.00 towards SHREEVASUKI SOUHARDASAHAKARI on Oct 01, 2026 at 12:09 p.m. from your ICICI Bank Savings Account XXXX6843. The Transaction ID is 627412583844.")
+        #expect(ICICIParser().canHandle(sender: "customernotification@icici.bank.in",
+                                        subject: "IMPS transaction through ICICI Bank Internet Banking."))
+        let result = try #require(ICICIParser().parse(rawEmail: raw))
+        #expect(result.amount == Decimal(string: "38650.00"))
+        #expect(result.rawMerchant == "SHREEVASUKI SOUHARDASAHAKARI")
+        #expect(!result.isReversal)
+        #expect(result.rawSourceLabel == "ICICI Savings ••6843")
+    }
+
     @Test("parse: ICICI account interest credit → negative amount, isReversal true — 07-07")
     func parsesAccountCredit() throws {
         let raw = rawEmail(
