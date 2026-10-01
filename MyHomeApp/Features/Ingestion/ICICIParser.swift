@@ -21,7 +21,7 @@ import Foundation
 public struct ICICIParser: BankEmailParser {
 
     public let parserID = "icici-v1"
-    public let parserVersion = "1.0"
+    public let parserVersion = "1.1"
 
     public init() {}
 
@@ -170,18 +170,19 @@ public struct ICICIParser: BankEmailParser {
         )
     }
 
-    /// ICICI savings-account NEFT outflow (07-07): "You have made an online NEFT payment of
+    /// ICICI savings-account NEFT/IMPS outflow (07-07): "You have made an online NEFT payment of
     /// Rs. <amount> towards <payee> on <Mon dd, yyyy> at <time> from your ICICI Bank Savings
-    /// Account XXXX<NNNN>." A genuine debit — downstream transfer detection flags self-transfers.
+    /// Account XXXX<NNNN>." IMPS emails use the identical wording with "IMPS" in place of "NEFT"
+    /// (parser 1.1). A genuine debit — downstream transfer detection flags self-transfers.
     private func parseNEFTDebit(body: String, fallbackDate: Date) -> ParsedExpense? {
         // FINGERPRINT
-        guard body.contains("You have made an online NEFT payment of"),
+        guard body.range(of: #"You have made an online (?:NEFT|IMPS) payment of"#, options: .regularExpression) != nil,
               body.contains("from your ICICI Bank Savings Account") else {
             return nil
         }
 
-        // EXTRACT amount — "NEFT payment of Rs. <amount> towards"
-        guard let amount = extractAmount(pattern: #"NEFT payment of Rs\.?\s*([\d,]+(?:\.\d{1,2})?)\s+towards"#, from: body) else {
+        // EXTRACT amount — "NEFT|IMPS payment of Rs. <amount> towards"
+        guard let amount = extractAmount(pattern: #"(?:NEFT|IMPS) payment of Rs\.?\s*([\d,]+(?:\.\d{1,2})?)\s+towards"#, from: body) else {
             return nil
         }
 
